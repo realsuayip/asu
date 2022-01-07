@@ -20,6 +20,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "zeynep",
+    "zeynep.auth",
     "rest_framework",
 ]
 
@@ -52,9 +54,12 @@ CACHES = {
 }
 
 REST_FRAMEWORK = {
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning", # noqa
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",  # noqa
     "DEFAULT_VERSION": "latest",
     "ALLOWED_VERSIONS": ["latest", "1.0"],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
 }
 
 

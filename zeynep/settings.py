@@ -89,6 +89,7 @@ password_validators = [
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": validator} for validator in password_validators
 ]
+AUTH_USER_MODEL = "zeynep_auth.User"
 
 
 LANGUAGE_CODE = "en-us"

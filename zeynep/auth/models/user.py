@@ -3,6 +3,8 @@ from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from zeynep.auth.models.managers import UserManager
+
 
 class User(AbstractUser):
     class Gender(models.TextChoices):
@@ -73,6 +75,8 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+
+    objects = UserManager()
 
     class Meta:
         verbose_name = _("user")

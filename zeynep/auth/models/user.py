@@ -28,6 +28,7 @@ class User(AbstractUser):
             ),
         ],
     )
+    display_name = models.CharField(_("display name"), max_length=32)
     email = models.EmailField(_("e-mail"), unique=True)
     gender = models.CharField(
         _("gender"),

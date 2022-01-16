@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "zeynep",
     "zeynep.auth",
+    "zeynep.verification",
     "rest_framework",
 ]
 

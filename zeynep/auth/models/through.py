@@ -1,15 +1,16 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
 class UserThrough(models.Model):
     from_user = models.ForeignKey(
-        "zeynep_auth.User",
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="+",
     )
     to_user = models.ForeignKey(
-        "zeynep_auth.User",
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="+",
     )

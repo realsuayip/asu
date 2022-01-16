@@ -19,7 +19,11 @@ local_apps = (
 api_urlpatterns = []
 
 for app in local_apps:
-    module = importlib.import_module("%s.urls" % app)
+    try:
+        module = importlib.import_module("%s.urls" % app)
+    except ModuleNotFoundError:
+        continue
+
     app_router = getattr(module, "router", None)
     app_urls = getattr(module, "api_urlpatterns", None)
 

@@ -2,12 +2,25 @@ import string
 
 from django.conf import settings
 from django.core.signing import TimestampSigner
+from django.core.validators import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 from zeynep.verification.managers import RegistrationVerificationManager
+
+
+def code_validator(code):
+    errors = []
+
+    if len(code) < 6:
+        errors.append(_("Ensure this field has at least 6 digits."))
+
+    if not code.isdigit():
+        errors.append(_("Ensure this field contains only digits."))
+
+    raise ValidationError(errors)
 
 
 class RegistrationVerification(models.Model):
@@ -19,7 +32,9 @@ class RegistrationVerification(models.Model):
         blank=True,
     )
     email = models.EmailField(_("email"))
-    code = models.CharField(_("code"), max_length=6)
+    code = models.CharField(
+        _("code"), max_length=6, validators=[code_validator]
+    )
 
     date_verified = models.DateTimeField(
         _("date verified"), null=True, blank=True
@@ -32,6 +47,11 @@ class RegistrationVerification(models.Model):
     class Meta:
         verbose_name = _("registration verification")
         verbose_name_plural = _("registration verifications")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["email", "code"], name="unique_email_and_code"
+            )
+        ]
 
     def __str__(self):
         return "%s <#%s>" % (self.email, self.pk)
@@ -44,12 +64,13 @@ class RegistrationVerification(models.Model):
 
         super().save(*args, **kwargs)
 
-    def create_signature(self):
-        assert self.is_eligible()
+    def create_consent(self):
+        assert self.is_eligible
 
         signer = TimestampSigner()
         return signer.sign(self.pk)
 
+    @property
     def is_eligible(self):
         """
         Can we create an account with this email?

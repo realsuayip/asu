@@ -9,7 +9,16 @@ parser.add_argument(
     "action",
     type=str,
     help="Specify docker action.",
-    choices=["up", "down", "build", "restart", "start", "stop"],
+    choices=[
+        "up",
+        "down",
+        "build",
+        "restart",
+        "start",
+        "stop",
+        "shell",
+        "console",
+    ],
 )
 parser.add_argument(
     "-p", "--production", action="store_true", help="Run in production mode."
@@ -24,7 +33,15 @@ action = args.action
 if args.production:
     filename = compose_prod
 
-cmd = "docker-compose -f %s %s" % (filename, action)
+
+command_map = {
+    "shell": "docker exec -it zeynep_django python manage.py shell",
+    "console": "docker exec -it zeynep_django sh",
+}
+
+default = "docker-compose -f %s %s" % (filename, action)
+cmd = command_map.get(action, default)
+
 
 if args.detached:
     cmd += " -d"

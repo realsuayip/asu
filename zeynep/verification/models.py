@@ -52,7 +52,7 @@ class RegistrationVerification(models.Model):
 
     def is_eligible(self):
         """
-        Can I create an account with this email?
+        Can we create an account with this email?
         """
         if self.date_verified is None:
             return False

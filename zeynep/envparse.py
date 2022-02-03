@@ -41,7 +41,7 @@ class EnvironmentParser:
     str = _construct(str)
     int = _construct(int)
     float = _construct(float)
-    dict = _construct(json.loads)
+    json = _construct(json.loads)
 
 
 env = EnvironmentParser()

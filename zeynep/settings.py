@@ -1,16 +1,16 @@
 import os
 from pathlib import Path
 
+from zeynep.envparse import env
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 ROOT_URLCONF = "zeynep.urls"
 WSGI_APPLICATION = "zeynep.wsgi.application"
-SECRET_KEY = (
-    "django-insecure-ku*^b-gl7if^%7v0we+_2z(l)dxp(6@^06z=lpi^k6gf@$(t0c"
-)
-DEBUG = True
-ALLOWED_HOSTS = []
+SECRET_KEY = env.str("SECRET_KEY", "django-insecure")
+DEBUG = env.bool("DEBUG", True)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", [])
 
 
 INSTALLED_APPS = [
@@ -39,11 +39,11 @@ MIDDLEWARE = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("DATABASE_HOST"),
-        "PORT": os.environ.get("DATABASE_PORT"),
+        "NAME": env.str("POSTGRES_DB"),
+        "USER": env.str("POSTGRES_USER"),
+        "PASSWORD": env.str("POSTGRES_PASSWORD"),
+        "HOST": env.str("DATABASE_HOST"),
+        "PORT": env.str("DATABASE_PORT"),
     }
 }
 
@@ -102,3 +102,5 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

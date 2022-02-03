@@ -1,12 +1,13 @@
 from django.db import transaction
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from rest_framework import mixins, serializers, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
+from zeynep.auth.models import User
 from zeynep.verification.models import RegistrationVerification, code_validator
 
 
@@ -20,10 +21,19 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = RegistrationVerification
         fields = ("email",)
 
+    def validate_email(self, email):  # noqa
+        email = User.objects.normalize_email(email)
+        user = User.objects.filter(email=email)
+
+        if user.exists():
+            raise ValidationError(gettext("This e-mail is already in use."))
+
+        return email
+
     @transaction.atomic
     def create(self, validated_data):
         verification = super().create(validated_data)
-        # todo send mail here
+        verification.send_email()
         return verification
 
 

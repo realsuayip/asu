@@ -6,8 +6,11 @@ from django.core.validators import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
-from django.utils.translation import gettext_lazy as _
+from django.utils.html import mark_safe
+from django.utils.translation import gettext, gettext_lazy as _
 
+from zeynep import mailing
+from zeynep.auth.models import User
 from zeynep.verification.managers import RegistrationVerificationManager
 
 
@@ -81,3 +84,22 @@ class RegistrationVerification(models.Model):
         period = self._meta.app_config.REGISTRATION_REGISTER_PERIOD
         delta = (timezone.now() - self.date_verified).total_seconds()
         return delta < period
+
+    def send_email(self):
+        title = gettext("Verify your email for registration")
+        content = mark_safe(
+            gettext(
+                "To continue for the registration process,"
+                " you need to enter the following code into"
+                " the application:"
+                "<div class='code'><strong>%(code)s</strong></div>"
+            )
+            % {"code": self.code}
+        )
+
+        return mailing.send(
+            "transactional",
+            title=title,
+            content=content,
+            recipients=[self.email],
+        )

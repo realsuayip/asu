@@ -27,7 +27,7 @@ def code_validator(code):
 
 
 class RegistrationVerification(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
         on_delete=models.SET_NULL,

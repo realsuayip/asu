@@ -3,491 +3,239 @@
 <!doctype html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
-    <meta charset="utf-8">
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
     <title>{{ title }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Suez+One&display=swap" rel="stylesheet">
     <style>
-        /*!
-         * Bootstrap Reboot v5.1.3 (https://getbootstrap.com/)
-         * Copyright 2011-2021 The Bootstrap Authors
-         * Copyright 2011-2021 Twitter, Inc.
-         * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
-         * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md)
-        */
-        :root {
-            --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            --bs-body-font-family: var(--bs-font-sans-serif);
-        }
-
-        *, ::after, ::before {
-            box-sizing: border-box
-        }
-
-        @media (prefers-reduced-motion: no-preference) {
-            :root {
-                scroll-behavior: smooth
-            }
+        img {
+            border: none;
+            -ms-interpolation-mode: bicubic;
+            max-width: 100%
         }
 
         body {
+            background-color: #f6f6f6;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            -webkit-font-smoothing: antialiased;
+            font-size: 16px;
+            line-height: 1.4;
             margin: 0;
-            font-family: var(--bs-body-font-family);
-            -webkit-text-size-adjust: 100%;
-            -webkit-tap-highlight-color: transparent
-        }
-
-        hr {
-            margin: 1rem 0;
-            color: inherit;
-            background-color: currentColor;
-            border: 0;
-            opacity: .25
-        }
-
-        hr:not([size]) {
-            height: 1px
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            margin-top: 0;
-            margin-bottom: .5rem;
-            font-weight: 500;
-            line-height: 1.2
-        }
-
-        h1 {
-            font-size: calc(1.375rem + 1.5vw)
-        }
-
-        @media (min-width: 1200px) {
-            h1 {
-                font-size: 2.5rem
-            }
-        }
-
-        h2 {
-            font-size: calc(1.325rem + .9vw)
-        }
-
-        @media (min-width: 1200px) {
-            h2 {
-                font-size: 2rem
-            }
-        }
-
-        h3 {
-            font-size: calc(1.3rem + .6vw)
-        }
-
-        @media (min-width: 1200px) {
-            h3 {
-                font-size: 1.75rem
-            }
-        }
-
-        h4 {
-            font-size: calc(1.275rem + .3vw)
-        }
-
-        @media (min-width: 1200px) {
-            h4 {
-                font-size: 1.5rem
-            }
-        }
-
-        h5 {
-            font-size: 1.25rem
-        }
-
-        h6 {
-            font-size: 1rem
-        }
-
-        p {
-            margin-top: 0;
-            margin-bottom: 1rem
-        }
-
-        abbr[data-bs-original-title], abbr[title] {
-            -webkit-text-decoration: underline dotted;
-            text-decoration: underline dotted;
-            cursor: help;
-            -webkit-text-decoration-skip-ink: none;
-            text-decoration-skip-ink: none
-        }
-
-        address {
-            margin-bottom: 1rem;
-            font-style: normal;
-            line-height: inherit
-        }
-
-        ol, ul {
-            padding-left: 2rem
-        }
-
-        dl, ol, ul {
-            margin-top: 0;
-            margin-bottom: 1rem
-        }
-
-        ol ol, ol ul, ul ol, ul ul {
-            margin-bottom: 0
-        }
-
-        dt {
-            font-weight: 700
-        }
-
-        dd {
-            margin-bottom: .5rem;
-            margin-left: 0
-        }
-
-        blockquote {
-            margin: 0 0 1rem
-        }
-
-        b, strong {
-            font-weight: bolder
-        }
-
-        small {
-            font-size: .875em
-        }
-
-        mark {
-            padding: .2em;
-            background-color: #fcf8e3
-        }
-
-        sub, sup {
-            position: relative;
-            font-size: .75em;
-            line-height: 0;
-            vertical-align: baseline
-        }
-
-        sub {
-            bottom: -.25em
-        }
-
-        sup {
-            top: -.5em
-        }
-
-        a {
-            color: #0d6efd;
-        }
-
-        a:hover {
-            color: #0a58ca
-        }
-
-        a:not([href]):not([class]), a:not([href]):not([class]):hover {
-            color: inherit;
-            text-decoration: none
-        }
-
-        code, kbd, pre, samp {
-            font-family: monospace;
-            font-size: 1em;
-            direction: ltr;
-            unicode-bidi: bidi-override
-        }
-
-        pre {
-            display: block;
-            margin-top: 0;
-            margin-bottom: 1rem;
-            overflow: auto;
-            font-size: .875em
-        }
-
-        pre code {
-            font-size: inherit;
-            color: inherit;
-            word-break: normal
-        }
-
-        code {
-            font-size: .875em;
-            color: #d63384;
-            word-wrap: break-word
-        }
-
-        a > code {
-            color: inherit
-        }
-
-        kbd {
-            padding: .2rem .4rem;
-            font-size: .875em;
-            color: #fff;
-            background-color: #212529;
-            border-radius: .2rem
-        }
-
-        kbd kbd {
             padding: 0;
-            font-size: 1em;
-            font-weight: 700
-        }
-
-        figure {
-            margin: 0 0 1rem
-        }
-
-        img, svg {
-            vertical-align: middle
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%
         }
 
         table {
-            caption-side: bottom;
-            border-collapse: collapse
+            border-collapse: separate;
+            mso-table-lspace: 0;
+            mso-table-rspace: 0;
+            width: 100%
         }
 
-        caption {
-            padding-top: .5rem;
-            padding-bottom: .5rem;
-            color: #6c757d;
-            text-align: left
+        table td {
+            vertical-align: top
         }
 
-        th {
-            text-align: inherit;
-            text-align: -webkit-match-parent
+        .body {
+            background-color: #f6f6f6;
+            width: 100%
         }
 
-        tbody, td, tfoot, th, thead, tr {
-            border-color: inherit;
-            border-style: solid;
-            border-width: 0
+        .container {
+            display: block;
+            margin: 0 auto !important;
+            max-width: 580px;
+            padding: 10px;
+            width: 580px
         }
 
-        label {
-            display: inline-block
-        }
-
-        button {
-            border-radius: 0
-        }
-
-        button:focus:not(:focus-visible) {
-            outline: 0
-        }
-
-        button, input, optgroup, select, textarea {
-            margin: 0;
-            font-family: inherit;
-            font-size: inherit;
-            line-height: inherit
-        }
-
-        button, select {
-            text-transform: none
-        }
-
-        [role=button] {
-            cursor: pointer
-        }
-
-        select {
-            word-wrap: normal
-        }
-
-        select:disabled {
-            opacity: 1
-        }
-
-        [list]::-webkit-calendar-picker-indicator {
-            display: none
-        }
-
-        [type=button], [type=reset], [type=submit], button {
-            -webkit-appearance: button
-        }
-
-        [type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled), button:not(:disabled) {
-            cursor: pointer
-        }
-
-        ::-moz-focus-inner {
-            padding: 0;
-            border-style: none
-        }
-
-        textarea {
-            resize: vertical
-        }
-
-        fieldset {
-            min-width: 0;
-            padding: 0;
-            margin: 0;
-            border: 0
-        }
-
-        legend {
-            float: left;
-            width: 100%;
-            padding: 0;
-            margin-bottom: .5rem;
-            font-size: calc(1.275rem + .3vw);
-            line-height: inherit
-        }
-
-        @media (min-width: 1200px) {
-            legend {
-                font-size: 1.5rem
-            }
-        }
-
-        legend + * {
-            clear: left
-        }
-
-        ::-webkit-inner-spin-button {
-            height: auto
-        }
-
-        [type=search] {
-            outline-offset: -2px;
-            -webkit-appearance: textfield
-        }
-
-        ::-webkit-search-decoration {
-            -webkit-appearance: none
-        }
-
-        ::-webkit-color-swatch-wrapper {
-            padding: 0
-        }
-
-        ::-webkit-file-upload-button {
-            font: inherit
-        }
-
-        ::file-selector-button {
-            font: inherit
-        }
-
-        ::-webkit-file-upload-button {
-            font: inherit;
-            -webkit-appearance: button
-        }
-
-        output {
-            display: inline-block
-        }
-
-        iframe {
-            border: 0
-        }
-
-        summary {
-            display: list-item;
-            cursor: pointer
-        }
-
-        progress {
-            vertical-align: baseline
-        }
-
-        [hidden] {
-            display: none !important
-        }
-    </style>
-    <style>
-        body {
-            background: #eeecec;
-        }
-
-        div.container {
-            font-size: 1rem;
+        .content {
+            box-sizing: border-box;
+            display: block;
             margin: 0 auto;
-            max-width: 700px;
-            overflow: auto;
-            box-sizing: border-box;
+            max-width: 580px;
+            padding: 10px
         }
 
-        .shade {
-            position: absolute;
-            top: 0;
-            background: #0d6efd;
-            height: 5rem;
-            width: 100%;
-            z-index: -1;
-        }
-
-        main {
-            box-sizing: border-box;
+        .main {
             background: #fff;
-            padding: 1rem;
-            border-radius: 1rem;
-            overflow: auto;
-            margin: 1rem 1rem 2rem;
+            border-radius: 6px;
+            width: 100%
         }
 
-        main > aside {
-            font-size: 85%;
+        .wrapper {
+            box-sizing: border-box;
+            padding: 20px
+        }
+
+        .content-block {
+            padding-bottom: 10px;
+            padding-top: 10px
+        }
+
+        .footer {
+            clear: both;
+            margin-top: 10px;
             text-align: center;
-            width: 400px;
-            color: #888;
-            margin: 0 auto;
+            width: 100%
         }
 
-        main > article {
-            margin: 2.5rem 2.5rem 3rem;
+        .footer a, .footer p, .footer span, .footer td {
+            color: #777;
+            font-size: 12px;
+            text-align: center
         }
 
-        footer {
-            text-align: center;
-            font-size: .85rem;
-            color: #888;
-            max-width: 450px;
-            margin: 0 auto;
+        h1, h2, h3, h4 {
+            color: #000;
+            font-family: sans-serif;
+            font-weight: 400;
+            line-height: 1.4;
+            margin: 0 0 1em;
         }
 
         h1 {
-            font-family: 'Suez One', serif;
+            font-size: 35px;
+            font-weight: 300;
             text-align: center;
-            color: #0d6efd;
         }
 
-        h4 {
-            margin-bottom: 1rem;
+        ol, p, ul {
+            font-family: sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            margin: 0 0 15px;
+        }
+
+        ol li, p li, ul li {
+            list-style-position: inside;
+            margin-left: 5px
+        }
+
+        a {
+            color: #3498db;
+            text-decoration: underline
+        }
+
+
+        hr {
+            border: 0;
+            border-bottom: 1px solid #f6f6f6;
+            margin: 20px 0
+        }
+
+        @media only screen and (max-width: 620px) {
+            table.body h1 {
+                font-size: 28px !important;
+                margin-bottom: 10px !important
+            }
+
+            table.body a, table.body ol, table.body p, table.body span, table.body td, table.body ul {
+                font-size: 16px !important
+            }
+
+            table.body .article, table.body .wrapper {
+                padding: 10px !important
+            }
+
+            table.body .content {
+                padding: 0 !important
+            }
+
+            table.body .container {
+                padding: 0 !important;
+                width: 100% !important
+            }
+
+            table.body .main {
+                border-left-width: 0 !important;
+                border-radius: 0 !important;
+                border-right-width: 0 !important
+            }
+
+            table.body .btn table {
+                width: 100% !important
+            }
+
+            table.body .btn a {
+                width: 100% !important
+            }
+
+            table.body .img-responsive {
+                height: auto !important;
+                max-width: 100% !important;
+                width: auto !important
+            }
+        }
+
+        div.code {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 1.25rem;
         }
     </style>
 </head>
 <body>
-<div class="shade"></div>
-<div class="container">
-    <main>
-        <h1>zeynep</h1>
-        <article>
-            <h4><strong>{{ title }}</strong></h4>
-            {{ content }}
-        </article>
-        <aside>
-            {% blocktranslate trimmed %}
-                This is a transactional e-mail sent by <a href="#">zeynep</a> application.
-                If you didn't make the request to receive this mail, you
-                may ignore it.
-            {% endblocktranslate %}
-        </aside>
-    </main>
-    <footer>
-        <p>
-            {% blocktranslate trimmed %}
-                © Copyright 2022 zeynep, All Rights Reserved<br>
-                <a href="mailto:support@example.com">support@example.com</a>
-            {% endblocktranslate %}
-        </p>
-    </footer>
-</div>
+<table role=presentation border=0 cellpadding=0 cellspacing=0 class=body>
+    <tr>
+        <td>&nbsp;</td>
+        <td class=container>
+            <div class=content>
+                <table role=presentation class=main>
+                    <tr></tr>
+                    <tr>
+                        <td class=wrapper>
+                            <table role=presentation border=0 cellpadding=0 cellspacing=0>
+                                <tr>
+                                    <td>
+                                        <h1><strong style="color: #0d6efd">zeynep</strong></h1>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table role=presentation border=0 cellpadding=0 cellspacing=0>
+                                <tr>
+                                    <td>
+                                        <h3><strong>{{ title }}</strong></h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        {{ content }}
+                                    </td>
+                                </tr>
+                            </table>
+                            <table role=presentation border=0 cellpadding=0 cellspacing=0 style="max-width: 80%; margin: 2em auto 0;">
+                                <tr>
+                                    <td style="text-align: center !important;">
+                                        <small>
+                                            {% blocktranslate trimmed %}
+                                                This is a transactional e-mail sent by
+                                                <a href="#">zeynep</a> application.
+                                                If you didn't make the request to receive this mail, you may ignore it.
+                                            {% endblocktranslate %}
+                                        </small>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <div class=footer>
+                    <table role=presentation border=0 cellpadding=0 cellspacing=0 style="width: 80%; margin: 0 auto;">
+                        <tr>
+                            <td class="content-block">
+                                {% blocktranslate trimmed %}
+                                    © Copyright 2022 zeynep, All Rights Reserved<br>
+                                    <a href="mailto:support@example.com">support@example.com</a>
+                                {% endblocktranslate %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
 </body>
 </html>

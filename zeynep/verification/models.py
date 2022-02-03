@@ -1,7 +1,7 @@
 import string
 
 from django.conf import settings
-from django.core.signing import TimestampSigner
+from django.core import signing
 from django.core.validators import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -70,7 +70,7 @@ class RegistrationVerification(models.Model):
     def create_consent(self):
         assert self.is_eligible
 
-        signer = TimestampSigner()
+        signer = signing.TimestampSigner()
         return signer.sign(self.pk)
 
     @property
@@ -79,6 +79,9 @@ class RegistrationVerification(models.Model):
         Can we create an account with this email?
         """
         if self.date_verified is None:
+            return False
+
+        if self.user is not None:
             return False
 
         period = self._meta.app_config.REGISTRATION_REGISTER_PERIOD

@@ -18,6 +18,7 @@ parser.add_argument(
         "stop",
         "shell",
         "console",
+        "test",
     ],
 )
 parser.add_argument(
@@ -37,6 +38,7 @@ if args.production:
 command_map = {
     "shell": "docker exec -it zeynep_django python manage.py shell",
     "console": "docker exec -it zeynep_django sh",
+    "test": "docker exec -it zeynep_django python manage.py test",
 }
 
 default = "docker-compose -f %s %s" % (filename, action)

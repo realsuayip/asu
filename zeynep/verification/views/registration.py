@@ -2,13 +2,14 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
 
-from rest_framework import mixins, serializers, viewsets
+from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
 from zeynep.auth.models import User
 from zeynep.verification.models import RegistrationVerification, code_validator
+from zeynep.utils.views import ExtendedViewSet
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -65,7 +66,8 @@ class RegistrationCheckSerializer(serializers.Serializer):  # noqa
         return validated_data
 
 
-class RegistrationViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+class RegistrationViewSet(ExtendedViewSet):
+    mixins = ("create",)
     serializer_class = RegistrationSerializer
 
     @action(

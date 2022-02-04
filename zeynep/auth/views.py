@@ -1,10 +1,11 @@
 from django.db import transaction
 from django.utils.translation import gettext
 
-from rest_framework import mixins, permissions, serializers, viewsets
+from rest_framework import permissions, serializers
 from rest_framework.exceptions import ValidationError
 
 from zeynep.auth.models import User
+from zeynep.utils.views import ExtendedViewSet
 from zeynep.verification.models import RegistrationVerification
 
 
@@ -95,13 +96,8 @@ class UserPermissions(permissions.IsAuthenticatedOrReadOnly):
         return has_base_permission
 
 
-class UserViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet,
-):
+class UserViewSet(ExtendedViewSet):
+    mixins = ("list", "retrieve", "create", "update")
     lookup_field = "username"
     http_method_names = ["get", "post", "patch", "head", "options"]
     permission_classes = [UserPermissions]

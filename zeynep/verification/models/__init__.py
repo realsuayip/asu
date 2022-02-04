@@ -1,0 +1,1 @@
+from zeynep.verification.models.registration import RegistrationVerification

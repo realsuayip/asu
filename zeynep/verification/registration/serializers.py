@@ -3,13 +3,13 @@ from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
 
 from rest_framework import serializers
-from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
-from rest_framework.response import Response
 
 from zeynep.auth.models import User
-from zeynep.verification.models import RegistrationVerification, code_validator
-from zeynep.utils.views import ExtendedViewSet
+from zeynep.verification.models.registration import (
+    RegistrationVerification,
+    code_validator,
+)
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -50,7 +50,11 @@ class RegistrationCheckSerializer(serializers.Serializer):  # noqa
         max_length=6,
         validators=[code_validator],
     )
-    consent = serializers.CharField(read_only=True)
+    consent = serializers.CharField(
+        read_only=True,
+        help_text="This consent value will be needed while you create an"
+        " actual user with their credentials. It will expire after some time.",
+    )
 
     def create(self, validated_data):
         try:
@@ -64,18 +68,3 @@ class RegistrationCheckSerializer(serializers.Serializer):  # noqa
         verification.save(update_fields=["date_verified"])
         validated_data["consent"] = verification.create_consent()
         return validated_data
-
-
-class RegistrationViewSet(ExtendedViewSet):
-    mixins = ("create",)
-    serializer_class = RegistrationSerializer
-
-    @action(
-        detail=False,
-        methods=["post"],
-        serializer_class=RegistrationCheckSerializer,
-    )
-    def check(self, request):
-        serializer = RegistrationCheckSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.save(), status=200)

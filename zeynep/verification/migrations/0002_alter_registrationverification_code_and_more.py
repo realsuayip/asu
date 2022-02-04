@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='registrationverification',
             name='code',
-            field=models.CharField(max_length=6, validators=[zeynep.verification.models.code_validator], verbose_name='code'),
+            field=models.CharField(max_length=6, validators=[zeynep.verification.models.base.code_validator], verbose_name='code'),
         ),
         migrations.AddConstraint(
             model_name='registrationverification',

@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 
-from zeynep.verification.views.registration import RegistrationViewSet
+from zeynep.verification.registration.views import RegistrationViewSet
 
 router = DefaultRouter()
 router.register(

@@ -2,7 +2,6 @@ import string
 
 from django.conf import settings
 from django.core import signing
-from django.core.validators import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -10,20 +9,8 @@ from django.utils.html import mark_safe
 from django.utils.translation import gettext, gettext_lazy as _
 
 from zeynep import mailing
-from zeynep.auth.models import User
 from zeynep.verification.managers import RegistrationVerificationManager
-
-
-def code_validator(code):
-    errors = []
-
-    if len(code) < 6:
-        errors.append(_("Ensure this field has at least 6 digits."))
-
-    if not code.isdigit():
-        errors.append(_("Ensure this field contains only digits."))
-
-    raise ValidationError(errors)
+from zeynep.verification.models.base import code_validator
 
 
 class RegistrationVerification(models.Model):

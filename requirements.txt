@@ -3,3 +3,4 @@ psycopg2-binary==2.9.3
 redis==4.1.0
 hiredis==2.0.0
 djangorestframework==3.13.1
+drf-spectacular==0.21.2

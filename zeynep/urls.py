@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -16,7 +17,14 @@ router.root_view_name = "api-root"
 local_apps = (
     app for app in settings.INSTALLED_APPS if app.startswith("zeynep.")
 )
-api_urlpatterns = []
+api_urlpatterns = [
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
+]
 
 for app in local_apps:
     try:

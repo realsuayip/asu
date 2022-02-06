@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Sequence
 
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
@@ -36,16 +36,17 @@ class ViewSetMeta(type):
 
                 bases += (mixin,)
 
-        return super().__new__(mcs, name, bases, classdict)
+        cls = super().__new__(mcs, name, bases, classdict)
+        schema_extensions = classdict.get("schema_extensions")
+
+        if schema_extensions is not None:
+            # Get related action and decorate
+            # it with extension e.g. extend_schema.
+            cls = extend_schema_view(**schema_extensions)(cls)
+
+        return cls
 
 
 class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
+    mixins: Optional[Sequence[str]] = None
     schema_extensions: Optional[Dict] = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.schema_extensions is not None:
-            # Get related action and decorate
-            # it with extension e.g. extend_schema.
-            cls = extend_schema_view(**cls.schema_extensions)(cls)
-
-        return super().__new__(cls)

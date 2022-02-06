@@ -3,6 +3,8 @@ from typing import Dict, Optional
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
+from drf_spectacular.utils import extend_schema_view
+
 _viewset_mixin_map = {
     "list": mixins.ListModelMixin,
     "create": mixins.CreateModelMixin,
@@ -44,8 +46,6 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
         if cls.schema_extensions is not None:
             # Get related action and decorate
             # it with extension e.g. extend_schema.
-            for name, extension in cls.schema_extensions.items():
-                action = getattr(cls, name)
-                setattr(cls, name, extension(action))
+            cls = extend_schema_view(**cls.schema_extensions)(cls)
 
         return super().__new__(cls)

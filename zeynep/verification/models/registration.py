@@ -9,8 +9,8 @@ from django.utils.html import mark_safe
 from django.utils.translation import gettext, gettext_lazy as _
 
 from zeynep import mailing
-from zeynep.verification.models.managers import RegistrationVerificationManager
 from zeynep.verification.models.base import code_validator
+from zeynep.verification.models.managers import RegistrationVerificationManager
 
 
 class RegistrationVerification(models.Model):

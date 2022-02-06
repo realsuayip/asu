@@ -4,8 +4,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework.routers import DefaultRouter
+
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 
 router = DefaultRouter()
 router.root_view_name = "api-root"

@@ -53,10 +53,12 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
 
         if verification is None:
             raise ValidationError(
-                gettext(
-                    "This e-mail could not be verified."
-                    " Please provide a validated e-mail address."
-                )
+                {
+                    "email": gettext(
+                        "This e-mail could not be verified."
+                        " Please provide a validated e-mail address."
+                    )
+                }
             )
 
         user = super().create(validated_data)

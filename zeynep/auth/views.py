@@ -1,8 +1,12 @@
 from django.db import transaction
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils.translation import gettext
 
 from rest_framework import permissions, serializers
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from zeynep.auth.models import User
 from zeynep.utils.views import ExtendedViewSet
@@ -16,6 +20,21 @@ class UserPublicReadSerializer(serializers.HyperlinkedModelSerializer):
             "id",
             "display_name",
             "username",
+            "date_joined",
+            "url",
+        )
+        extra_kwargs = {"url": {"lookup_field": "username"}}
+
+
+class UserPrivateReadSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "display_name",
+            "username",
+            "gender",
+            "birth_date",
             "date_joined",
             "url",
         )
@@ -117,3 +136,23 @@ class UserViewSet(ExtendedViewSet):
             return UserCreateSerializer
 
         return UserPublicReadSerializer
+
+    @action(
+        detail=False,
+        methods=["get", "patch"],
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=UserPrivateReadSerializer,
+    )
+    def me(self, request):
+        if request.method == "PATCH":
+            detail = reverse(
+                "user-detail",
+                kwargs={"username": self.request.user.username},
+            )
+            return HttpResponseRedirect(detail, status=307)
+
+        serializer = UserPrivateReadSerializer(
+            self.request.user,
+            context={"request": request},
+        )
+        return Response(data=serializer.data, status=200)

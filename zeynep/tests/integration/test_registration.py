@@ -51,4 +51,5 @@ class RegistrationTest(APITestCase):
 
         # Let's make sure everything is in the database.
         user = User.objects.get(email=email)
-        RegistrationVerification.objects.get(user=user)
+        verification = RegistrationVerification.objects.get(user=user)
+        self.assertFalse(verification.is_eligible)

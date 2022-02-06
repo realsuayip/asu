@@ -91,3 +91,36 @@ class TestRegistrationVerification(APITestCase):
             {"email": email, "code": verification.code},
         )
         self.assertEqual(404, response.status_code)
+
+    def test_check_consent_matching(self):
+        email = "janet@example.com"
+        verification = RegistrationVerification.objects.create(
+            email=email, date_verified=timezone.now()
+        )
+        actual = RegistrationVerification.objects.get_with_consent(
+            email, verification.create_consent()
+        )
+        self.assertEqual(verification, actual)
+
+    def test_get_with_consent(self):
+        config = apps.get_app_config("verification")
+        period = config.REGISTRATION_REGISTER_PERIOD + 10
+        email = "janet2@example.com"
+
+        # Create a verified registration
+        verification = RegistrationVerification.objects.create(
+            email=email, date_verified=timezone.now()
+        )
+        consent = verification.create_consent()
+
+        # Expire the verification date
+        verification.date_verified = timezone.now() - timezone.timedelta(
+            seconds=period
+        )
+        verification.save(update_fields=["date_verified"])
+
+        # Should return nothing
+        actual = RegistrationVerification.objects.get_with_consent(
+            email, consent
+        )
+        self.assertIsNone(actual)

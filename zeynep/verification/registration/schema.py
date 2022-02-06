@@ -8,7 +8,7 @@ from zeynep.verification.registration.serializers import (
 registration_create = extend_schema(
     summary="Registration: send email verification",
     description="Given that provided email that is not already taken,"
-    " sends an e-mail containing a six-digit that could "
+    " sends an e-mail containing a six-digit that could"
     " be used to verify the e-mail.",
     examples=[
         OpenApiExample(
@@ -31,7 +31,7 @@ registration_create = extend_schema(
 )
 
 registration_check = extend_schema(
-    summary="Registration: Check email verification",
+    summary="Registration: check email verification",
     description="Given an e-mail (one that received verification"
     " e-mail via related endpoint) and code, check if the pairs make"
     " a valid combination.",

@@ -31,6 +31,7 @@ class UserPrivateReadSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = (
             "id",
+            "email",
             "display_name",
             "username",
             "gender",

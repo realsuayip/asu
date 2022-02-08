@@ -16,3 +16,7 @@ class VerificationConfig(AppConfig):
     """
     Time allocated (seconds) to register with the verified email.
     """
+    EMAIL_VERIFY_PERIOD = env.int("EMAIL_VERIFY_PERIOD", 600)
+    """
+    Time allocated (seconds) to verify an email (for changing emails).
+    """

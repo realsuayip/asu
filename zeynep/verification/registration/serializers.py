@@ -6,10 +6,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound, ValidationError
 
 from zeynep.auth.models import User
-from zeynep.verification.models.registration import (
-    RegistrationVerification,
-    code_validator,
-)
+from zeynep.verification.models.base import code_validator
+from zeynep.verification.models.registration import RegistrationVerification
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

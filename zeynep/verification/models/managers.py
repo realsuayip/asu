@@ -19,11 +19,11 @@ class VerificationManager(models.Manager):
         )
 
 
-class RegistrationVerificationManager(VerificationManager):
-    verify_period = app_config.REGISTRATION_VERIFY_PERIOD
+class ConsentVerificationManager(VerificationManager):
+    eligible_period: int
 
     def eligible(self):
-        period = app_config.REGISTRATION_REGISTER_PERIOD
+        period = self.eligible_period
         max_register_date = timezone.now() - timezone.timedelta(seconds=period)
         return self.filter(
             user__isnull=True,
@@ -37,7 +37,7 @@ class RegistrationVerificationManager(VerificationManager):
         object and return it, else return None. 'email' should be normalized.
         """
         signer = signing.TimestampSigner()
-        max_age = app_config.REGISTRATION_REGISTER_PERIOD
+        max_age = self.eligible_period
 
         try:
             value = signer.unsign(consent, max_age=max_age)
@@ -48,6 +48,16 @@ class RegistrationVerificationManager(VerificationManager):
             return self.eligible().get(pk=int(value), email=email)
         except self.model.DoesNotExist:
             return None
+
+
+class RegistrationVerificationManager(ConsentVerificationManager):
+    verify_period = app_config.REGISTRATION_VERIFY_PERIOD
+    eligible_period = app_config.REGISTRATION_REGISTER_PERIOD
+
+
+class PasswordResetVerificationManager(ConsentVerificationManager):
+    verify_period = app_config.PASSWORD_VERIFY_PERIOD
+    eligible_period = app_config.PASSWORD_RESET_PERIOD
 
 
 class EmailVerificationManager(VerificationManager):

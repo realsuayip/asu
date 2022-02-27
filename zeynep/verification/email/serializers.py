@@ -4,10 +4,8 @@ from django.utils import timezone
 from rest_framework.exceptions import NotFound
 
 from zeynep.verification.models import EmailVerification
-from zeynep.verification.registration.serializers import (
-    RegistrationCheckSerializer,
-    RegistrationSerializer,
-)
+from zeynep.verification.registration.serializers import RegistrationSerializer
+from zeynep.verification.serializers import BaseCheckSerializer
 
 
 class EmailSerializer(RegistrationSerializer):
@@ -23,7 +21,7 @@ class EmailSerializer(RegistrationSerializer):
         return verification
 
 
-class EmailCheckSerializer(RegistrationCheckSerializer):  # noqa
+class EmailCheckSerializer(BaseCheckSerializer):  # noqa
     consent = None
 
     @transaction.atomic

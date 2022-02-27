@@ -20,3 +20,5 @@ class VerificationConfig(AppConfig):
     """
     Time allocated (seconds) to verify an email (for changing emails).
     """
+    PASSWORD_VERIFY_PERIOD = env.int("PASSWORD_VERIFY_PERIOD", 600)
+    PASSWORD_RESET_PERIOD = env.int("PASSWORD_RESET_PERIOD", 600)

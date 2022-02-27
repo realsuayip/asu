@@ -1,16 +1,19 @@
+from django.apps import apps
 from django.conf import settings
-from django.core import signing
 from django.db import models
-from django.utils import timezone
 from django.utils.html import mark_safe
 from django.utils.translation import gettext, gettext_lazy as _
 
 from zeynep import mailing
-from zeynep.verification.models.base import Verification
+from zeynep.verification.models.base import ConsentVerification
 from zeynep.verification.models.managers import RegistrationVerificationManager
 
+app_config = apps.get_app_config("verification")
 
-class RegistrationVerification(Verification):
+
+class RegistrationVerification(ConsentVerification):
+    ELIGIBLE_PERIOD = app_config.REGISTRATION_REGISTER_PERIOD
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
@@ -21,33 +24,15 @@ class RegistrationVerification(Verification):
 
     objects = RegistrationVerificationManager()
 
-    class Meta(Verification.Meta):
+    class Meta(ConsentVerification.Meta):
         verbose_name = _("registration verification")
         verbose_name_plural = _("registration verifications")
 
-    def __str__(self):
-        return "%s <#%s>" % (self.email, self.pk)
-
-    def create_consent(self):
-        assert self.is_eligible
-
-        signer = signing.TimestampSigner()
-        return signer.sign(self.pk)
-
     @property
     def is_eligible(self):
-        """
-        Can we create an account with this email?
-        """
-        if self.date_verified is None:
-            return False
-
         if self.user is not None:
             return False
-
-        period = self._meta.app_config.REGISTRATION_REGISTER_PERIOD
-        delta = (timezone.now() - self.date_verified).total_seconds()
-        return delta < period
+        return super().is_eligible
 
     def send_email(self):
         title = gettext("Verify your email for registration")

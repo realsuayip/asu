@@ -1,10 +1,15 @@
 import string
 
+from django.apps import apps
 from django.conf import settings
+from django.core import signing
 from django.core.validators import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
+
+app_config = apps.get_app_config("verification")
 
 
 def code_validator(code):
@@ -58,3 +63,28 @@ class Verification(models.Model):
             self.code = get_random_string(6, allowed_chars=string.digits)
 
         super().save(*args, **kwargs)
+
+
+class ConsentVerification(Verification):
+    ELIGIBLE_PERIOD: int
+
+    class Meta(Verification.Meta):
+        abstract = True
+
+    def __str__(self):
+        return "%s <#%s>" % (self.email, self.pk)
+
+    def create_consent(self):
+        assert self.is_eligible
+
+        signer = signing.TimestampSigner()
+        return signer.sign(self.pk)
+
+    @property
+    def is_eligible(self):
+        if self.date_verified is None:
+            return False
+
+        period = self.ELIGIBLE_PERIOD
+        delta = (timezone.now() - self.date_verified).total_seconds()
+        return delta < period

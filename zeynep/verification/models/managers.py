@@ -26,12 +26,11 @@ class ConsentVerificationManager(VerificationManager):
         period = self.eligible_period
         max_register_date = timezone.now() - timezone.timedelta(seconds=period)
         return self.filter(
-            user__isnull=True,
             date_verified__isnull=False,
             date_verified__gt=max_register_date,
         )
 
-    def get_with_consent(self, email, consent):
+    def get_with_consent(self, email, consent, **kwargs):
         """
         Check consent, if valid, fetch related RegistrationVerification
         object and return it, else return None. 'email' should be normalized.
@@ -45,7 +44,7 @@ class ConsentVerificationManager(VerificationManager):
             return None
 
         try:
-            return self.eligible().get(pk=int(value), email=email)
+            return self.eligible().get(pk=int(value), email=email, **kwargs)
         except self.model.DoesNotExist:
             return None
 
@@ -53,6 +52,9 @@ class ConsentVerificationManager(VerificationManager):
 class RegistrationVerificationManager(ConsentVerificationManager):
     verify_period = app_config.REGISTRATION_VERIFY_PERIOD
     eligible_period = app_config.REGISTRATION_REGISTER_PERIOD
+
+    def eligible(self):
+        return super().eligible().filter(user__isnull=True)
 
 
 class PasswordResetVerificationManager(ConsentVerificationManager):

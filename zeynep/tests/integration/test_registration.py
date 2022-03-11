@@ -53,3 +53,4 @@ class RegistrationTest(APITestCase):
         user = User.objects.get(email=email)
         verification = RegistrationVerification.objects.get(user=user)
         self.assertFalse(verification.is_eligible)
+        self.assertIsNotNone(verification.date_completed)

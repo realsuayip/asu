@@ -68,6 +68,12 @@ class Verification(models.Model):
 class ConsentVerification(Verification):
     ELIGIBLE_PERIOD: int
 
+    date_completed = models.DateTimeField(
+        _("date completed"),
+        null=True,
+        blank=True,
+    )
+
     class Meta(Verification.Meta):
         abstract = True
 
@@ -82,7 +88,7 @@ class ConsentVerification(Verification):
 
     @property
     def is_eligible(self):
-        if self.date_verified is None:
+        if (self.date_verified is None) or self.date_completed:
             return False
 
         period = self.ELIGIBLE_PERIOD

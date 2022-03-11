@@ -27,6 +27,7 @@ class ConsentVerificationManager(VerificationManager):
         max_register_date = timezone.now() - timezone.timedelta(seconds=period)
         return self.filter(
             date_verified__isnull=False,
+            date_completed__isnull=True,
             date_verified__gt=max_register_date,
         )
 

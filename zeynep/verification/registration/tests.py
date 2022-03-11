@@ -39,6 +39,7 @@ class TestRegistrationVerification(APITestCase):
 
         self.assertFalse(verification.is_eligible)
         self.assertIsNone(verification.user)
+        self.assertIsNone(verification.date_completed)
 
         with self.assertRaises(AssertionError):
             verification.create_consent()
@@ -69,6 +70,7 @@ class TestRegistrationVerification(APITestCase):
         self.assertContains(valid, "consent")
         self.assertTrue(verification.is_eligible)
         self.assertIsNotNone(verification.date_verified)
+        self.assertIsNone(verification.date_completed)
 
         # Resend to confirm that it is no more valid
         resend = self.client.post(self.url_check, payload)

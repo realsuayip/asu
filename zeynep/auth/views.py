@@ -210,6 +210,7 @@ class UserViewSet(ExtendedViewSet):
     @action(
         detail=False,
         methods=["post"],
+        permission_classes=[permissions.AllowAny],
         serializer_class=PasswordResetSerializer,
         url_path="password-reset",
     )

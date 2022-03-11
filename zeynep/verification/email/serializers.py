@@ -37,6 +37,7 @@ class EmailCheckSerializer(BaseCheckSerializer):  # noqa
 
         verification.date_verified = timezone.now()
         verification.save(update_fields=["date_verified"])
+        verification.null_others()
 
         user.email = verification.email
         user.save(update_fields=["email"])

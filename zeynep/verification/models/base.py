@@ -39,6 +39,18 @@ class Verification(models.Model):
         validators=[code_validator],
     )
 
+    # If the user successfully makes use of another verification object,
+    # null remaining verification objects so that they couldn't be used
+    # to repeat the related action. In a nutshell, this field is another
+    # way of stating "is_expired".
+    nulled_by = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        verbose_name=_("nulled by"),
+        on_delete=models.SET_NULL,
+    )
+
     date_verified = models.DateTimeField(
         _("date verified"),
         null=True,
@@ -63,6 +75,10 @@ class Verification(models.Model):
             self.code = get_random_string(6, allowed_chars=string.digits)
 
         super().save(*args, **kwargs)
+
+    def null_others(self):
+        queryset = self._meta.model.objects.verifiable()
+        queryset.update(nulled_by=self)
 
 
 class ConsentVerification(Verification):
@@ -94,3 +110,7 @@ class ConsentVerification(Verification):
         period = self.ELIGIBLE_PERIOD
         delta = (timezone.now() - self.date_verified).total_seconds()
         return delta < period
+
+    def null_others(self):
+        queryset = self._meta.model.objects.eligible()
+        queryset.update(nulled_by=self)

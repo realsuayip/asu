@@ -3,6 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext
 
 from rest_framework import permissions, serializers
@@ -88,7 +89,8 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
 
         user = super().create(validated_data)
         verification.user = user
-        verification.save(update_fields=["user"])
+        verification.date_completed = timezone.now()
+        verification.save(update_fields=["user", "date_completed"])
         return user
 
     class Meta:
@@ -139,6 +141,9 @@ class PasswordResetSerializer(serializers.Serializer):  # noqa
             raise ValidationError(
                 {"email": gettext("This e-mail could not be verified.")}
             )
+
+        verification.date_completed = timezone.now()
+        verification.save(update_fields=["date_completed"])
 
         user.set_password(password)
         user.save(update_fields=["password"])

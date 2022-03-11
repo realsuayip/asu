@@ -16,6 +16,7 @@ class VerificationManager(models.Manager):
         return self.filter(
             date_verified__isnull=True,
             date_created__gt=max_verify_date,
+            nulled_by__isnull=True,
         )
 
 
@@ -29,6 +30,7 @@ class ConsentVerificationManager(VerificationManager):
             date_verified__isnull=False,
             date_completed__isnull=True,
             date_verified__gt=max_register_date,
+            nulled_by__isnull=True,
         )
 
     def get_with_consent(self, email, consent, **kwargs):

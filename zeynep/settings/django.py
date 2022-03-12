@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from zeynep.envparse import env
+from zeynep.utils.envparse import env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

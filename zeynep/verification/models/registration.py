@@ -1,4 +1,3 @@
-from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.utils.html import mark_safe
@@ -8,11 +7,9 @@ from zeynep import mailing
 from zeynep.verification.models.base import ConsentVerification
 from zeynep.verification.models.managers import RegistrationVerificationManager
 
-app_config = apps.get_app_config("verification")
-
 
 class RegistrationVerification(ConsentVerification):
-    ELIGIBLE_PERIOD = app_config.REGISTRATION_REGISTER_PERIOD
+    ELIGIBLE_PERIOD = settings.REGISTRATION_REGISTER_PERIOD
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,

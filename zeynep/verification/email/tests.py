@@ -1,7 +1,7 @@
 import re
 from unittest import mock
 
-from django.apps import apps
+from django.conf import settings
 from django.core import mail
 from django.urls import reverse
 from django.utils import timezone
@@ -60,8 +60,7 @@ class TestRegistrationVerification(APITestCase):
     def test_check_case_expired(self):
         self.client.force_login(UserFactory(email="old@exmaple.com"))
 
-        config = apps.get_app_config("verification")
-        period = config.EMAIL_VERIFY_PERIOD + 10
+        period = settings.EMAIL_VERIFY_PERIOD + 10
         expired_create = timezone.now() - timezone.timedelta(seconds=period)
         email = "new@exmaple.com"
 

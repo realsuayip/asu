@@ -1,9 +1,7 @@
-from django.apps import apps
+from django.conf import settings
 from django.core import signing
 from django.db import models
 from django.utils import timezone
-
-app_config = apps.get_app_config("verification")
 
 
 class VerificationManager(models.Manager):
@@ -53,20 +51,20 @@ class ConsentVerificationManager(VerificationManager):
 
 
 class RegistrationVerificationManager(ConsentVerificationManager):
-    verify_period = app_config.REGISTRATION_VERIFY_PERIOD
-    eligible_period = app_config.REGISTRATION_REGISTER_PERIOD
+    verify_period = settings.REGISTRATION_VERIFY_PERIOD
+    eligible_period = settings.REGISTRATION_REGISTER_PERIOD
 
     def eligible(self):
         return super().eligible().filter(user__isnull=True)
 
 
 class PasswordResetVerificationManager(ConsentVerificationManager):
-    verify_period = app_config.PASSWORD_VERIFY_PERIOD
-    eligible_period = app_config.PASSWORD_RESET_PERIOD
+    verify_period = settings.PASSWORD_VERIFY_PERIOD
+    eligible_period = settings.PASSWORD_RESET_PERIOD
 
 
 class EmailVerificationManager(VerificationManager):
-    verify_period = app_config.EMAIL_VERIFY_PERIOD
+    verify_period = settings.EMAIL_VERIFY_PERIOD
 
     def verifiable(self):
         return super().verifiable().filter(user__isnull=False)

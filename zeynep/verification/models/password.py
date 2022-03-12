@@ -1,4 +1,4 @@
-from django.apps import apps
+from django.conf import settings
 from django.utils.html import mark_safe
 from django.utils.translation import gettext, gettext_lazy as _
 
@@ -8,11 +8,9 @@ from zeynep.verification.models.managers import (
     PasswordResetVerificationManager,
 )
 
-app_config = apps.get_app_config("verification")
-
 
 class PasswordResetVerification(ConsentVerification):
-    ELIGIBLE_PERIOD = app_config.PASSWORD_RESET_PERIOD
+    ELIGIBLE_PERIOD = settings.PASSWORD_RESET_PERIOD
 
     objects = PasswordResetVerificationManager()
 

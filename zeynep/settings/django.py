@@ -54,17 +54,6 @@ CACHES = {
     }
 }
 
-REST_FRAMEWORK = {
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",  # noqa
-    "DEFAULT_VERSION": "latest",
-    "ALLOWED_VERSIONS": ["latest", "1.0"],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-    ],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "EXCEPTION_HANDLER": "zeynep.utils.rest.exception_handler",
-}
-
 
 TEMPLATES = [
     {
@@ -106,8 +95,3 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-SPECTACULAR_SETTINGS = {
-    "VERSION": None,
-    "TITLE": "zeynep API",
-}

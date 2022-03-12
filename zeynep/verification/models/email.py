@@ -1,7 +1,7 @@
 from django.utils.html import mark_safe
 from django.utils.translation import gettext, gettext_lazy as _
 
-from zeynep import mailing
+from zeynep.utils import mailing
 from zeynep.verification.models.base import Verification
 from zeynep.verification.models.managers import EmailVerificationManager
 

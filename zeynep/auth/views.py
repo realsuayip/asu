@@ -217,6 +217,4 @@ class UserViewSet(ExtendedViewSet):
         url_path="password-reset",
     )
     def reset_password(self, request):
-        serializer = PasswordResetSerializer(data=self.request.data)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.save(), status=200)
+        return self.get_action_save_response(request, PasswordResetSerializer)

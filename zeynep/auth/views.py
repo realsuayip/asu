@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext
 
-from rest_framework import permissions, serializers
+from rest_framework import permissions, serializers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
@@ -201,13 +201,14 @@ class UserViewSet(ExtendedViewSet):
                 "user-detail",
                 kwargs={"username": self.request.user.username},
             )
-            return HttpResponseRedirect(detail, status=307)
+            return HttpResponseRedirect(
+                detail, status=status.HTTP_307_TEMPORARY_REDIRECT
+            )
 
         serializer = UserPrivateReadSerializer(
-            self.request.user,
-            context={"request": request},
+            self.request.user, context=self.get_serializer_context()
         )
-        return Response(data=serializer.data, status=200)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=False,

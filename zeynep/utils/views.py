@@ -62,12 +62,7 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
         # for ViewSet actions.
         assert status.is_success(status_code)
         serializer = serializer_class(
-            data=request.data,
-            context={
-                "request": request,
-                "view": self,
-                "format": self.format_kwarg,
-            },
+            data=request.data, context=self.get_serializer_context()
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()

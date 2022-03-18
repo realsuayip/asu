@@ -16,8 +16,7 @@ def exception_handler(exc, context):
 
         if isinstance(exc.detail, list):
             response.data = {non_field_errors: exc.detail}
-
-        if isinstance(exc.detail, dict):
+        elif isinstance(exc.detail, dict):
             detail = {}
             for key, value in exc.detail.items():
                 if isinstance(value, str):

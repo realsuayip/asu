@@ -30,5 +30,5 @@ class PasswordResetSerializer(serializers.ModelSerializer):
         return verification
 
 
-class RegistrationCheckSerializer(BaseCheckSerializer):  # noqa
+class PasswordResetCheckSerializer(BaseCheckSerializer):  # noqa
     model = PasswordResetVerification

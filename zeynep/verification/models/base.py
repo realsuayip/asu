@@ -29,7 +29,7 @@ class Verification(models.Model):
         null=True,
         blank=True,
     )
-    email = models.EmailField(_("email"))
+    email = models.EmailField(_("email"), db_index=True)
     code = models.CharField(
         _("code"),
         max_length=6,

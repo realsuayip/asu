@@ -64,6 +64,11 @@ class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
 
 class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
     consent = serializers.CharField(write_only=True)
+    password = serializers.CharField(
+        max_length=256,
+        write_only=True,
+        style={"input_type": "password"},
+    )
 
     def validate_email(self, email):  # noqa
         return User.objects.normalize_email(email)
@@ -87,7 +92,16 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
                 }
             )
 
-        user = super().create(validated_data)
+        password = validated_data.pop("password")
+        user = User(**validated_data)
+
+        try:
+            validate_password(password, user=user)
+        except django.core.validators.ValidationError as err:
+            raise serializers.ValidationError({"password": err.messages})
+
+        user.set_password(password)
+        user.save()
         verification.user = user
         verification.date_completed = timezone.now()
         verification.save(update_fields=["user", "date_completed"])
@@ -101,6 +115,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             "email",
             "display_name",
             "username",
+            "password",
             "gender",
             "birth_date",
             "consent",

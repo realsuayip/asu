@@ -43,6 +43,7 @@ class RegistrationTest(APITestCase):
                 "consent": consent,
                 "display_name": "Janet",
                 "username": "janet_52",
+                "password": "very_secret",
                 "gender": "female",
                 "birth_date": "2000-01-01",
             },

@@ -12,6 +12,7 @@ class TestAuth(APITestCase):
         self.create_payload = {
             "display_name": "Janet",
             "username": "janet_48",
+            "password": "very_secret",
             "gender": "female",
             "birth_data": "1999-02-02",
         }

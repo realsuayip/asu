@@ -193,7 +193,7 @@ class UserViewSet(ExtendedViewSet):
     def get_queryset(self):
         if self.action == "partial_update":
             return User.objects.active()
-        return User.objects.visible()
+        return User.objects.public()
 
     def get_serializer_class(self):
         if self.action == "partial_update":

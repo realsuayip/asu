@@ -3,7 +3,7 @@ from django.db.models import Q
 
 
 class UserManager(DjangoUserManager):
-    def visible(self):
+    def public(self):
         """
         Users who are publicly available.
         """

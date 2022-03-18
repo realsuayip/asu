@@ -44,6 +44,7 @@ for app in local_apps:
 
 
 urlpatterns = [
+    path("", include("rest_framework.urls")),
     path("api/", include(router.urls + api_urlpatterns)),
     path("admin/", admin.site.urls),
 ]

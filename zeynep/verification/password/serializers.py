@@ -1,7 +1,6 @@
 from django.db import transaction
 
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound
 
 from zeynep.auth.models import User
 from zeynep.verification.models import PasswordResetVerification
@@ -23,7 +22,7 @@ class PasswordResetSerializer(serializers.ModelSerializer):
                 email=validated_data["email"]
             )
         except User.DoesNotExist:
-            raise NotFound
+            return validated_data
 
         verification = super().create(validated_data)
         verification.send_email()

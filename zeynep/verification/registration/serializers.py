@@ -2,7 +2,6 @@ from django.db import transaction
 from django.utils.translation import gettext
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from zeynep.auth.models import User
 from zeynep.verification.models.registration import RegistrationVerification
@@ -24,7 +23,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.filter(email=email)
 
         if user.exists():
-            raise ValidationError(gettext("This e-mail is already in use."))
+            raise serializers.ValidationError(
+                gettext("This e-mail is already in use.")
+            )
 
         return email
 

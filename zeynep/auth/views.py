@@ -8,7 +8,7 @@ from django.utils.translation import gettext
 
 from rest_framework import permissions, serializers, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from zeynep.auth.models import User
@@ -78,7 +78,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         )
 
         if verification is None:
-            raise ValidationError(
+            raise serializers.ValidationError(
                 {
                     "email": gettext(
                         "This e-mail could not be verified."
@@ -132,14 +132,14 @@ class PasswordResetSerializer(serializers.Serializer):  # noqa
         try:
             validate_password(password, user=user)
         except django.core.validators.ValidationError as err:
-            raise ValidationError({"password": err.messages})
+            raise serializers.ValidationError({"password": err.messages})
 
         verification = PasswordResetVerification.objects.get_with_consent(
             email, validated_data["consent"], user=user
         )
 
         if verification is None:
-            raise ValidationError(
+            raise serializers.ValidationError(
                 {"email": gettext("This e-mail could not be verified.")}
             )
 

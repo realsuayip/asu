@@ -1,7 +1,6 @@
-from django.utils.html import mark_safe
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from zeynep.utils import mailing
+from zeynep.utils import messages
 from zeynep.verification.models.base import Verification
 from zeynep.verification.models.managers import EmailVerificationManager
 
@@ -13,20 +12,4 @@ class EmailVerification(Verification):
 
     objects = EmailVerificationManager()
 
-    def send_email(self):
-        title = gettext("Verify this email address")
-        content = mark_safe(
-            gettext(
-                "To change your email, you need to enter the following"
-                " code into the application:"
-                "<div class='code'><strong>%(code)s</strong></div>"
-            )
-            % {"code": self.code}
-        )
-
-        return mailing.send(
-            "transactional",
-            title=title,
-            content=content,
-            recipients=[self.email],
-        )
+    MESSAGES = messages.email_verification

@@ -1,16 +1,13 @@
 from django.conf import settings
 from django.db import models
-from django.utils.html import mark_safe
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from zeynep.utils import mailing
+from zeynep.utils import messages
 from zeynep.verification.models.base import ConsentVerification
 from zeynep.verification.models.managers import RegistrationVerificationManager
 
 
 class RegistrationVerification(ConsentVerification):
-    ELIGIBLE_PERIOD = settings.REGISTRATION_REGISTER_PERIOD
-
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
@@ -21,6 +18,9 @@ class RegistrationVerification(ConsentVerification):
 
     objects = RegistrationVerificationManager()
 
+    ELIGIBLE_PERIOD = settings.REGISTRATION_REGISTER_PERIOD
+    MESSAGES = messages.registration
+
     class Meta(ConsentVerification.Meta):
         verbose_name = _("registration verification")
         verbose_name_plural = _("registration verifications")
@@ -30,22 +30,3 @@ class RegistrationVerification(ConsentVerification):
         if self.user is not None:
             return False
         return super().is_eligible
-
-    def send_email(self):
-        title = gettext("Verify your email for registration")
-        content = mark_safe(
-            gettext(
-                "To continue for the registration process,"
-                " you need to enter the following code into"
-                " the application:"
-                "<div class='code'><strong>%(code)s</strong></div>"
-            )
-            % {"code": self.code}
-        )
-
-        return mailing.send(
-            "transactional",
-            title=title,
-            content=content,
-            recipients=[self.email],
-        )

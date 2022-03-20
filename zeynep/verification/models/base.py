@@ -6,7 +6,10 @@ from django.core.validators import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy as _
+
+from zeynep.utils import mailing
 
 
 def code_validator(code):
@@ -56,6 +59,9 @@ class Verification(models.Model):
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 
+    # Specifies a namedtuple (subject, body) to be used in send_mail.
+    MESSAGES = None
+
     class Meta:
         abstract = True
         constraints = [
@@ -77,15 +83,25 @@ class Verification(models.Model):
         queryset = self._meta.model.objects.verifiable()
         queryset.update(nulled_by=self)
 
+    def send_email(self):
+        title = self.MESSAGES.subject
+        content = mark_safe(self.MESSAGES.body % {"code": self.code})
+        return mailing.send(
+            "transactional",
+            title=title,
+            content=content,
+            recipients=[self.email],
+        )
+
 
 class ConsentVerification(Verification):
-    ELIGIBLE_PERIOD: int
-
     date_completed = models.DateTimeField(
         _("date completed"),
         null=True,
         blank=True,
     )
+
+    ELIGIBLE_PERIOD: int
 
     class Meta(Verification.Meta):
         abstract = True

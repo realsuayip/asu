@@ -6,7 +6,7 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from zeynep.auth.models import User, UserBlock
+from zeynep.auth.models import User, UserBlock, UserFollow
 from zeynep.verification.models import PasswordResetVerification
 
 
@@ -67,3 +67,8 @@ class BlockSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return self.Meta.model.objects.get_or_create(**validated_data)
+
+
+class FollowSerializer(BlockSerializer):
+    class Meta(BlockSerializer.Meta):
+        model = UserFollow

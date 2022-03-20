@@ -5,8 +5,11 @@ from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from zeynep.auth.models import User
-from zeynep.auth.serializers.actions import PasswordResetSerializer
+from zeynep.auth.models import User, UserBlock
+from zeynep.auth.serializers.actions import (
+    BlockSerializer,
+    PasswordResetSerializer,
+)
 from zeynep.auth.serializers.user import (
     UserCreateSerializer,
     UserPrivateReadSerializer,
@@ -83,3 +86,29 @@ class UserViewSet(ExtendedViewSet):
     )
     def reset_password(self, request):
         return self.get_action_save_response(request, PasswordResetSerializer)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def block(self, request, username):
+        serializer = BlockSerializer(
+            data={"from_user": self.request.user.pk, "to_user": username},
+            context=self.get_serializer_context(),
+        )
+        return self.get_action_save_response(
+            request, serializer, status_code=204
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def unblock(self, request, username):
+        UserBlock.objects.filter(
+            from_user_id=request.user.id,
+            to_user__username=username,
+        ).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

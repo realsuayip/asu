@@ -6,7 +6,7 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from zeynep.auth.models import User
+from zeynep.auth.models import User, UserBlock
 from zeynep.verification.models import PasswordResetVerification
 
 
@@ -51,3 +51,19 @@ class PasswordResetSerializer(serializers.Serializer):  # noqa
         user.set_password(password)
         user.save(update_fields=["password"])
         return validated_data
+
+
+class BlockSerializer(serializers.ModelSerializer):
+    to_user = serializers.SlugRelatedField(
+        slug_field="username",
+        queryset=User.objects.active(),
+        write_only=True,
+    )
+
+    class Meta:
+        model = UserBlock
+        fields = ("from_user", "to_user")
+        extra_kwargs = {"from_user": {"write_only": True}}
+
+    def create(self, validated_data):
+        return self.Meta.model.objects.get_or_create(**validated_data)

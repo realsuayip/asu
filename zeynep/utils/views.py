@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Sequence
 
-from rest_framework import mixins, status
+from rest_framework import mixins, serializers, status
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -55,15 +55,21 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
     def get_action_save_response(
         self,
         request,
-        serializer_class,
+        serializer,
         status_code=status.HTTP_200_OK,
     ):
         # Similar functionality from mixins.CreateModelMixin
         # for ViewSet actions.
         assert status.is_success(status_code)
-        serializer = serializer_class(
-            data=request.data, context=self.get_serializer_context()
-        )
+        if not isinstance(serializer, serializers.Serializer):
+            serializer = serializer(
+                data=request.data, context=self.get_serializer_context()
+            )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status_code)
+        data = (
+            serializer.data
+            if status_code != status.HTTP_204_NO_CONTENT
+            else None
+        )
+        return Response(data, status=status_code)

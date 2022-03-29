@@ -41,12 +41,12 @@ class ConsentVerificationManager(VerificationManager):
 
         try:
             value = signer.unsign(consent, max_age=max_age)
-        except (signing.BadSignature, signing.SignatureExpired):
-            return None
-
-        try:
             return self.eligible().get(pk=int(value), email=email, **kwargs)
-        except self.model.DoesNotExist:
+        except (
+            signing.BadSignature,
+            signing.SignatureExpired,
+            self.model.DoesNotExist,
+        ):
             return None
 
 

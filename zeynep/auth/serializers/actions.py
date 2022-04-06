@@ -1,5 +1,6 @@
 import django.core.validators
 from django.contrib.auth.password_validation import validate_password
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext
 
@@ -21,6 +22,7 @@ class PasswordResetSerializer(serializers.Serializer):  # noqa
     def validate_email(self, email):  # noqa
         return User.objects.normalize_email(email)
 
+    @transaction.atomic
     def create(self, validated_data):
         password = validated_data["password"]
         email = validated_data["email"]

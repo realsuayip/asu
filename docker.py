@@ -1,52 +1,120 @@
 import argparse
 import os
+import sys
 
-compose_prod = "docker-compose.prod.yml"
-compose_dev = filename = "docker-compose.yml"
+from zeynep.utils.envparse import env
 
-parser = argparse.ArgumentParser(description="Runs docker containers.")
-parser.add_argument(
-    "action",
-    type=str,
-    help="Specify docker action.",
-    choices=[
-        "up",
-        "down",
-        "build",
-        "restart",
-        "start",
-        "stop",
-        "shell",
-        "console",
-        "test",
-    ],
-)
-parser.add_argument(
-    "-p", "--production", action="store_true", help="Run in production mode."
-)
-parser.add_argument(
-    "-d", "--detached", action="store_true", help="Run in detached mode."
-)
-
-args = parser.parse_args()
-action = args.action
-
-if args.production:
-    filename = compose_prod
-
-
-command_map = {
-    "shell": "docker exec -it zeynep_django python manage.py shell",
-    "console": "docker exec -it zeynep_django sh",
-    "test": "docker exec -it zeynep_django python manage.py test",
+_compose_files = {
+    "production": "docker-compose.prod.yml",
+    "development": "docker-compose.yml",
 }
-
-default = "docker-compose -f %s %s" % (filename, action)
-cmd = command_map.get(action, default)
+_django = "docker exec -it zeynep_django python manage.py"
 
 
-if args.detached:
-    cmd += " -d"
+def assertive(text):
+    return "\033[95m\033[1m" + text + "\033[0m"
 
-print("Running: %s\n" % cmd)
-os.system(cmd)
+
+def run_command(command, environment):
+    message = assertive("(%s) Running: %s\n" % (environment, command))
+    print(message)
+    os.system(command)
+
+
+def main(parser, environment):  # noqa
+    args = parser.parse_args()
+    action = args.action
+
+    if (action is None) and (not args.command):
+        parser.print_help()
+        sys.exit(1)
+
+    filename = _compose_files[environment]
+    compose_cmd = "docker-compose -f %s" % filename
+    command_map = {
+        "command": f"{_django} {args.command}",
+        "shell": f"{_django} shell",
+        "test": f"{_django} test",
+        "fixtures": f"{_django} loaddata zeynep/fixtures/* --format=yaml",
+        "console": "docker exec -it zeynep_django sh",
+    }
+
+    if action is None:
+        action = "command"
+
+    if action == "star":
+        if environment != "development":
+            print("This command is only available in development environment.")
+            sys.exit(1)
+
+        run_command("%s start" % compose_cmd, environment)
+        run_command("%s logs -f --tail 100 web" % compose_cmd, environment)
+        run_command("%s stop" % compose_cmd, environment)
+        sys.exit(0)
+
+    if action == "logs":
+        os.system("%s logs -f --tail 100" % compose_cmd)
+        sys.exit(0)
+
+    default = "%s %s" % (compose_cmd, action)
+    cmd = command_map.get(action, default)
+
+    if args.detached:
+        cmd += " -d"
+
+    run_command(cmd, environment)
+
+
+def get_environment():
+    environment = env.str("ZEYNEP_ENV", None)
+
+    if environment is None:
+        print("No environment specified, defaulting to development.")
+        return "development"
+
+    if environment not in ("production", "development"):
+        print(
+            "Received invalid environment type, choices are: %s."
+            % "development, production"
+        )
+        sys.exit(1)
+
+    return environment
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Runs and manages docker containers."
+    )
+    parser.add_argument(
+        "action",
+        nargs="?",
+        type=str,
+        help="Specify an action.",
+        choices=[
+            "up",
+            "down",
+            "build",
+            "restart",
+            "star",
+            "start",
+            "stop",
+            "shell",
+            "console",
+            "test",
+            "fixtures",
+            "logs",
+        ],
+    )
+    parser.add_argument(
+        "-d",
+        "--detached",
+        action="store_true",
+        help="Run in detached mode.",
+    )
+    parser.add_argument(
+        "-c",
+        "--command",
+        help="Run a Django command via 'manage.py'.",
+    )
+    main(parser, get_environment())

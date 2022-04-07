@@ -3,10 +3,9 @@ ENV PYTHONUNBUFFERED 1
 
 RUN mkdir /code
 WORKDIR /code
-COPY requirements.txt /code/
+COPY . /code
 
 RUN apt-get update && apt-get install -y netcat
 RUN pip install -r requirements.txt
-COPY . /code/
 
 ENTRYPOINT ["/code/scripts/entrypoint.sh"]

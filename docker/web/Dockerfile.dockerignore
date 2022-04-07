@@ -6,3 +6,7 @@ media
 .env
 .idea
 .vscode
+docker.py
+.DS_Store
+.coverage
+htmlcov

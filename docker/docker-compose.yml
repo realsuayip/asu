@@ -3,27 +3,27 @@ version: '3.7'
 services:
   db:
     image: postgres
-    container_name: zeynep_db
+    container_name: postgres
     user: postgres
     env_file:
       - .env
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/web/Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
-    container_name: zeynep_django
+    container_name: web
     environment:
       DJANGO_SETTINGS_MODULE: zeynep.settings
     env_file:
       - .env
     volumes:
-      - .:/code
+      - ../zeynep:/code/zeynep
     ports:
       - "8000:8000"
     depends_on:
       - db
   redis:
-    container_name: zeynep_redis
+    container_name: redis
     image: redis:6.2.6-alpine
     user: redis

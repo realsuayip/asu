@@ -5,10 +5,10 @@ import sys
 from zeynep.utils.envparse import env
 
 _compose_files = {
-    "production": "docker-compose.prod.yml",
-    "development": "docker-compose.yml",
+    "production": "docker/docker-compose.prod.yml",
+    "development": "docker/docker-compose.yml",
 }
-_django = "docker exec -it zeynep_django python manage.py"
+_django = "docker exec -it web python manage.py"
 
 
 def assertive(text):
@@ -30,13 +30,13 @@ def main(parser, environment):  # noqa
         sys.exit(1)
 
     filename = _compose_files[environment]
-    compose_cmd = "docker-compose -f %s" % filename
+    compose_cmd = "docker-compose -p zeynep -f %s" % filename
     command_map = {
         "command": f"{_django} {args.command}",
         "shell": f"{_django} shell",
         "test": f"{_django} test",
         "fixtures": f"{_django} loaddata zeynep/fixtures/* --format=yaml",
-        "console": "docker exec -it zeynep_django sh",
+        "console": "docker exec -it web sh",
     }
 
     if action is None:

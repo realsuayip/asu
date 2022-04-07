@@ -8,4 +8,4 @@ COPY . /code
 RUN apt-get update && apt-get install -y netcat
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["/code/scripts/entrypoint.sh"]
+ENTRYPOINT ["/code/docker/scripts/entrypoint.sh"]

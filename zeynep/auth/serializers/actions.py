@@ -68,6 +68,11 @@ class BlockSerializer(serializers.ModelSerializer):
         fields = ("from_user", "to_user")
         extra_kwargs = {"from_user": {"write_only": True}}
 
+    def validate(self, attrs):
+        if attrs["from_user"] == attrs["to_user"]:
+            raise PermissionDenied
+        return attrs
+
     def get_rels(self, model, *, from_user, to_user):  # noqa
         # Given m2m through model, return queryset
         # containing objects for both directions

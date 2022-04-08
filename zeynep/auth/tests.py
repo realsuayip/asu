@@ -121,6 +121,16 @@ class TestAuth(APITestCase):
     def test_follow_fails_if_blocked_by(self):
         self._test_follows_fails_if(self.user2, self.user1)
 
+    def test_self_follow_not_allowed(self):
+        self.client.force_login(self.user1)
+        response = self.client.post(
+            reverse(
+                "user-follow",
+                kwargs={"username": self.user1.username},
+            )
+        )
+        self.assertEqual(403, response.status_code)
+
     def test_block_basic(self):
         self.client.force_login(self.user1)
 
@@ -181,3 +191,13 @@ class TestAuth(APITestCase):
 
     def test_block_removes_followed_by(self):
         self._test_block_removes_follows(self.user2, self.user1)
+
+    def test_self_block_not_allowed(self):
+        self.client.force_login(self.user1)
+        response = self.client.post(
+            reverse(
+                "user-block",
+                kwargs={"username": self.user1.username},
+            )
+        )
+        self.assertEqual(403, response.status_code)

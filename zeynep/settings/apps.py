@@ -16,6 +16,8 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "zeynep API",
 }
 
+CELERY_BROKER_URL = "redis://redis:6379/1"
+
 
 # ----- Local apps -----
 

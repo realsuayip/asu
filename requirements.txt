@@ -5,3 +5,4 @@ hiredis==2.0.0
 djangorestframework==3.13.1
 drf-spectacular==0.21.2
 factory-boy==3.2.1
+celery==5.2.6

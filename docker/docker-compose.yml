@@ -2,19 +2,17 @@ version: '3.7'
 
 services:
   db:
-    image: postgres
     container_name: postgres
+    image: postgres
     user: postgres
     env_file:
       - .env
   web:
+    container_name: web
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
-    container_name: web
-    environment:
-      DJANGO_SETTINGS_MODULE: zeynep.settings
     env_file:
       - .env
     volumes:
@@ -27,3 +25,29 @@ services:
     container_name: redis
     image: redis:6.2.6-alpine
     user: redis
+  celery-worker:
+    container_name: celery-worker
+    build:
+      context: ..
+      dockerfile: docker/web/Dockerfile
+    command: celery -A zeynep worker -l info
+    env_file:
+      - .env
+    volumes:
+      - ../zeynep:/code/zeynep
+    depends_on:
+      - redis
+      - db
+  celery-beat:
+    container_name: celery-beat
+    build:
+      context: ..
+      dockerfile: docker/web/Dockerfile
+    command: celery -A zeynep beat -l info
+    env_file:
+      - .env
+    volumes:
+      - ../zeynep:/code/zeynep
+    depends_on:
+      - redis
+      - db

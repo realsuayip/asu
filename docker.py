@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 
 from zeynep.utils.envparse import env
 
@@ -27,7 +26,7 @@ def main(parser, environment):  # noqa
 
     if (action is None) and (not args.command):
         parser.print_help()
-        sys.exit(1)
+        return 1
 
     filename = _compose_files[environment]
     compose_cmd = "docker-compose -p zeynep -f %s" % filename
@@ -44,17 +43,16 @@ def main(parser, environment):  # noqa
 
     if action == "star":
         if environment != "development":
-            print("This command is only available in development environment.")
-            sys.exit(1)
+            return "This command is only available in development environment."
 
         run_command("%s start" % compose_cmd, environment)
         run_command("%s logs -f --tail 100 web" % compose_cmd, environment)
         run_command("%s stop" % compose_cmd, environment)
-        sys.exit(0)
+        return 0
 
     if action == "logs":
         os.system("%s logs -f --tail 100" % compose_cmd)
-        sys.exit(0)
+        return 0
 
     default = "%s %s" % (compose_cmd, action)
     cmd = command_map.get(action, default)
@@ -63,6 +61,7 @@ def main(parser, environment):  # noqa
         cmd += " -d"
 
     run_command(cmd, environment)
+    return 0
 
 
 def get_environment():
@@ -73,11 +72,10 @@ def get_environment():
         return "development"
 
     if environment not in ("production", "development"):
-        print(
+        raise SystemExit(
             "Received invalid environment type, choices are: %s."
             % "development, production"
         )
-        sys.exit(1)
 
     return environment
 
@@ -117,4 +115,4 @@ if __name__ == "__main__":
         "--command",
         help="Run a Django command via 'manage.py'.",
     )
-    main(parser, get_environment())
+    raise SystemExit(main(parser, get_environment()))

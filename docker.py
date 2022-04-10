@@ -1,5 +1,7 @@
 import argparse
 import os
+import shlex
+import subprocess
 
 from zeynep.utils.envparse import env
 
@@ -17,7 +19,12 @@ def assertive(text):
 def run_command(command, environment):
     message = assertive("(%s) Running: %s\n" % (environment, command))
     print(message)
-    os.system(command)
+    command = shlex.split(command)
+
+    try:
+        subprocess.call(command, start_new_session=True)
+    except KeyboardInterrupt:
+        print(assertive("Operation cancelled."))
 
 
 def main(parser, environment):  # noqa
@@ -34,7 +41,6 @@ def main(parser, environment):  # noqa
         "command": f"{_django} {args.command}",
         "shell": f"{_django} shell",
         "test": f"{_django} test",
-        "fixtures": f"{_django} loaddata zeynep/fixtures/* --format=yaml",
         "console": "docker exec -it web sh",
     }
 
@@ -68,7 +74,9 @@ def get_environment():
     environment = env.str("ZEYNEP_ENV", None)
 
     if environment is None:
-        print("No environment specified, defaulting to development.")
+        print(
+            assertive("No environment specified, defaulting to development.")
+        )
         return "development"
 
     if environment not in ("production", "development"):
@@ -100,7 +108,6 @@ if __name__ == "__main__":
             "shell",
             "console",
             "test",
-            "fixtures",
             "logs",
         ],
     )

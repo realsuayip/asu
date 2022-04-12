@@ -1,5 +1,9 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinLengthValidator, RegexValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    RegexValidator,
+)
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -24,13 +28,19 @@ class User(AbstractUser):
                 regex=r"^[a-z0-9]+(_[a-z0-9]+)*$",
                 message=_(
                     "Usernames can only contain latin letters,"
-                    " roman numerals and underscores. Trailing, leading or"
+                    " numerals and underscores. Trailing, leading or"
                     " consecutive underscores are not allowed."
                 ),
             ),
         ],
     )
     display_name = models.CharField(_("display name"), max_length=32)
+    description = models.TextField(
+        _("description"),
+        blank=True,
+        validators=[MaxLengthValidator(140)],
+    )
+    website = models.URLField(_("website"), blank=True)
     email = models.EmailField(_("e-mail"), unique=True)
     gender = models.CharField(
         _("gender"),

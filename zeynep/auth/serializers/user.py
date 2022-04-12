@@ -18,6 +18,9 @@ class UserPublicReadSerializer(serializers.HyperlinkedModelSerializer):
             "display_name",
             "username",
             "date_joined",
+            "is_private",
+            "description",
+            "website",
             "url",
         )
         extra_kwargs = {"url": {"lookup_field": "username"}}
@@ -34,6 +37,9 @@ class UserPrivateReadSerializer(serializers.HyperlinkedModelSerializer):
             "gender",
             "birth_date",
             "date_joined",
+            "is_private",
+            "description",
+            "website",
             "url",
         )
         extra_kwargs = {"url": {"lookup_field": "username"}}
@@ -48,6 +54,9 @@ class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
             "username",
             "gender",
             "birth_date",
+            "is_private",
+            "description",
+            "website",
             "url",
         )
         extra_kwargs = {"url": {"lookup_field": "username"}}

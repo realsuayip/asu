@@ -35,17 +35,28 @@ class RegistrationTest(APITestCase):
         self.assertEqual(200, check_response.status_code)
         consent = check_response.data["consent"]
 
+        register_data = {
+            "email": email,
+            "consent": consent,
+            "display_name": "Janet",
+            "username": "janet_52",
+            "gender": "female",
+            "birth_date": "2000-01-01",
+        }
+
+        # Fail password validation
+        fail_response = self.client.post(
+            url_register,
+            data={**register_data, "password": 123},
+        )
+        self.assertContains(fail_response, "too common", status_code=400)
+
         # Create the actual user
         register_response = self.client.post(
             url_register,
             data={
-                "email": email,
-                "consent": consent,
-                "display_name": "Janet",
-                "username": "janet_52",
+                **register_data,
                 "password": "very_secret",
-                "gender": "female",
-                "birth_date": "2000-01-01",
             },
         )
         self.assertEqual(201, register_response.status_code)

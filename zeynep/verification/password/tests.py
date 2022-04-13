@@ -7,17 +7,19 @@ from zeynep.verification.models import PasswordResetVerification
 
 
 class TestPasswordReset(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.url_send = reverse("password-reset-list")
+        cls.url_check = reverse("password-reset-check")
+        cls.url_change = reverse("user-reset-password")
+
     def test_check_nullification(self):
         email = "null_test@example.com"
         UserFactory(email=email)
 
-        url_send = reverse("password-reset-list")
-        url_check = reverse("password-reset-check")
-        url_change = reverse("user-reset-password")
-
         # Create & get verifications
         for _ in range(3):
-            self.client.post(url_send, data={"email": email})
+            self.client.post(self.url_send, data={"email": email})
 
         v1, v2, v3 = verifications = tuple(
             PasswordResetVerification.objects.filter(email=email).order_by(
@@ -29,7 +31,7 @@ class TestPasswordReset(APITestCase):
         # Get consents
         for verification in verifications:
             verify_response = self.client.post(
-                url_check,
+                self.url_check,
                 {"email": verification.email, "code": verification.code},
             )
             consents.append(verify_response.data["consent"])
@@ -37,7 +39,7 @@ class TestPasswordReset(APITestCase):
 
         # Reset the password
         reset_response = self.client.post(
-            url_change,
+            self.url_change,
             data={
                 "email": email,
                 "password": "12345678*",
@@ -49,7 +51,7 @@ class TestPasswordReset(APITestCase):
         # Now, subsequent reset requests should fail
         for consent in (c1, c3):
             response = self.client.post(
-                url_change,
+                self.url_change,
                 data={
                     "email": email,
                     "password": "12345678*",
@@ -72,13 +74,13 @@ class TestPasswordReset(APITestCase):
 
         # Now let's make another valid password reset, this shouldn't
         # affect verification 2 as it is used already.
-        self.client.post(url_send, data={"email": email})
+        self.client.post(self.url_send, data={"email": email})
         v4 = PasswordResetVerification.objects.latest("id")
         check_4 = self.client.post(
-            url_check, {"email": email, "code": v4.code}
+            self.url_check, {"email": email, "code": v4.code}
         )
         response_4 = self.client.post(
-            url_change,
+            self.url_change,
             data={
                 "email": email,
                 "password": "12345678*",
@@ -89,3 +91,20 @@ class TestPasswordReset(APITestCase):
 
         v2.refresh_from_db()
         self.assertIsNone(v2.nulled_by_id)
+
+    def test_reset_invalid_email(self):
+        response = self.client.post(
+            self.url_change,
+            data={
+                "email": "nonexistent@example.com",
+                "consent": "abc",
+                "password": "1234567890*",
+            },
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_create_invalid_email_ok(self):
+        response = self.client.post(
+            self.url_send, data={"email": "nonexistent123@example.com"}
+        )
+        self.assertEqual(201, response.status_code)

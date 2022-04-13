@@ -11,6 +11,9 @@ from zeynep.verification.models import RegistrationVerification
 
 
 class UserPublicReadSerializer(serializers.HyperlinkedModelSerializer):
+    following_count = serializers.IntegerField()
+    follower_count = serializers.IntegerField()
+
     class Meta:
         model = User
         fields = (
@@ -21,6 +24,8 @@ class UserPublicReadSerializer(serializers.HyperlinkedModelSerializer):
             "is_private",
             "description",
             "website",
+            "following_count",
+            "follower_count",
             "url",
         )
         extra_kwargs = {"url": {"lookup_field": "username"}}

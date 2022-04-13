@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
@@ -44,15 +45,20 @@ class UserViewSet(ExtendedViewSet):
     permission_classes = [UserPermissions]
 
     def get_queryset(self):
-        base = User.objects.active()
+        queryset = User.objects.active()
 
         if self.action == "partial_update":
-            return base
+            return queryset
+
+        queryset = queryset.annotate(
+            following_count=Count("following", distinct=True),
+            follower_count=Count("followed_by", distinct=True),
+        )
 
         if self.request.user.is_authenticated:
-            return base.exclude(blocked__in=[self.request.user])
+            return queryset.exclude(blocked__in=[self.request.user])
 
-        return base
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "partial_update":

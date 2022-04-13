@@ -44,9 +44,15 @@ class UserViewSet(ExtendedViewSet):
     permission_classes = [UserPermissions]
 
     def get_queryset(self):
+        base = User.objects.active()
+
         if self.action == "partial_update":
-            return User.objects.active()
-        return User.objects.public()
+            return base
+
+        if self.request.user.is_authenticated:
+            return base.exclude(blocked__in=[self.request.user])
+
+        return base
 
     def get_serializer_class(self):
         if self.action == "partial_update":

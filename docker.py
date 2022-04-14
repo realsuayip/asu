@@ -22,7 +22,7 @@ def run_command(command, environment):
     command = shlex.split(command)
 
     try:
-        subprocess.run(command, start_new_session=True)
+        subprocess.run(command)
     except KeyboardInterrupt:
         print(assertive("Operation cancelled."))
 

@@ -25,15 +25,6 @@ class UserPermissions(permissions.IsAuthenticatedOrReadOnly):
 
         return super().has_permission(request, view)
 
-    def has_object_permission(self, request, view, obj):
-        has_base_permission = super().has_object_permission(request, view, obj)
-
-        if view.action == "partial_update":
-            # Only self-update allowed.
-            return (request.user == obj) and has_base_permission
-
-        return has_base_permission
-
 
 class UserViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "create")
@@ -41,12 +32,7 @@ class UserViewSet(ExtendedViewSet):
     permission_classes = [UserPermissions]
 
     def get_queryset(self):
-        queryset = User.objects.active()
-
-        if self.action == "partial_update":
-            return queryset
-
-        queryset = queryset.annotate(
+        queryset = User.objects.active().annotate(
             following_count=Count("following", distinct=True),
             follower_count=Count("followed_by", distinct=True),
         )

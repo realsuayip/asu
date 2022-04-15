@@ -51,6 +51,7 @@ class ViewSetMeta(type):
 class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
     mixins: Optional[Sequence[str]] = None
     schema_extensions: Optional[Dict] = None
+    serializer_classes: Dict = {}
 
     def get_action_save_response(
         self,
@@ -73,3 +74,6 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
             else None
         )
         return Response(data, status=status_code)
+
+    def get_serializer_class(self):
+        return self.serializer_classes.get(self.action, self.serializer_class)

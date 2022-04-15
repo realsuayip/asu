@@ -30,6 +30,16 @@ class UserViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "create")
     lookup_field = "username"
     permission_classes = [UserPermissions]
+    serializer_classes = {
+        "create": UserCreateSerializer,
+        "me": UserSerializer,
+        "block": BlockSerializer,
+        "unblock": BlockSerializer,
+        "follow": FollowSerializer,
+        "unfollow": FollowSerializer,
+        "reset_password": PasswordResetSerializer,
+    }
+    serializer_class = UserPublicReadSerializer
 
     def get_queryset(self):
         queryset = User.objects.active().annotate(
@@ -41,15 +51,6 @@ class UserViewSet(ExtendedViewSet):
             return queryset.exclude(blocked__in=[self.request.user])
 
         return queryset
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return UserCreateSerializer
-
-        if self.action == "me":
-            return UserSerializer
-
-        return UserPublicReadSerializer
 
     @action(
         detail=False,
@@ -79,25 +80,28 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["post"],
         permission_classes=[permissions.AllowAny],
-        serializer_class=PasswordResetSerializer,
         url_path="password-reset",
     )
     def reset_password(self, request):
-        return self.get_action_save_response(request, PasswordResetSerializer)
+        serializer = self.get_serializer_class()
+        return self.get_action_save_response(request, serializer)
 
-    def _save_through(self, serializer_class, username):
+    def save_through(self, username):
         # Common save method for user blocking and following.
-        serializer = serializer_class(
-            data={"from_user": self.request.user.pk, "to_user": username},
+        serializer = self.get_serializer_class()(
+            data={
+                "from_user": self.request.user.pk,
+                "to_user": username,
+            },
             context=self.get_serializer_context(),
         )
         return self.get_action_save_response(
             self.request, serializer, status_code=204
         )
 
-    def _delete_through(self, serializer_class, username):
+    def delete_through(self, username):
         # Common delete method for user blocking and following.
-        model = serializer_class.Meta.model
+        model = self.get_serializer_class().Meta.model
         model.objects.filter(
             from_user_id=self.request.user.id,
             to_user__username=username,
@@ -114,16 +118,16 @@ class UserViewSet(ExtendedViewSet):
 
     @through_action
     def block(self, request, username):
-        return self._save_through(BlockSerializer, username)
+        return self.save_through(username)
 
     @through_action
     def unblock(self, request, username):
-        return self._delete_through(BlockSerializer, username)
+        return self.delete_through(username)
 
     @through_action
     def follow(self, request, username):
-        return self._save_through(FollowSerializer, username)
+        return self.save_through(username)
 
     @through_action
     def unfollow(self, request, username):
-        return self._delete_through(FollowSerializer, username)
+        return self.delete_through(username)

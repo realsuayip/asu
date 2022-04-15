@@ -1,6 +1,4 @@
 from django.db.models import Count
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -14,9 +12,8 @@ from zeynep.auth.serializers.actions import (
 )
 from zeynep.auth.serializers.user import (
     UserCreateSerializer,
-    UserPrivateReadSerializer,
     UserPublicReadSerializer,
-    UserUpdateSerializer,
+    UserSerializer,
 )
 from zeynep.utils.views import ExtendedViewSet
 
@@ -39,9 +36,8 @@ class UserPermissions(permissions.IsAuthenticatedOrReadOnly):
 
 
 class UserViewSet(ExtendedViewSet):
-    mixins = ("list", "retrieve", "create", "update")
+    mixins = ("list", "retrieve", "create")
     lookup_field = "username"
-    http_method_names = ["get", "post", "patch", "head", "options"]
     permission_classes = [UserPermissions]
 
     def get_queryset(self):
@@ -61,11 +57,11 @@ class UserViewSet(ExtendedViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action == "partial_update":
-            return UserUpdateSerializer
-
         if self.action == "create":
             return UserCreateSerializer
+
+        if self.action == "me":
+            return UserSerializer
 
         return UserPublicReadSerializer
 
@@ -73,22 +69,25 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["get", "patch"],
         permission_classes=[permissions.IsAuthenticated],
-        serializer_class=UserPrivateReadSerializer,
+        serializer_class=UserSerializer,
     )
     def me(self, request):
-        if request.method == "PATCH":
-            detail = reverse(
-                "user-detail",
-                kwargs={"username": self.request.user.username},
-            )
-            return HttpResponseRedirect(
-                detail, status=status.HTTP_307_TEMPORARY_REDIRECT
-            )
-
-        serializer = UserPrivateReadSerializer(
-            self.request.user, context=self.get_serializer_context()
+        serializer_class, context = (
+            self.get_serializer_class(),
+            self.get_serializer_context(),
         )
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        if request.method == "PATCH":
+            serializer = serializer_class(
+                self.request.user,
+                context=context,
+                data=self.request.data,
+                partial=True,
+            )
+            return self.get_action_save_response(self.request, serializer)
+
+        serializer = serializer_class(self.request.user, context=context)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=False,

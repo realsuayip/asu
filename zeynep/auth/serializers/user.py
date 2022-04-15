@@ -31,7 +31,7 @@ class UserPublicReadSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {"url": {"lookup_field": "username"}}
 
 
-class UserPrivateReadSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -48,23 +48,7 @@ class UserPrivateReadSerializer(serializers.HyperlinkedModelSerializer):
             "url",
         )
         extra_kwargs = {"url": {"lookup_field": "username"}}
-
-
-class UserUpdateSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "display_name",
-            "username",
-            "gender",
-            "birth_date",
-            "is_private",
-            "description",
-            "website",
-            "url",
-        )
-        extra_kwargs = {"url": {"lookup_field": "username"}}
+        read_only_fields = ("email", "date_joined")
 
 
 class UserCreateSerializer(serializers.HyperlinkedModelSerializer):

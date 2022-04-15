@@ -7,7 +7,7 @@ from zeynep.verification.models import PasswordResetVerification
 from zeynep.verification.registration.serializers import BaseCheckSerializer
 
 
-class PasswordResetSerializer(serializers.ModelSerializer):
+class PasswordResetVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = PasswordResetVerification
         fields = ("email",)
@@ -29,5 +29,5 @@ class PasswordResetSerializer(serializers.ModelSerializer):
         return verification
 
 
-class PasswordResetCheckSerializer(BaseCheckSerializer):  # noqa
+class PasswordResetVerificationCheckSerializer(BaseCheckSerializer):  # noqa
     model = PasswordResetVerification

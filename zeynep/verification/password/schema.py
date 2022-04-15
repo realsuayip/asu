@@ -1,8 +1,8 @@
 from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema
 
 from zeynep.verification.password.serializers import (
-    PasswordResetCheckSerializer,
-    PasswordResetSerializer,
+    PasswordResetVerificationCheckSerializer,
+    PasswordResetVerificationSerializer,
 )
 from zeynep.verification.registration.schema import consent_examples
 
@@ -20,7 +20,7 @@ password_reset_create = extend_schema(
         ),
     ],
     responses={
-        201: PasswordResetSerializer,
+        201: PasswordResetVerificationSerializer,
         400: OpenApiTypes.OBJECT,
     },
 )
@@ -33,7 +33,7 @@ password_reset_check = extend_schema(
     " reset the password.",
     examples=consent_examples,
     responses={
-        200: PasswordResetCheckSerializer,
+        200: PasswordResetVerificationCheckSerializer,
         404: OpenApiTypes.OBJECT,
         400: OpenApiTypes.OBJECT,
     },

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 
@@ -34,5 +35,29 @@ class UserBlock(UserThrough):
         constraints = [
             models.UniqueConstraint(
                 fields=["from_user", "to_user"], name="unique_user_block"
+            )
+        ]
+
+
+class UserFollowRequest(UserThrough):
+    class Status(models.TextChoices):
+        PENDING = "pending", _("pending")
+        APPROVED = "approved", _("approved")
+        REJECTED = "rejected", _("rejected")
+
+    status = models.CharField(
+        _("status"),
+        max_length=8,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    date_modified = models.DateTimeField(_("date modified"), auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["from_user", "to_user"],
+                condition=Q(status="pending"),
+                name="unique_user_follow_request",
             )
         ]

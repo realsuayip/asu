@@ -94,9 +94,18 @@ class FollowSerializer(BlockSerializer):
         model = UserFollow
 
     def create(self, validated_data):
+        from_user = validated_data["from_user"]
+        to_user = validated_data["to_user"]
+
         # If users block each other in any
         # direction, following is not allowed.
         blocks = self.get_rels(UserBlock, **validated_data)
         if blocks.exists():
             raise PermissionDenied
-        return UserFollow.objects.get_or_create(**validated_data)
+
+        if to_user.is_private:
+            from_user.send_follow_request(to_user=to_user)
+        else:
+            from_user.add_following(to_user=to_user)
+
+        return validated_data

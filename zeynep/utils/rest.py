@@ -25,3 +25,19 @@ def exception_handler(exc, context):
             response.data = detail
 
     return response
+
+
+class DynamicFieldsMixin:
+    """
+    Allows creating of serializer fields selectively by passing 'fields'
+    keyword argument.
+    """
+
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop("fields", None)
+        super().__init__(*args, **kwargs)
+
+        if fields is not None:
+            allowed, existing = set(fields), set(self.fields)  # noqa
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)  # noqa

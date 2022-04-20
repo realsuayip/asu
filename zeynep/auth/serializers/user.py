@@ -7,10 +7,13 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 
 from zeynep.auth.models import User
+from zeynep.utils.rest import DynamicFieldsMixin
 from zeynep.verification.models import RegistrationVerification
 
 
-class UserPublicReadSerializer(serializers.HyperlinkedModelSerializer):
+class UserPublicReadSerializer(
+    DynamicFieldsMixin, serializers.HyperlinkedModelSerializer
+):
     following_count = serializers.IntegerField()
     follower_count = serializers.IntegerField()
 

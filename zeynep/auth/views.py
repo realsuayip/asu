@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from zeynep.auth.models import User
 from zeynep.auth.serializers.actions import (
     BlockSerializer,
+    FollowRequestSerializer,
     FollowSerializer,
     PasswordResetSerializer,
 )
@@ -131,3 +132,14 @@ class UserViewSet(ExtendedViewSet):
     @through_action
     def unfollow(self, request, username):
         return self.delete_through(username)
+
+
+class FollowRequestViewSet(ExtendedViewSet):
+    mixins = ("list", "update")
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FollowRequestSerializer
+
+    def get_queryset(self):
+        return self.request.user.get_pending_follow_requests().select_related(
+            "from_user"
+        )

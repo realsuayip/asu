@@ -110,5 +110,5 @@ class User(AbstractUser):
 
     def get_pending_follow_requests(self):
         return UserFollowRequest.objects.filter(
-            from_user=self, status=UserFollowRequest.Status.PENDING
+            to_user=self, status=UserFollowRequest.Status.PENDING
         )

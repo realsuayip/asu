@@ -61,3 +61,20 @@ class UserFollowRequest(UserThrough):
                 name="unique_user_follow_request",
             )
         ]
+
+    @property
+    def is_pending(self):
+        return self.status == self.Status.PENDING
+
+    @property
+    def is_rejected(self):
+        return self.status == self.Status.REJECTED
+
+    @property
+    def is_approved(self):
+        return self.status == self.Status.APPROVED
+
+    def bond(self):
+        # Create the actual following relationship.
+        assert self.is_approved, "Attempt to bond unapproved instance"
+        self.from_user.add_following(to_user=self.to_user)  # noqa

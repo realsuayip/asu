@@ -16,6 +16,7 @@ from zeynep.auth.serializers.user import (
     UserPublicReadSerializer,
     UserSerializer,
 )
+from zeynep.utils.rest import get_paginator
 from zeynep.utils.views import ExtendedViewSet
 
 
@@ -138,6 +139,7 @@ class FollowRequestViewSet(ExtendedViewSet):
     mixins = ("list", "update")
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FollowRequestSerializer
+    pagination_class = get_paginator("cursor", ordering="-date_created")
 
     def get_queryset(self):
         return self.request.user.get_pending_follow_requests().select_related(

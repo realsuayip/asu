@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
+from zeynep.auth.models import UserFollowRequest
 from zeynep.tests.factories import UserFactory
 from zeynep.verification.models import RegistrationVerification
 
@@ -19,6 +20,7 @@ class TestAuth(APITestCase):
         }
         self.user1 = UserFactory()
         self.user2 = UserFactory()
+        self.private_user = UserFactory(is_private=True)
 
     def test_user_create_invalid_consent_case_1(self):
         email = "janet@example.com"
@@ -79,24 +81,111 @@ class TestAuth(APITestCase):
             self.user1.following.filter(pk=self.user2.pk).exists()
         )
 
-    def test_follow_subsequent_ok(self):
-        self.client.force_login(self.user2)
+    def _test_follow_subsequent_ok(self, user1, user2):
+        self.client.force_login(user2)
 
         response1 = self.client.post(
             reverse(
                 "user-follow",
-                kwargs={"username": self.user1.username},
+                kwargs={"username": user1.username},
             )
         )
         response2 = self.client.post(
             reverse(
                 "user-follow",
-                kwargs={"username": self.user1.username},
+                kwargs={"username": user1.username},
             )
         )
         self.assertEqual(204, response1.status_code)
         self.assertEqual(204, response2.status_code)
-        self.assertTrue(self.user2.following.filter(pk=self.user1.pk).exists())
+
+    def test_follow_subsequent_ok(self):
+        self._test_follow_subsequent_ok(self.user1, self.user2)
+        self.assertEqual(
+            1, self.user2.following.filter(pk=self.user1.pk).count()
+        )
+
+    def test_follow_subsequent_ok_private(self):
+        self._test_follow_subsequent_ok(self.private_user, self.user2)
+        self.assertEqual(
+            1,
+            UserFollowRequest.objects.filter(
+                from_user=self.user2, to_user=self.private_user
+            ).count(),
+        )
+
+    def test_follow_request_accept_whole(self):
+        # Send follow request
+        self.client.force_login(self.user1)
+        self.client.post(
+            reverse(
+                "user-follow",
+                kwargs={"username": self.private_user.username},
+            )
+        )
+        self.assertFalse(self.user1.following.filter(pk=self.private_user.pk))
+
+        # Switch to recipient, check follow request list
+        self.client.force_login(self.private_user)
+        response = self.client.get(reverse("follow-request-list"))
+        data = response.json()
+        results = data["results"]
+        self.assertEqual(1, len(results))
+
+        # Approve request
+        detail = results[0]["url"]
+        approved_response = self.client.patch(
+            detail, data={"status": "approved"}
+        )
+        self.assertEqual(200, approved_response.status_code)
+
+        # Make sure the follow request is gone
+        subsequent_response = self.client.patch(
+            detail, data={"status": "approved"}
+        )
+        self.assertEqual(404, subsequent_response.status_code)
+
+        # Verify that sender follows the user now.
+        self.assertTrue(
+            self.user1.following.filter(pk=self.private_user.pk).exists()
+        )
+        self.assertEqual(
+            1,
+            UserFollowRequest.objects.filter(
+                status="approved",
+                from_user=self.user1,
+                to_user=self.private_user,
+            ).count(),
+        )
+
+    def test_follow_request_reject(self):
+        self.client.force_login(self.user1)
+        self.client.post(
+            reverse(
+                "user-follow",
+                kwargs={"username": self.private_user.username},
+            )
+        )
+
+        self.client.force_login(self.private_user)
+        response = self.client.get(reverse("follow-request-list"))
+        detail = response.json()["results"][0]["url"]
+
+        rejected_response = self.client.patch(
+            detail, data={"status": "rejected"}
+        )
+        self.assertEqual(200, rejected_response.status_code)
+        self.assertFalse(
+            self.user1.following.filter(pk=self.private_user.pk).exists()
+        )
+        self.assertEqual(
+            1,
+            UserFollowRequest.objects.filter(
+                status="rejected",
+                from_user=self.user1,
+                to_user=self.private_user,
+            ).count(),
+        )
 
     def _test_follows_fails_if(self, a, b):
         # user1 sends the follow request, blockage direction

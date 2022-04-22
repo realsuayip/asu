@@ -63,14 +63,6 @@ class UserFollowRequest(UserThrough):
         ]
 
     @property
-    def is_pending(self):
-        return self.status == self.Status.PENDING
-
-    @property
-    def is_rejected(self):
-        return self.status == self.Status.REJECTED
-
-    @property
     def is_approved(self):
         return self.status == self.Status.APPROVED
 

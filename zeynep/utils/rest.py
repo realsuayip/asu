@@ -1,4 +1,4 @@
-from rest_framework import exceptions
+from rest_framework import exceptions, pagination
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
 
@@ -25,6 +25,19 @@ def exception_handler(exc, context):
             response.data = detail
 
     return response
+
+
+_pagination_map = {
+    "page_number": pagination.PageNumberPagination,
+    "cursor": pagination.CursorPagination,
+    "limit_offset": pagination.LimitOffsetPagination,
+}
+
+
+def get_paginator(name="page_number", /, **kwargs):
+    kwargs.setdefault("page_size", 10)
+    klass = _pagination_map[name]
+    return type("Factory%s" % klass.__name__, (klass,), kwargs)
 
 
 class DynamicFieldsMixin:

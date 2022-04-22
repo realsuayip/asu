@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from zeynep.auth.models.managers import UserManager
+from zeynep.auth.models.through import UserFollow, UserFollowRequest
 
 
 class User(AbstractUser):
@@ -94,3 +95,20 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def add_following(self, *, to_user):
+        return UserFollow.objects.get_or_create(
+            from_user=self, to_user=to_user
+        )
+
+    def send_follow_request(self, *, to_user):
+        return UserFollowRequest.objects.get_or_create(
+            from_user=self,
+            to_user=to_user,
+            status=UserFollowRequest.Status.PENDING,
+        )
+
+    def get_pending_follow_requests(self):
+        return UserFollowRequest.objects.filter(
+            to_user=self, status=UserFollowRequest.Status.PENDING
+        )

@@ -8,7 +8,8 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
 
-from zeynep.auth.models import User, UserBlock, UserFollow
+from zeynep.auth.models import User, UserBlock, UserFollow, UserFollowRequest
+from zeynep.auth.serializers.user import UserPublicReadSerializer
 from zeynep.verification.models import PasswordResetVerification
 
 
@@ -94,9 +95,49 @@ class FollowSerializer(BlockSerializer):
         model = UserFollow
 
     def create(self, validated_data):
+        from_user = validated_data["from_user"]
+        to_user = validated_data["to_user"]
+
         # If users block each other in any
         # direction, following is not allowed.
         blocks = self.get_rels(UserBlock, **validated_data)
         if blocks.exists():
             raise PermissionDenied
-        return UserFollow.objects.get_or_create(**validated_data)
+
+        if to_user.is_private:
+            from_user.send_follow_request(to_user=to_user)
+        else:
+            from_user.add_following(to_user=to_user)
+
+        return validated_data
+
+
+class FollowRequestSerializer(serializers.ModelSerializer):
+    from_user = UserPublicReadSerializer(
+        read_only=True,
+        fields=(
+            "id",
+            "display_name",
+            "username",
+            "url",
+        ),
+    )
+    status = serializers.ChoiceField(
+        choices=[
+            UserFollowRequest.Status.REJECTED,
+            UserFollowRequest.Status.APPROVED,
+        ],
+        write_only=True,
+    )
+
+    class Meta:
+        model = UserFollowRequest
+        fields = ("from_user", "status", "url")
+        extra_kwargs = {"url": {"view_name": "follow-request-detail"}}
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        if instance.is_approved:
+            instance.bond()
+        return instance

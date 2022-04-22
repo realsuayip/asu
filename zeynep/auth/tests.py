@@ -21,6 +21,119 @@ class TestAuth(APITestCase):
         self.user1 = UserFactory()
         self.user2 = UserFactory()
         self.private_user = UserFactory(is_private=True)
+        self.inactive_user = UserFactory(is_active=False)
+        self.frozen_user = UserFactory(is_frozen=True)
+
+    def _compare_instance_to_dict(self, instance, dictionary, *, exclude):
+        for item in exclude:
+            dictionary.pop(item)
+
+        for key, value in dictionary.items():
+            self.assertEqual(
+                getattr(instance, key),
+                value,
+                msg="mismatch on '%s'" % key,
+            )
+
+    def test_me(self):
+        self.client.force_login(self.user1)
+        response = self.client.get(reverse("user-me"))
+        self.assertEqual(200, response.status_code)
+        detail = response.json()
+
+        self._compare_instance_to_dict(
+            self.user1,
+            detail,
+            exclude=["url", "date_joined"],
+        )
+
+    def test_me_update(self):
+        self.client.force_login(self.user2)
+        response = self.client.patch(
+            reverse("user-me"),
+            data={
+                "display_name": "__Potato__",
+                "description": "Lorem ipsum",
+            },
+        )
+        detail = response.json()
+
+        self.user2.refresh_from_db()
+        self._compare_instance_to_dict(
+            self.user2,
+            detail,
+            exclude=["url", "date_joined", "birth_date"],
+        )
+
+    def test_me_update_disallow_email(self):
+        email = "hello@example.com"
+        self.client.force_login(self.user1)
+        self.client.patch(reverse("user-me"), data={"email": email})
+        self.user1.refresh_from_db()
+        self.assertNotEqual(email, self.user1)
+
+    def test_detail(self):
+        response = self.client.get(
+            reverse(
+                "user-detail",
+                kwargs={"username": self.user1.username},
+            )
+        )
+        detail = response.json()
+
+        self.assertIn("follower_count", detail)
+        self.assertIn("following_count", detail)
+
+        self._compare_instance_to_dict(
+            self.user1,
+            detail,
+            exclude=[
+                "follower_count",
+                "following_count",
+                "url",
+                "date_joined",
+            ],
+        )
+
+    def test_detail_returns_200_when_blocked(self):
+        self.user1.blocked.add(self.user2)
+        self.client.force_login(self.user1)
+
+        response = self.client.get(
+            reverse(
+                "user-detail",
+                kwargs={"username": self.user2.username},
+            )
+        )
+        self.assertEqual(200, response.status_code)
+
+    def test_detail_returns_404_when_blocked_by(self):
+        self.user1.blocked.add(self.user2)
+        self.client.force_login(self.user2)
+
+        response = self.client.get(
+            reverse(
+                "user-detail",
+                kwargs={"username": self.user1.username},
+            )
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_detail_excludes_frozen_or_inactive(self):
+        frozen = self.client.get(
+            reverse(
+                "user-detail",
+                kwargs={"username": self.frozen_user.username},
+            )
+        )
+        inactive = self.client.get(
+            reverse(
+                "user-detail",
+                kwargs={"username": self.inactive_user.username},
+            )
+        )
+        self.assertEqual(404, frozen.status_code)
+        self.assertEqual(404, inactive.status_code)
 
     def test_user_create_invalid_consent_case_1(self):
         email = "janet@example.com"

@@ -13,4 +13,3 @@ class UserFactory(DjangoModelFactory):
     last_name = Faker("last_name")
     email = Faker("email")
     birth_date = Faker("date")
-    is_private = False

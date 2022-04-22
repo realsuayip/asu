@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import Dict, Optional, Sequence
 
 from rest_framework import mixins, serializers, status
@@ -45,6 +46,8 @@ class ViewSetMeta(type):
             # it with extension e.g. extend_schema.
             cls = extend_schema_view(**schema_extensions)(cls)
 
+        with suppress(ValueError):
+            cls.http_method_names.remove("put")  # noqa
         return cls
 
 

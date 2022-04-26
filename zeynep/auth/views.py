@@ -165,7 +165,7 @@ class UserViewSet(ExtendedViewSet):
             to_user=user,
             from_user__is_active=True,
             from_user__is_frozen=False,
-        )
+        ).select_related("from_user")
         return self.list_follow_through(queryset)
 
     @action(
@@ -179,7 +179,7 @@ class UserViewSet(ExtendedViewSet):
             from_user=user,
             to_user__is_active=True,
             to_user__is_frozen=False,
-        )
+        ).select_related("to_user")
         return self.list_follow_through(queryset)
 
     @action(
@@ -192,7 +192,7 @@ class UserViewSet(ExtendedViewSet):
             from_user=request.user,
             to_user__is_active=True,
             to_user__is_frozen=False,
-        )
+        ).select_related("to_user")
         return self.list_follow_through(queryset)
 
 

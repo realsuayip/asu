@@ -12,6 +12,18 @@ from zeynep.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from zeynep.auth.serializers.user import UserPublicReadSerializer
 from zeynep.verification.models import PasswordResetVerification
 
+RelatedUserField = UserPublicReadSerializer(
+    read_only=True,
+    fields=(
+        "id",
+        "display_name",
+        "username",
+        "description",
+        "is_private",
+        "url",
+    ),
+)
+
 
 class PasswordResetSerializer(serializers.Serializer):  # noqa
     email = serializers.EmailField()
@@ -58,16 +70,13 @@ class PasswordResetSerializer(serializers.Serializer):  # noqa
 
 
 class BlockSerializer(serializers.ModelSerializer):
-    to_user = serializers.SlugRelatedField(
-        slug_field="username",
-        queryset=User.objects.active(),
-        write_only=True,
-    )
-
     class Meta:
         model = UserBlock
         fields = ("from_user", "to_user")
-        extra_kwargs = {"from_user": {"write_only": True}}
+        extra_kwargs = {
+            "from_user": {"write_only": True},
+            "to_user": {"write_only": True},
+        }
 
     def validate(self, attrs):
         if attrs["from_user"] == attrs["to_user"]:
@@ -113,15 +122,7 @@ class FollowSerializer(BlockSerializer):
 
 
 class FollowRequestSerializer(serializers.ModelSerializer):
-    from_user = UserPublicReadSerializer(
-        read_only=True,
-        fields=(
-            "id",
-            "display_name",
-            "username",
-            "url",
-        ),
-    )
+    from_user = RelatedUserField
     status = serializers.ChoiceField(
         choices=[
             UserFollowRequest.Status.REJECTED,
@@ -141,3 +142,31 @@ class FollowRequestSerializer(serializers.ModelSerializer):
         if instance.is_approved:
             instance.bond()
         return instance
+
+
+class UserFollowersSerializer(serializers.ModelSerializer):
+    from_user = RelatedUserField
+
+    class Meta:
+        model = UserFollow
+        fields = ("from_user",)
+
+    def to_representation(self, instance):
+        return super().to_representation(instance).pop("from_user")
+
+
+class UserFollowingSerializer(serializers.ModelSerializer):
+    to_user = RelatedUserField
+
+    class Meta:
+        model = UserFollow
+        fields = ("to_user",)
+
+    def to_representation(self, instance):
+        return super().to_representation(instance).pop("to_user")
+
+
+class UserBlockedSerializer(UserFollowingSerializer):
+    class Meta:
+        model = UserBlock
+        fields = ("to_user",)

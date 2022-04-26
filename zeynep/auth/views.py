@@ -1,15 +1,19 @@
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from zeynep.auth.models import User
+from zeynep.auth.models import User, UserBlock, UserFollow
 from zeynep.auth.serializers.actions import (
     BlockSerializer,
     FollowRequestSerializer,
     FollowSerializer,
     PasswordResetSerializer,
+    UserBlockedSerializer,
+    UserFollowersSerializer,
+    UserFollowingSerializer,
 )
 from zeynep.auth.serializers.user import (
     UserCreateSerializer,
@@ -39,6 +43,9 @@ class UserViewSet(ExtendedViewSet):
         "unblock": BlockSerializer,
         "follow": FollowSerializer,
         "unfollow": FollowSerializer,
+        "followers": UserFollowersSerializer,
+        "following": UserFollowingSerializer,
+        "blocked": UserBlockedSerializer,
         "reset_password": PasswordResetSerializer,
     }
     serializer_class = UserPublicReadSerializer
@@ -90,10 +97,11 @@ class UserViewSet(ExtendedViewSet):
 
     def save_through(self, username):
         # Common save method for user blocking and following.
+        to_user = self.get_user(username)
         serializer = self.get_serializer_class()(
             data={
                 "from_user": self.request.user.pk,
-                "to_user": username,
+                "to_user": to_user.pk,
             },
             context=self.get_serializer_context(),
         )
@@ -103,10 +111,11 @@ class UserViewSet(ExtendedViewSet):
 
     def delete_through(self, username):
         # Common delete method for user blocking and following.
+        to_user = self.get_user(username)
         model = self.get_serializer_class().Meta.model
         model.objects.filter(
-            from_user_id=self.request.user.id,
-            to_user__username=username,
+            from_user=self.request.user,
+            to_user=to_user,
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -133,6 +142,58 @@ class UserViewSet(ExtendedViewSet):
     @through_action
     def unfollow(self, request, username):
         return self.delete_through(username)
+
+    def get_user(self, username):
+        if self.request.user.username == username:
+            return self.request.user
+
+        return get_object_or_404(User.objects.active(), username=username)
+
+    def list_follow_through(self, queryset):
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        pagination_class=get_paginator("cursor", ordering="-date_created"),
+    )
+    def followers(self, request, username):
+        user = self.get_user(username)
+        queryset = UserFollow.objects.filter(
+            to_use=user,
+            from_user__is_active=True,
+            from_user__is_frozen=False,
+        )
+        return self.list_follow_through(queryset)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        pagination_class=get_paginator("cursor", ordering="-date_created"),
+    )
+    def following(self, request, username):
+        user = self.get_user(username)
+        queryset = UserFollow.objects.filter(
+            from_user=user,
+            to_user__is_active=True,
+            to_user__is_frozen=False,
+        )
+        return self.list_follow_through(queryset)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        pagination_class=get_paginator("cursor", ordering="-date_created"),
+    )
+    def blocked(self, request):
+        queryset = UserBlock.objects.filter(
+            from_user=request.user,
+            to_user__is_active=True,
+            to_user__is_frozen=False,
+        )
+        return self.list_follow_through(queryset)
 
 
 class FollowRequestViewSet(ExtendedViewSet):

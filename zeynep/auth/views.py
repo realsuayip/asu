@@ -186,6 +186,7 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["get"],
         pagination_class=get_paginator("cursor", ordering="-date_created"),
+        permission_classes=[permissions.IsAuthenticated],
     )
     def blocked(self, request):
         queryset = UserBlock.objects.filter(

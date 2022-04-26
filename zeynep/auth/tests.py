@@ -403,3 +403,68 @@ class TestAuth(APITestCase):
             )
         )
         self.assertEqual(403, response.status_code)
+
+    def _test_action_yields_404(self, url_name):
+        self.client.force_login(self.user1)
+        response1 = self.client.post(
+            reverse(
+                url_name,
+                kwargs={"username": "non_existing_user"},
+            )
+        )
+        response2 = self.client.post(
+            reverse(
+                url_name,
+                kwargs={"username": self.inactive_user.username},
+            )
+        )
+        response3 = self.client.post(
+            reverse(
+                url_name,
+                kwargs={"username": self.frozen_user.username},
+            )
+        )
+        self.assertEqual(404, response1.status_code)
+        self.assertEqual(404, response2.status_code)
+        self.assertEqual(404, response3.status_code)
+
+    def test_follow_yields_404(self):
+        self._test_action_yields_404("user-follow")
+
+    def test_unfollow_yields_404(self):
+        self._test_action_yields_404("user-unfollow")
+
+    def test_block_yields_404(self):
+        self._test_action_yields_404("user-block")
+
+    def test_unblock_yields_404(self):
+        self._test_action_yields_404("user-unblock")
+
+    def _test_get_yields_404(self, url_name):
+        response1 = self.client.get(
+            reverse(
+                url_name,
+                kwargs={"username": "non_existing_user"},
+            )
+        )
+        response2 = self.client.get(
+            reverse(
+                url_name,
+                kwargs={"username": self.inactive_user.username},
+            )
+        )
+        response3 = self.client.get(
+            reverse(
+                url_name,
+                kwargs={"username": self.frozen_user.username},
+            )
+        )
+        self.assertEqual(404, response1.status_code)
+        self.assertEqual(404, response2.status_code)
+        self.assertEqual(404, response3.status_code)
+
+    def test_followers_yields_404(self):
+        self._test_get_yields_404("user-followers")
+
+    def test_following_yields_404(self):
+        self._test_get_yields_404("user-following")

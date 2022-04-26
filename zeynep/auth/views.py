@@ -162,7 +162,7 @@ class UserViewSet(ExtendedViewSet):
     def followers(self, request, username):
         user = self.get_user(username)
         queryset = UserFollow.objects.filter(
-            to_use=user,
+            to_user=user,
             from_user__is_active=True,
             from_user__is_frozen=False,
         )

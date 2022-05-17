@@ -20,6 +20,8 @@ class TestAuth(APITestCase):
         }
         self.user1 = UserFactory()
         self.user2 = UserFactory()
+        self.user3 = UserFactory()
+        self.user4 = UserFactory()
         self.private_user = UserFactory(is_private=True)
         self.inactive_user = UserFactory(is_active=False)
         self.frozen_user = UserFactory(is_frozen=True)
@@ -468,3 +470,56 @@ class TestAuth(APITestCase):
 
     def test_following_yields_404(self):
         self._test_get_yields_404("user-following")
+
+    def _test_through_list_response(self, response):
+        results = response.data["results"]
+
+        self.assertEqual(3, len(results))
+        self.assertContains(response, self.user2.username)
+        self.assertContains(response, self.user3.username)
+        self.assertContains(response, self.private_user.username)
+        self.assertNotContains(response, self.inactive_user.username)
+        self.assertNotContains(response, self.frozen_user.username)
+        self.assertNotContains(response, self.user4.username)
+
+    def test_followers(self):
+        self.user2.following.add(self.user1)
+        self.user3.following.add(self.user1)
+        self.private_user.following.add(self.user1)
+        self.inactive_user.following.add(self.user1)
+        self.frozen_user.following.add(self.user1)
+
+        response = self.client.get(
+            reverse(
+                "user-followers",
+                kwargs={"username": self.user1.username},
+            )
+        )
+        self._test_through_list_response(response)
+
+    def test_following(self):
+        self.user1.following.add(self.user2)
+        self.user1.following.add(self.user3)
+        self.user1.following.add(self.private_user)
+        self.user1.following.add(self.inactive_user)
+        self.user1.following.add(self.frozen_user)
+
+        response = self.client.get(
+            reverse(
+                "user-following",
+                kwargs={"username": self.user1.username},
+            )
+        )
+        self._test_through_list_response(response)
+
+    def test_blocked(self):
+        self.client.force_login(self.user1)
+
+        self.user1.blocked.add(self.user2)
+        self.user1.blocked.add(self.user3)
+        self.user1.blocked.add(self.private_user)
+        self.user1.blocked.add(self.inactive_user)
+        self.user1.blocked.add(self.frozen_user)
+
+        response = self.client.get(reverse("user-blocked"))
+        self._test_through_list_response(response)

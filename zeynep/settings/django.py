@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "zeynep",
     "zeynep.auth",
     "zeynep.verification",
+    "zeynep.messaging",
     "rest_framework",
     "drf_spectacular",
 ]

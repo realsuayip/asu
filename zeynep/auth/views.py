@@ -20,6 +20,7 @@ from zeynep.auth.serializers.user import (
     UserPublicReadSerializer,
     UserSerializer,
 )
+from zeynep.messaging.serializers import MessageComposeSerializer
 from zeynep.utils.rest import get_paginator
 from zeynep.utils.views import ExtendedViewSet
 
@@ -195,6 +196,22 @@ class UserViewSet(ExtendedViewSet):
             to_user__is_frozen=False,
         ).select_related("to_user")
         return self.list_follow_through(queryset)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=MessageComposeSerializer,
+    )
+    def message(self, request, username):
+        context = self.get_serializer_context()
+        context["recipient"] = self.get_object()
+        serializer = self.get_serializer(data=request.data, context=context)
+        return self.get_action_save_response(
+            request,
+            serializer,
+            status_code=status.HTTP_201_CREATED,
+        )
 
 
 class FollowRequestViewSet(ExtendedViewSet):

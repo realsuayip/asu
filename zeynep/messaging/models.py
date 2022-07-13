@@ -1,5 +1,3 @@
-from contextlib import suppress
-
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q
@@ -31,12 +29,24 @@ class ConversationRequestManager(models.Manager):
         sender,
         recipient,
     ):
-        with suppress(self.model.DoesNotExist):  # noqa
+        try:
             obj = self.get(Q(conversation=holder) | Q(conversation=target))
+        except self.model.DoesNotExist:
+            obj = None
+
+        is_following = recipient.is_following(sender)
+
+        if obj is not None:
+            # A follow relation has been formed since the request
+            # first created; automatically accept the request.
+            if is_following and (obj.date_accepted is None):
+                obj.date_accepted = timezone.now()
+                obj.save(update_fields=["date_accepted", "date_modified"])
             return obj, False
 
         kwargs = {"sender": sender, "conversation": target}
-        if recipient.is_following(sender):
+
+        if is_following:
             kwargs["date_accepted"] = timezone.now()
 
         obj = self.create(**kwargs)

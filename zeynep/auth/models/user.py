@@ -1,5 +1,3 @@
-import functools
-
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (
     MaxLengthValidator,
@@ -135,7 +133,6 @@ class User(AbstractUser):
             to_user=self, status=UserFollowRequest.Status.PENDING
         )
 
-    @functools.cache
     def is_following(self, to_user):
         return UserFollow.objects.filter(
             from_user=self, to_user=to_user
@@ -160,27 +157,40 @@ class User(AbstractUser):
             # another, so deny messages.
             return False
 
-        if not to_user.is_following(self):
-            # If the recipient is not following the sender, we need
-            # to look into conversation request relations.
+        if to_user.is_following(self):
+            # The sender is followed by recipient, so messaging should
+            # happen without intervention. A message request will be created
+            # and accepted automatically, so in the future, (when this
+            # relation breaks) participants can continue messaging each
+            # other without having to send/accept new conversation requests.
+            return True
 
-            # In case this sender previously sent a conversation
-            # request, and it was accepted by the recipient.
-            recipient_accepted_request = ConversationRequest.objects.filter(
-                date_accepted__isnull=False,
-                sender=self,
-                conversation__holder=to_user,
+        # If the recipient is not following the sender, we need
+        # to look into conversation request relations.
+
+        # In case this sender previously sent a conversation
+        # request, and it was accepted by the recipient.
+        recipient_accepted_request = ConversationRequest.objects.filter(
+            date_accepted__isnull=False,
+            sender=self,
+            conversation__holder=to_user,
+        )
+
+        if recipient_accepted_request.exists():
+            return True
+
+        try:
+            # Check if this message is sent as a reply. To reply,
+            # the user needs to accept the request first, so 'accept
+            # date' should not be null to send this message.
+            replying = ConversationRequest.objects.get(
+                sender=to_user,
+                conversation__holder=self,
             )
-            if recipient_accepted_request.exists():
-                return True
-
-            try:
-                replying = ConversationRequest.objects.get(
-                    sender=to_user,
-                    conversation__holder=self,
-                )
-                return replying.date_accepted is not None
-            except ConversationRequest.DoesNotExist:
-                return to_user.allows_all_messages
-
-        return True
+            return replying.date_accepted is not None
+        except ConversationRequest.DoesNotExist:
+            # Not a reply either, this means it might be a new
+            # conversation request, or new messages are added to
+            # unaccepted request. Let's check if the user allows message
+            # requests from strangers.
+            return to_user.allows_all_messages

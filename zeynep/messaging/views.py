@@ -38,8 +38,13 @@ class ConversationFilterSet(django_filters.FilterSet):
     def filter_type(self, queryset, name, value):
         if value == "requests":
             return Conversation.objects.filter(
+                Exists(
+                    ConversationRequest.objects.filter(
+                        date_accepted__isnull=True,
+                        conversation=OuterRef("pk"),
+                    )
+                ),
                 holder=self.request.user,
-                requests__date_accepted__isnull=True,
             ).select_related("target")
         return queryset
 

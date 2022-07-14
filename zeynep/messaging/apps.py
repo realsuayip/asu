@@ -7,4 +7,4 @@ class MessagingConfig(AppConfig):
     verbose_name = pgettext_lazy("app name", "Messaging")
 
     def ready(self):
-        import zeynep.messaging.signals  # noqa
+        import zeynep.messaging.models.signals  # noqa

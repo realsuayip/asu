@@ -17,7 +17,7 @@ from zeynep.utils.views import ExtendedViewSet
 
 
 class MessageViewSet(ExtendedViewSet):
-    mixins = ("list", "retrieve")
+    mixins = ("list", "retrieve", "destroy")
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = get_paginator("cursor", ordering="-date_created")
@@ -26,6 +26,10 @@ class MessageViewSet(ExtendedViewSet):
         return Message.objects.filter(
             conversations__id=self.kwargs["conversation_pk"]
         )
+
+    def perform_destroy(self, instance):
+        conversation = instance.conversations.get(holder=self.request.user)
+        conversation.messages.remove(instance)
 
 
 class ConversationFilterSet(django_filters.FilterSet):
@@ -41,7 +45,7 @@ class ConversationFilterSet(django_filters.FilterSet):
                 Exists(
                     ConversationRequest.objects.filter(
                         date_accepted__isnull=True,
-                        conversation=OuterRef("pk"),
+                        recipient=OuterRef("holder_id"),
                     )
                 ),
                 holder=self.request.user,
@@ -50,7 +54,7 @@ class ConversationFilterSet(django_filters.FilterSet):
 
 
 class ConversationViewSet(ExtendedViewSet):
-    mixins = ("list", "retrieve")
+    mixins = ("list", "retrieve", "destroy")
     serializer_class = ConversationSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = get_paginator("cursor", ordering="-date_modified")
@@ -65,12 +69,12 @@ class ConversationViewSet(ExtendedViewSet):
             request_accepted = Exists(
                 ConversationRequest.objects.filter(
                     date_accepted__isnull=False,
-                    conversation=OuterRef("pk"),
+                    recipient=OuterRef("holder_id"),
                 )
             )
             request_sent = Exists(
                 ConversationRequest.objects.filter(
-                    conversation__holder=OuterRef("target_id")
+                    recipient=OuterRef("target_id")
                 )
             )
             return Conversation.objects.filter(
@@ -89,7 +93,10 @@ class ConversationViewSet(ExtendedViewSet):
         conversation = self.get_object()
 
         try:
-            request = conversation.requests.get(date_accepted__isnull=True)
+            request = ConversationRequest.objects.get(
+                recipient=conversation.holder,
+                date_accepted__isnull=True,
+            )
         except ConversationRequest.DoesNotExist:
             return Response(status=204)  # Maintain idempotency
 

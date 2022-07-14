@@ -22,15 +22,12 @@ class MessageManager(models.Manager):
 
 
 class ConversationRequestManager(models.Manager):
-    def compose(
-        self,
-        holder: "Conversation",
-        target: "Conversation",
-        sender,
-        recipient,
-    ):
+    def compose(self, sender, recipient):
         try:
-            obj = self.get(Q(conversation=holder) | Q(conversation=target))
+            obj = self.get(
+                Q(sender=sender, recipient=recipient)
+                | Q(sender=recipient, recipient=sender)
+            )
         except self.model.DoesNotExist:
             obj = None
 
@@ -44,7 +41,7 @@ class ConversationRequestManager(models.Manager):
                 obj.save(update_fields=["date_accepted", "date_modified"])
             return obj, False
 
-        kwargs = {"sender": sender, "conversation": target}
+        kwargs = {"sender": sender, "recipient": recipient}
 
         if is_following:
             kwargs["date_accepted"] = timezone.now()
@@ -123,11 +120,10 @@ class ConversationRequest(models.Model):
         on_delete=models.CASCADE,
         related_name="+",
     )
-    # Notice: Recipient's conversation instance.
-    conversation = models.ForeignKey(
-        "Conversation",
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="requests",
+        related_name="+",
     )
 
     date_accepted = models.DateTimeField(
@@ -145,7 +141,7 @@ class ConversationRequest(models.Model):
         verbose_name_plural = _("conversation requests")
         constraints = [
             models.UniqueConstraint(
-                fields=["sender", "conversation"],
+                fields=["sender", "recipient"],
                 name="unique_conversation_request",
             )
         ]

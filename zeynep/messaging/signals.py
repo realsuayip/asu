@@ -13,7 +13,7 @@ def deliver_message(instance, created, **kwargs):
 
     holder, _ = sender.conversations.get_or_create(target=recipient)
     target, _ = recipient.conversations.get_or_create(target=sender)
-    ConversationRequest.objects.compose(holder, target, sender, recipient)
+    ConversationRequest.objects.compose(sender, recipient)
 
     holder.messages.add(instance)
     target.messages.add(instance)

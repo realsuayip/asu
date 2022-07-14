@@ -173,7 +173,7 @@ class User(AbstractUser):
         recipient_accepted_request = ConversationRequest.objects.filter(
             date_accepted__isnull=False,
             sender=self,
-            conversation__holder=to_user,
+            recipient=to_user,
         )
 
         if recipient_accepted_request.exists():
@@ -185,7 +185,7 @@ class User(AbstractUser):
             # date' should not be null to send this message.
             replying = ConversationRequest.objects.get(
                 sender=to_user,
-                conversation__holder=self,
+                recipient=self,
             )
             return replying.date_accepted is not None
         except ConversationRequest.DoesNotExist:

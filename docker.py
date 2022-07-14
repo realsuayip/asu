@@ -40,7 +40,8 @@ def main(parser, environment):  # noqa
     command_map = {
         "command": f"{_django} {args.command}",
         "shell": f"{_django} shell",
-        "test": f"{_django} test",
+        "test": f"{_django} test --settings=zeynep.settings.test"
+        " --parallel 4 --shuffle --timing --keepdb",
         "console": "docker exec -it web sh",
     }
 

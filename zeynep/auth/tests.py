@@ -9,22 +9,23 @@ from zeynep.verification.models import RegistrationVerification
 
 
 class TestAuth(APITestCase):
-    def setUp(self):
-        self.url_create = reverse("user-list")
-        self.create_payload = {
+    @classmethod
+    def setUpTestData(cls):
+        cls.url_create = reverse("user-list")
+        cls.create_payload = {
             "display_name": "Janet",
             "username": "janet_48",
             "password": "very_secret",
             "gender": "female",
             "birth_data": "1999-02-02",
         }
-        self.user1 = UserFactory()
-        self.user2 = UserFactory()
-        self.user3 = UserFactory()
-        self.user4 = UserFactory()
-        self.private_user = UserFactory(is_private=True)
-        self.inactive_user = UserFactory(is_active=False)
-        self.frozen_user = UserFactory(is_frozen=True)
+        cls.user1 = UserFactory()
+        cls.user2 = UserFactory()
+        cls.user3 = UserFactory()
+        cls.user4 = UserFactory()
+        cls.private_user = UserFactory(is_private=True)
+        cls.inactive_user = UserFactory(is_active=False)
+        cls.frozen_user = UserFactory(is_frozen=True)
 
     def _compare_instance_to_dict(self, instance, dictionary, *, exclude):
         for item in exclude:

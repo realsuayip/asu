@@ -13,9 +13,10 @@ from zeynep.verification.models import RegistrationVerification
 
 
 class TestRegistrationVerification(APITestCase):
-    def setUp(self):
-        self.url_send = reverse("registration-verification-list")
-        self.url_check = reverse("registration-verification-check")
+    @classmethod
+    def setUpTestData(cls):
+        cls.url_send = reverse("registration-verification-list")
+        cls.url_check = reverse("registration-verification-check")
 
     def test_code_gen(self):
         verification = RegistrationVerification.objects.create(

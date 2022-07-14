@@ -13,9 +13,10 @@ from zeynep.verification.models import EmailVerification
 
 
 class TestRegistrationVerification(APITestCase):
-    def setUp(self):
-        self.url_send = reverse("email-verification-list")
-        self.url_check = reverse("email-verification-check")
+    @classmethod
+    def setUpTestData(cls):
+        cls.url_send = reverse("email-verification-list")
+        cls.url_check = reverse("email-verification-check")
 
     def test_email_verification(self):
         # Test email verification as whole

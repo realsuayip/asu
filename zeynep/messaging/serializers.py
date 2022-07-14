@@ -1,7 +1,7 @@
 from rest_framework import exceptions, serializers
 
 from zeynep.auth.serializers.user import UserPublicReadSerializer
-from zeynep.messaging.models import Conversation, Message
+from zeynep.messaging.models import Conversation, ConversationRequest, Message
 
 
 class MessageComposeSerializer(serializers.HyperlinkedModelSerializer):
@@ -33,17 +33,25 @@ class MessageComposeSerializer(serializers.HyperlinkedModelSerializer):
         return message
 
 
+MessageSourceType = serializers.ChoiceField(choices=["sent", "received"])
+
+
 class MessageSerializer(serializers.ModelSerializer):
     date_read = serializers.SerializerMethodField()
+    source = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
-        fields = ("id", "body", "date_created", "date_read")
+        fields = ("id", "body", "source", "date_created", "date_read")
 
     def get_date_read(  # noqa
         self, message
     ) -> serializers.DateTimeField(allow_null=True):
         return message.date_read if message.has_receipt else None
+
+    def get_source(self, message) -> MessageSourceType:
+        user = self.context["request"].user
+        return "sent" if message.sender == user else "received"
 
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer):
@@ -59,10 +67,26 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Conversation
+        fields = ("id", "target", "date_created", "date_modified", "url")
+
+
+class ConversationDetailSerializer(ConversationSerializer):
+    accept_required = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Conversation
         fields = (
             "id",
             "target",
+            "accept_required",
             "date_created",
             "date_modified",
             "url",
         )
+
+    def get_accept_required(self, conversation) -> bool:  # noqa
+        return ConversationRequest.objects.filter(
+            date_accepted__isnull=True,
+            recipient=conversation.holder_id,
+            sender=conversation.target_id,
+        ).exists()

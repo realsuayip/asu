@@ -75,6 +75,16 @@ class TestMessaging(APITestCase):
         response = self._send_message(self.user2, self.user1, "Yo")
         self.assertEqual(403, response.status_code)
 
+        conversation = Conversation.objects.get(holder=self.user2)
+        conversation = self.client.get(
+            reverse(
+                "conversation-detail",
+                kwargs={"pk": conversation.pk},
+            )
+        )
+        accept_required = conversation.data["accept_required"]
+        self.assertTrue(accept_required)
+
     def test_message_fails_on_preference_interruption(self):
         # In this case, the request was created but not accepted.
         # The user then decided to not receive any messages from
@@ -235,6 +245,18 @@ class TestMessaging(APITestCase):
 
         request = ConversationRequest.objects.get()
         self.assertIsNotNone(request.date_accepted)
+
+        self.client.force_login(self.user1)
+        conversation = Conversation.objects.get(holder=self.user1)
+
+        conversation = self.client.get(
+            reverse(
+                "conversation-detail",
+                kwargs={"pk": conversation.pk},
+            )
+        )
+        accept_required = conversation.data["accept_required"]
+        self.assertFalse(accept_required)
 
     def test_follow_rel_other_direction(self):
         # Sending a message to some person I'm following, but not
@@ -412,12 +434,32 @@ class TestMessaging(APITestCase):
         r1 = self._send_message(self.user1, self.user2, "World is great!")
         conversation = r1.data["conversation"]
         r2 = self.client.get(conversation + "messages/")
+        results = r2.data["results"]
 
         self.assertEqual(200, r2.status_code)
-        self.assertEqual(2, len(r2.data["results"]))
+        self.assertEqual(2, len(results))
 
         self.assertContains(r2, "Howdy")
         self.assertContains(r2, "World")
+
+        for result in results:
+            self.assertEqual("sent", result["source"])
+
+        # Target perspective
+        self.client.force_login(self.user2)
+        conversation = Conversation.objects.get(holder=self.user2)
+        target_messages = self.client.get(
+            reverse(
+                "conversation-detail",
+                kwargs={"pk": conversation.pk},
+            )
+            + "messages/"
+        )
+        results = target_messages.data["results"]
+        self.assertEqual(2, len(results))
+
+        for result in results:
+            self.assertEqual("received", result["source"])
 
     def test_message_detail(self):
         r1 = self._send_message(self.user1, self.user2, "Howdy")

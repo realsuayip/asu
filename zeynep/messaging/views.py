@@ -9,6 +9,7 @@ import django_filters
 
 from zeynep.messaging.models import Conversation, ConversationRequest, Message
 from zeynep.messaging.serializers import (
+    ConversationDetailSerializer,
     ConversationSerializer,
     MessageSerializer,
 )
@@ -57,6 +58,7 @@ class ConversationFilterSet(django_filters.FilterSet):
 class ConversationViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "destroy")
     serializer_class = ConversationSerializer
+    serializer_classes = {"retrieve": ConversationDetailSerializer}
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = get_paginator("cursor", ordering="-date_modified")
 

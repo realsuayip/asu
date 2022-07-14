@@ -349,3 +349,45 @@ class TestMessaging(APITestCase):
         self.assertEqual(
             0, len(user2_conversation_requests_response.data["results"])
         )
+
+    def test_message_list(self):
+        self._send_message(self.user1, self.user2, "Howdy")
+        r1 = self._send_message(self.user1, self.user2, "World is great!")
+        conversation = r1.data["conversation"]
+        r2 = self.client.get(conversation + "messages/")
+
+        self.assertEqual(200, r2.status_code)
+        self.assertEqual(2, len(r2.data["results"]))
+
+        self.assertContains(r2, "Howdy")
+        self.assertContains(r2, "World")
+
+    def test_message_detail(self):
+        r1 = self._send_message(self.user1, self.user2, "Howdy")
+        message_id = r1.data["id"]
+        conversation = r1.data["conversation"]
+
+        r2 = self.client.get(conversation + f"messages/{message_id}/")
+
+        self.assertEqual(200, r2.status_code)
+        self.assertContains(r2, "Howdy")
+
+    def _test_receipt_fragment(self, u1, u2):
+        r1 = self._send_message(u1, u2, "Howdy")
+        message_id = r1.data["id"]
+        conversation = r1.data["conversation"]
+
+        msg = Message.objects.get(pk=message_id)
+        msg.date_read = timezone.now()
+        msg.save(update_fields=["date_read"])
+
+        r2 = self.client.get(conversation + f"messages/{message_id}/")
+        return r2.data["date_read"]
+
+    def test_message_receipt_hidden(self):
+        date_read = self._test_receipt_fragment(self.user4, self.user1)
+        self.assertIsNone(date_read)
+
+    def test_message_receipt_shown(self):
+        date_read = self._test_receipt_fragment(self.user1, self.user2)
+        self.assertIsNotNone(date_read)

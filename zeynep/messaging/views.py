@@ -46,7 +46,7 @@ class ConversationFilterSet(django_filters.FilterSet):
                 ),
                 holder=self.request.user,
             ).select_related("target")
-        return queryset
+        return queryset  # pragma: no cover
 
 
 class ConversationViewSet(ExtendedViewSet):

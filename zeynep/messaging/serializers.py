@@ -17,7 +17,6 @@ class MessageComposeSerializer(serializers.HyperlinkedModelSerializer):
             "id",
             "body",
             "conversation",
-            "conversation",
             "date_created",
         )
 

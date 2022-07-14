@@ -5,10 +5,12 @@ from django.core.validators import (
     RegexValidator,
 )
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from zeynep.auth.models.managers import UserManager
-from zeynep.auth.models.through import UserFollow, UserFollowRequest
+from zeynep.auth.models.through import UserBlock, UserFollow, UserFollowRequest
+from zeynep.messaging.models import ConversationRequest
 
 
 class User(AbstractUser):
@@ -50,6 +52,20 @@ class User(AbstractUser):
         default=Gender.UNSPECIFIED,
     )
     birth_date = models.DateField(_("birth date"), null=True, blank=True)
+
+    # Messaging
+    allows_receipts = models.BooleanField(
+        _("allows message receipts"),
+        default=True,
+    )
+    allows_all_messages = models.BooleanField(
+        _("allows all incoming messages"),
+        default=True,
+        help_text=_(
+            "Users that are not followed by this user can"
+            " send message requests to them."
+        ),
+    )
 
     # Account flags
     is_frozen = models.BooleanField(
@@ -96,6 +112,10 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    @property
+    def is_accessible(self):
+        return self.is_active and (not self.is_frozen)
+
     def add_following(self, *, to_user):
         return UserFollow.objects.get_or_create(
             from_user=self, to_user=to_user
@@ -112,3 +132,65 @@ class User(AbstractUser):
         return UserFollowRequest.objects.filter(
             to_user=self, status=UserFollowRequest.Status.PENDING
         )
+
+    def is_following(self, to_user):
+        return UserFollow.objects.filter(
+            from_user=self, to_user=to_user
+        ).exists()
+
+    def has_block_rel(self, to_user):
+        # Check symmetric blocking status
+        return UserBlock.objects.filter(
+            Q(from_user=self, to_user=to_user)
+            | Q(from_user=to_user, to_user=self)
+        ).exists()
+
+    def can_send_message(self, to_user):
+        if self == to_user:
+            return False
+
+        if not (to_user.is_accessible and self.is_accessible):
+            return False
+
+        if self.has_block_rel(to_user):
+            # One of the users is blocking
+            # another, so deny messages.
+            return False
+
+        if to_user.is_following(self):
+            # The sender is followed by recipient, so messaging should
+            # happen without intervention. A message request will be created
+            # and accepted automatically, so in the future, (when this
+            # relation breaks) participants can continue messaging each
+            # other without having to send/accept new conversation requests.
+            return True
+
+        # If the recipient is not following the sender, we need
+        # to look into conversation request relations.
+
+        # In case this sender previously sent a conversation
+        # request, and it was accepted by the recipient.
+        recipient_accepted_request = ConversationRequest.objects.filter(
+            date_accepted__isnull=False,
+            sender=self,
+            recipient=to_user,
+        )
+
+        if recipient_accepted_request.exists():
+            return True
+
+        try:
+            # Check if this message is sent as a reply. To reply,
+            # the user needs to accept the request first, so 'accept
+            # date' should not be null to send this message.
+            replying = ConversationRequest.objects.get(
+                sender=to_user,
+                recipient=self,
+            )
+            return replying.date_accepted is not None
+        except ConversationRequest.DoesNotExist:
+            # Not a reply either, this means it might be a new
+            # conversation request, or new messages are added to
+            # unaccepted request. Let's check if the user allows message
+            # requests from strangers.
+            return to_user.allows_all_messages

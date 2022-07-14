@@ -5,3 +5,6 @@ from django.utils.translation import pgettext_lazy
 class MessagingConfig(AppConfig):
     name = "zeynep.messaging"
     verbose_name = pgettext_lazy("app name", "Messaging")
+
+    def ready(self):
+        import zeynep.messaging.models.signals  # noqa

@@ -46,6 +46,7 @@ class ConversationFilterSet(django_filters.FilterSet):
                     ConversationRequest.objects.filter(
                         date_accepted__isnull=True,
                         recipient=OuterRef("holder_id"),
+                        sender=OuterRef("target_id"),
                     )
                 ),
                 holder=self.request.user,
@@ -70,11 +71,13 @@ class ConversationViewSet(ExtendedViewSet):
                 ConversationRequest.objects.filter(
                     date_accepted__isnull=False,
                     recipient=OuterRef("holder_id"),
+                    sender=OuterRef("target_id"),
                 )
             )
             request_sent = Exists(
                 ConversationRequest.objects.filter(
-                    recipient=OuterRef("target_id")
+                    recipient=OuterRef("target_id"),
+                    sender=OuterRef("holder_id"),
                 )
             )
             return Conversation.objects.filter(
@@ -94,6 +97,7 @@ class ConversationViewSet(ExtendedViewSet):
 
         try:
             request = ConversationRequest.objects.get(
+                sender=conversation.target,
                 recipient=conversation.holder,
                 date_accepted__isnull=True,
             )

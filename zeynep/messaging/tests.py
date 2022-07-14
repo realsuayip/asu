@@ -11,6 +11,7 @@ from zeynep.tests.factories import UserFactory
 class TestMessaging(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        cls.user0 = UserFactory()
         cls.user1 = UserFactory()
         cls.user2 = UserFactory()
         cls.user3 = UserFactory()
@@ -371,6 +372,40 @@ class TestMessaging(APITestCase):
         self.assertEqual(
             0, len(user2_conversation_requests_response.data["results"])
         )
+
+    def test_conversation_list_case_1(self):
+        self._send_message(self.user0, self.user1, "Yo")
+        self._send_message(self.user1, self.user2, "Hi")
+        self._send_message(self.user1, self.user3, "Hello")
+
+        r1 = self.client.get(reverse("conversation-list"))
+        r2 = self.client.get(reverse("conversation-list") + "?type=requests")
+        self.assertEqual(2, len(r1.data["results"]))
+        self.assertEqual(1, len(r2.data["results"]))
+
+    def test_conversation_list_case_2(self):
+        self._send_message(self.user0, self.user1, "Hi")
+        self._send_message(self.user1, self.user2, "Hello")
+
+        self.client.force_login(self.user2)
+        r1 = self.client.get(reverse("conversation-list"))
+        self.assertEqual(0, len(r1.data["results"]))
+
+    def test_conversation_list_case_3(self):
+        self._send_message(self.user0, self.user1, "Hi")
+        self._accept_conversation(self.user0, self.user1)
+
+        self._send_message(self.user2, self.user1, "Hello")
+        self._send_message(self.user3, self.user1, "Hello")
+
+        self.client.force_login(self.user1)
+        r2 = self.client.get(reverse("conversation-list"))
+        self.assertEqual(1, len(r2.data["results"]))
+
+        r3 = self.client.get(reverse("conversation-list") + "?type=requests")
+        url = r3.data["results"][0]["url"]
+        accept = self.client.post(url + "accept/")
+        self.assertEqual(204, accept.status_code)
 
     def test_message_list(self):
         self._send_message(self.user1, self.user2, "Howdy")

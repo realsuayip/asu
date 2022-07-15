@@ -6,6 +6,7 @@ from django.core.validators import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.utils.functional import classproperty
 from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -109,10 +110,14 @@ class ConsentVerification(Verification):
     def __str__(self):
         return "%s <#%s>" % (self.email, self.pk)
 
+    @classproperty
+    def salt(cls):  # noqa
+        return "consent_" + cls._meta.model_name
+
     def create_consent(self):
         assert self.is_eligible
 
-        signer = signing.TimestampSigner()
+        signer = signing.TimestampSigner(salt=self.salt)
         return signer.sign(self.pk)
 
     @property

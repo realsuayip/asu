@@ -36,7 +36,7 @@ class ConsentVerificationManager(VerificationManager):
         Check consent, if valid, fetch related RegistrationVerification
         object and return it, else return None. 'email' should be normalized.
         """
-        signer = signing.TimestampSigner()
+        signer = signing.TimestampSigner(salt=self.model.salt)
         max_age = self.eligible_period
 
         try:

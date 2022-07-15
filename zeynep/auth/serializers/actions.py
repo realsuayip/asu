@@ -170,3 +170,19 @@ class UserBlockedSerializer(UserFollowingSerializer):
     class Meta:
         model = UserBlock
         fields = ("to_user",)
+
+
+class TicketSerializer(serializers.Serializer):  # noqa
+    scope = serializers.ChoiceField(choices=["websocket"])
+    ticket = serializers.CharField(read_only=True)
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        scope = validated_data["scope"]
+        ticket = user.get_ticket(scope)
+
+        if ticket is None:
+            raise PermissionDenied
+
+        validated_data["ticket"] = ticket
+        return validated_data

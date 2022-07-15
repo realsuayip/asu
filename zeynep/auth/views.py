@@ -11,6 +11,7 @@ from zeynep.auth.serializers.actions import (
     FollowRequestSerializer,
     FollowSerializer,
     PasswordResetSerializer,
+    TicketSerializer,
     UserBlockedSerializer,
     UserFollowersSerializer,
     UserFollowingSerializer,
@@ -210,6 +211,19 @@ class UserViewSet(ExtendedViewSet):
         return self.get_action_save_response(
             request,
             serializer,
+            status_code=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=TicketSerializer,
+    )
+    def ticket(self, request):
+        return self.get_action_save_response(
+            request,
+            self.get_serializer(data=request.data),
             status_code=status.HTTP_201_CREATED,
         )
 

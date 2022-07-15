@@ -179,7 +179,7 @@ class TicketSerializer(serializers.Serializer):  # noqa
     def create(self, validated_data):
         user = self.context["request"].user
         scope = validated_data["scope"]
-        ticket = user.get_ticket(scope)
+        ticket = user.create_ticket(scope)
 
         if ticket is None:
             raise PermissionDenied

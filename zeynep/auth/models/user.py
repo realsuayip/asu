@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.cache import cache
+from django.core import signing
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -7,7 +7,6 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Q
-from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 from zeynep.auth.models.managers import UserManager
@@ -197,15 +196,8 @@ class User(AbstractUser):
             # requests from strangers.
             return to_user.allows_all_messages
 
-    def get_ticket(self, scope):
+    def create_ticket(self, scope):
         if scope == "websocket":
-            key = "ticket_websocket_%s" % self.pk
-
-            if (cached_value := cache.get(key)) is not None:
-                return cached_value
-
-            ticket = get_random_string(32)
-            cache.set(key, ticket, timeout=10)
-            return ticket
-
+            signer = signing.TimestampSigner(salt=scope)
+            return signer.sign(self.pk)
         return None

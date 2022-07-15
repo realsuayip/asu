@@ -315,16 +315,18 @@ class TestAuth(APITestCase):
                 kwargs={"username": self.user2.username},
             )
         )
-        self.assertEqual(403, response.status_code)
         self.assertFalse(
             self.user1.following.filter(pk=self.user2.pk).exists()
         )
+        return response
 
     def test_follow_fails_if_blocked(self):
-        self._test_follows_fails_if(self.user1, self.user2)
+        response = self._test_follows_fails_if(self.user1, self.user2)
+        self.assertEqual(403, response.status_code)
 
     def test_follow_fails_if_blocked_by(self):
-        self._test_follows_fails_if(self.user2, self.user1)
+        response = self._test_follows_fails_if(self.user2, self.user1)
+        self.assertEqual(404, response.status_code)
 
     def test_self_follow_not_allowed(self):
         self.client.force_login(self.user1)

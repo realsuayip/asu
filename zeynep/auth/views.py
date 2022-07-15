@@ -1,5 +1,4 @@
 from django.db.models import Count
-from django.shortcuts import get_object_or_404
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -49,42 +48,43 @@ class UserViewSet(ExtendedViewSet):
         "following": UserFollowingSerializer,
         "blocked": UserBlockedSerializer,
         "reset_password": PasswordResetSerializer,
+        "message": MessageComposeSerializer,
+        "ticket": TicketSerializer,
     }
     serializer_class = UserPublicReadSerializer
 
     def get_queryset(self):
-        queryset = User.objects.active().annotate(
-            following_count=Count("following", distinct=True),
-            follower_count=Count("followed_by", distinct=True),
-        )
+        queryset = User.objects.active()
 
         if self.request.user.is_authenticated:
-            return queryset.exclude(blocked__in=[self.request.user])
+            queryset = queryset.exclude(blocked__in=[self.request.user])
+
+        if self.action in ["list", "retrieve"]:
+            return queryset.annotate(
+                following_count=Count("following", distinct=True),
+                follower_count=Count("followed_by", distinct=True),
+            )
 
         return queryset
+
+    def get_object(self):
+        if self.request.user.username == self.kwargs["username"]:
+            return self.request.user
+        return super().get_object()
 
     @action(
         detail=False,
         methods=["get", "patch"],
         permission_classes=[permissions.IsAuthenticated],
-        serializer_class=UserSerializer,
     )
     def me(self, request):
-        serializer_class, context = (
-            self.get_serializer_class(),
-            self.get_serializer_context(),
-        )
-
         if request.method == "PATCH":
-            serializer = serializer_class(
-                self.request.user,
-                context=context,
-                data=self.request.data,
-                partial=True,
+            serializer = self.get_serializer(
+                self.request.user, data=self.request.data, partial=True
             )
             return self.get_action_save_response(self.request, serializer)
 
-        serializer = serializer_class(self.request.user, context=context)
+        serializer = self.get_serializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
@@ -94,18 +94,13 @@ class UserViewSet(ExtendedViewSet):
         url_path="password-reset",
     )
     def reset_password(self, request):
-        serializer = self.get_serializer_class()
-        return self.get_action_save_response(request, serializer)
+        return self.get_action_save_response(request)
 
     def save_through(self, username):
         # Common save method for user blocking and following.
-        to_user = self.get_user(username)
-        serializer = self.get_serializer_class()(
-            data={
-                "from_user": self.request.user.pk,
-                "to_user": to_user.pk,
-            },
-            context=self.get_serializer_context(),
+        to_user = self.get_object()
+        serializer = self.get_serializer(
+            data={"from_user": self.request.user.pk, "to_user": to_user.pk}
         )
         return self.get_action_save_response(
             self.request, serializer, status_code=204
@@ -113,7 +108,7 @@ class UserViewSet(ExtendedViewSet):
 
     def delete_through(self, username):
         # Common delete method for user blocking and following.
-        to_user = self.get_user(username)
+        to_user = self.get_object()
         model = self.get_serializer_class().Meta.model
         model.objects.filter(
             from_user=self.request.user,
@@ -145,12 +140,6 @@ class UserViewSet(ExtendedViewSet):
     def unfollow(self, request, username):
         return self.delete_through(username)
 
-    def get_user(self, username):
-        if self.request.user.username == username:
-            return self.request.user
-
-        return get_object_or_404(User.objects.active(), username=username)
-
     def list_follow_through(self, queryset):
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
@@ -162,7 +151,7 @@ class UserViewSet(ExtendedViewSet):
         pagination_class=get_paginator("cursor", ordering="-date_created"),
     )
     def followers(self, request, username):
-        user = self.get_user(username)
+        user = self.get_object()
         queryset = UserFollow.objects.filter(
             to_user=user,
             from_user__is_active=True,
@@ -176,7 +165,7 @@ class UserViewSet(ExtendedViewSet):
         pagination_class=get_paginator("cursor", ordering="-date_created"),
     )
     def following(self, request, username):
-        user = self.get_user(username)
+        user = self.get_object()
         queryset = UserFollow.objects.filter(
             from_user=user,
             to_user__is_active=True,
@@ -202,7 +191,6 @@ class UserViewSet(ExtendedViewSet):
         detail=True,
         methods=["post"],
         permission_classes=[permissions.IsAuthenticated],
-        serializer_class=MessageComposeSerializer,
     )
     def message(self, request, username):
         context = self.get_serializer_context()
@@ -218,13 +206,10 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["post"],
         permission_classes=[permissions.IsAuthenticated],
-        serializer_class=TicketSerializer,
     )
     def ticket(self, request):
         return self.get_action_save_response(
-            request,
-            self.get_serializer(data=request.data),
-            status_code=status.HTTP_201_CREATED,
+            request, status_code=status.HTTP_201_CREATED
         )
 
 

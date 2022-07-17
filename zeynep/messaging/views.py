@@ -91,7 +91,7 @@ class ConversationViewSet(ExtendedViewSet):
 
     @action(
         detail=True,
-        methods=["post"],
+        methods=["patch"],
         serializer_class=serializers.Serializer,
     )
     def accept(self, request, pk):

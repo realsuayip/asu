@@ -160,7 +160,7 @@ class TestMessaging(APITestCase):
 
         target_conversation = Conversation.objects.get(holder=self.user2)
         self.client.force_login(self.user2)
-        self.client.post(
+        self.client.patch(
             reverse(
                 "conversation-accept",
                 kwargs={"pk": target_conversation.pk},
@@ -180,7 +180,7 @@ class TestMessaging(APITestCase):
         target_conversation = Conversation.objects.get(holder=self.user2)
         self.client.force_login(self.user2)
 
-        self.client.post(
+        self.client.patch(
             reverse(
                 "conversation-accept",
                 kwargs={"pk": target_conversation.pk},
@@ -336,9 +336,9 @@ class TestMessaging(APITestCase):
 
         self.client.force_login(self.user2)
 
-        r1 = self.client.post(url)
-        r2 = self.client.post(url)
-        r3 = self.client.post(url)
+        r1 = self.client.patch(url)
+        r2 = self.client.patch(url)
+        r3 = self.client.patch(url)
 
         self.assertEqual(204, r1.status_code)
         request = ConversationRequest.objects.get()
@@ -390,7 +390,7 @@ class TestMessaging(APITestCase):
 
         # 3. Accept the conversation; we should observe the change
         # in lists.
-        accept_response = self.client.post(results[0]["url"] + "accept/")
+        accept_response = self.client.patch(results[0]["url"] + "accept/")
         self.assertEqual(204, accept_response.status_code)
 
         user2_conversations_response = self.client.get(url)
@@ -432,7 +432,7 @@ class TestMessaging(APITestCase):
 
         r3 = self.client.get(reverse("conversation-list") + "?type=requests")
         url = r3.data["results"][0]["url"]
-        accept = self.client.post(url + "accept/")
+        accept = self.client.patch(url + "accept/")
         self.assertEqual(204, accept.status_code)
 
     def test_message_list(self):

@@ -61,11 +61,11 @@ class PasswordResetSerializer(serializers.Serializer):  # noqa
             )
 
         verification.date_completed = timezone.now()
-        verification.save(update_fields=["date_completed"])
+        verification.save(update_fields=["date_completed", "date_modified"])
         verification.null_others()
 
         user.set_password(password)
-        user.save(update_fields=["password"])
+        user.save(update_fields=["password", "date_modified"])
         return validated_data
 
 

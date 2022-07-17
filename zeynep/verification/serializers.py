@@ -36,6 +36,6 @@ class BaseCheckSerializer(serializers.Serializer):  # noqa
             raise NotFound
 
         verification.date_verified = timezone.now()
-        verification.save(update_fields=["date_verified"])
+        verification.save(update_fields=["date_verified", "date_modified"])
         validated_data["consent"] = verification.create_consent()
         return validated_data

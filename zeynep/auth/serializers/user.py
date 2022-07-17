@@ -96,7 +96,9 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         user.save()
         verification.user = user
         verification.date_completed = timezone.now()
-        verification.save(update_fields=["user", "date_completed"])
+        verification.save(
+            update_fields=["user", "date_completed", "date_modified"]
+        )
         verification.null_others()
         return user
 

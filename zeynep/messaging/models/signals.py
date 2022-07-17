@@ -19,6 +19,7 @@ def deliver_message(instance, created, **kwargs):
     target.messages.add(instance)
     holder.save(update_fields=["date_modified"])
     target.save(update_fields=["date_modified"])
+    instance.websocket_send(target.pk)
 
 
 @receiver(m2m_changed, sender=Conversation.messages.through)

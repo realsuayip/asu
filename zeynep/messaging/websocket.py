@@ -14,7 +14,7 @@ class ConversationConsumer(AsyncJsonWebsocketConsumer):
 
     async def disconnect(self, code):
         if group := getattr(self, "group", None):
-            self.channel_layer.group_discard(group, self.channel_name)
+            await self.channel_layer.group_discard(group, self.channel_name)
 
     async def conversation_message(self, event):
         await self.send_json(event)

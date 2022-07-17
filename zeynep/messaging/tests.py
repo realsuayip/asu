@@ -1,10 +1,16 @@
+import django.core.signing
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from rest_framework.test import APITestCase
 
+from asgiref.sync import sync_to_async
+from channels.testing import WebsocketCommunicator
+
 from zeynep.auth.models import UserFollow
 from zeynep.messaging.models import Conversation, ConversationRequest, Message
+from zeynep.messaging.websocket import ConversationConsumer
 from zeynep.tests.factories import UserFactory
 
 
@@ -575,3 +581,53 @@ class TestMessaging(APITestCase):
 
         self.assertFalse(Message.objects.all().exists())
         self.assertEqual(1, ConversationRequest.objects.all().count())
+
+    # Websocket related
+
+    @cached_property
+    def communicator(self):
+        return WebsocketCommunicator(
+            ConversationConsumer.as_asgi(),
+            "/ws/conversations/",
+        )
+
+    async def test_ws_connects(self):
+        connected, _ = await self.communicator.connect()
+        self.assertTrue(connected)
+        await self.communicator.receive_nothing()
+        await self.communicator.disconnect()
+
+    async def test_ws_bad_ticket(self):
+        await self.communicator.connect()
+        await self.communicator.send_json_to({"ticket": "ticket"})
+
+        with self.assertRaises(django.core.signing.BadSignature):
+            await self.communicator.receive_from(timeout=0.001)
+
+    async def test_ws_sends_message(self):
+        await self.communicator.connect()
+
+        # Verify ticket
+        await sync_to_async(self.client.force_login)(self.user1)
+        response = await sync_to_async(self.client.post)(
+            reverse("user-ticket"),
+            data={"scope": "websocket"},
+        )
+        ticket = response.data["ticket"]
+        await self.communicator.send_json_to({"ticket": ticket})
+
+        # Send message while connected to conversation ws
+        api_result = await sync_to_async(self._send_message)(
+            self.user2, self.user1, "Hi"
+        )
+        ws_result = await self.communicator.receive_json_from(timeout=0.01)
+
+        message_id = api_result.data["id"]
+        target_conversation = await sync_to_async(Conversation.objects.get)(
+            holder=self.user1
+        )
+
+        self.assertEqual(ws_result["type"], "conversation.message")
+        self.assertEqual(ws_result["conversation_id"], target_conversation.id)
+        self.assertEqual(ws_result["message_id"], message_id)
+        await self.communicator.disconnect()

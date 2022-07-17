@@ -6,6 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 ROOT_URLCONF = "zeynep.urls"
+ASGI_APPLICATION = "zeynep.asgi.application"
 WSGI_APPLICATION = "zeynep.wsgi.application"
 SECRET_KEY = env.str("SECRET_KEY", "django-insecure")
 DEBUG = env.bool("DEBUG", True)
@@ -26,6 +27,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "django_filters",
+    "channels",
 ]
 
 MIDDLEWARE = [

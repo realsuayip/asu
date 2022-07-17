@@ -1,4 +1,5 @@
 from django.contrib.auth.models import UserManager as DjangoUserManager
+from django.core import signing
 from django.db.models import Q
 
 
@@ -17,3 +18,7 @@ class UserManager(DjangoUserManager):
         perform actions on the application.
         """
         return self.exclude(Q(is_active=False) | Q(is_frozen=True))
+
+    def verify_ticket(self, ticket, scope, *, max_age):  # noqa
+        signer = signing.TimestampSigner(salt=scope)
+        return signer.unsign(ticket, max_age=max_age)

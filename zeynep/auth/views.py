@@ -89,7 +89,7 @@ class UserViewSet(ExtendedViewSet):
 
     @action(
         detail=False,
-        methods=["post"],
+        methods=["patch"],
         permission_classes=[permissions.AllowAny],
         url_path="password-reset",
     )

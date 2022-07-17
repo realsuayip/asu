@@ -38,7 +38,7 @@ class TestPasswordReset(APITestCase):
         c1, c2, c3 = consents
 
         # Reset the password
-        reset_response = self.client.post(
+        reset_response = self.client.patch(
             self.url_change,
             data={
                 "email": email,
@@ -50,7 +50,7 @@ class TestPasswordReset(APITestCase):
 
         # Now, subsequent reset requests should fail
         for consent in (c1, c3):
-            response = self.client.post(
+            response = self.client.patch(
                 self.url_change,
                 data={
                     "email": email,
@@ -79,7 +79,7 @@ class TestPasswordReset(APITestCase):
         check_4 = self.client.post(
             self.url_check, {"email": email, "code": v4.code}
         )
-        response_4 = self.client.post(
+        response_4 = self.client.patch(
             self.url_change,
             data={
                 "email": email,
@@ -93,7 +93,7 @@ class TestPasswordReset(APITestCase):
         self.assertIsNone(v2.nulled_by_id)
 
     def test_reset_invalid_email(self):
-        response = self.client.post(
+        response = self.client.patch(
             self.url_change,
             data={
                 "email": "nonexistent@example.com",

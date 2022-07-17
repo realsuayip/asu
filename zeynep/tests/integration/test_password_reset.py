@@ -19,7 +19,7 @@ class PasswordResetTest(APITestCase):
         cls.user = UserFactory(email="best@example.com")
 
     def _send_new_password(self, email, consent, password):
-        return self.client.post(
+        return self.client.patch(
             reverse("user-reset-password"),
             data={
                 "email": email,

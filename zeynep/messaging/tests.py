@@ -435,6 +435,46 @@ class TestMessaging(APITestCase):
         accept = self.client.patch(url + "accept/")
         self.assertEqual(204, accept.status_code)
 
+    def test_conversation_last_message(self):
+        r1 = self._send_message(self.user1, self.user2, "Gary says hello")
+        conversation_1 = r1.data["conversation"]
+        r2 = self.client.get(conversation_1)
+        self.assertEqual("Gary says hello", r2.data["last_message"]["body"])
+
+        self._accept_conversation(self.user1, self.user2)
+        r3 = self._send_message(self.user2, self.user1, "Gary who?")
+
+        conversation_2 = r3.data["conversation"]
+        r4 = self.client.get(conversation_2)
+        self.assertEqual("Gary who?", r4.data["last_message"]["body"])
+
+        self.client.force_login(self.user1)
+        r5 = self.client.get(conversation_1)
+        self.assertEqual("Gary who?", r5.data["last_message"]["body"])
+
+    def test_conversation_last_message_case_deletion(self):
+        r1 = self._send_message(self.user1, self.user2, "Gary says hello")
+        conversation = r1.data["conversation"]
+
+        message = conversation + "messages/%s/" % r1.data["id"]
+        self.client.delete(message)
+
+        r2 = self.client.get(conversation)
+        self.assertIsNone(r2.data["last_message"])
+
+        # Target should still have the deleted message.
+        self.client.force_login(self.user2)
+        conversation_2 = (
+            Conversation.objects.filter(holder=self.user2).only("pk").get()
+        )
+        r3 = self.client.get(
+            reverse(
+                "conversation-detail",
+                kwargs={"pk": conversation_2.pk},
+            )
+        )
+        self.assertEqual("Gary says hello", r3.data["last_message"]["body"])
+
     def test_message_list(self):
         self._send_message(self.user1, self.user2, "Howdy")
         r1 = self._send_message(self.user1, self.user2, "World is great!")

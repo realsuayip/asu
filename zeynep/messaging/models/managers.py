@@ -1,5 +1,6 @@
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import OuterRef, Q
+from django.db.models.functions import JSONObject
 from django.utils import timezone
 
 
@@ -15,6 +16,25 @@ class MessageManager(models.Manager):
             recipient=recipient,
             body=body,
             has_receipt=has_receipt,
+        )
+
+
+class ConversationManager(models.Manager):
+    def annotate_last_message(self, queryset):  # noqa
+        from zeynep.messaging.models import Message
+
+        fields = (
+            "id",
+            "body",
+            "sender_id",
+            "has_receipt",
+            "date_read",
+            "date_created",
+        )
+        return queryset.annotate(
+            last_message=Message.objects.filter(conversations=OuterRef("pk"))
+            .order_by("-date_created")
+            .values(data=JSONObject(**{f: f for f in fields}))[:1]
         )
 
 

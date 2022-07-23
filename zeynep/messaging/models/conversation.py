@@ -2,7 +2,10 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from zeynep.messaging.models.managers import ConversationRequestManager
+from zeynep.messaging.models.managers import (
+    ConversationManager,
+    ConversationRequestManager,
+)
 
 
 class Conversation(models.Model):
@@ -21,6 +24,8 @@ class Conversation(models.Model):
 
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
+
+    objects = ConversationManager()
 
     class Meta:
         constraints = [

@@ -1,3 +1,5 @@
+import types
+
 from rest_framework import exceptions, serializers
 
 from zeynep.auth.serializers.user import UserPublicReadSerializer
@@ -51,7 +53,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def get_source(self, message) -> MessageSourceType:
         user = self.context["request"].user
-        return "sent" if message.sender == user else "received"
+        return "sent" if message.sender_id == user.pk else "received"
 
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer):
@@ -64,10 +66,26 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
             "url",
         )
     )
+    last_message = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
-        fields = ("id", "target", "date_created", "date_modified", "url")
+        fields = (
+            "id",
+            "target",
+            "last_message",
+            "date_created",
+            "date_modified",
+            "url",
+        )
+
+    def get_last_message(self, obj) -> MessageSerializer(allow_null=True):
+        if obj.last_message is None:
+            return None
+
+        message = types.SimpleNamespace(**obj.last_message)
+        serializer = MessageSerializer(message, context=self.context)
+        return serializer.data
 
 
 class ConversationDetailSerializer(ConversationSerializer):
@@ -79,6 +97,7 @@ class ConversationDetailSerializer(ConversationSerializer):
             "id",
             "target",
             "accept_required",
+            "last_message",
             "date_created",
             "date_modified",
             "url",

@@ -40,18 +40,17 @@ class ConversationFilterSet(django_filters.FilterSet):
         choices=[("requests", "Requests")],
     )
 
-    def filter_type(self, queryset, name, value):
+    def filter_type(self, queryset, name, value):  # noqa
         if value == "requests":
-            return Conversation.objects.filter(
+            return queryset.filter(
                 Exists(
                     ConversationRequest.objects.filter(
                         date_accepted__isnull=True,
                         recipient=OuterRef("holder_id"),
                         sender=OuterRef("target_id"),
                     )
-                ),
-                holder=self.request.user,
-            ).select_related("target")
+                )
+            )
         return queryset  # pragma: no cover
 
 
@@ -67,27 +66,34 @@ class ConversationViewSet(ExtendedViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = Conversation.objects.filter(holder=user)
 
-        if self.action == "list":
-            request_accepted = Exists(
-                ConversationRequest.objects.filter(
-                    date_accepted__isnull=False,
-                    recipient=OuterRef("holder_id"),
-                    sender=OuterRef("target_id"),
-                )
-            )
-            request_sent = Exists(
-                ConversationRequest.objects.filter(
-                    recipient=OuterRef("target_id"),
-                    sender=OuterRef("holder_id"),
-                )
-            )
-            return Conversation.objects.filter(
-                Q(request_sent) | Q(request_accepted),
-                holder=user,
-            )
+        if self.action not in ("list", "retrieve"):
+            # i.e., accept & destroy
+            return queryset
 
-        return Conversation.objects.filter(holder=user)
+        queryset = queryset.select_related("target")
+        queryset = Conversation.objects.annotate_last_message(queryset)
+        requests_only = self.request.GET.get("type") == "requests"
+
+        if (self.action == "retrieve") or requests_only:
+            return queryset
+
+        # Regular "list" action
+        request_accepted = Exists(
+            ConversationRequest.objects.filter(
+                date_accepted__isnull=False,
+                recipient=OuterRef("holder_id"),
+                sender=OuterRef("target_id"),
+            )
+        )
+        request_sent = Exists(
+            ConversationRequest.objects.filter(
+                recipient=OuterRef("target_id"),
+                sender=OuterRef("holder_id"),
+            )
+        )
+        return queryset.filter(Q(request_sent) | Q(request_accepted))
 
     @action(
         detail=True,

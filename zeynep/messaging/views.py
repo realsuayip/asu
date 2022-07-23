@@ -93,7 +93,7 @@ class ConversationViewSet(ExtendedViewSet):
                 sender=OuterRef("holder_id"),
             )
         )
-        return queryset.filter(Q(request_sent) | Q(request_accepted))
+        return queryset
 
     @action(
         detail=True,

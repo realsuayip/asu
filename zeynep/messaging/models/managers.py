@@ -21,8 +21,6 @@ class MessageManager(models.Manager):
 
 class ConversationManager(models.Manager):
     def annotate_last_message(self, queryset):  # noqa
-        from zeynep.messaging.models import Message
-
         fields = (
             "id",
             "body",
@@ -31,11 +29,16 @@ class ConversationManager(models.Manager):
             "date_read",
             "date_created",
         )
-        return queryset.annotate(
-            last_message=Message.objects.filter(conversations=OuterRef("pk"))
+        fields = dict(zip(fields, fields))
+
+        messages = (
+            self.model.messages.rel.model.objects.filter(
+                conversations=OuterRef("pk")
+            )
             .order_by("-date_created")
-            .values(data=JSONObject(**{f: f for f in fields}))[:1]
+            .values(data=JSONObject(**fields))
         )
+        return queryset.annotate(last_message=messages[:1])
 
 
 class ConversationRequestManager(models.Manager):

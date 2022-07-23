@@ -15,4 +15,4 @@ jobs:
     - name: Build containers
       run: docker-compose -p zeynep -f docker/docker-compose.yml up -d
     - name: Run tests
-      run: docker exec -it web python manage.py test --settings=zeynep.settings.test --parallel 4 --shuffle --timing
+      run: docker exec -t web python manage.py test --settings=zeynep.settings.test --parallel 4 --shuffle --timing

@@ -23,3 +23,16 @@ class UserManager(DjangoUserManager):
         #
         signer = signing.TimestampSigner(salt=scope)
         return signer.unsign(ticket, max_age=max_age)
+
+
+
+
+
+
+
+
+
+
+
+
+

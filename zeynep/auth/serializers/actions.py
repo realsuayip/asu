@@ -186,3 +186,14 @@ class TicketSerializer(serializers.Serializer):  # noqa
 
         validated_data["ticket"] = ticket
         return validated_data
+
+
+class ProfilePictureEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ("profile_picture",)
+        model = User
+
+    def update(self, instance, validated_data):
+        image = validated_data["profile_picture"]
+        instance.set_profile_picture(image)
+        return instance

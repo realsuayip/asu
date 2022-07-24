@@ -1,6 +1,11 @@
+import os
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
+from django.core.exceptions import ValidationError
 from django.core.validators import (
+    FileExtensionValidator,
     MaxLengthValidator,
     MinLengthValidator,
     RegexValidator,
@@ -9,9 +14,35 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+import sorl.thumbnail
+from sorl.thumbnail import get_thumbnail
+
 from zeynep.auth.models.managers import UserManager
 from zeynep.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from zeynep.messaging.models import ConversationRequest
+from zeynep.utils.file import (
+    FileSizeValidator,
+    MimeTypeValidator,
+    get_mime_type,
+)
+
+
+def profile_picture_upload_to(instance, filename):
+    template = "usercontent/%(user_id)s/profile_picture/%(uuid)s%(ext)s"
+    _, ext = os.path.splitext(filename)
+    return template % {
+        "user_id": instance.pk,
+        "uuid": uuid.uuid4().hex,
+        "ext": ext,
+    }
+
+
+def validate_file_size(file):
+    pass
+
+
+def validate_file_integrity(file):
+    raise ValidationError(get_mime_type(file))
 
 
 class User(AbstractUser):
@@ -53,6 +84,17 @@ class User(AbstractUser):
         default=Gender.UNSPECIFIED,
     )
     birth_date = models.DateField(_("birth date"), null=True, blank=True)
+    profile_picture = models.ImageField(
+        _("profile picture"),
+        blank=True,
+        upload_to=profile_picture_upload_to,
+        validators=[
+            # todo resize to 400
+            FileExtensionValidator(allowed_extensions=["png", "jpg"]),
+            FileSizeValidator(max_size=2**21),  # 2 MB
+            MimeTypeValidator(allowed_types=["image/png", "image/jpeg"]),
+        ],
+    )
 
     # Messaging
     allows_receipts = models.BooleanField(
@@ -201,3 +243,28 @@ class User(AbstractUser):
             signer = signing.TimestampSigner(salt=scope)
             return signer.sign(self.pk)
         return None
+
+    def set_profile_picture(self, image):
+        if self.profile_picture:
+            sorl.thumbnail.delete(self.profile_picture, delete_file=False)
+            self.profile_picture.delete(save=False)
+
+        self.profile_picture = image
+        self.save(update_fields=["profile_picture", "date_modified"])
+
+    def get_profile_picture(self, size=(72, 72)):
+        if not self.profile_picture:
+            return None
+
+        size = "%sx%s" % size
+        return get_thumbnail(
+            self.profile_picture,
+            size,
+            crop="center",
+            quality=85,
+        )
+
+    def delete_profile_picture(self):
+        image = self.profile_picture
+        sorl.thumbnail.delete(image, delete_file=False)
+        image.delete()

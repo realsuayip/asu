@@ -16,6 +16,7 @@ class UserPublicReadSerializer(
 ):
     following_count = serializers.IntegerField()
     follower_count = serializers.IntegerField()
+    profile_picture = serializers.ImageField(source="get_profile_picture")
 
     class Meta:
         model = User
@@ -23,6 +24,7 @@ class UserPublicReadSerializer(
             "id",
             "display_name",
             "username",
+            "profile_picture",
             "date_joined",
             "is_private",
             "description",

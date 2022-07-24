@@ -10,6 +10,7 @@ from zeynep.auth.serializers.actions import (
     FollowRequestSerializer,
     FollowSerializer,
     PasswordResetSerializer,
+    ProfilePictureEditSerializer,
     TicketSerializer,
     UserBlockedSerializer,
     UserFollowersSerializer,
@@ -50,6 +51,7 @@ class UserViewSet(ExtendedViewSet):
         "reset_password": PasswordResetSerializer,
         "message": MessageComposeSerializer,
         "ticket": TicketSerializer,
+        "profile_picture": ProfilePictureEditSerializer,
     }
     serializer_class = UserPublicReadSerializer
 
@@ -219,6 +221,19 @@ class UserViewSet(ExtendedViewSet):
         return self.get_action_save_response(
             request, status_code=status.HTTP_201_CREATED
         )
+
+    @action(
+        detail=False,
+        methods=["post", "delete"],
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def profile_picture(self, request):
+        if request.method == "DELETE":
+            self.request.user.delete_profile_picture()
+            return Response(status=204)
+
+        serializer = self.get_serializer(self.request.user, data=request.data)
+        return self.get_action_save_response(request, serializer)
 
 
 class FollowRequestViewSet(ExtendedViewSet):

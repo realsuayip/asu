@@ -98,6 +98,16 @@ class TestAuth(APITestCase):
             ],
         )
 
+    def test_detail_self(self):
+        self.client.force_login(self.user1)
+        response = self.client.get(
+            reverse(
+                "user-detail",
+                kwargs={"username": self.user1.username},
+            )
+        )
+        self.assertEqual(200, response.status_code)
+
     def test_detail_returns_200_when_blocked(self):
         self.user1.blocked.add(self.user2)
         self.client.force_login(self.user1)

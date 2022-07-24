@@ -68,7 +68,8 @@ class UserViewSet(ExtendedViewSet):
         return queryset
 
     def get_object(self):
-        if self.request.user.username == self.kwargs["username"]:
+        self_view = self.request.user.username == self.kwargs["username"]
+        if self_view and self.action != "retrieve":
             return self.request.user
         return super().get_object()
 

@@ -4,7 +4,6 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
-from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import (
     MaxLengthValidator,
@@ -22,11 +21,7 @@ from sorl.thumbnail import get_thumbnail
 from zeynep.auth.models.managers import UserManager
 from zeynep.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from zeynep.messaging.models import ConversationRequest
-from zeynep.utils.file import (
-    FileSizeValidator,
-    MimeTypeValidator,
-    get_mime_type,
-)
+from zeynep.utils.file import FileSizeValidator, MimeTypeValidator
 
 
 def profile_picture_upload_to(instance, filename):
@@ -37,14 +32,6 @@ def profile_picture_upload_to(instance, filename):
         "uuid": uuid.uuid4().hex,
         "ext": ext,
     }
-
-
-def validate_file_size(file):
-    pass
-
-
-def validate_file_integrity(file):
-    raise ValidationError(get_mime_type(file))
 
 
 class User(AbstractUser):

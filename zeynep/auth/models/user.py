@@ -1,6 +1,4 @@
 import io
-import os
-import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
@@ -26,16 +24,6 @@ from zeynep.utils.file import (
     MimeTypeValidator,
     UserContentPath,
 )
-
-
-def profile_picture_upload_to(instance, filename):
-    template = "usercontent/%(user_id)s/profile_picture/%(uuid)s%(ext)s"
-    _, ext = os.path.splitext(filename)
-    return template % {
-        "user_id": instance.pk,
-        "uuid": uuid.uuid4().hex,
-        "ext": ext,
-    }
 
 
 class User(AbstractUser):

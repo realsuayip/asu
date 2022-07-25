@@ -1,4 +1,6 @@
 import mimetypes
+import os
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.utils.deconstruct import deconstructible
@@ -47,3 +49,17 @@ class FileSizeValidator:
     def __call__(self, file):
         if file.size > self.max_size:
             raise ValidationError(self.message)
+
+
+@deconstructible
+class UserContentPath:
+    base_path = "usercontent/"
+
+    def __init__(self, template):
+        self.template = self.base_path + template
+
+    def __call__(self, instance, filename):
+        _, ext = os.path.splitext(filename)
+        return self.template.format(
+            instance=instance, uuid=uuid.uuid4().hex, ext=ext
+        )

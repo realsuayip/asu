@@ -21,7 +21,11 @@ from sorl.thumbnail import get_thumbnail
 from zeynep.auth.models.managers import UserManager
 from zeynep.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from zeynep.messaging.models import ConversationRequest
-from zeynep.utils.file import FileSizeValidator, MimeTypeValidator
+from zeynep.utils.file import (
+    FileSizeValidator,
+    MimeTypeValidator,
+    UserContentPath,
+)
 
 
 def profile_picture_upload_to(instance, filename):
@@ -76,7 +80,7 @@ class User(AbstractUser):
     profile_picture = models.ImageField(
         _("profile picture"),
         blank=True,
-        upload_to=profile_picture_upload_to,
+        upload_to=UserContentPath("{instance.pk}/profile_picture/{uuid}{ext}"),
         validators=[
             FileSizeValidator(max_size=2**21),  # 2 MB
             MimeTypeValidator(allowed_types=["image/png", "image/jpeg"]),
@@ -243,7 +247,12 @@ class User(AbstractUser):
         if image.mode != "RGB":
             image = image.convert("RGB")
 
-        image = image.resize((400, 400), Image.LANCZOS)
+        maxsize = 400
+        width, height = image.size
+        ratio = min(maxsize / width, maxsize / height)
+        size = (int(width * ratio), int(height * ratio))
+
+        image = image.resize(size, Image.LANCZOS)
         image.save(thumb_io, format="JPEG")
 
         self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)

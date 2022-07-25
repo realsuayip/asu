@@ -1,11 +1,12 @@
+import io
 import os
 import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.core.validators import (
-    FileExtensionValidator,
     MaxLengthValidator,
     MinLengthValidator,
     RegexValidator,
@@ -15,6 +16,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 import sorl.thumbnail
+from PIL import Image
 from sorl.thumbnail import get_thumbnail
 
 from zeynep.auth.models.managers import UserManager
@@ -89,8 +91,6 @@ class User(AbstractUser):
         blank=True,
         upload_to=profile_picture_upload_to,
         validators=[
-            # todo resize to 400
-            FileExtensionValidator(allowed_extensions=["png", "jpg"]),
             FileSizeValidator(max_size=2**21),  # 2 MB
             MimeTypeValidator(allowed_types=["image/png", "image/jpeg"]),
         ],
@@ -249,7 +249,17 @@ class User(AbstractUser):
             sorl.thumbnail.delete(self.profile_picture, delete_file=False)
             self.profile_picture.delete(save=False)
 
-        self.profile_picture = image
+        name = image.name
+        thumb_io = io.BytesIO()
+        image = Image.open(image)
+
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        image = image.resize((400, 400), Image.LANCZOS)
+        image.save(thumb_io, format="JPEG")
+
+        self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)
         self.save(update_fields=["profile_picture", "date_modified"])
 
     def get_profile_picture(self, size=(72, 72)):

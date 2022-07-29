@@ -230,7 +230,7 @@ class UserViewSet(ExtendedViewSet):
     def profile_picture(self, request):
         if request.method == "DELETE":
             self.request.user.delete_profile_picture()
-            return Response(status=204)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         serializer = self.get_serializer(self.request.user, data=request.data)
         return self.get_action_save_response(request, serializer)

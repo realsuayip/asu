@@ -97,6 +97,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# FileSystemStorage related functionality
+# won't be required for remote file storages.
 MEDIA_URL = "media/"
 MEDIA_ROOT = "/code/zeynep/media"
 

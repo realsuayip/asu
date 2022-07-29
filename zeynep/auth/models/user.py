@@ -261,4 +261,5 @@ class User(AbstractUser):
     def delete_profile_picture(self):
         image = self.profile_picture
         sorl.thumbnail.delete(image, delete_file=False)
-        image.delete()
+        image.delete(save=False)
+        self.save(update_fields=["profile_picture", "date_modified"])

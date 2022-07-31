@@ -546,7 +546,7 @@ class TestAuth(APITestCase):
         self.assertFalse(self.user1.profile_picture.name)
         self.client.force_login(self.user1)
 
-        response = self.client.post(
+        response = self.client.put(
             reverse("user-profile-picture"),
             data={"profile_picture": image},
         )

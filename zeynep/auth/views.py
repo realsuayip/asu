@@ -2,6 +2,7 @@ from django.db.models import Count
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from zeynep.auth.models import User, UserBlock, UserFollow
@@ -70,7 +71,12 @@ class UserViewSet(ExtendedViewSet):
         return queryset
 
     def get_object(self):
-        self_view = self.request.user.username == self.kwargs.get("username")
+        username = self.kwargs.get("username")
+
+        if not username:
+            raise NotFound
+
+        self_view = self.request.user.username == username
         if self_view and self.action != "retrieve":
             return self.request.user
         return super().get_object()
@@ -224,8 +230,10 @@ class UserViewSet(ExtendedViewSet):
 
     @action(
         detail=False,
-        methods=["post", "delete"],
+        methods=["put", "delete"],
+        http_method_names=["put", "delete", "options", "trace"],
         permission_classes=[permissions.IsAuthenticated],
+        serializer_class=ProfilePictureEditSerializer,
     )
     def profile_picture(self, request):
         if request.method == "DELETE":

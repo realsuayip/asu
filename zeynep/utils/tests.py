@@ -18,15 +18,15 @@ class TestFileUtils(TestCase):
 
     def test_mimetype_validator(self):
         validate = MimeTypeValidator(allowed_types=["image/jpeg"])
-
-        try:
-            validate(self.image)
-        except ValidationError:
-            self.fail("unexpected validation error")
+        validate(self.image)
 
         validate.allowed_types = ["image/png"]
         with self.assertRaises(ValidationError):
             validate(self.image)
+
+        invalid_image = SimpleUploadedFile("test.png", b"test", "image/png")
+        with self.assertRaises(ValidationError):
+            validate(invalid_image)
 
     def test_filesize_validator(self):
         validate = FileSizeValidator(max_size=16400)
@@ -35,11 +35,7 @@ class TestFileUtils(TestCase):
             self.image.read(),
             content_type="image/jpeg",
         )
-
-        try:
-            validate(image)
-        except ValidationError:
-            self.fail("unexpected validation error")
+        validate(image)
 
         validate.max_size = 11200
         with self.assertRaises(ValidationError):

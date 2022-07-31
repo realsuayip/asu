@@ -62,6 +62,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
             "id",
             "display_name",
             "username",
+            "profile_picture",
             "is_private",
             "url",
         )

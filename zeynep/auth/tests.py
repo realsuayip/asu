@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -95,6 +96,7 @@ class TestAuth(APITestCase):
                 "following_count",
                 "url",
                 "date_joined",
+                "profile_picture",
             ],
         )
 
@@ -536,3 +538,26 @@ class TestAuth(APITestCase):
 
         response = self.client.get(reverse("user-blocked"))
         self._test_through_list_response(response)
+
+    def test_upload_delete_profile_picture(self):
+        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
+        image = open(file_path, "rb")
+
+        self.assertFalse(self.user1.profile_picture.name)
+        self.client.force_login(self.user1)
+
+        response = self.client.put(
+            reverse("user-profile-picture"),
+            data={"profile_picture": image},
+        )
+        self.assertEqual(200, response.status_code)
+
+        image.close()
+        self.user1.refresh_from_db()
+        self.assertTrue(self.user1.profile_picture.name)
+
+        r2 = self.client.delete(reverse("user-profile-picture"))
+        self.assertEqual(204, r2.status_code)
+
+        self.user1.refresh_from_db()
+        self.assertFalse(self.user1.profile_picture.name)

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_filters",
     "channels",
+    "sorl.thumbnail",
 ]
 
 MIDDLEWARE = [
@@ -95,6 +96,11 @@ USE_TZ = True
 
 
 STATIC_URL = "static/"
+
+# FileSystemStorage related functionality
+# won't be required for remote file storages.
+MEDIA_URL = "media/"
+MEDIA_ROOT = "/code/zeynep/media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

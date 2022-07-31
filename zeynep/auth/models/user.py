@@ -1,5 +1,8 @@
+import io
+
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
+from django.core.files.base import ContentFile
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -9,9 +12,18 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+import sorl.thumbnail
+from PIL import Image
+from sorl.thumbnail import get_thumbnail
+
 from zeynep.auth.models.managers import UserManager
 from zeynep.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from zeynep.messaging.models import ConversationRequest
+from zeynep.utils.file import (
+    FileSizeValidator,
+    MimeTypeValidator,
+    UserContentPath,
+)
 
 
 class User(AbstractUser):
@@ -53,6 +65,15 @@ class User(AbstractUser):
         default=Gender.UNSPECIFIED,
     )
     birth_date = models.DateField(_("birth date"), null=True, blank=True)
+    profile_picture = models.ImageField(
+        _("profile picture"),
+        blank=True,
+        upload_to=UserContentPath("{instance.pk}/profile_picture/{uuid}{ext}"),
+        validators=[
+            FileSizeValidator(max_size=2**21),  # 2 MB
+            MimeTypeValidator(allowed_types=["image/png", "image/jpeg"]),
+        ],
+    )
 
     # Messaging
     allows_receipts = models.BooleanField(
@@ -201,3 +222,44 @@ class User(AbstractUser):
             signer = signing.TimestampSigner(salt=scope)
             return signer.sign(self.pk)
         return None
+
+    def set_profile_picture(self, image):
+        if self.profile_picture:
+            sorl.thumbnail.delete(self.profile_picture, delete_file=False)
+            self.profile_picture.delete(save=False)
+
+        name = image.name
+        thumb_io = io.BytesIO()
+        image = Image.open(image)
+
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        maxsize = 400
+        width, height = image.size
+        ratio = min(maxsize / width, maxsize / height)
+        size = (int(width * ratio), int(height * ratio))
+
+        image = image.resize(size, Image.LANCZOS)
+        image.save(thumb_io, format="JPEG")
+
+        self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)
+        self.save(update_fields=["profile_picture", "date_modified"])
+
+    def get_profile_picture(self, size=(72, 72)):
+        if not self.profile_picture:
+            return None
+
+        size = "%sx%s" % size
+        return get_thumbnail(
+            self.profile_picture,
+            size,
+            crop="center",
+            quality=85,
+        )
+
+    def delete_profile_picture(self):
+        image = self.profile_picture
+        sorl.thumbnail.delete(image, delete_file=False)
+        image.delete(save=False)
+        self.save(update_fields=["profile_picture", "date_modified"])

@@ -2,6 +2,7 @@ from django.db.models import Count
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from zeynep.auth.models import User, UserBlock, UserFollow
@@ -10,6 +11,7 @@ from zeynep.auth.serializers.actions import (
     FollowRequestSerializer,
     FollowSerializer,
     PasswordResetSerializer,
+    ProfilePictureEditSerializer,
     TicketSerializer,
     UserBlockedSerializer,
     UserFollowersSerializer,
@@ -50,6 +52,7 @@ class UserViewSet(ExtendedViewSet):
         "reset_password": PasswordResetSerializer,
         "message": MessageComposeSerializer,
         "ticket": TicketSerializer,
+        "profile_picture": ProfilePictureEditSerializer,
     }
     serializer_class = UserPublicReadSerializer
 
@@ -68,7 +71,12 @@ class UserViewSet(ExtendedViewSet):
         return queryset
 
     def get_object(self):
-        self_view = self.request.user.username == self.kwargs.get("username")
+        username = self.kwargs.get("username")
+
+        if not username:
+            raise NotFound
+
+        self_view = self.request.user.username == username
         if self_view and self.action != "retrieve":
             return self.request.user
         return super().get_object()
@@ -219,6 +227,21 @@ class UserViewSet(ExtendedViewSet):
         return self.get_action_save_response(
             request, status_code=status.HTTP_201_CREATED
         )
+
+    @action(
+        detail=False,
+        methods=["put", "delete"],
+        http_method_names=["put", "delete", "options", "trace"],
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=ProfilePictureEditSerializer,
+    )
+    def profile_picture(self, request):
+        if request.method == "DELETE":
+            self.request.user.delete_profile_picture()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        serializer = self.get_serializer(self.request.user, data=request.data)
+        return self.get_action_save_response(request, serializer)
 
 
 class FollowRequestViewSet(ExtendedViewSet):

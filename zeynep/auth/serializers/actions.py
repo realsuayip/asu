@@ -18,6 +18,7 @@ RelatedUserField = UserPublicReadSerializer(
         "id",
         "display_name",
         "username",
+        "profile_picture",
         "description",
         "is_private",
         "url",

@@ -192,6 +192,7 @@ class ProfilePictureEditSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ("profile_picture",)
         model = User
+        extra_kwargs = {"profile_picture": {"required": True}}
 
     def update(self, instance, validated_data):
         image = validated_data["profile_picture"]

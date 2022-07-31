@@ -68,7 +68,7 @@ class UserViewSet(ExtendedViewSet):
         return queryset
 
     def get_object(self):
-        self_view = self.request.user.username == self.kwargs["username"]
+        self_view = self.request.user.username == self.kwargs.get("username")
         if self_view and self.action != "retrieve":
             return self.request.user
         return super().get_object()
@@ -77,6 +77,7 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["get", "patch"],
         permission_classes=[permissions.IsAuthenticated],
+        serializer_class=UserSerializer,
     )
     def me(self, request):
         if request.method == "PATCH":
@@ -92,6 +93,7 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["patch"],
         permission_classes=[permissions.AllowAny],
+        serializer_class=PasswordResetSerializer,
         url_path="password-reset",
     )
     def reset_password(self, request):
@@ -149,6 +151,7 @@ class UserViewSet(ExtendedViewSet):
     @action(
         detail=True,
         methods=["get"],
+        serializer_class=UserFollowersSerializer,
         pagination_class=get_paginator("cursor", ordering="-date_created"),
     )
     def followers(self, request, username):
@@ -163,6 +166,7 @@ class UserViewSet(ExtendedViewSet):
     @action(
         detail=True,
         methods=["get"],
+        serializer_class=UserFollowingSerializer,
         pagination_class=get_paginator("cursor", ordering="-date_created"),
     )
     def following(self, request, username):
@@ -179,6 +183,7 @@ class UserViewSet(ExtendedViewSet):
         methods=["get"],
         pagination_class=get_paginator("cursor", ordering="-date_created"),
         permission_classes=[permissions.IsAuthenticated],
+        serializer_class=UserBlockedSerializer,
     )
     def blocked(self, request):
         queryset = UserBlock.objects.filter(
@@ -192,6 +197,7 @@ class UserViewSet(ExtendedViewSet):
         detail=True,
         methods=["post"],
         permission_classes=[permissions.IsAuthenticated],
+        serializer_class=MessageComposeSerializer,
     )
     def message(self, request, username):
         context = self.get_serializer_context()
@@ -207,6 +213,7 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["post"],
         permission_classes=[permissions.IsAuthenticated],
+        serializer_class=TicketSerializer,
     )
     def ticket(self, request):
         return self.get_action_save_response(

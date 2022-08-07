@@ -10,6 +10,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 
 import sorl.thumbnail
@@ -26,6 +27,15 @@ from zeynep.utils.file import (
 )
 
 
+class UsernameValidator(RegexValidator):
+    regex = r"^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$"
+    message = _(
+        "Usernames can only contain latin letters,"
+        " numerals and underscores. Trailing, leading or"
+        " consecutive underscores are not allowed."
+    )
+
+
 class User(AbstractUser):
     class Gender(models.TextChoices):
         MALE = "male", _("Male")
@@ -37,18 +47,7 @@ class User(AbstractUser):
     username = models.CharField(
         _("username"),
         max_length=16,
-        unique=True,
-        validators=[
-            MinLengthValidator(3),
-            RegexValidator(
-                regex=r"^[a-z0-9]+(_[a-z0-9]+)*$",
-                message=_(
-                    "Usernames can only contain latin letters,"
-                    " numerals and underscores. Trailing, leading or"
-                    " consecutive underscores are not allowed."
-                ),
-            ),
-        ],
+        validators=[MinLengthValidator(3), UsernameValidator()],
     )
     display_name = models.CharField(_("display name"), max_length=32)
     description = models.TextField(
@@ -130,6 +129,20 @@ class User(AbstractUser):
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
+        constraints = [
+            models.UniqueConstraint(
+                Lower("username"),
+                name="unique_lower_username",
+                violation_error_message=_(
+                    "The username you specified is already in use."
+                ),
+            ),
+            models.CheckConstraint(
+                check=Q(username__regex=UsernameValidator.regex),
+                name="regex_valid_username",
+                violation_error_message=UsernameValidator.message,
+            ),
+        ]
 
     def __str__(self):
         return self.username

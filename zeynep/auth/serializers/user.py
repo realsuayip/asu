@@ -95,6 +95,12 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             raise serializers.ValidationError({"password": err.messages})
 
         user.set_password(password)
+
+        try:
+            user.full_clean()
+        except django.core.validators.ValidationError as exc:
+            raise serializers.ValidationError(exc.messages)
+
         user.save()
         verification.user = user
         verification.date_completed = timezone.now()

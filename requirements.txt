@@ -1,4 +1,4 @@
-Django==4.0.1
+Django==4.1
 psycopg2==2.9.3
 redis==4.1.0
 hiredis==2.0.0

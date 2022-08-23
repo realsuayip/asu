@@ -7,13 +7,25 @@ import zeynep.utils.file
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('zeynep_auth', '0006_user_allows_all_messages_user_allows_receipts'),
+        ("zeynep_auth", "0006_user_allows_all_messages_user_allows_receipts"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='profile_picture',
-            field=models.ImageField(blank=True, upload_to=zeynep.utils.file.UserContentPath('{instance.pk}/profile_picture/{uuid}{ext}'), validators=[zeynep.utils.file.FileSizeValidator(max_size=2097152), zeynep.utils.file.MimeTypeValidator(allowed_types=['image/png', 'image/jpeg'])], verbose_name='profile picture'),
+            model_name="user",
+            name="profile_picture",
+            field=models.ImageField(
+                blank=True,
+                upload_to=zeynep.utils.file.UserContentPath(
+                    "{instance.pk}/profile_picture/{uuid}{ext}"
+                ),
+                validators=[
+                    zeynep.utils.file.FileSizeValidator(max_size=2097152),
+                    zeynep.utils.file.MimeTypeValidator(
+                        allowed_types=["image/png", "image/jpeg"]
+                    ),
+                ],
+                verbose_name="profile picture",
+            ),
         ),
     ]

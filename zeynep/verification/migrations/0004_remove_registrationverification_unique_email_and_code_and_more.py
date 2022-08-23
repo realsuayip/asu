@@ -6,16 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('verification', '0003_alter_registrationverification_user'),
+        ("verification", "0003_alter_registrationverification_user"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='registrationverification',
-            name='unique_email_and_code',
+            model_name="registrationverification",
+            name="unique_email_and_code",
         ),
         migrations.AddConstraint(
-            model_name='registrationverification',
-            constraint=models.UniqueConstraint(fields=('email', 'code'), name='registrationverification_unique_email_and_code'),
+            model_name="registrationverification",
+            constraint=models.UniqueConstraint(
+                fields=("email", "code"),
+                name="registrationverification_unique_email_and_code",
+            ),
         ),
     ]

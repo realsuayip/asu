@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('verification', '0006_passwordresetverification_and_more'),
+        ("verification", "0006_passwordresetverification_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='passwordresetverification',
-            name='date_completed',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='date completed'),
+            model_name="passwordresetverification",
+            name="date_completed",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="date completed"
+            ),
         ),
         migrations.AddField(
-            model_name='registrationverification',
-            name='date_completed',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='date completed'),
+            model_name="registrationverification",
+            name="date_completed",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="date completed"
+            ),
         ),
     ]

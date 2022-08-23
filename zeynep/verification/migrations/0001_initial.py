@@ -15,19 +15,54 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='RegistrationVerification',
+            name="RegistrationVerification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=254, verbose_name='email')),
-                ('code', models.CharField(max_length=6, verbose_name='code')),
-                ('date_verified', models.DateTimeField(blank=True, null=True, verbose_name='date verified')),
-                ('date_modified', models.DateTimeField(auto_now=True, verbose_name='date modified')),
-                ('date_created', models.DateTimeField(auto_now_add=True, verbose_name='date created')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(max_length=254, verbose_name="email"),
+                ),
+                ("code", models.CharField(max_length=6, verbose_name="code")),
+                (
+                    "date_verified",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="date verified"
+                    ),
+                ),
+                (
+                    "date_modified",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="date modified"
+                    ),
+                ),
+                (
+                    "date_created",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="date created"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="user",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'registration verification',
-                'verbose_name_plural': 'registration verifications',
+                "verbose_name": "registration verification",
+                "verbose_name_plural": "registration verifications",
             },
         ),
     ]

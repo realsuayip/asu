@@ -6,23 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('verification', '0008_emailverification_nulled_by_and_more'),
+        ("verification", "0008_emailverification_nulled_by_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='emailverification',
-            name='email',
-            field=models.EmailField(db_index=True, max_length=254, verbose_name='email'),
+            model_name="emailverification",
+            name="email",
+            field=models.EmailField(
+                db_index=True, max_length=254, verbose_name="email"
+            ),
         ),
         migrations.AlterField(
-            model_name='passwordresetverification',
-            name='email',
-            field=models.EmailField(db_index=True, max_length=254, verbose_name='email'),
+            model_name="passwordresetverification",
+            name="email",
+            field=models.EmailField(
+                db_index=True, max_length=254, verbose_name="email"
+            ),
         ),
         migrations.AlterField(
-            model_name='registrationverification',
-            name='email',
-            field=models.EmailField(db_index=True, max_length=254, verbose_name='email'),
+            model_name="registrationverification",
+            name="email",
+            field=models.EmailField(
+                db_index=True, max_length=254, verbose_name="email"
+            ),
         ),
     ]

@@ -7,14 +7,14 @@ import zeynep.auth.models.managers
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('zeynep_auth', '0002_user_display_name'),
+        ("zeynep_auth", "0002_user_display_name"),
     ]
 
     operations = [
         migrations.AlterModelManagers(
-            name='user',
+            name="user",
             managers=[
-                ('objects', zeynep.auth.models.managers.UserManager()),
+                ("objects", zeynep.auth.models.managers.UserManager()),
             ],
         ),
     ]

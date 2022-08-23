@@ -21,4 +21,3 @@ repos:
     rev: 22.6.0
     hooks:
       - id: black
-        exclude: migrations

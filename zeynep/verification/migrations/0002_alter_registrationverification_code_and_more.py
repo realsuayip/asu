@@ -7,17 +7,23 @@ import zeynep.verification.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('verification', '0001_initial'),
+        ("verification", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='registrationverification',
-            name='code',
-            field=models.CharField(max_length=6, validators=[zeynep.verification.models.base.code_validator], verbose_name='code'),
+            model_name="registrationverification",
+            name="code",
+            field=models.CharField(
+                max_length=6,
+                validators=[zeynep.verification.models.base.code_validator],
+                verbose_name="code",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='registrationverification',
-            constraint=models.UniqueConstraint(fields=('email', 'code'), name='unique_email_and_code'),
+            model_name="registrationverification",
+            constraint=models.UniqueConstraint(
+                fields=("email", "code"), name="unique_email_and_code"
+            ),
         ),
     ]

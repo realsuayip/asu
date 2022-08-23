@@ -6,18 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('zeynep_auth', '0005_userfollowrequest_and_more'),
+        ("zeynep_auth", "0005_userfollowrequest_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='allows_all_messages',
-            field=models.BooleanField(default=True, help_text='Users that are not followed by this user can send message requests to them.', verbose_name='allows all incoming messages'),
+            model_name="user",
+            name="allows_all_messages",
+            field=models.BooleanField(
+                default=True,
+                help_text="Users that are not followed by this user can send message requests to them.",
+                verbose_name="allows all incoming messages",
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='allows_receipts',
-            field=models.BooleanField(default=True, verbose_name='allows message receipts'),
+            model_name="user",
+            name="allows_receipts",
+            field=models.BooleanField(
+                default=True, verbose_name="allows message receipts"
+            ),
         ),
     ]

@@ -32,7 +32,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         verification = super().create(validated_data)
-        verification.send_email()
+        transaction.on_commit(verification.send_email)
         return verification
 
 

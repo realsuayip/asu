@@ -17,7 +17,6 @@ class EmailSerializer(RegistrationSerializer):
     def create(self, validated_data):
         validated_data["user"] = self.context["request"].user
         verification = super().create(validated_data)
-        verification.send_email()
         return verification
 
 

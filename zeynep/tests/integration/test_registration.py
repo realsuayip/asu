@@ -23,9 +23,13 @@ class RegistrationTest(APITestCase):
 
         # Send code to e-mail
         with self.settings(EMAIL_BACKEND=test_backend):
-            send_response = self.client.post(url_send, data={"email": email})
+            with self.captureOnCommitCallbacks(execute=True) as callbacks:
+                send_response = self.client.post(
+                    url_send, data={"email": email}
+                )
             self.assertEqual(201, send_response.status_code)
             self.assertEqual(1, len(mail.outbox))
+            self.assertEqual(1, len(callbacks))
             (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
 
         # Check and verify the combination, get consent

@@ -67,6 +67,9 @@ def main(parser, environment):  # noqa
     if args.detached:
         cmd += " -d"
 
+    if args.amend:
+        cmd += " " + args.amend
+
     run_command(cmd, environment)
     return 0
 
@@ -122,5 +125,10 @@ if __name__ == "__main__":
         "-c",
         "--command",
         help="Run a Django command via 'manage.py'.",
+    )
+    parser.add_argument(
+        "-a",
+        "--amend",
+        help="Add arbitrary arguments to the command to be run.",
     )
     raise SystemExit(main(parser, get_environment()))

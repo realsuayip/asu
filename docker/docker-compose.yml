@@ -16,7 +16,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ../zeynep:/code/zeynep
+      - ../zaida:/code/zaida
     ports:
       - "8000:8000"
     depends_on:
@@ -30,11 +30,11 @@ services:
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
-    command: celery -A zeynep worker -l info
+    command: celery -A zaida worker -l info
     env_file:
       - .env
     volumes:
-      - ../zeynep:/code/zeynep
+      - ../zaida:/code/zaida
     depends_on:
       - redis
       - db
@@ -43,11 +43,11 @@ services:
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
-    command: celery -A zeynep beat -l info
+    command: celery -A zaida beat -l info
     env_file:
       - .env
     volumes:
-      - ../zeynep:/code/zeynep
+      - ../zaida:/code/zaida
     depends_on:
       - redis
       - db

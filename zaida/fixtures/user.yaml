@@ -1,0 +1,44 @@
+- model: zaida_auth.user
+  pk: 1
+  fields:
+    # password = hello
+    password: pbkdf2_sha256$320000$bPH1cEVClJIJLax3gttc5u$ZO+CC1wsOlG/8K+C3FA5gi8pBRANNATs+egdNAlaiLM=
+    last_login: 2022-04-06 19:53:58.037408+00:00
+    is_superuser: true
+    is_staff: true
+    is_active: true
+    date_joined: 2022-02-27 11:11:20.973352+00:00
+    display_name: "Administrator"
+    username: admin
+    description: "Doing administrative stuff"
+    website: www.example.com
+    email: test@django.org
+    date_modified: 2022-04-06 19:54:40.738350+00:00
+- model: zaida_auth.user
+  pk: 2
+  fields:
+    password: pbkdf2_sha256$320000$bPH1cEVClJIJLax3gttc5u$ZO+CC1wsOlG/8K+C3FA5gi8pBRANNATs+egdNAlaiLM=
+    is_superuser: true
+    is_staff: true
+    is_active: true
+    date_joined: 2022-03-01 11:11:20.973352+00:00
+    display_name: "Best Guy"
+    username: best
+    description: "Doing best stuff"
+    website: www.best.example.com
+    email: best@django.org
+    date_modified: 2022-04-06 19:54:40.738350+00:00
+- model: zaida_auth.user
+  pk: 3
+  fields:
+    password: pbkdf2_sha256$320000$bPH1cEVClJIJLax3gttc5u$ZO+CC1wsOlG/8K+C3FA5gi8pBRANNATs+egdNAlaiLM=
+    is_superuser: true
+    is_staff: true
+    is_active: true
+    date_joined: 2022-05-13 11:11:20.973352+00:00
+    display_name: "Greatest Person"
+    description: "Doing greatest stuff"
+    website: www.greatest.example.com
+    username: greatest
+    email: greatest@django.org
+    date_modified: 2022-04-06 19:54:40.738350+00:00

@@ -3,7 +3,7 @@ import os
 import shlex
 import subprocess
 
-from zeynep.utils.envparse import env
+from zaida.utils.envparse import env
 
 _compose_files = {
     "production": "docker/docker-compose.prod.yml",
@@ -36,11 +36,11 @@ def main(parser, environment):  # noqa
         return 1
 
     filename = _compose_files[environment]
-    compose_cmd = "docker-compose -p zeynep -f %s" % filename
+    compose_cmd = "docker-compose -p zaida -f %s" % filename
     command_map = {
         "command": f"{_django} {args.command}",
         "shell": f"{_django} shell",
-        "test": f"{_django} test --settings=zeynep.settings.test"
+        "test": f"{_django} test --settings=zaida.settings.test"
         " --parallel 4 --shuffle --timing --keepdb",
         "console": "docker exec -it web /bin/bash",
     }
@@ -72,7 +72,7 @@ def main(parser, environment):  # noqa
 
 
 def get_environment():
-    environment = env.str("ZEYNEP_ENV", None)
+    environment = env.str("ZAIDA_ENV", None)
 
     if environment is None:
         print(

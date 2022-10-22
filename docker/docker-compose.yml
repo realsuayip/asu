@@ -3,7 +3,7 @@ version: '3.7'
 services:
   db:
     container_name: postgres
-    image: postgres
+    image: postgres:14.5-alpine
     user: postgres
     env_file:
       - .env
@@ -20,16 +20,17 @@ services:
     ports:
       - "8000:8000"
     depends_on:
+      - redis
       - db
   redis:
     container_name: redis
-    image: redis:6.2.6-alpine
+    image: redis:7-alpine
     user: redis
   celery-worker:
     container_name: celery-worker
     build:
       context: ..
-      dockerfile: docker/web/Dockerfile
+      dockerfile: docker/celery/Dockerfile
     command: celery -A zaida worker -l info
     env_file:
       - .env
@@ -42,7 +43,7 @@ services:
     container_name: celery-beat
     build:
       context: ..
-      dockerfile: docker/web/Dockerfile
+      dockerfile: docker/celery/Dockerfile
     command: celery -A zaida beat -l info
     env_file:
       - .env

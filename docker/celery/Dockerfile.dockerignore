@@ -1,0 +1,12 @@
+node_modules
+package-lock.json
+venv
+media
+.git
+.env
+.idea
+.vscode
+docker.py
+.DS_Store
+.coverage
+htmlcov

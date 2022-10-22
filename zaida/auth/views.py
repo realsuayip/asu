@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from zaida.auth import schema
 from zaida.auth.models import User, UserBlock, UserFollow
 from zaida.auth.serializers.actions import (
     BlockSerializer,
@@ -55,6 +56,14 @@ class UserViewSet(ExtendedViewSet):
         "profile_picture": ProfilePictureEditSerializer,
     }
     serializer_class = UserPublicReadSerializer
+    schema_extensions = {
+        "create": schema.create,
+        "retrieve": schema.retrieve,
+        "block": schema.block,
+        "unblock": schema.unblock,
+        "follow": schema.follow,
+        "unfollow": schema.unfollow,
+    }
 
     def get_queryset(self):
         queryset = User.objects.active()

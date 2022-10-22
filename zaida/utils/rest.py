@@ -1,4 +1,4 @@
-from rest_framework import exceptions, pagination
+from rest_framework import exceptions, pagination, serializers
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
 
@@ -54,3 +54,8 @@ class DynamicFieldsMixin:
             allowed, existing = set(fields), set(self.fields)  # noqa
             for field_name in existing - allowed:
                 self.fields.pop(field_name)  # noqa
+
+
+class APIError(serializers.Serializer):  # noqa
+    # Generic error serializer for documentation rendering.
+    detail = serializers.CharField()

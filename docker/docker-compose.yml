@@ -16,7 +16,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ../zaida:/code/zaida
+      - ..:/code
     ports:
       - "8000:8000"
     depends_on:
@@ -35,7 +35,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ../zaida:/code/zaida
+      - ..:/code
     depends_on:
       - redis
       - db
@@ -48,7 +48,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ../zaida:/code/zaida
+      - ..:/code
     depends_on:
       - redis
       - db

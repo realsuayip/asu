@@ -1,4 +1,4 @@
-FROM python:3.10.8-bullseye
+FROM python:3.11.0-bullseye
 ENV PYTHONUNBUFFERED 1
 
 RUN mkdir /code

@@ -1,4 +1,5 @@
 import string
+import uuid
 
 from django.conf import settings
 from django.core import signing
@@ -26,6 +27,7 @@ def code_validator(code):
 
 
 class Verification(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
@@ -111,14 +113,15 @@ class ConsentVerification(Verification):
         return "%s <#%s>" % (self.email, self.pk)
 
     @classproperty
-    def salt(cls):  # noqa
+    def ident(cls):  # noqa
         return "consent_" + cls._meta.model_name
 
     def create_consent(self):
         assert self.is_eligible
 
-        signer = signing.TimestampSigner(salt=self.salt)
-        return signer.sign(self.pk)
+        obj = {"ident": self.ident, "value": self.uuid.hex}
+        signer = signing.TimestampSigner()
+        return signer.sign_object(obj)
 
     @property
     def is_eligible(self):

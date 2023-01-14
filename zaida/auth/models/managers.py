@@ -19,6 +19,12 @@ class UserManager(DjangoUserManager):
         """
         return self.exclude(Q(is_active=False) | Q(is_frozen=True))
 
-    def verify_ticket(self, ticket, scope, *, max_age):  # noqa
-        signer = signing.TimestampSigner(salt=scope)
-        return signer.unsign(ticket, max_age=max_age)
+    def verify_ticket(
+        self, ticket: str, *, ident: str, max_age: int
+    ) -> tuple[int, str]:
+        signer = signing.TimestampSigner()
+        obj = signer.unsign_object(ticket, max_age=max_age)
+        given_ident, value = obj.get("ident"), obj.get("value")
+        if (not ident) or (not value) or ident != given_ident:
+            raise signing.BadSignature
+        return value

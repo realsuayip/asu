@@ -36,12 +36,13 @@ class ConsentVerificationManager(VerificationManager):
         Check consent, if valid, fetch related RegistrationVerification
         object and return it, else return None. 'email' should be normalized.
         """
-        signer = signing.TimestampSigner(salt=self.model.salt)
-        max_age = self.eligible_period
-
+        signer = signing.TimestampSigner()
         try:
-            value = signer.unsign(consent, max_age=max_age)
-            return self.eligible().get(pk=int(value), email=email, **kwargs)
+            obj = signer.unsign_object(consent, max_age=self.eligible_period)
+            ident, value = obj.get("ident"), obj.get("value")
+            if (not value) or (not ident) or ident != self.model.ident:
+                raise signing.BadSignature
+            return self.eligible().get(uuid=value, email=email, **kwargs)
         except (
             signing.BadSignature,
             signing.SignatureExpired,

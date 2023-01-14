@@ -1,4 +1,5 @@
 import io
+import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
@@ -42,6 +43,8 @@ class User(AbstractUser):
         FEMALE = "female", _("Female")
         OTHER = "other", _("Other")
         UNSPECIFIED = "unspecified", _("Unspecified")
+
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
 
     # Personal information
     username = models.CharField(
@@ -230,11 +233,12 @@ class User(AbstractUser):
             # requests from strangers.
             return to_user.allows_all_messages
 
-    def create_ticket(self, scope):
-        if scope == "websocket":
-            signer = signing.TimestampSigner(salt=scope)
-            return signer.sign(self.pk)
-        return None
+    def create_ticket(self, *, ident: str) -> str:
+        assert ident, "ident might not be empty"
+
+        signer = signing.TimestampSigner()
+        obj = {"ident": ident, "value": (self.pk, self.uuid.hex)}
+        return signer.sign_object(obj)
 
     def set_profile_picture(self, image):
         if self.profile_picture:

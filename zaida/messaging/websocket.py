@@ -6,7 +6,9 @@ from zaida.auth.models import User
 class ConversationConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content, **kwargs):
         ticket = content["ticket"]
-        user_id = User.objects.verify_ticket(ticket, "websocket", max_age=10)
+        user_id, _ = User.objects.verify_ticket(
+            ticket, ident="websocket", max_age=10
+        )
 
         if getattr(self, "group", None) is None:
             self.group = "conversations_%s" % user_id  # noqa

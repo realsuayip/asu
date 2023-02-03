@@ -61,12 +61,31 @@ class TestAuth(APITestCase):
             },
         )
         detail = response.json()
+        self.assertEqual("__Potato__", detail["display_name"])
+        self.assertEqual("Lorem ipsum", detail["description"])
 
         self.user2.refresh_from_db()
         self._compare_instance_to_dict(
             self.user2,
             detail,
             exclude=["url", "date_joined", "birth_date"],
+        )
+
+    def test_me_update_username_taken(self):
+        UserFactory(username="suzie")
+
+        self.client.force_login(self.user2)
+        response = self.client.patch(
+            reverse("user-me"),
+            data={
+                "username": "Suzie",
+            },
+        )
+
+        self.assertContains(
+            response,
+            "username you specified is already in use",
+            status_code=400,
         )
 
     def test_me_update_disallow_email(self):

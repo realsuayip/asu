@@ -55,6 +55,20 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {"url": {"lookup_field": "username"}}
         read_only_fields = ("email", "date_joined")
 
+    def update(self, instance, validated_data):
+        # This method is overriden so that the full_clean could be
+        # called, triggering related database constraints.
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        try:
+            instance.full_clean()
+        except django.core.validators.ValidationError as exc:
+            raise serializers.ValidationError(exc.messages)
+
+        instance.save(update_fields=validated_data.keys())
+        return instance
+
 
 class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
     consent = serializers.CharField(write_only=True)

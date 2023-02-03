@@ -3,8 +3,6 @@ import os
 import shlex
 import subprocess
 
-from zaida.utils.envparse import env
-
 _compose_files = {
     "production": "docker/docker-compose.prod.yml",
     "development": "docker/docker-compose.yml",
@@ -75,7 +73,7 @@ def main(parser, environment):  # noqa
 
 
 def get_environment():
-    environment = env.str("ZAIDA_ENV", None)
+    environment = os.environ.get("ZAIDA_ENV")
 
     if environment is None:
         print(
@@ -92,7 +90,7 @@ def get_environment():
     return environment
 
 
-if __name__ == "__main__":
+def entrypoint():
     parser = argparse.ArgumentParser(
         description="Runs and manages docker containers."
     )

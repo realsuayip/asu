@@ -8,7 +8,6 @@ import zaida.verification.models.base
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [

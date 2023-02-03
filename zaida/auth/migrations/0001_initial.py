@@ -13,7 +13,6 @@ import zaida.utils.file
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [

@@ -115,3 +115,30 @@ what it is doing.
       * Django web framework
       * django_rest_framework for REST API
       * channels for WebSocket support
+
+## Installation
+
+To serve the project you'll at least need Docker with compose plugin
+installed, having Python will help. First off, clone the project:
+
+```shell
+git clone https://github.com/realsuayip/zaida 
+```
+
+Navigate to the root directory, and run this command:
+
+````shell
+CONTEXT=setup python manage.py up
+````
+
+The command above can execute helper functions that create related Docker
+commands, if you don't have Python at your disposal, you may also use the
+docker commands directly:
+
+````shell
+docker-compose -p zaida -f docker/docker-compose.yml up
+````
+
+If you are using it for the first time, it might take a while to set up the
+containers. Once the containers are done, you may navigate to
+`127.0.0.1:8000/api/schema/redoc/` to browse the API documentation.

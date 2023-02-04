@@ -18,4 +18,15 @@ jobs:
       run: sleep 5s
       shell: bash
     - name: Run tests
-      run: docker exec -t web python manage.py test --settings=zaida.settings.test --parallel 4 --shuffle --timing
+      run: >-
+        docker exec -t web
+        python manage.py test --settings=zaida.settings.test --parallel 4 --shuffle --timing
+    - name: Run tests with coverage
+      run: >-
+        docker exec -t web
+        /bin/sh -c
+        "coverage run ./manage.py test --shuffle --settings=zaida.settings.test && coverage xml"
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}

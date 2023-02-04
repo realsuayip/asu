@@ -1,5 +1,7 @@
 # zaida
 
+[![codecov](https://codecov.io/github/realsuayip/zaida/branch/main/graph/badge.svg?token=A0BJ9TINW1)](https://codecov.io/github/realsuayip/zaida)
+
 A comprehensive layout for your next social networking service. zaida strictly
 follows REST principles (this repository does not contain a front-end
 application).
@@ -122,7 +124,7 @@ To serve the project you'll at least need Docker with compose plugin
 installed, having Python will help. First off, clone the project:
 
 ```shell
-git clone https://github.com/realsuayip/zaida 
+git clone https://github.com/realsuayip/zaida
 ```
 
 Navigate to the root directory, and run this command:

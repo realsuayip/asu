@@ -12,3 +12,5 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     }
 }
+
+INSTALLED_APPS.remove("debug_toolbar")

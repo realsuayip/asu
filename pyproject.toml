@@ -24,6 +24,14 @@ dependencies = [
     "python-magic ~= 0.4",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "django-debug-toolbar ~= 3.8",
+    "ipython ~= 8.9",
+    "coverage ~= 7.1",
+    "pip-tools ~= 1.8",
+]
+
 [tool.black]
 line-length = 79
 

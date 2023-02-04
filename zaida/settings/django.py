@@ -106,3 +106,14 @@ MEDIA_ROOT = "/code/zaida/media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
+if DEBUG:
+    # Django debug toolbar related configuration
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
+    # Properly identify internal IP in Docker container
+    import socket
+    _, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips]

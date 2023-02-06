@@ -21,15 +21,24 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # First party apps
     "zaida",
     "zaida.auth",
     "zaida.verification",
     "zaida.messaging",
+    # Third party apps
     "rest_framework",
     "drf_spectacular",
     "django_filters",
     "channels",
     "sorl.thumbnail",
+    # OAuth2
+    "oauth2_provider",
+    # Two-factor authentication
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
+    "two_factor",
 ]
 
 MIDDLEWARE = [
@@ -40,6 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_otp.middleware.OTPMiddleware",
 ]
 
 DATABASES = {
@@ -107,6 +117,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+LOGIN_URL = "two_factor:login"
+LOGIN_REDIRECT_URL = "two_factor:profile"
 
 if DEBUG:
     # Django debug toolbar related configuration
@@ -115,5 +127,6 @@ if DEBUG:
 
     # Properly identify internal IP in Docker container
     import socket
+
     _, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips]

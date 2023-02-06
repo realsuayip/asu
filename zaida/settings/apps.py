@@ -5,6 +5,7 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSION": "latest",
     "ALLOWED_VERSIONS": ["latest", "1.0"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

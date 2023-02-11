@@ -104,6 +104,8 @@ django-phonenumber-field==6.4.0
     # via django-two-factor-auth
 django-two-factor-auth==1.15.0
     # via zaida (pyproject.toml)
+django-widget-tweaks==1.4.12
+    # via zaida (pyproject.toml)
 djangorestframework==3.14.0
     # via
     #   drf-nested-routers

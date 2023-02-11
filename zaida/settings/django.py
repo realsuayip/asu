@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "django_filters",
     "channels",
     "sorl.thumbnail",
+    "widget_tweaks",
     # OAuth2
     "oauth2_provider",
     # Two-factor authentication
@@ -107,6 +108,7 @@ USE_TZ = True
 
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # FileSystemStorage related functionality
 # won't be required for remote file storages.

@@ -1,0 +1,36 @@
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv=Content-Type content="text/html; charst=UTF-8">
+
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static "css/index.css" %}" rel="stylesheet"/>
+</head>
+
+<body>
+
+<main class="container">
+    {% block content_wrapper %}{% block content %}{% endblock %}{% endblock %}
+    <footer>
+        <section class="links">
+            <a href="#">Terms</a>
+            <a href="#">Privacy</a>
+            <a href="#">Security</a>
+            <a href="#">Contact</a>
+        </section>
+        <article>
+            {% blocktranslate trimmed %}
+                © Copyright 2022 zaida, All Rights Reserved<br>
+                <a href="mailto:support@example.com">support@example.com</a>
+            {% endblocktranslate %}
+        </article>
+    </footer>
+</main>
+
+</body>
+</html>

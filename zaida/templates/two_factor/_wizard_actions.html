@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<div class="input-cluster">
+    <button type="submit" class="btn primary">{% trans "Continue" %}</button>
+
+    {% if wizard.steps.prev %}
+        <button name="wizard_goto_step"
+                type="submit"
+                value="{{ wizard.steps.prev }}"
+                class="btn secondary">{% trans "Back" %}</button>
+    {% endif %}
+
+    {% if cancel_url %}
+        <a href="{{ cancel_url }}" class="btn secondary muted">{% trans "Cancel" %}</a>
+    {% endif %}
+</div>

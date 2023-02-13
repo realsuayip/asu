@@ -13,7 +13,7 @@
         </h1>
 
         {% if wizard.steps.current == 'auth' %}
-            <small style="text-align: justify"{% if user.is_authenticated %} class="banner warning"{% endif %}>
+            <small role="alert" style="text-align: justify"{% if user.is_authenticated %} class="banner warning"{% endif %}>
                 {% if user.is_authenticated %}
                     {% url "two_factor:profile" as url %}
                     {% blocktranslate trimmed with username=user.username %}
@@ -40,7 +40,7 @@
 
     {% if wizard.form.non_field_errors %}
         {% for error in wizard.form.non_field_errors %}
-            <p class="banner danger">{{ error }}</p>
+            <p role="alert" class="banner danger">{{ error }}</p>
         {% endfor %}
     {% endif %}
 
@@ -75,7 +75,7 @@
             {% elif wizard.steps.current == 'token' or wizard.steps.current == 'backup' %}
                 <div class="input-group">
                     <label for="login_otp_token">Code</label>
-                    {% render_field wizard.form.otp_token id="login_otp_token" %}
+                    {% render_field wizard.form.otp_token|attr:"required" id="login_otp_token" %}
                     {% if wizard.form.otp_token.errors %}
                         {% for error in wizard.form.otp_token.errors %}
                             <small class="text-danger">{{ error }}</small>

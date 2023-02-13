@@ -11,7 +11,7 @@
 
     {% if wizard.form.non_field_errors %}
         {% for error in wizard.form.non_field_errors %}
-            <p class="banner danger">{{ error }}</p>
+            <p role="alert" class="banner danger">{{ error }}</p>
         {% endfor %}
     {% endif %}
 
@@ -63,8 +63,6 @@
                 <input type="submit" value="" hidden/>
             </div>
             {% include "two_factor/_wizard_actions.html" %}
-            {# so that 'Back' can be clicked without having to enter the input #}
-            <script>document.getElementById("gen_token").removeAttribute("required")</script>
         </form>
     </div>
 {% endblock %}

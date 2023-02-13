@@ -33,5 +33,15 @@
     </footer>
 </main>
 
+<script>
+    !function () {
+        const t = document.querySelector("button.back[type=submit]");
+        null !== t && t.addEventListener("click", function () {
+            document.querySelectorAll("input:not([type=hidden])").forEach(function (t) {
+                t.disabled = !0
+            })
+        })
+    }();
+</script>
 </body>
 </html>

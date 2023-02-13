@@ -4,6 +4,29 @@
     box-sizing: border-box;
 }
 
+:root {
+    --background: #0d1117;
+    --foreground: #c9d1d9;
+    --background-accent: #161b22;
+    --border-accent: #21262d;
+    --input-border: #30363d;
+    --btn-color: inherit;
+    --btn-effect: rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --background: #ffffff;
+        --foreground: #24292f;
+        --background-accent: #f9f9f9;
+        --border-accent: #dedede;
+        --input-border: #d0d7de;
+        --btn-color: #ffffff;
+        --btn-effect: rgba(0, 0, 0, 0.05);
+    }
+}
+
+
 html {
     line-height: 1.15;
     -webkit-text-size-adjust: 100%;
@@ -16,8 +39,8 @@ body {
     margin: 0;
     font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     font-size: 1.4rem;
-    background: #0d1117;
-    color: #c9d1d9;
+    background: var(--background);
+    color: var(--foreground);
 }
 
 hr {
@@ -163,7 +186,7 @@ body {
 }
 
 svg {
-    fill: #c9d1d9;
+    fill: var(--foreground);
 }
 
 main {
@@ -173,6 +196,12 @@ main {
     border-radius: .4rem;
     width: 400px;
     height: auto;
+}
+
+@media screen and (max-width: 420px) {
+    main {
+        margin: 0 2rem;
+    }
 }
 
 footer {
@@ -196,9 +225,9 @@ footer > article {
 
 .subject {
     padding: 2.5rem 1.5rem;
-    border: 1px solid #21262d;
+    border: 1px solid var(--border-accent);
     border-radius: .75rem;
-    background: #161b22;
+    background: var(--background-accent);
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -226,11 +255,11 @@ label {
 }
 
 input {
-    border: 1px solid #30363d;
+    border: 1px solid var(--input-border);
     border-radius: .4rem;
-    background: #0d1117;
+    background: var(--background);
     font-size: 1.6rem;
-    color: #c9d1d9;
+    color: var(--foreground);
     padding: 1rem 1rem;
 }
 
@@ -241,7 +270,7 @@ input {
     line-height: 2.25rem;
     background: linear-gradient(to bottom, #287cfe, #0466ff);
     cursor: pointer;
-    color: inherit;
+    color: var(--btn-color);
     border-radius: .4rem;
     padding: .5rem 1rem;
     font-size: 1.4rem;
@@ -253,6 +282,7 @@ input {
     background: transparent;
     border: 1px solid rgba(40, 124, 254, 0.5);
     font-weight: bold;
+    color: inherit;
 }
 
 .btn.secondary.light {
@@ -282,7 +312,7 @@ a {
 }
 
 .btn.secondary:hover {
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--btn-effect);
 }
 
 .qrcode {

@@ -13,6 +13,8 @@ from asu.verification.models import EmailVerification
 
 
 class TestRegistrationVerification(APITestCase):
+    fixtures = ["project_variables"]
+
     @classmethod
     def setUpTestData(cls):
         cls.url_send = reverse("email-verification-list")

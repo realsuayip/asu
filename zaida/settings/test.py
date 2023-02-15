@@ -13,4 +13,4 @@ CHANNEL_LAYERS = {
     }
 }
 
-INSTALLED_APPS.remove("debug_toolbar")
+INSTALLED_APPS.remove("debug_toolbar")  # noqa: F405

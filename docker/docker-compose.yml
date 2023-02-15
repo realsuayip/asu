@@ -22,6 +22,7 @@ services:
     depends_on:
       - redis
       - db
+    restart: on-failure
   redis:
     container_name: redis
     image: redis:7-alpine

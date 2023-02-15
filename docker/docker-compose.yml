@@ -26,6 +26,9 @@ services:
     container_name: redis
     image: redis:7-alpine
     user: redis
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.11-alpine
   celery-worker:
     container_name: celery-worker
     build:

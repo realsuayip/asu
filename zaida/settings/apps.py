@@ -18,7 +18,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 REDIS_URL = "redis://redis:6379/1"
-CELERY_BROKER_URL = REDIS_URL
+CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672/"
 
 CHANNEL_LAYERS = {
     "default": {

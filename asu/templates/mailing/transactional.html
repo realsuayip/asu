@@ -1,5 +1,7 @@
-{% load i18n %}
+{% load i18n asu %}
 {% get_current_language as LANGUAGE_CODE %}
+{% get_variable "BRAND" as brand %}
+{% get_variable "SUPPORT_EMAIL" as support_email %}
 <!doctype html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
@@ -188,7 +190,7 @@
                             <table role=presentation border=0 cellpadding=0 cellspacing=0>
                                 <tr>
                                     <td>
-                                        <h1><strong style="color: #0d6efd">zaida</strong></h1>
+                                        <h1><strong style="color: #0d6efd">{{ brand }}</strong></h1>
                                     </td>
                                 </tr>
                             </table>
@@ -204,13 +206,14 @@
                                     </td>
                                 </tr>
                             </table>
-                            <table role=presentation border=0 cellpadding=0 cellspacing=0 style="max-width: 80%; margin: 2em auto 0;">
+                            <table role=presentation border=0 cellpadding=0 cellspacing=0
+                                   style="max-width: 80%; margin: 2em auto 0;">
                                 <tr>
                                     <td style="text-align: center !important;">
                                         <small>
                                             {% blocktranslate trimmed %}
                                                 This is a transactional e-mail sent by
-                                                <a href="#">zaida</a> application.
+                                                <a href="#">{{ brand }}</a> application.
                                                 If you didn't make the request to receive this mail, you may ignore it.
                                             {% endblocktranslate %}
                                         </small>
@@ -225,8 +228,8 @@
                         <tr>
                             <td class="content-block">
                                 {% blocktranslate trimmed %}
-                                    © Copyright 2022 zaida, All Rights Reserved<br>
-                                    <a href="mailto:support@example.com">support@example.com</a>
+                                    © Copyright 2022 {{ brand }}, All Rights Reserved<br>
+                                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>
                                 {% endblocktranslate %}
                             </td>
                         </tr>

@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n asu %}
 {% get_current_language as LANGUAGE_CODE %}
 
 <!doctype html>
@@ -25,9 +25,11 @@
             <a href="#StubLink">Contact</a>
         </section>
         <article>
+            {% get_variable "BRAND" as brand %}
+            {% get_variable "SUPPORT_EMAIL" as support_mail %}
             {% blocktranslate trimmed %}
-                © Copyright 2022 zaida, All Rights Reserved<br>
-                <a href="mailto:support@example.com">support@example.com</a>
+                © Copyright 2022 {{ brand }}, All Rights Reserved<br>
+                <a href="mailto:{{ support_mail }}">{{ support_mail }}</a>
             {% endblocktranslate %}
         </article>
     </footer>

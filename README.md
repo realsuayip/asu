@@ -1,8 +1,8 @@
-# zaida
+# asu
 
-[![codecov](https://codecov.io/github/realsuayip/zaida/branch/main/graph/badge.svg?token=A0BJ9TINW1)](https://codecov.io/github/realsuayip/zaida)
+[![codecov](https://codecov.io/github/realsuayip/asu/branch/main/graph/badge.svg?token=A0BJ9TINW1)](https://codecov.io/github/realsuayip/asu)
 
-A comprehensive layout for your next social networking service. zaida strictly
+A comprehensive layout for your next social networking service. asu strictly
 follows REST principles (this repository does not contain a front-end
 application).
 
@@ -73,7 +73,7 @@ And it's not just about logic; it is also important to figure out a good
 database design and optimized queries while considering the overall
 application design.
 
-zaida (hopefully), will contain all the basic social-media related functionality
+asu (hopefully), will contain all the basic social-media related functionality
 in order to bootstrap a new social media application; while being comprehensive
 on
 what it is doing.
@@ -124,7 +124,7 @@ To serve the project you'll at least need Docker with compose plugin
 installed, having Python will help. First off, clone the project:
 
 ```shell
-git clone https://github.com/realsuayip/zaida
+git clone https://github.com/realsuayip/asu
 ```
 
 Navigate to the root directory, and run this command:
@@ -138,7 +138,7 @@ commands, if you don't have Python at your disposal, you may also use the
 docker commands directly:
 
 ````shell
-docker-compose -p zaida -f docker/docker-compose.yml up
+docker-compose -p asu -f docker/docker-compose.yml up
 ````
 
 If you are using it for the first time, it might take a while to set up the

@@ -10,11 +10,11 @@ appnope==0.1.3
     # via ipython
 asgiref==3.6.0
     # via
+    #   asu (pyproject.toml)
     #   channels
     #   channels-redis
     #   daphne
     #   django
-    #   zaida (pyproject.toml)
 asttokens==2.2.1
     # via stack-data
 async-timeout==4.0.2
@@ -34,17 +34,17 @@ backcall==0.2.0
 billiard==3.6.4.0
     # via celery
 celery==5.2.7
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 certifi==2022.12.7
     # via requests
 cffi==1.15.1
     # via cryptography
 channels[daphne]==4.0.0
     # via
+    #   asu (pyproject.toml)
     #   channels-redis
-    #   zaida (pyproject.toml)
 channels-redis==4.0.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 charset-normalizer==3.0.1
     # via requests
 click==8.1.3
@@ -63,7 +63,7 @@ click-repl==0.2.0
 constantly==15.1.0
     # via twisted
 coverage==7.1.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 cryptography==39.0.0
     # via
     #   autobahn
@@ -78,6 +78,7 @@ deprecated==1.2.13
     # via jwcrypto
 django==4.1.6
     # via
+    #   asu (pyproject.toml)
     #   channels
     #   django-debug-toolbar
     #   django-filter
@@ -89,42 +90,41 @@ django==4.1.6
     #   djangorestframework
     #   drf-nested-routers
     #   drf-spectacular
-    #   zaida (pyproject.toml)
 django-debug-toolbar==3.8.1
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 django-filter==22.1
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 django-formtools==2.4
     # via django-two-factor-auth
 django-oauth-toolkit==2.2.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 django-otp==1.1.4
     # via django-two-factor-auth
 django-phonenumber-field==6.4.0
     # via django-two-factor-auth
 django-two-factor-auth==1.15.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 django-widget-tweaks==1.4.12
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 djangorestframework==3.14.0
     # via
+    #   asu (pyproject.toml)
     #   drf-nested-routers
     #   drf-spectacular
-    #   zaida (pyproject.toml)
 drf-nested-routers==0.93.4
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 drf-spectacular==0.25.1
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 executing==1.2.0
     # via stack-data
 factory-boy==3.2.1
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 faker==16.6.1
     # via factory-boy
 first==2.0.2
     # via pip-tools
 hiredis==2.2.1
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 hyperlink==21.0.0
     # via
     #   autobahn
@@ -139,7 +139,7 @@ incremental==22.10.0
 inflection==0.5.1
     # via drf-spectacular
 ipython==8.9.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 jedi==0.18.2
     # via ipython
 jsonschema==4.17.3
@@ -159,19 +159,19 @@ parso==0.8.3
 pexpect==4.8.0
     # via ipython
 phonenumbers==8.13.5
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 pickleshare==0.7.5
     # via ipython
 pillow==9.4.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 pip-tools==1.11.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 prompt-toolkit==3.0.36
     # via
     #   click-repl
     #   ipython
 psycopg2==2.9.5
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
@@ -195,7 +195,7 @@ pyrsistent==0.19.3
 python-dateutil==2.8.2
     # via faker
 python-magic==0.4.27
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 pytz==2022.7.1
     # via
     #   celery
@@ -206,8 +206,8 @@ qrcode==7.4.1
     # via django-two-factor-auth
 redis==4.4.2
     # via
+    #   asu (pyproject.toml)
     #   channels-redis
-    #   zaida (pyproject.toml)
 requests==2.28.2
     # via django-oauth-toolkit
 service-identity==21.1.0
@@ -221,7 +221,7 @@ six==1.16.0
     #   python-dateutil
     #   service-identity
 sorl-thumbnail==12.9.0
-    # via zaida (pyproject.toml)
+    # via asu (pyproject.toml)
 sqlparse==0.4.3
     # via
     #   django

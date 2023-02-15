@@ -35,7 +35,7 @@ services:
     build:
       context: ..
       dockerfile: docker/celery/Dockerfile
-    command: celery -A zaida worker -l info
+    command: celery -A asu worker -l info
     env_file:
       - .env
     volumes:
@@ -48,7 +48,7 @@ services:
     build:
       context: ..
       dockerfile: docker/celery/Dockerfile
-    command: celery -A zaida beat -l info
+    command: celery -A asu beat -l info
     env_file:
       - .env
     volumes:

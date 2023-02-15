@@ -18,7 +18,7 @@ def main():
     # Django management stuff.
     from django.core.management import execute_from_command_line
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "zaida.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "asu.settings")
     execute_from_command_line(sys.argv)
 
 

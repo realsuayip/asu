@@ -34,11 +34,11 @@ def main(parser, environment):  # noqa
         return 1
 
     filename = _compose_files[environment]
-    compose_cmd = "docker-compose -p zaida -f %s" % filename
+    compose_cmd = "docker-compose -p asu -f %s" % filename
     command_map = {
         "command": f"{_django} {args.command}",
         "shell": f"{_django} shell",
-        "test": f"{_django} test --settings=zaida.settings.test"
+        "test": f"{_django} test --settings=asu.settings.test"
         " --parallel 4 --shuffle --timing --keepdb",
         "console": "docker exec -it web /bin/bash",
     }
@@ -73,7 +73,7 @@ def main(parser, environment):  # noqa
 
 
 def get_environment():
-    environment = os.environ.get("ZAIDA_ENV")
+    environment = os.environ.get("ASU_ENV")
 
     if environment is None:
         print(

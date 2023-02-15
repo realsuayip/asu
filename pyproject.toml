@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "zaida"
+name = "asu"
 version = "0.1.0"
 dependencies = [
     "django ~= 4.1",

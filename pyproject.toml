@@ -33,6 +33,7 @@ dev = [
     "django-debug-toolbar ~= 3.8",
     "ipython ~= 8.9",
     "coverage ~= 7.1",
+    "tblib ~= 1.7",
 ]
 
 [tool.black]

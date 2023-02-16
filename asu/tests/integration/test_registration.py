@@ -14,8 +14,6 @@ class RegistrationTest(APITestCase):
     Test the entire registration process.
     """
 
-    fixtures = ["project_variables"]
-
     def test_registration(self):
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("registration-verification-check")

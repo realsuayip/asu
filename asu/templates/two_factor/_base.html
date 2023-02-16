@@ -25,8 +25,8 @@
             <a href="#StubLink">Contact</a>
         </section>
         <article>
-            {% get_variable "BRAND" as brand %}
-            {% get_variable "SUPPORT_EMAIL" as support_mail %}
+            {% get_variable "build.BRAND" as brand %}
+            {% get_variable "build.SUPPORT_EMAIL" as support_mail %}
             {% blocktranslate trimmed %}
                 © Copyright 2022 {{ brand }}, All Rights Reserved<br>
                 <a href="mailto:{{ support_mail }}">{{ support_mail }}</a>

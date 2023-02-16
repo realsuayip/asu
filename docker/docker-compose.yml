@@ -2,13 +2,13 @@ version: '3.7'
 
 services:
   db:
-    container_name: postgres
+    container_name: asu-postgres
     image: postgres:14.5-alpine
     user: postgres
     env_file:
       - .env
   web:
-    container_name: web
+    container_name: asu-web
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
@@ -24,14 +24,14 @@ services:
       - db
     restart: on-failure
   redis:
-    container_name: redis
+    container_name: asu-redis
     image: redis:7-alpine
     user: redis
   rabbitmq:
-    container_name: rabbitmq
+    container_name: asu-rabbitmq
     image: rabbitmq:3.11-alpine
   celery-worker:
-    container_name: celery-worker
+    container_name: asu-celery-worker
     build:
       context: ..
       dockerfile: docker/celery/Dockerfile
@@ -43,8 +43,9 @@ services:
     depends_on:
       - redis
       - db
+      - rabbitmq
   celery-beat:
-    container_name: celery-beat
+    container_name: asu-celery-beat
     build:
       context: ..
       dockerfile: docker/celery/Dockerfile
@@ -56,3 +57,4 @@ services:
     depends_on:
       - redis
       - db
+      - rabbitmq

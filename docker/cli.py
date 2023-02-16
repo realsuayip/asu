@@ -7,7 +7,7 @@ _compose_files = {
     "production": "docker/docker-compose.prod.yml",
     "development": "docker/docker-compose.yml",
 }
-_django = "docker exec -it web python manage.py"
+_django = "docker exec -it asu-web python manage.py"
 
 
 def assertive(text):
@@ -40,7 +40,7 @@ def main(parser, environment):  # noqa
         "shell": f"{_django} shell",
         "test": f"{_django} test --settings=asu.settings.test"
         " --parallel 4 --shuffle --timing --keepdb",
-        "console": "docker exec -it web /bin/bash",
+        "console": "docker exec -it asu-web /bin/bash",
     }
 
     if action is None:
@@ -51,7 +51,7 @@ def main(parser, environment):  # noqa
             return "This command is only available in development environment."
 
         run_command("%s start" % compose_cmd, environment)
-        run_command("%s logs -f --tail 100 web" % compose_cmd, environment)
+        run_command("%s logs -f --tail 100 asu-web" % compose_cmd, environment)
         run_command("%s stop" % compose_cmd, environment)
         return 0
 

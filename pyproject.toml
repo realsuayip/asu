@@ -25,7 +25,7 @@ dependencies = [
     "django-oauth-toolkit ~= 2.2",
     "django-two-factor-auth ~= 1.15",
     "phonenumbers ~= 8.13",
-    "django-widget-tweaks ~= 1.4"
+    "django-widget-tweaks ~= 1.4",
 ]
 
 [project.optional-dependencies]
@@ -33,7 +33,6 @@ dev = [
     "django-debug-toolbar ~= 3.8",
     "ipython ~= 8.9",
     "coverage ~= 7.1",
-    "pip-tools ~= 1.8",
 ]
 
 [tool.black]

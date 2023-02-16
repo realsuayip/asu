@@ -14,8 +14,6 @@ class PasswordResetTest(APITestCase):
     Test the entire password reset process.
     """
 
-    fixtures = ["project_variables"]
-
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory(email="best@example.com")

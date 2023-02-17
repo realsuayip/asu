@@ -27,7 +27,7 @@ class TestMessaging(APITestCase):
         cls.inactive_user = UserFactory(is_active=False)
         cls.user_disabled_msg_requests = UserFactory(allows_all_messages=False)
 
-    def _accept_conversation(self, sender, recipient):  # noqa
+    def _accept_conversation(self, sender, recipient):
         ConversationRequest.objects.filter(
             sender=sender, recipient=recipient
         ).update(date_accepted=timezone.now())

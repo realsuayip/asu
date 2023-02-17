@@ -20,7 +20,7 @@ class MessageManager(models.Manager):
 
 
 class ConversationManager(models.Manager):
-    def annotate_last_message(self, queryset):  # noqa
+    def annotate_last_message(self, queryset):
         fields = (
             "id",
             "body",
@@ -29,7 +29,7 @@ class ConversationManager(models.Manager):
             "date_read",
             "date_created",
         )
-        fields = dict(zip(fields, fields))
+        fields = dict(zip(fields, fields, strict=True))
 
         messages = (
             self.model.messages.rel.model.objects.filter(

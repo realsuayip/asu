@@ -11,7 +11,7 @@ class ConversationConsumer(AsyncJsonWebsocketConsumer):
         )
 
         if getattr(self, "group", None) is None:
-            self.group = "conversations_%s" % user_id  # noqa
+            self.group = "conversations_%s" % user_id
             await self.channel_layer.group_add(self.group, self.channel_name)
 
     async def disconnect(self, code):

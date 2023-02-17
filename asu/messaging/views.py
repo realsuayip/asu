@@ -40,7 +40,7 @@ class ConversationFilterSet(django_filters.FilterSet):
         choices=[("requests", "Requests")],
     )
 
-    def filter_type(self, queryset, name, value):  # noqa
+    def filter_type(self, queryset, name, value):
         if value == "requests":
             return queryset.filter(
                 Exists(

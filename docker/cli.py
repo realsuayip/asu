@@ -25,7 +25,7 @@ def run_command(command, environment):
         print(assertive("Operation cancelled."))
 
 
-def main(parser, environment):  # noqa
+def main(parser, environment):
     args = parser.parse_args()
     action = args.action
 

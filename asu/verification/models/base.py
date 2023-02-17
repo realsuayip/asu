@@ -113,7 +113,7 @@ class ConsentVerification(Verification):
         return "%s <#%s>" % (self.email, self.pk)
 
     @classproperty
-    def ident(cls):  # noqa
+    def ident(cls):
         return "consent_" + cls._meta.model_name
 
     def create_consent(self):

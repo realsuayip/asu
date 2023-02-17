@@ -78,7 +78,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         style={"input_type": "password"},
     )
 
-    def validate_email(self, email):  # noqa
+    def validate_email(self, email):
         return User.objects.normalize_email(email)
 
     @transaction.atomic

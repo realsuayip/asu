@@ -47,7 +47,7 @@ class ViewSetMeta(type):
             cls = extend_schema_view(**schema_extensions)(cls)
 
         with suppress(ValueError):
-            cls.http_method_names.remove("put")  # noqa
+            cls.http_method_names.remove("put")
         return cls
 
 
@@ -69,7 +69,7 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
         if serializer is None:
             serializer = self.get_serializer(data=request.data)
         elif not isinstance(serializer, serializers.Serializer):
-            serializer = serializer(  # noqa
+            serializer = serializer(
                 data=request.data, context=self.get_serializer_context()
             )
         serializer.is_valid(raise_exception=True)

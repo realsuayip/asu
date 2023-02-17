@@ -18,7 +18,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = RegistrationVerification
         fields = ("email",)
 
-    def validate_email(self, email):  # noqa
+    def validate_email(self, email):
         email = User.objects.normalize_email(email)
         user = User.objects.filter(email=email)
 
@@ -36,5 +36,5 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return verification
 
 
-class RegistrationCheckSerializer(BaseCheckSerializer):  # noqa
+class RegistrationCheckSerializer(BaseCheckSerializer):
     model = RegistrationVerification

@@ -26,7 +26,7 @@ RelatedUserField = UserPublicReadSerializer(
 )
 
 
-class PasswordResetSerializer(serializers.Serializer):  # noqa
+class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
     consent = serializers.CharField(write_only=True)
     password = serializers.CharField(
@@ -34,7 +34,7 @@ class PasswordResetSerializer(serializers.Serializer):  # noqa
         style={"input_type": "password"},
     )
 
-    def validate_email(self, email):  # noqa
+    def validate_email(self, email):
         return User.objects.normalize_email(email)
 
     @transaction.atomic
@@ -84,7 +84,7 @@ class BlockSerializer(serializers.ModelSerializer):
             raise PermissionDenied
         return attrs
 
-    def get_rels(self, model, *, from_user, to_user):  # noqa
+    def get_rels(self, model, *, from_user, to_user):
         # Given m2m through model, return queryset
         # containing objects for both directions
         return model.objects.filter(
@@ -173,7 +173,7 @@ class UserBlockedSerializer(UserFollowingSerializer):
         fields = ("to_user",)
 
 
-class TicketSerializer(serializers.Serializer):  # noqa
+class TicketSerializer(serializers.Serializer):
     scope = serializers.ChoiceField(choices=["websocket"])
     ticket = serializers.CharField(read_only=True)
 

@@ -20,7 +20,7 @@ class EmailSerializer(RegistrationSerializer):
         return verification
 
 
-class EmailCheckSerializer(BaseCheckSerializer):  # noqa
+class EmailCheckSerializer(BaseCheckSerializer):
     consent = None
 
     @transaction.atomic

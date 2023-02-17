@@ -1,7 +1,7 @@
 from asu.utils.envparse import env
 
 REST_FRAMEWORK = {
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",  # noqa
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",  # noqa: E501
     "DEFAULT_VERSION": "latest",
     "ALLOWED_VERSIONS": ["latest", "1.0"],
     "DEFAULT_AUTHENTICATION_CLASSES": [

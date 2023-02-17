@@ -46,3 +46,25 @@ known_rest_framework = "rest_framework"
 sections = "FUTURE,STDLIB,DJANGO,REST_FRAMEWORK,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 combine_as_imports = true
 line_length = 79
+
+[tool.ruff]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+    "RUF", # Ruff-specific
+    "C4", # flake8-comprehensions
+    "C90", # mccabe
+]
+line-length = 79
+exclude = [
+    "migrations",
+]
+ignore = [
+    "B904",
+]
+
+[tool.ruff.mccabe]
+max-complexity = 20

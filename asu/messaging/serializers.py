@@ -46,7 +46,7 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ("id", "body", "source", "date_created", "date_read")
 
-    def get_date_read(  # noqa
+    def get_date_read(
         self, message
     ) -> serializers.DateTimeField(allow_null=True):
         return message.date_read if message.has_receipt else None
@@ -104,7 +104,7 @@ class ConversationDetailSerializer(ConversationSerializer):
             "url",
         )
 
-    def get_accept_required(self, conversation) -> bool:  # noqa
+    def get_accept_required(self, conversation) -> bool:
         return ConversationRequest.objects.filter(
             date_accepted__isnull=True,
             recipient=conversation.holder_id,

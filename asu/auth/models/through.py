@@ -69,4 +69,4 @@ class UserFollowRequest(UserThrough):
     def bond(self):
         # Create the actual following relationship.
         assert self.is_approved, "Attempt to bond unapproved instance"
-        self.from_user.add_following(to_user=self.to_user)  # noqa
+        self.from_user.add_following(to_user=self.to_user)

@@ -7,7 +7,7 @@ from rest_framework.exceptions import NotFound
 from asu.verification.models.base import code_validator
 
 
-class BaseCheckSerializer(serializers.Serializer):  # noqa
+class BaseCheckSerializer(serializers.Serializer):
     """
     Check the verification, verify it and
     return corresponding consent.

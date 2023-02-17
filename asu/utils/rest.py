@@ -51,11 +51,11 @@ class DynamicFieldsMixin:
         super().__init__(*args, **kwargs)
 
         if fields is not None:
-            allowed, existing = set(fields), set(self.fields)  # noqa
+            allowed, existing = set(fields), set(self.fields)
             for field_name in existing - allowed:
-                self.fields.pop(field_name)  # noqa
+                self.fields.pop(field_name)
 
 
-class APIError(serializers.Serializer):  # noqa
+class APIError(serializers.Serializer):
     # Generic error serializer for documentation rendering.
     detail = serializers.CharField()

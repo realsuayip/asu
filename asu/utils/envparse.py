@@ -5,7 +5,7 @@ _empty = object()
 
 
 class EnvironmentParser:
-    def parse(self, name, default=_empty, parser=None):  # noqa
+    def parse(self, name, default=_empty, parser=None):
         try:
             value = os.environ[name]
         except KeyError:
@@ -21,7 +21,7 @@ class EnvironmentParser:
     def list(self, name, default=_empty, *, delimiter=","):
         return self.parse(name, default, lambda v: v.split(delimiter))
 
-    def bool(self, name, default=_empty):  # noqa
+    def bool(self, name, default=_empty):
         value = self.parse(name, default=default)
 
         if isinstance(value, bool):

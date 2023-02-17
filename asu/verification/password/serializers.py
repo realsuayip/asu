@@ -12,7 +12,7 @@ class PasswordResetVerificationSerializer(serializers.ModelSerializer):
         model = PasswordResetVerification
         fields = ("email",)
 
-    def validate_email(self, email):  # noqa
+    def validate_email(self, email):
         return User.objects.normalize_email(email)
 
     @transaction.atomic
@@ -29,5 +29,5 @@ class PasswordResetVerificationSerializer(serializers.ModelSerializer):
         return verification
 
 
-class PasswordResetVerificationCheckSerializer(BaseCheckSerializer):  # noqa
+class PasswordResetVerificationCheckSerializer(BaseCheckSerializer):
     model = PasswordResetVerification

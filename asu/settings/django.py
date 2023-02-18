@@ -8,9 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_URLCONF = "asu.urls"
 ASGI_APPLICATION = "asu.asgi.application"
 WSGI_APPLICATION = "asu.wsgi.application"
-SECRET_KEY = env.str("SECRET_KEY", "django-insecure")
-DEBUG = env.bool("DEBUG", True)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", [])
+
+SECRET_KEY = env.str("DJANGO_SECRET_KEY")
+DEBUG = env.bool("DJANGO_DEBUG")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
 INSTALLED_APPS = [
@@ -67,7 +68,7 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://redis:6379/1",
+        "LOCATION": env.str("REDIS_URL"),
     }
 }
 
@@ -102,8 +103,9 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = "account.User"
 
 
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+LANGUAGE_CODE = env.str("DJANGO_LANGUAGE_CODE")
+TIME_ZONE = env.str("DJANGO_TIME_ZONE")
+
 USE_I18N = True
 USE_TZ = True
 
@@ -118,7 +120,13 @@ MEDIA_ROOT = "/code/asu/media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = env.str("EMAIL_BACKEND")
+EMAIL_HOST = env.str("EMAIL_HOST")
+EMAIL_PORT = env.int("EMAIL_PORT")
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+
 
 LOGIN_URL = "two_factor:login"
 LOGIN_REDIRECT_URL = "two_factor:profile"

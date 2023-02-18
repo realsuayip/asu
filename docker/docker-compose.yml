@@ -5,16 +5,26 @@ services:
     container_name: asu-postgres
     image: postgres:14.5-alpine
     user: postgres
-    env_file:
-      - .env
+    env_file: conf/postgres.env
+
+  redis:
+    container_name: asu-redis
+    image: redis:7-alpine
+    user: redis
+
+  rabbitmq:
+    container_name: asu-rabbitmq
+    image: rabbitmq:3.11-alpine
+
   web:
     container_name: asu-web
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
-    env_file:
-      - .env
+    env_file: &django_env
+      - conf/django.env
+      - conf/postgres.env
     volumes:
       - ..:/code
     ports:
@@ -23,38 +33,22 @@ services:
       - redis
       - db
     restart: on-failure
-  redis:
-    container_name: asu-redis
-    image: redis:7-alpine
-    user: redis
-  rabbitmq:
-    container_name: asu-rabbitmq
-    image: rabbitmq:3.11-alpine
-  celery-worker:
+
+  celery-worker: &celery
     container_name: asu-celery-worker
     build:
       context: ..
       dockerfile: docker/celery/Dockerfile
     command: celery -A asu worker -l info
-    env_file:
-      - .env
+    env_file: *django_env
     volumes:
       - ..:/code
     depends_on:
       - redis
       - db
       - rabbitmq
+
   celery-beat:
+    <<: *celery
     container_name: asu-celery-beat
-    build:
-      context: ..
-      dockerfile: docker/celery/Dockerfile
     command: celery -A asu beat -l info
-    env_file:
-      - .env
-    volumes:
-      - ..:/code
-    depends_on:
-      - redis
-      - db
-      - rabbitmq

@@ -34,6 +34,7 @@ dev = [
     "ipython ~= 8.9",
     "coverage ~= 7.1",
     "tblib ~= 1.7",
+    "watchfiles ~= 0.18",
 ]
 
 [tool.black]

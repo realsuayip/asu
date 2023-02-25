@@ -33,7 +33,12 @@ class UserPublicReadSerializer(
             "follower_count",
             "url",
         )
-        extra_kwargs = {"url": {"lookup_field": "username"}}
+        extra_kwargs = {
+            "url": {
+                "lookup_field": "username",
+                "view_name": "api:user-detail",
+            }
+        }
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -52,7 +57,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             "website",
             "url",
         )
-        extra_kwargs = {"url": {"lookup_field": "username"}}
+        extra_kwargs = {
+            "url": {
+                "lookup_field": "username",
+                "view_name": "api:user-detail",
+            }
+        }
         read_only_fields = ("email", "date_joined")
 
     def update(self, instance, validated_data):
@@ -137,4 +147,9 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             "consent",
             "url",
         )
-        extra_kwargs = {"url": {"lookup_field": "username"}}
+        extra_kwargs = {
+            "url": {
+                "lookup_field": "username",
+                "view_name": "api:user-detail",
+            }
+        }

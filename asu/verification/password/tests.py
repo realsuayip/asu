@@ -9,9 +9,9 @@ from asu.verification.models import PasswordResetVerification
 class TestPasswordReset(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url_send = reverse("password-reset-list")
-        cls.url_check = reverse("password-reset-check")
-        cls.url_change = reverse("user-reset-password")
+        cls.url_send = reverse("api:password-reset-list")
+        cls.url_check = reverse("api:password-reset-check")
+        cls.url_change = reverse("api:user-reset-password")
 
     def test_check_nullification(self):
         email = "null_test@example.com"

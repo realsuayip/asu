@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 
 from asu.models import ProjectVariable
 
@@ -25,3 +26,18 @@ class TestProjectVariable(TestCase):
         for name, exc in cases.items():
             with self.assertRaisesRegex(KeyError, exc):
                 ProjectVariable.objects.get_value(name=name)
+
+
+class TestAPIRoot(TestCase):
+    def test_api_root(self):
+        url = reverse("api:api-root")
+
+        response = self.client.get(url)
+        content = response.json()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("ok", content["status"])
+
+        self.assertIn("routes", content)
+        self.assertIn("user-agent", content)
+        self.assertIn("version", content)

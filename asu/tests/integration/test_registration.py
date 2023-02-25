@@ -16,9 +16,9 @@ class RegistrationTest(APITestCase):
 
     def test_registration(self):
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
-        url_check = reverse("registration-verification-check")
-        url_send = reverse("registration-verification-list")
-        url_register = reverse("user-list")
+        url_check = reverse("api:registration-verification-check")
+        url_send = reverse("api:registration-verification-list")
+        url_register = reverse("api:user-list")
         email = "test@example.com"
 
         # Send code to e-mail

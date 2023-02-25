@@ -20,7 +20,7 @@ class PasswordResetTest(APITestCase):
 
     def _send_new_password(self, email, consent, password):
         return self.client.patch(
-            reverse("user-reset-password"),
+            reverse("api:user-reset-password"),
             data={
                 "email": email,
                 "consent": consent,
@@ -30,8 +30,8 @@ class PasswordResetTest(APITestCase):
 
     def test_password_reset(self):
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
-        url_check = reverse("password-reset-check")
-        url_send = reverse("password-reset-list")
+        url_check = reverse("api:password-reset-check")
+        url_send = reverse("api:password-reset-list")
         email = self.user.email
 
         # Send code to e-mail

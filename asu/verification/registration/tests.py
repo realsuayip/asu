@@ -15,8 +15,8 @@ from asu.verification.models import RegistrationVerification
 class TestRegistrationVerification(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url_send = reverse("registration-verification-list")
-        cls.url_check = reverse("registration-verification-check")
+        cls.url_send = reverse("api:registration-verification-list")
+        cls.url_check = reverse("api:registration-verification-check")
 
     def test_code_gen(self):
         verification = RegistrationVerification.objects.create(

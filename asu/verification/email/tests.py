@@ -15,8 +15,8 @@ from asu.verification.models import EmailVerification
 class TestRegistrationVerification(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url_send = reverse("email-verification-list")
-        cls.url_check = reverse("email-verification-check")
+        cls.url_send = reverse("api:email-verification-list")
+        cls.url_check = reverse("api:email-verification-check")
 
     def test_email_verification(self):
         # Test email verification as whole

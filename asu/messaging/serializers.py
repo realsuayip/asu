@@ -9,7 +9,7 @@ from asu.messaging.models import Conversation, ConversationRequest, Message
 class MessageComposeSerializer(serializers.HyperlinkedModelSerializer):
     conversation = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name="conversation-detail",
+        view_name="api:conversation-detail",
         source="sender_conversation",
     )
 
@@ -79,6 +79,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
             "date_modified",
             "url",
         )
+        extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
 
     def get_last_message(self, obj) -> MessageSerializer(allow_null=True):
         if obj.last_message is None:
@@ -103,6 +104,7 @@ class ConversationDetailSerializer(ConversationSerializer):
             "date_modified",
             "url",
         )
+        extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
 
     def get_accept_required(self, conversation) -> bool:
         return ConversationRequest.objects.filter(

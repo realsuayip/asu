@@ -15,6 +15,8 @@ class RegistrationTest(APITestCase):
     """
 
     def test_registration(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("api:registration-verification-check")
         url_send = reverse("api:registration-verification-list")

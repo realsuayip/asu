@@ -7,6 +7,12 @@ from rest_framework.response import Response
 
 from asu.auth import schema
 from asu.auth.models import User, UserBlock, UserFollow
+from asu.auth.permissions import (
+    RequireFirstParty,
+    RequireScope,
+    RequireToken,
+    RequireUser,
+)
 from asu.auth.serializers.actions import (
     BlockSerializer,
     FollowRequestSerializer,
@@ -28,18 +34,12 @@ from asu.utils.rest import get_paginator
 from asu.utils.views import ExtendedViewSet
 
 
-class UserPermissions(permissions.IsAuthenticatedOrReadOnly):
-    def has_permission(self, request, view):
-        if view.action == "create":
-            return True
-
-        return super().has_permission(request, view)
-
-
 class UserViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "create")
     lookup_field = "username"
-    permission_classes = [UserPermissions]
+    permission_classes = [RequireToken]
+    # ^ Allow everyone for mixins listed above, for actions, each
+    # have their permission classes set separately.
     serializer_classes = {
         "create": UserCreateSerializer,
         "me": UserSerializer,
@@ -64,11 +64,18 @@ class UserViewSet(ExtendedViewSet):
         "follow": schema.follow,
         "unfollow": schema.unfollow,
     }
+    scopes = {
+        "me": ["user.profile"],
+        "block": ["user.block"],
+        "unblock": ["user.block"],
+        "follow": ["user.follow"],
+        "unfollow": ["user.follow"],
+    }
 
     def get_queryset(self):
         queryset = User.objects.active()
 
-        if self.request.user.is_authenticated:
+        if self.request.user and self.request.user.is_authenticated:
             queryset = queryset.exclude(blocked__in=[self.request.user])
 
         if self.action in ["list", "retrieve"]:
@@ -85,15 +92,18 @@ class UserViewSet(ExtendedViewSet):
         if not username:
             raise NotFound
 
-        self_view = self.request.user.username == username
-        if self_view and self.action != "retrieve":
-            return self.request.user
+        if self.request.user is not None:
+            # Todo: 'retrieve' check might be removed once follower
+            #  annotations above are removed.
+            self_view = self.request.user.username == username
+            if self_view and self.action != "retrieve":
+                return self.request.user
         return super().get_object()
 
     @action(
         detail=False,
         methods=["get", "patch"],
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[RequireUser, RequireScope],
         serializer_class=UserSerializer,
     )
     def me(self, request):
@@ -109,7 +119,7 @@ class UserViewSet(ExtendedViewSet):
     @action(
         detail=False,
         methods=["patch"],
-        permission_classes=[permissions.AllowAny],
+        permission_classes=[RequireToken],
         serializer_class=PasswordResetSerializer,
         url_path="password-reset",
     )
@@ -141,7 +151,7 @@ class UserViewSet(ExtendedViewSet):
         return action(
             detail=True,
             methods=["post"],
-            permission_classes=[permissions.IsAuthenticated],
+            permission_classes=[RequireUser, RequireScope],
         )(method)
 
     @through_action
@@ -170,6 +180,7 @@ class UserViewSet(ExtendedViewSet):
         methods=["get"],
         serializer_class=UserFollowersSerializer,
         pagination_class=get_paginator("cursor", ordering="-date_created"),
+        permission_classes=[RequireToken],
     )
     def followers(self, request, username):
         user = self.get_object()
@@ -185,6 +196,7 @@ class UserViewSet(ExtendedViewSet):
         methods=["get"],
         serializer_class=UserFollowingSerializer,
         pagination_class=get_paginator("cursor", ordering="-date_created"),
+        permission_classes=[RequireToken],
     )
     def following(self, request, username):
         user = self.get_object()
@@ -199,7 +211,7 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["get"],
         pagination_class=get_paginator("cursor", ordering="-date_created"),
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[RequireUser, RequireScope],
         serializer_class=UserBlockedSerializer,
     )
     def blocked(self, request):
@@ -213,7 +225,7 @@ class UserViewSet(ExtendedViewSet):
     @action(
         detail=True,
         methods=["post"],
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[RequireUser, RequireFirstParty],
         serializer_class=MessageComposeSerializer,
     )
     def message(self, request, username):
@@ -229,7 +241,7 @@ class UserViewSet(ExtendedViewSet):
     @action(
         detail=False,
         methods=["post"],
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[RequireUser, RequireFirstParty],
         serializer_class=TicketSerializer,
     )
     def ticket(self, request):
@@ -241,7 +253,7 @@ class UserViewSet(ExtendedViewSet):
         detail=False,
         methods=["put", "delete"],
         http_method_names=["put", "delete", "options", "trace"],
-        permission_classes=[permissions.IsAuthenticated],
+        permission_classes=[RequireUser, RequireFirstParty],
         serializer_class=ProfilePictureEditSerializer,
     )
     def profile_picture(self, request):

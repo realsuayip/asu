@@ -29,6 +29,8 @@ class PasswordResetTest(APITestCase):
         )
 
     def test_password_reset(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("api:password-reset-check")
         url_send = reverse("api:password-reset-list")

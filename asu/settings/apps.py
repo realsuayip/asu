@@ -1,4 +1,5 @@
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 
 from asu.utils.envparse import env
 
@@ -12,6 +13,24 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",
+}
+
+OAUTH2_PROVIDER = {
+    "SCOPES": {
+        "user.profile:read": _(
+            "Retrieve your account, including the private information."
+        ),
+        "user.profile:write": _("Alter your profile and account settings."),
+        "user.follow:read": _(
+            "Display your list of followers and follow requests."
+        ),
+        "user.follow:write": _(
+            "Follow and unfollow people on your behalf, send follow requests."
+        ),
+        "user.block:read": _("Display your list of blocked users"),
+        "user.block:write": _("Block and unblock people on your behalf."),
+    },
+    "ERROR_RESPONSE_WITH_SCOPES": True,
 }
 
 _system_font = """\

@@ -14,6 +14,8 @@ class TestPasswordReset(APITestCase):
         cls.url_change = reverse("api:user-reset-password")
 
     def test_check_nullification(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         email = "null_test@example.com"
         UserFactory(email=email)
 
@@ -93,6 +95,8 @@ class TestPasswordReset(APITestCase):
         self.assertIsNone(v2.nulled_by_id)
 
     def test_reset_invalid_email(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         response = self.client.patch(
             self.url_change,
             data={

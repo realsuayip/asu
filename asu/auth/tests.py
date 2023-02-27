@@ -96,6 +96,8 @@ class TestAuth(APITestCase):
         self.assertNotEqual(email, self.user1)
 
     def test_detail(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         response = self.client.get(
             reverse(
                 "api:user-detail",
@@ -154,6 +156,8 @@ class TestAuth(APITestCase):
         self.assertEqual(404, response.status_code)
 
     def test_detail_excludes_frozen_or_inactive(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         frozen = self.client.get(
             reverse(
                 "api:user-detail",
@@ -170,6 +174,8 @@ class TestAuth(APITestCase):
         self.assertEqual(404, inactive.status_code)
 
     def test_user_create_invalid_consent_case_1(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         email = "janet@example.com"
         verification = RegistrationVerification.objects.create(
             email=email, date_verified=timezone.now()
@@ -189,6 +195,8 @@ class TestAuth(APITestCase):
         )
 
     def test_user_create_invalid_consent_case_2(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         response = self.client.post(
             self.url_create,
             data={
@@ -477,6 +485,8 @@ class TestAuth(APITestCase):
         self._test_action_yields_404("api:user-unblock")
 
     def _test_get_yields_404(self, url_name):
+        self.client.force_authenticate(token="UserNotRequired")
+
         response1 = self.client.get(
             reverse(
                 url_name,
@@ -517,6 +527,8 @@ class TestAuth(APITestCase):
         self.assertNotContains(response, self.user4.username)
 
     def test_followers(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         self.user2.following.add(self.user1)
         self.user3.following.add(self.user1)
         self.private_user.following.add(self.user1)
@@ -532,6 +544,8 @@ class TestAuth(APITestCase):
         self._test_through_list_response(response)
 
     def test_following(self):
+        self.client.force_authenticate(token="UserNotRequired")
+
         self.user1.following.add(self.user2)
         self.user1.following.add(self.user3)
         self.user1.following.add(self.private_user)

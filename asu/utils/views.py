@@ -2,6 +2,7 @@ from contextlib import suppress
 from typing import Dict, Optional, Sequence
 
 from rest_framework import mixins, serializers, status
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -55,6 +56,7 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
     mixins: Optional[Sequence[str]] = None
     schema_extensions: Optional[Dict] = None
     serializer_classes: Dict = {}
+    scopes: dict[str, list[str]] = {}
 
     def get_action_save_response(
         self,
@@ -83,3 +85,11 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action, self.serializer_class)
+
+    @property
+    def required_scopes(self):
+        # Classify scopes depending on the request method. 'write' for
+        # unsafe methods and 'read' for safe methods.
+        spec = self.scopes[self.action]
+        mode = "read" if self.request.method in SAFE_METHODS else "write"
+        return ["%s:%s" % (scope, mode) for scope in spec]

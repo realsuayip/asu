@@ -56,7 +56,7 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
     mixins: Optional[Sequence[str]] = None
     schema_extensions: Optional[Dict] = None
     serializer_classes: Dict = {}
-    scopes: dict[str, list[str]] = {}
+    scopes: dict[str, list[str] | str] = {}
 
     def get_action_save_response(
         self,
@@ -87,9 +87,14 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
         return self.serializer_classes.get(self.action, self.serializer_class)
 
     @property
-    def required_scopes(self):
+    def required_scopes(self) -> list[str]:
         # Classify scopes depending on the request method. 'write' for
         # unsafe methods and 'read' for safe methods.
         spec = self.scopes[self.action]
         mode = "read" if self.request.method in SAFE_METHODS else "write"
+
+        if isinstance(spec, str):
+            scope = "%s:%s" % (spec, mode)
+            return [scope]
+
         return ["%s:%s" % (scope, mode) for scope in spec]

@@ -15,6 +15,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",
 }
 
+OAUTH2_PROVIDER_APPLICATION_MODEL = "account.Application"
 OAUTH2_PROVIDER = {
     "SCOPES": {
         "user.profile:read": _(

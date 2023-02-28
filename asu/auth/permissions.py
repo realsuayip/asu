@@ -28,17 +28,12 @@ class OAuthPermission(BasePermission):
 class RequireFirstParty(OAuthPermission):
     """
     Allow permission if the related OAuth application is from first
-    party, identified by its application name.
+    party. Identified by 'is_first_party' attribute.
     """
 
     def has_oauth_permission(self, request, view):
         token = request.auth
-
-        if not token:
-            return False
-
-        application = token.application
-        return application.name.startswith("first_party::")
+        return token and token.application.is_first_party
 
 
 class RequireToken(OAuthPermission):

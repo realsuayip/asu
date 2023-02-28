@@ -1,6 +1,6 @@
 from django.db.models import Count
 
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -65,11 +65,11 @@ class UserViewSet(ExtendedViewSet):
         "unfollow": schema.unfollow,
     }
     scopes = {
-        "me": ["user.profile"],
-        "block": ["user.block"],
-        "unblock": ["user.block"],
-        "follow": ["user.follow"],
-        "unfollow": ["user.follow"],
+        "me": "user.profile",
+        "block": "user.block",
+        "unblock": "user.block",
+        "follow": "user.follow",
+        "unfollow": "user.follow",
     }
 
     def get_queryset(self):
@@ -267,9 +267,10 @@ class UserViewSet(ExtendedViewSet):
 
 class FollowRequestViewSet(ExtendedViewSet):
     mixins = ("list", "update")
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [RequireUser, RequireScope]
     serializer_class = FollowRequestSerializer
     pagination_class = get_paginator("cursor", ordering="-date_created")
+    scopes = {"list": "user.follow", "partial_update": "user.follow"}
 
     def get_queryset(self):
         return self.request.user.get_pending_follow_requests().select_related(

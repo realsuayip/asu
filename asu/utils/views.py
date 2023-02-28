@@ -88,9 +88,19 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
 
     @property
     def required_scopes(self) -> list[str]:
-        # Classify scopes depending on the request method. 'write' for
-        # unsafe methods and 'read' for safe methods.
-        spec = self.scopes[self.action]
+        """
+        Classify scopes depending on the request method. 'write' for
+        unsafe methods and 'read' for safe methods. Used by RequireScope
+        permission class.
+        """
+
+        # Reference to non-existing action, ignore scopes. Likely to
+        # result in 405 Method Not Allowed.
+        action = self.action
+        if not action:
+            return []
+
+        spec = self.scopes[action]
         mode = "read" if self.request.method in SAFE_METHODS else "write"
 
         if isinstance(spec, str):

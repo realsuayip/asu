@@ -597,6 +597,15 @@ class TestAuth(APITestCase):
         self.user1.refresh_from_db()
         self.assertFalse(self.user1.profile_picture.name)
 
+    def test_delete_profile_picture_idempotent(self):
+        self.client.force_login(self.user1)
+
+        r = self.client.delete(reverse("api:user-profile-picture"))
+        r1 = self.client.delete(reverse("api:user-profile-picture"))
+
+        self.assertEqual(204, r.status_code)
+        self.assertEqual(204, r1.status_code)
+
 
 class TestOAuthPermissions(APITestCase):
     @classmethod

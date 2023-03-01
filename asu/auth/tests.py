@@ -4,7 +4,9 @@ from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
-from asu.auth.models import UserFollowRequest
+from oauth2_provider.models import AccessToken
+
+from asu.auth.models import Application, UserFollowRequest
 from asu.tests.factories import UserFactory
 from asu.verification.models import RegistrationVerification
 
@@ -594,3 +596,124 @@ class TestAuth(APITestCase):
 
         self.user1.refresh_from_db()
         self.assertFalse(self.user1.profile_picture.name)
+
+
+class TestOAuthPermissions(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user = UserFactory()
+
+        # First party application with authorization code flow
+        first_party = Application.objects.create(
+            client_id="first-party",
+            client_secret="secret",
+            redirect_uris="http://127.0.0.1/local/",
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            name="First party app",
+            is_first_party=True,
+        )
+        AccessToken.objects.create(
+            user=user,
+            scope="user.profile:read user.profile:write",
+            expires=timezone.now() + timezone.timedelta(days=1),
+            token="first-party-token",  # <----
+            application=first_party,
+        )
+
+        # THIRD party application with authorization code flow
+        third_party = Application.objects.create(
+            client_id="third-party",
+            client_secret="third-secret",
+            redirect_uris="http://127.0.0.1/local/",
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            name="Third party app",
+            is_first_party=False,
+        )
+        AccessToken.objects.create(
+            user=user,
+            scope="user.profile:read",
+            expires=timezone.now() + timezone.timedelta(days=1),
+            token="third-party-token",  # <----
+            application=third_party,
+        )
+
+        # THIRD party application with client credentials flow
+        third_party_client_credentials = Application.objects.create(
+            client_id="third-party-cc",
+            client_secret="third-secret-cc",
+            client_type=Application.CLIENT_CONFIDENTIAL,
+            authorization_grant_type=Application.GRANT_CLIENT_CREDENTIALS,
+            name="Third party app with client credentials",
+            is_first_party=False,
+        )
+        AccessToken.objects.create(
+            expires=timezone.now() + timezone.timedelta(days=1),
+            scope="user.profile:read",
+            token="third-party-client-credentials",  # <----
+            application=third_party_client_credentials,
+        )
+
+    def test_require_first_party(self):
+        user2 = UserFactory()
+        url = reverse(
+            "api:user-message",
+            kwargs={"username": user2.username},
+        )
+
+        params = [
+            (201, "first-party-token"),
+            (403, "third-party-token"),
+        ]
+        for status_code, token in params:
+            response = self.client.post(
+                url,
+                data={"body": "hello"},
+                HTTP_AUTHORIZATION="Bearer %s" % token,
+            )
+            self.assertEqual(
+                status_code,
+                response.status_code,
+                msg="used %s" % token,
+            )
+
+    def test_require_token(self):
+        url = reverse(
+            "api:user-detail", kwargs={"username": self.user.username}
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(401, response.status_code)
+
+        for token in (
+            "first-party-token",
+            "third-party-token",
+            "third-party-client-credentials",
+        ):
+            r = self.client.get(url, HTTP_AUTHORIZATION="Bearer %s" % token)
+            self.assertEqual(200, r.status_code, msg="used %s" % token)
+
+    def test_require_user(self):
+        url = reverse("api:user-me")
+
+        params = [
+            (200, "first-party-token"),
+            (200, "third-party-token"),
+            (403, "third-party-client-credentials"),
+        ]
+        for status_code, token in params:
+            r = self.client.get(url, HTTP_AUTHORIZATION="Bearer %s" % token)
+            self.assertEqual(status_code, r.status_code, msg="used %s" % token)
+
+    def test_require_scope(self):
+        url = reverse("api:user-me")
+
+        params = [(200, "first-party-token"), (403, "third-party-token")]
+        for status_code, token in params:
+            r = self.client.patch(
+                url,
+                data={"display_name": "hello"},
+                HTTP_AUTHORIZATION="Bearer %s" % token,
+            )
+            self.assertEqual(status_code, r.status_code, msg="used %s" % token)

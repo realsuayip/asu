@@ -717,3 +717,10 @@ class TestOAuthPermissions(APITestCase):
                 HTTP_AUTHORIZATION="Bearer %s" % token,
             )
             self.assertEqual(status_code, r.status_code, msg="used %s" % token)
+
+    def test_properly_responds_with_405_rather_than_403(self):
+        r = self.client.post(
+            reverse("api:user-me"),
+            HTTP_AUTHORIZATION="Bearer third-party-token",
+        )
+        self.assertEqual(405, r.status_code)

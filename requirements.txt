@@ -25,7 +25,7 @@ attrs==22.2.0
     #   jsonschema
     #   service-identity
     #   twisted
-autobahn==23.1.1
+autobahn==23.1.2
     # via daphne
 automat==22.10.0
     # via twisted
@@ -61,9 +61,9 @@ click-repl==0.2.0
     # via celery
 constantly==15.1.0
     # via twisted
-coverage==7.1.0
+coverage==7.2.1
     # via asu (pyproject.toml)
-cryptography==39.0.0
+cryptography==39.0.2
     # via
     #   autobahn
     #   jwcrypto
@@ -75,7 +75,7 @@ decorator==5.1.1
     # via ipython
 deprecated==1.2.13
     # via jwcrypto
-django==4.1.6
+django==4.1.7
     # via
     #   asu (pyproject.toml)
     #   channels
@@ -101,7 +101,7 @@ django-otp==1.1.4
     # via django-two-factor-auth
 django-phonenumber-field==6.4.0
     # via django-two-factor-auth
-django-two-factor-auth==1.15.0
+django-two-factor-auth==1.15.1
     # via asu (pyproject.toml)
 django-widget-tweaks==1.4.12
     # via asu (pyproject.toml)
@@ -112,15 +112,17 @@ djangorestframework==3.14.0
     #   drf-spectacular
 drf-nested-routers==0.93.4
     # via asu (pyproject.toml)
-drf-spectacular==0.25.1
+drf-spectacular==0.26.0
+    # via asu (pyproject.toml)
+envanter==1.1.2
     # via asu (pyproject.toml)
 executing==1.2.0
     # via stack-data
 factory-boy==3.2.1
     # via asu (pyproject.toml)
-faker==16.6.1
+faker==17.6.0
     # via factory-boy
-hiredis==2.2.1
+hiredis==2.2.2
     # via asu (pyproject.toml)
 hyperlink==21.0.0
     # via
@@ -136,7 +138,7 @@ incremental==22.10.0
     # via twisted
 inflection==0.5.1
     # via drf-spectacular
-ipython==8.9.0
+ipython==8.11.0
     # via asu (pyproject.toml)
 jedi==0.18.2
     # via ipython
@@ -156,13 +158,13 @@ parso==0.8.3
     # via jedi
 pexpect==4.8.0
     # via ipython
-phonenumbers==8.13.5
+phonenumbers==8.13.7
     # via asu (pyproject.toml)
 pickleshare==0.7.5
     # via ipython
 pillow==9.4.0
     # via asu (pyproject.toml)
-prompt-toolkit==3.0.36
+prompt-toolkit==3.0.38
     # via
     #   click-repl
     #   ipython
@@ -198,9 +200,9 @@ pytz==2022.7.1
     #   djangorestframework
 pyyaml==6.0
     # via drf-spectacular
-qrcode==7.4.1
+qrcode==7.4.2
     # via django-two-factor-auth
-redis==4.4.2
+redis==4.5.1
     # via
     #   asu (pyproject.toml)
     #   channels-redis
@@ -235,7 +237,7 @@ twisted[tls]==22.10.0
     # via daphne
 txaio==23.1.1
     # via autobahn
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via
     #   qrcode
     #   twisted
@@ -252,7 +254,7 @@ watchfiles==0.18.1
     # via asu (pyproject.toml)
 wcwidth==0.2.6
     # via prompt-toolkit
-wrapt==1.14.1
+wrapt==1.15.0
     # via deprecated
 zope-interface==5.5.2
     # via twisted

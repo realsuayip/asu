@@ -26,6 +26,7 @@ dependencies = [
     "django-two-factor-auth ~= 1.15",
     "phonenumbers ~= 8.13",
     "django-widget-tweaks ~= 1.4",
+    "envanter ~= 1.1",
 ]
 
 [project.optional-dependencies]

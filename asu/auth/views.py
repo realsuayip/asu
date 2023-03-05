@@ -250,6 +250,7 @@ class UserViewSet(ExtendedViewSet):
         http_method_names=["put", "delete", "options", "trace"],
         permission_classes=[RequireUser, RequireFirstParty],
         serializer_class=ProfilePictureEditSerializer,
+        url_path="profile-picture",
     )
     def profile_picture(self, request):
         if request.method == "DELETE":

@@ -1,10 +1,14 @@
+import io
+
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
 from oauth2_provider.models import AccessToken
+from PIL import Image
 
 from asu.auth.models import Application, UserFollowRequest
 from asu.tests.factories import UserFactory
@@ -591,6 +595,41 @@ class TestAuth(APITestCase):
 
         self.user1.refresh_from_db()
         self.assertFalse(self.user1.profile_picture.name)
+
+    def test_change_profile_picture(self):
+        self.client.force_login(self.user1)
+
+        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
+
+        with open(file_path, "rb") as file:
+            r1 = self.client.put(
+                reverse("api:user-profile-picture"),
+                data={"profile_picture": file},
+            )
+            self.assertEqual(200, r1.status_code)
+
+            file.seek(0)
+            buf = io.BytesIO()
+            image = Image.open(file)
+            image = image.convert("RGBA")
+            image.save(buf, "PNG")
+            picture = ContentFile(buf.getvalue(), name="hello.png")
+
+            r2 = self.client.put(
+                reverse("api:user-profile-picture"),
+                data={"profile_picture": picture},
+            )
+            self.assertEqual(200, r2.status_code)
+
+        profile = self.client.get(
+            reverse(
+                "api:user-detail",
+                kwargs={"pk": self.user1.pk},
+            )
+        )
+        profile_picture_url = profile.json()["profile_picture"]
+        self.assertIsNotNone(profile_picture_url)
+        self.assertTrue(profile_picture_url.endswith("jpg"))
 
     def test_delete_profile_picture_idempotent(self):
         self.client.force_login(self.user1)

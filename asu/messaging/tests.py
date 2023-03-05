@@ -35,18 +35,14 @@ class TestMessaging(APITestCase):
     def _send_message(self, sender, recipient, message):
         self.client.force_login(sender)
         return self.client.post(
-            reverse(
-                "api:user-message", kwargs={"username": recipient.username}
-            ),
+            reverse("api:user-message", kwargs={"pk": recipient.pk}),
             data={"body": message},
         )
 
     def test_message_basic(self):
         self.client.force_login(self.user1)
         response = self.client.post(
-            reverse(
-                "api:user-message", kwargs={"username": self.user2.username}
-            ),
+            reverse("api:user-message", kwargs={"pk": self.user2.pk}),
             data={"body": "Hello world!"},
         )
         self.assertEqual(201, response.status_code)

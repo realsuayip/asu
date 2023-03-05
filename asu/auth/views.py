@@ -2,7 +2,6 @@ from django.db.models import Count
 
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from asu.auth import schema
@@ -36,7 +35,6 @@ from asu.utils.views import ExtendedViewSet
 
 class UserViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "create")
-    lookup_field = "username"
     permission_classes = [RequireToken]
     # ^ Allow everyone for mixins listed above, for actions, each
     # have their permission classes set separately.
@@ -87,15 +85,12 @@ class UserViewSet(ExtendedViewSet):
         return queryset
 
     def get_object(self):
-        username = self.kwargs.get("username")
-
-        if not username:
-            raise NotFound
+        pk = self.kwargs["pk"]
 
         if self.request.user is not None:
             # Todo: 'retrieve' check might be removed once follower
             #  annotations above are removed.
-            self_view = self.request.user.username == username
+            self_view = self.request.user.pk == pk
             if self_view and self.action != "retrieve":
                 return self.request.user
         return super().get_object()
@@ -126,7 +121,7 @@ class UserViewSet(ExtendedViewSet):
     def reset_password(self, request):
         return self.get_action_save_response(request)
 
-    def save_through(self, username):
+    def save_through(self, pk):
         # Common save method for user blocking and following.
         to_user = self.get_object()
         serializer = self.get_serializer(
@@ -136,7 +131,7 @@ class UserViewSet(ExtendedViewSet):
             self.request, serializer, status_code=204
         )
 
-    def delete_through(self, username):
+    def delete_through(self, pk):
         # Common delete method for user blocking and following.
         to_user = self.get_object()
         model = self.get_serializer_class().Meta.model
@@ -155,20 +150,20 @@ class UserViewSet(ExtendedViewSet):
         )(method)
 
     @through_action
-    def block(self, request, username):
-        return self.save_through(username)
+    def block(self, request, pk):
+        return self.save_through(pk)
 
     @through_action
-    def unblock(self, request, username):
-        return self.delete_through(username)
+    def unblock(self, request, pk):
+        return self.delete_through(pk)
 
     @through_action
-    def follow(self, request, username):
-        return self.save_through(username)
+    def follow(self, request, pk):
+        return self.save_through(pk)
 
     @through_action
-    def unfollow(self, request, username):
-        return self.delete_through(username)
+    def unfollow(self, request, pk):
+        return self.delete_through(pk)
 
     def list_follow_through(self, queryset):
         page = self.paginate_queryset(queryset)
@@ -182,7 +177,7 @@ class UserViewSet(ExtendedViewSet):
         pagination_class=get_paginator("cursor", ordering="-date_created"),
         permission_classes=[RequireToken],
     )
-    def followers(self, request, username):
+    def followers(self, request, pk):
         user = self.get_object()
         queryset = UserFollow.objects.filter(
             to_user=user,
@@ -198,7 +193,7 @@ class UserViewSet(ExtendedViewSet):
         pagination_class=get_paginator("cursor", ordering="-date_created"),
         permission_classes=[RequireToken],
     )
-    def following(self, request, username):
+    def following(self, request, pk):
         user = self.get_object()
         queryset = UserFollow.objects.filter(
             from_user=user,
@@ -228,7 +223,7 @@ class UserViewSet(ExtendedViewSet):
         permission_classes=[RequireUser, RequireFirstParty],
         serializer_class=MessageComposeSerializer,
     )
-    def message(self, request, username):
+    def message(self, request, pk):
         context = self.get_serializer_context()
         context["recipient"] = self.get_object()
         serializer = self.get_serializer(data=request.data, context=context)

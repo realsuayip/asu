@@ -32,6 +32,12 @@ OAUTH2_PROVIDER = {
         "user.block:write": _("Block and unblock people on your behalf."),
     },
     "ERROR_RESPONSE_WITH_SCOPES": True,
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,  # an hour
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 86400 * 180,  # 6 months
+    "ROTATE_REFRESH_TOKEN": True,
+    "PKCE_REQUIRED": True,
+    "CLEAR_EXPIRED_TOKENS_BATCH_SIZE": 1000,
+    "CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL": 0.25,
 }
 
 _system_font = """\

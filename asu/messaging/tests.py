@@ -458,6 +458,18 @@ class TestMessaging(APITestCase):
         r5 = self.client.get(conversation_1)
         self.assertEqual("Gary who?", r5.data["last_message"]["body"])
 
+    def test_conversation_messages_url(self):
+        r1 = self._send_message(self.user1, self.user2, "Hello")
+        conversation = r1.data["conversation"]
+        r2 = self.client.get(conversation)
+
+        pk = r2.data["id"]
+        self.assertTrue(
+            r2.data["messages"].endswith(
+                reverse("api:message-list", kwargs={"conversation_pk": pk})
+            )
+        )
+
     def test_conversation_last_message_case_deletion(self):
         r1 = self._send_message(self.user1, self.user2, "Gary says hello")
         conversation = r1.data["conversation"]

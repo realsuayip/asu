@@ -1,6 +1,7 @@
 import types
 
 from rest_framework import exceptions, serializers
+from rest_framework.reverse import reverse
 
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.messaging.models import Conversation, ConversationRequest, Message
@@ -68,6 +69,11 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         )
     )
     last_message = serializers.SerializerMethodField()
+    messages = serializers.SerializerMethodField(
+        method_name="get_messages_url",
+        help_text="URL from which messages belonging to this chat"
+        " can be retrieved.",
+    )
 
     class Meta:
         model = Conversation
@@ -77,6 +83,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
             "last_message",
             "date_created",
             "date_modified",
+            "messages",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
@@ -88,6 +95,13 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         message = types.SimpleNamespace(**obj.last_message)
         serializer = MessageSerializer(message, context=self.context)
         return serializer.data
+
+    def get_messages_url(self, obj) -> serializers.URLField:
+        return reverse(
+            "api:message-list",
+            kwargs={"conversation_pk": obj.pk},
+            request=self.context["request"],
+        )
 
 
 class ConversationDetailSerializer(ConversationSerializer):
@@ -102,6 +116,7 @@ class ConversationDetailSerializer(ConversationSerializer):
             "last_message",
             "date_created",
             "date_modified",
+            "messages",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}

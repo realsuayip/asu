@@ -7,12 +7,13 @@ from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.messaging.models import Conversation, ConversationRequest, Message
 
 
-class MessageComposeSerializer(serializers.HyperlinkedModelSerializer):
+class MessageComposeSerializer(serializers.ModelSerializer):
     conversation = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name="api:conversation-detail",
         source="sender_conversation",
     )
+    url = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -21,6 +22,17 @@ class MessageComposeSerializer(serializers.HyperlinkedModelSerializer):
             "body",
             "conversation",
             "date_created",
+            "url",
+        )
+
+    def get_url(self, obj):
+        return reverse(
+            "api:message-detail",
+            kwargs={
+                "pk": obj.pk,
+                "conversation_pk": obj.sender_conversation.pk,
+            },
+            request=self.context["request"],
         )
 
     def create(self, validated_data):

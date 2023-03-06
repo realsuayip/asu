@@ -559,7 +559,7 @@ class TestMessaging(APITestCase):
         self._send_message(self.user1, self.user2, "Hi")
         r1 = self._send_message(self.user1, self.user2, "Hi again")
         message_id = r1.data["id"]
-        message_url = r1.data["conversation"] + f"messages/{message_id}/"
+        message_url = r1.data["url"]
 
         detail = self.client.get(message_url)
         self.assertEqual(200, detail.status_code)
@@ -646,12 +646,12 @@ class TestMessaging(APITestCase):
         msg_1 = self._send_message(
             self.user1, self.user2, "user1 and user2 message"
         ).json()
-        msg_1_url = msg_1["conversation"] + "messages/%s/" % msg_1["id"]
+        msg_1_url = msg_1["url"]
 
         msg_2 = self._send_message(
             self.user3, self.user4, "user3 and user4 message"
         ).json()
-        msg_2_url = msg_2["conversation"] + "messages/%s/" % msg_2["id"]
+        msg_2_url = msg_2["url"]
 
         # at this point, authenticated user is 'user3'. Both user3 and
         # user4 should not be able to see messages of user1 and user2

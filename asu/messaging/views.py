@@ -1,12 +1,13 @@
 from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 
-from rest_framework import permissions, serializers
+from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 import django_filters
 
+from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.messaging.models import Conversation, ConversationRequest, Message
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
@@ -20,7 +21,7 @@ from asu.utils.views import ExtendedViewSet
 class MessageViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "destroy")
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_created")
 
     def get_queryset(self):
@@ -58,7 +59,7 @@ class ConversationViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "destroy")
     serializer_class = ConversationSerializer
     serializer_classes = {"retrieve": ConversationDetailSerializer}
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_modified")
 
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
@@ -99,6 +100,7 @@ class ConversationViewSet(ExtendedViewSet):
         detail=True,
         methods=["patch"],
         serializer_class=serializers.Serializer,
+        permission_classes=[RequireUser, RequireFirstParty],
     )
     def accept(self, request, pk):
         conversation = self.get_object()

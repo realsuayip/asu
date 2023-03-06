@@ -628,6 +628,33 @@ class TestMessaging(APITestCase):
         self.assertFalse(Message.objects.all().exists())
         self.assertEqual(1, ConversationRequest.objects.all().count())
 
+    def test_can_only_see_own_messages(self):
+        # Send independent messages to two conversations and make sure
+        # only the participants can access those messages.
+        msg_1 = self._send_message(
+            self.user1, self.user2, "user1 and user2 message"
+        ).json()
+        msg_1_url = msg_1["conversation"] + "messages/%s/" % msg_1["id"]
+
+        msg_2 = self._send_message(
+            self.user3, self.user4, "user3 and user4 message"
+        ).json()
+        msg_2_url = msg_2["conversation"] + "messages/%s/" % msg_2["id"]
+
+        # at this point, authenticated user is 'user3'. Both user3 and
+        # user4 should not be able to see messages of user1 and user2
+        r1 = self.client.get(msg_1_url)
+        r2 = self.client.get(msg_2_url)
+        self.assertEqual(404, r1.status_code)
+        self.assertEqual(200, r2.status_code)
+
+        # try for user4
+        self.client.force_login(self.user4)
+        r1_alt = self.client.get(msg_1_url)
+        r2_alt = self.client.get(msg_2_url)
+        self.assertEqual(404, r1_alt.status_code)
+        self.assertEqual(200, r2_alt.status_code)
+
     # Websocket related
 
     @cached_property

@@ -25,8 +25,13 @@ class MessageViewSet(ExtendedViewSet):
     pagination_class = get_paginator("cursor", ordering="-date_created")
 
     def get_queryset(self):
+        user, conversation_id = (
+            self.request.user,
+            self.kwargs["conversation_pk"],
+        )
         return Message.objects.filter(
-            conversations__id=self.kwargs["conversation_pk"]
+            Q(sender=user) | Q(recipient=user),
+            conversations__id=conversation_id,
         )
 
     def perform_destroy(self, instance):

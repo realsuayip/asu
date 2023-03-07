@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
-from asu.tests.factories import UserFactory
+from asu.tests.factories import UserFactory, first_party_token
 from asu.verification.models import RegistrationVerification
 
 
@@ -27,6 +27,8 @@ class TestRegistrationVerification(APITestCase):
         self.assertTrue(verification.code.isdigit())
 
     def test_send(self):
+        self.client.force_authenticate(token=first_party_token)
+
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
         email = "patato@example.com"
 
@@ -48,6 +50,8 @@ class TestRegistrationVerification(APITestCase):
             verification.create_consent()
 
     def test_send_case_exists(self):
+        self.client.force_authenticate(token=first_party_token)
+
         email_taken = "hello@example.com"
         UserFactory(email=email_taken)
 
@@ -55,6 +59,8 @@ class TestRegistrationVerification(APITestCase):
         self.assertEqual(400, response.status_code)
 
     def test_check(self):
+        self.client.force_authenticate(token=first_party_token)
+
         email = "worldt@exmaple.com"
         verification = RegistrationVerification.objects.create(email=email)
 
@@ -80,6 +86,8 @@ class TestRegistrationVerification(APITestCase):
         self.assertEqual(404, resend.status_code)
 
     def test_check_case_expired(self):
+        self.client.force_authenticate(token=first_party_token)
+
         period = settings.REGISTRATION_VERIFY_PERIOD + 10
         expired_create = timezone.now() - timezone.timedelta(seconds=period)
         email = "worldz@exmaple.com"

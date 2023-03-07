@@ -2,7 +2,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from asu.tests.factories import UserFactory
+from asu.tests.factories import UserFactory, first_party_token
 from asu.verification.models import PasswordResetVerification
 
 
@@ -14,7 +14,7 @@ class TestPasswordReset(APITestCase):
         cls.url_change = reverse("api:user-reset-password")
 
     def test_check_nullification(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         email = "null_test@example.com"
         UserFactory(email=email)
@@ -108,6 +108,8 @@ class TestPasswordReset(APITestCase):
         self.assertEqual(404, response.status_code)
 
     def test_create_invalid_email_ok(self):
+        self.client.force_authenticate(token=first_party_token)
+
         response = self.client.post(
             self.url_send, data={"email": "nonexistent123@example.com"}
         )

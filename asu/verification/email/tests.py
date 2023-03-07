@@ -12,7 +12,7 @@ from asu.tests.factories import UserFactory
 from asu.verification.models import EmailVerification
 
 
-class TestRegistrationVerification(APITestCase):
+class TestEmailVerification(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.url_send = reverse("api:email-verification-list")

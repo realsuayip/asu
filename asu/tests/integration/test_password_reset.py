@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from asu.tests.factories import UserFactory
+from asu.tests.factories import UserFactory, first_party_token
 from asu.verification.models import PasswordResetVerification
 
 
@@ -29,7 +29,7 @@ class PasswordResetTest(APITestCase):
         )
 
     def test_password_reset(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("api:password-reset-check")

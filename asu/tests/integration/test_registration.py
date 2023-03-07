@@ -6,6 +6,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 
 from asu.auth.models import User
+from asu.tests.factories import first_party_token
 from asu.verification.models import RegistrationVerification
 
 
@@ -15,7 +16,7 @@ class RegistrationTest(APITestCase):
     """
 
     def test_registration(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("api:registration-verification-check")

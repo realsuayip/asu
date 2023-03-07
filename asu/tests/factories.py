@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import factory.fuzzy
 from factory import Faker
 from factory.django import DjangoModelFactory
@@ -14,3 +16,10 @@ class UserFactory(DjangoModelFactory):
     last_name = Faker("last_name")
     email = Faker("email")
     birth_date = Faker("date")
+
+
+# Behaves as if first party oauth token in the context
+# of 'client.force_authenticate'
+first_party_token = SimpleNamespace(
+    application=SimpleNamespace(is_first_party=True)
+)

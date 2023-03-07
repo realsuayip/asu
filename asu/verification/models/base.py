@@ -98,6 +98,42 @@ class Verification(models.Model):
 
 
 class ConsentVerification(Verification):
+    """
+    A consent is a secret string that acts as the proof of verification
+    for given email. In this case, it is a signed string that contains
+    the 'uuid' of an instance of this model.
+
+    Consent string is useful when the verification involves an interim
+    step. For example, instead of taking all user information during the
+    registration flow, we only ask for the email first.
+
+    If the user verifies the email, a consent is issued so that we know
+    that email is good in subsequent request, which will contain all the
+    user information [along with consent].
+
+    The consent string is signed, however it is not necessary, any
+    string that identifies the consent verification object in the
+    database could be returned (provided that it is not easy to guess).
+
+    The comment below dwells on why consent is signed. Do not read it.
+    ~~~~~~~~~~~
+
+    Initially there was no 'uuid' field; the string was signed so that
+    the BIGINT 'id' field could not be enumerated. However, I realized
+    that I was signing IDs across multiple flows, which could generate
+    the same signed consents. This would again allow for enumeration;
+    I needed to add some 'random' bit to the signed string, so, I added
+    'uuid' field. I was already using the timestamp in the consent to
+    check the age along with a pepper, so it was a quite stretch to say
+    it could be enumerated...
+
+    With the introduction of UUID, the reasoning for all the signing is
+    not necessary since 'uuid' could not be enumerated. However, it
+    still has a little benefit. I can discard invalid consents right
+    away without having to check the database (for example in case of
+    past age, or outright garbage consent information).
+    """
+
     date_completed = models.DateTimeField(
         _("date completed"),
         null=True,

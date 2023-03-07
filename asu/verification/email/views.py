@@ -10,6 +10,21 @@ from asu.verification.email.serializers import (
 
 
 class EmailViewSet(ExtendedViewSet):
+    """
+    This ViewSet is responsible for e-email change flow, in which the
+    user receives a verification code to their new email address (this
+    is done in 'create' action). Once they confirm the code using the
+    'check' action, their email is changed.
+
+    This flow does not require consent since it only entails two steps:
+    'send' & 'verify' the code. There is no interim step such as in
+    registration, where the user fills out profile information or in
+    password reset, we ask for new password.
+
+    TODO: Should consider revoking other active tokens when email
+     gets changed.
+    """
+
     mixins = ("create",)
     serializer_class = EmailSerializer
     permission_classes = [RequireUser, RequireFirstParty]

@@ -1,7 +1,24 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from oauth2_provider.models import AbstractApplication, ApplicationManager
+from oauth2_provider.models import (
+    AbstractApplication,
+    ApplicationManager as BaseApplicationManager,
+)
+
+
+class ApplicationManager(BaseApplicationManager):
+    def get_default(self):
+        # Figure out the default application, this is application is
+        # used to programmatically issue tokens, outside the oauth
+        # flows. For example, immediately after the registration.
+        apps = self.filter(
+            is_first_party=True,
+            skip_authorization=True,
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+        )
+        return apps.get()
 
 
 class Application(AbstractApplication):

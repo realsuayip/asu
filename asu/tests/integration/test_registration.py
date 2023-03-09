@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from asu.auth.models import User
+from asu.auth.models import Application, User
 from asu.tests.factories import first_party_token
 from asu.verification.models import RegistrationVerification
 
@@ -14,6 +14,19 @@ class RegistrationTest(APITestCase):
     """
     Test the entire registration process.
     """
+
+    @classmethod
+    def setUpTestData(cls):
+        Application.objects.create(
+            client_id="first-party",
+            client_secret="secret",
+            redirect_uris="http://127.0.0.1/local/",
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            name="First party app",
+            is_first_party=True,
+            skip_authorization=True,
+        )
 
     def test_registration(self):
         self.client.force_authenticate(token=first_party_token)
@@ -73,3 +86,17 @@ class RegistrationTest(APITestCase):
         verification = RegistrationVerification.objects.get(user=user)
         self.assertFalse(verification.is_eligible)
         self.assertIsNotNone(verification.date_completed)
+
+        # Make sure given access token can be used to authorize the user
+        auth = register_response.json()["auth"]
+        access_token = auth["access_token"]
+        token_type = auth["token_type"]
+        authorization = "%s %s" % (token_type, access_token)
+
+        self.client.logout()
+        # ^ Disable force_authenticate done above (i.e., server token).
+        response = self.client.get(
+            reverse("api:user-me"), HTTP_AUTHORIZATION=authorization
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(register_data["username"], response.data["username"])

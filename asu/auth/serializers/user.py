@@ -70,6 +70,14 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
+class AuthSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    token_type = serializers.ChoiceField(choices=["Bearer"])
+    expires_in = serializers.IntegerField()
+    refresh_token = serializers.CharField()
+    scope = serializers.CharField()
+
+
 class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
     consent = serializers.CharField(write_only=True)
     password = serializers.CharField(
@@ -77,6 +85,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         write_only=True,
         style={"input_type": "password"},
     )
+    auth = AuthSerializer(source="issue_token", read_only=True)
 
     def validate_email(self, email):
         return User.objects.normalize_email(email)
@@ -135,6 +144,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             "gender",
             "birth_date",
             "consent",
+            "auth",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:user-detail"}}

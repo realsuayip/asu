@@ -12,12 +12,17 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Lower
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+import oauthlib.common
 import sorl.thumbnail
+from oauth2_provider.models import AccessToken, RefreshToken
+from oauth2_provider.settings import oauth2_settings
 from PIL import Image
 from sorl.thumbnail import get_thumbnail
 
+from asu.auth.models import Application
 from asu.auth.models.managers import UserManager
 from asu.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from asu.messaging.models import ConversationRequest
@@ -281,3 +286,34 @@ class User(AbstractUser):
             sorl.thumbnail.delete(image, delete_file=False)
             image.delete(save=False)
             self.save(update_fields=["profile_picture", "date_modified"])
+
+    def issue_token(self):
+        # Programmatically issue tokens for this user. Used just after
+        # registration so that user can be logged in without having to
+        # enter their password again.
+        application = Application.objects.get_default()
+
+        expires_seconds = oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+        expires = timezone.now() + timezone.timedelta(seconds=expires_seconds)
+        scope = " ".join(oauth2_settings.SCOPES.keys())
+
+        access = AccessToken.objects.create(
+            user=self,
+            scope=scope,
+            expires=expires,
+            token=oauthlib.common.generate_token(),
+            application=application,
+        )
+        refresh = RefreshToken.objects.create(
+            user=self,
+            token=oauthlib.common.generate_token(),
+            access_token=access,
+            application=application,
+        )
+        return {
+            "access_token": access.token,
+            "token_type": "Bearer",
+            "expires_in": expires_seconds,
+            "refresh_token": refresh.token,
+            "scope": scope,
+        }

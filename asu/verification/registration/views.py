@@ -29,9 +29,6 @@ class RegistrationViewSet(ExtendedViewSet):
 
     During the user creation, the token is used to match the email
     given. If emails do match, the user is saved to the database.
-
-    TODO: After user creation, we need to issue access & refresh tokens
-     so they they can be authenticated immediately.
     """
 
     mixins = ("create",)

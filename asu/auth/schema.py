@@ -2,13 +2,34 @@ import functools
 
 from rest_framework import serializers
 
+from drf_spectacular.contrib import django_oauth_toolkit
 from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema
 
+from asu.auth.permissions import OAuthPermission
 from asu.auth.serializers.user import (
     UserCreateSerializer,
     UserPublicReadSerializer,
 )
 from asu.utils.rest import APIError
+
+
+class OAuthScheme(django_oauth_toolkit.DjangoOAuthToolkitScheme):
+    priority = 1
+
+    def get_security_requirement(self, auto_schema):
+        view = auto_schema.view
+        permissions = view.get_permissions()
+
+        has_oauth = any(isinstance(p, OAuthPermission) for p in permissions)
+        if not has_oauth:
+            return None
+
+        try:
+            scopes = view.required_scopes
+        except KeyError:
+            scopes = []
+        return {"oauth2": scopes}
+
 
 not_found_example = OpenApiExample(
     "user was not found",

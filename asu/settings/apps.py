@@ -63,7 +63,7 @@ SPECTACULAR_SETTINGS = {
             },
         },
     },
-    "OAUTH2_FLOWS": ["authorizationCode"],
+    "OAUTH2_FLOWS": ["authorizationCode", "clientCredentials"],
     "OAUTH2_AUTHORIZATION_URL": reverse_lazy("oauth2_provider:authorize"),
     "OAUTH2_TOKEN_URL": reverse_lazy("oauth2_provider:token"),
 }

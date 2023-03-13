@@ -15,11 +15,14 @@ ex = docker exec -it asu-web
 dj = $(ex) python manage.py
 
 .PHONY: *
+.DEFAULT_GOAL := detach
 
 build:
 	$(cc) build $(WHATEVER)
 up:
 	$(cc) up $(WHATEVER)
+detach:
+	$(cc) up -d $(WHATEVER)
 down:
 	$(cc) down $(WHATEVER)
 compose:
@@ -35,5 +38,6 @@ shell:
 test:
 	$(dj) test --settings=asu.settings.test --parallel 4 --shuffle --timing --keepdb
 coverage:
-	$(ex) /bin/sh -c "coverage run ./manage.py test --shuffle --settings=asu.settings.test && coverage html"
+	$(ex) /bin/sh -c "coverage run ./manage.py test --shuffle --settings=asu.settings.test &&\
+ 					  coverage html --omit='*/test_*.py,*/tests.py,*/migrations/*' --skip-empty"
 	open htmlcov/index.html

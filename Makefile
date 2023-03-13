@@ -23,8 +23,12 @@ up:
 	$(cc) up $(WHATEVER)
 detach:
 	$(cc) up -d $(WHATEVER)
+ifneq (${CONTEXT}, production)
 down:
 	$(cc) down $(WHATEVER)
+endif
+stop:
+	$(cc) stop $(WHATEVER)
 compose:
 	$(cc) $(WHATEVER)
 logs:

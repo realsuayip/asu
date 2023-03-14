@@ -5,7 +5,7 @@ services:
     container_name: asu-postgres
     image: postgres:15.2-alpine
     user: postgres
-    env_file: conf/postgres.env
+    env_file: ../conf/postgres.env
 
   redis:
     container_name: asu-redis
@@ -23,8 +23,8 @@ services:
       dockerfile: docker/web/Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
     env_file: &django_env
-      - conf/django.env
-      - conf/postgres.env
+      - ../conf/django.env
+      - ../conf/postgres.env
     volumes:
       - ..:/code
     ports:

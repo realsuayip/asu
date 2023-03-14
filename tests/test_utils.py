@@ -9,7 +9,7 @@ from asu.utils.file import FileSizeValidator, MimeTypeValidator
 class TestFileUtils(TestCase):
     @classmethod
     def setUpClass(cls):
-        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
+        file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
         cls.image = open(file_path, "rb")
 
     @classmethod

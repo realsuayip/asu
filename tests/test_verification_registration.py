@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
-from asu.tests.factories import UserFactory, first_party_token
 from asu.verification.models import RegistrationVerification
+from tests.factories import UserFactory, first_party_token
 
 
 class TestRegistrationVerification(APITestCase):

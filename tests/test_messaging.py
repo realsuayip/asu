@@ -11,7 +11,7 @@ from channels.testing import WebsocketCommunicator
 from asu.auth.models import UserFollow
 from asu.messaging.models import Conversation, ConversationRequest, Message
 from asu.messaging.websocket import ConversationConsumer
-from asu.tests.factories import UserFactory
+from tests.factories import UserFactory
 
 
 class TestMessaging(APITestCase):

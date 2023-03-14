@@ -11,8 +11,8 @@ from oauth2_provider.models import AccessToken
 from PIL import Image
 
 from asu.auth.models import Application, UserFollowRequest
-from asu.tests.factories import UserFactory
 from asu.verification.models import RegistrationVerification
+from tests.factories import UserFactory
 
 
 class TestAuth(APITestCase):
@@ -574,7 +574,7 @@ class TestAuth(APITestCase):
         self._test_through_list_response(response)
 
     def test_upload_delete_profile_picture(self):
-        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
+        file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
         image = open(file_path, "rb")
 
         self.assertFalse(self.user1.profile_picture.name)
@@ -599,7 +599,7 @@ class TestAuth(APITestCase):
     def test_change_profile_picture(self):
         self.client.force_login(self.user1)
 
-        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
+        file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
 
         with open(file_path, "rb") as file:
             r1 = self.client.put(

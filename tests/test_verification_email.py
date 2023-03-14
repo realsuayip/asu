@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
-from asu.tests.factories import UserFactory
 from asu.verification.models import EmailVerification
+from tests.factories import UserFactory
 
 
 class TestEmailVerification(APITestCase):

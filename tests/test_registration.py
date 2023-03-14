@@ -6,8 +6,8 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 
 from asu.auth.models import Application, User
-from asu.tests.factories import first_party_token
 from asu.verification.models import RegistrationVerification
+from tests.factories import first_party_token
 
 
 class RegistrationTest(APITestCase):

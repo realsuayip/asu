@@ -5,8 +5,8 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from asu.tests.factories import UserFactory, first_party_token
 from asu.verification.models import PasswordResetVerification
+from tests.factories import UserFactory, first_party_token
 
 
 class PasswordResetTest(APITestCase):

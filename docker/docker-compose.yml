@@ -3,7 +3,7 @@ version: '3.7'
 services:
   db:
     container_name: asu-postgres
-    image: postgres:14.5-alpine
+    image: postgres:15.2-alpine
     user: postgres
     env_file: conf/postgres.env
 

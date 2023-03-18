@@ -62,9 +62,8 @@ class ConversationRequestManager(models.Manager):
             return obj, False
 
         kwargs = {"sender": sender, "recipient": recipient}
+        defaults = None
 
         if is_following:
-            kwargs["date_accepted"] = timezone.now()
-
-        obj = self.create(**kwargs)
-        return obj, True
+            defaults = {"date_accepted": timezone.now()}
+        return self.get_or_create(**kwargs, defaults=defaults)

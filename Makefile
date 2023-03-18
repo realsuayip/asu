@@ -42,6 +42,6 @@ shell:
 test:
 	$(dj) test --settings=asu.settings.test --parallel 4 --shuffle --timing --keepdb
 coverage:
-	$(ex) /bin/sh -c "coverage run ./manage.py test --shuffle --settings=asu.settings.test &&\
+	$(ex) /bin/sh -c "coverage run ./manage.py test --shuffle --settings=asu.settings.test --no-input &&\
  					  coverage html --omit='*/test_*.py,*/tests.py,*/migrations/*' --skip-empty"
 	open htmlcov/index.html

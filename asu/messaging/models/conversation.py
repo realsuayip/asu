@@ -13,14 +13,18 @@ class Conversation(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="conversations",
+        verbose_name=_("holder"),
     )
     target = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="targeted_conversations",
+        verbose_name=_("target"),
     )
 
-    messages = models.ManyToManyField("Message", related_name="conversations")
+    messages = models.ManyToManyField(
+        "Message", related_name="conversations", verbose_name=_("messages")
+    )
 
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
@@ -28,6 +32,8 @@ class Conversation(models.Model):
     objects = ConversationManager()
 
     class Meta:
+        verbose_name = _("conversation")
+        verbose_name_plural = _("conversations")
         constraints = [
             models.UniqueConstraint(
                 fields=["holder", "target"],
@@ -41,11 +47,13 @@ class ConversationRequest(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="+",
+        verbose_name=_("sender"),
     )
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="+",
+        verbose_name=_("recipient"),
     )
 
     date_accepted = models.DateTimeField(

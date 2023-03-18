@@ -13,19 +13,21 @@ channel_layer = get_channel_layer()
 
 
 class Message(models.Model):
-    body = models.TextField()
+    body = models.TextField(_("body"))
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="+",
+        verbose_name=_("sender"),
     )
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="+",
+        verbose_name=_("recipient"),
     )
 
-    has_receipt = models.BooleanField(default=True)
+    has_receipt = models.BooleanField(_("has receipt"), default=True)
 
     date_read = models.DateTimeField(_("date read"), null=True, blank=True)
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)

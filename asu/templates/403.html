@@ -1,0 +1,7 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+
+{% block content %}
+    <header><h1>{% translate "Permission denied" %}</h1></header>
+    <section class="subject">{% translate "You do not have permission to perform this action." %}</section>
+{% endblock %}

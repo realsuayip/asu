@@ -1,0 +1,23 @@
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv=Content-Type content="text/html; charst=UTF-8">
+
+    <title>{% translate "Something went wrong..." %}</title>
+    <link href="{% static "css/index.css" %}" rel="stylesheet"/>
+</head>
+
+<body>
+<main class="container">
+    <header>
+        <h1>{% translate "Something went wrong..." %}</h1>
+        <small>{% translate "We could not handle your request. Please try again later." %}</small>
+    </header>
+</main>
+</body>
+</html>

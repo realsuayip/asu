@@ -11,7 +11,13 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
 from two_factor import views as tf
 
-from asu.views import APIRootView
+from asu.views import (
+    APIRootView,
+    bad_request,
+    page_not_found,
+    permission_denied,
+    server_error,
+)
 
 
 class APIRouter(DefaultRouter):
@@ -83,3 +89,9 @@ if settings.DEBUG:
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
     )
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
+
+
+handler400 = bad_request
+handler403 = permission_denied
+handler404 = page_not_found
+handler500 = server_error

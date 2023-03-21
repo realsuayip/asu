@@ -1,10 +1,15 @@
 from collections import defaultdict
 
 from django import urls
+from django.http import JsonResponse
 from django.urls import URLResolver, reverse
+from django.utils.translation import gettext
+from django.views import defaults
 
 from rest_framework.response import Response
 from rest_framework.routers import APIRootView as BaseAPIRootView
+
+from asu.utils import messages
 
 
 class APIRootView(BaseAPIRootView):
@@ -60,3 +65,41 @@ class APIRootView(BaseAPIRootView):
             "routes": routes,
         }
         return Response(ret)
+
+
+def as_json(message, /, *, status):
+    return JsonResponse({"detail": message}, status=status)
+
+
+def should_return_json(request) -> bool:
+    return (
+        request.path.startswith("/api/")
+        or request.content_type == "application/json"
+    )
+
+
+def bad_request(request, exception):
+    if should_return_json(request):
+        return as_json(messages.GENERIC_ERROR, status=400)
+    return defaults.bad_request(request, exception)
+
+
+def server_error(request):
+    if should_return_json(request):
+        return as_json(messages.GENERIC_ERROR, status=500)
+    return defaults.server_error(request)
+
+
+def permission_denied(request, exception):
+    if should_return_json(request):
+        return as_json(
+            gettext("You do not have permission to perform this action."),
+            status=403,
+        )
+    return defaults.permission_denied(request, exception)
+
+
+def page_not_found(request, exception):
+    if should_return_json(request):
+        return as_json(gettext("Not found."), status=404)
+    return defaults.page_not_found(request, exception)

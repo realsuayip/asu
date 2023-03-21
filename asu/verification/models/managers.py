@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.core import signing
 from django.db import models
@@ -8,7 +10,7 @@ class VerificationManager(models.Manager):
     verify_period: int
 
     def verifiable(self):
-        max_verify_date = timezone.now() - timezone.timedelta(
+        max_verify_date = timezone.now() - timedelta(
             seconds=self.verify_period
         )
         return self.filter(
@@ -23,7 +25,7 @@ class ConsentVerificationManager(VerificationManager):
 
     def eligible(self):
         period = self.eligible_period
-        max_register_date = timezone.now() - timezone.timedelta(seconds=period)
+        max_register_date = timezone.now() - timedelta(seconds=period)
         return self.filter(
             date_verified__isnull=False,
             date_completed__isnull=True,

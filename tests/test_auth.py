@@ -1,4 +1,5 @@
 import io
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -659,7 +660,7 @@ class TestOAuthPermissions(APITestCase):
         AccessToken.objects.create(
             user=user,
             scope="user.profile:read user.profile:write",
-            expires=timezone.now() + timezone.timedelta(days=1),
+            expires=timezone.now() + timedelta(days=1),
             token="first-party-token",  # <----
             application=first_party,
         )
@@ -677,7 +678,7 @@ class TestOAuthPermissions(APITestCase):
         AccessToken.objects.create(
             user=user,
             scope="user.profile:read",
-            expires=timezone.now() + timezone.timedelta(days=1),
+            expires=timezone.now() + timedelta(days=1),
             token="third-party-token",  # <----
             application=third_party,
         )
@@ -692,7 +693,7 @@ class TestOAuthPermissions(APITestCase):
             is_first_party=False,
         )
         AccessToken.objects.create(
-            expires=timezone.now() + timezone.timedelta(days=1),
+            expires=timezone.now() + timedelta(days=1),
             scope="user.profile:read",
             token="third-party-client-credentials",  # <----
             application=third_party_client_credentials,

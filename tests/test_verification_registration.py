@@ -1,4 +1,5 @@
 import re
+from datetime import timedelta
 from unittest import mock
 
 from django.conf import settings
@@ -89,7 +90,7 @@ class TestRegistrationVerification(APITestCase):
         self.client.force_authenticate(token=first_party_token)
 
         period = settings.REGISTRATION_VERIFY_PERIOD + 10
-        expired_create = timezone.now() - timezone.timedelta(seconds=period)
+        expired_create = timezone.now() - timedelta(seconds=period)
         email = "worldz@exmaple.com"
 
         with mock.patch(
@@ -125,9 +126,7 @@ class TestRegistrationVerification(APITestCase):
         consent = verification.create_consent()
 
         # Expire the verification date
-        verification.date_verified = timezone.now() - timezone.timedelta(
-            seconds=period
-        )
+        verification.date_verified = timezone.now() - timedelta(seconds=period)
         verification.save(update_fields=["date_verified"])
 
         # Should return nothing

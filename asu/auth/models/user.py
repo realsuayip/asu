@@ -1,5 +1,6 @@
 import io
 import uuid
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
@@ -294,7 +295,7 @@ class User(AbstractUser):
         application = Application.objects.get_default()
 
         expires_seconds = oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
-        expires = timezone.now() + timezone.timedelta(seconds=expires_seconds)
+        expires = timezone.now() + timedelta(seconds=expires_seconds)
         scope = " ".join(oauth2_settings.SCOPES.keys())
 
         access = AccessToken.objects.create(

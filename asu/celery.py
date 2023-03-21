@@ -1,4 +1,4 @@
-from django.utils import timezone
+from datetime import timedelta
 
 from celery import Celery
 
@@ -11,6 +11,6 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     "auth-tokens": {
         "task": "asu.auth.tasks.clear_expired_oauth_tokens",
-        "schedule": timezone.timedelta(hours=24),
+        "schedule": timedelta(hours=24),
     }
 }

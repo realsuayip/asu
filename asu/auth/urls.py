@@ -10,3 +10,4 @@ router.register(
     basename="follow-request",
 )
 router.register("users", UserViewSet, basename="user")
+urlpatterns = router.urls

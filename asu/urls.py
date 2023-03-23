@@ -1,11 +1,7 @@
-import importlib
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-
-from rest_framework.routers import DefaultRouter
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
@@ -19,35 +15,12 @@ from asu.views import (
     server_error,
 )
 
-
-class APIRouter(DefaultRouter):
-    include_format_suffixes = False
-    APIRootView = APIRootView
-
-
-router = APIRouter()
-router.root_view_name = "api-root"
-
-# Logic to scan through local apps and
-# register routers & custom urlpatterns
-
-api_urls = []
-local_apps = (app for app in settings.INSTALLED_APPS if app.startswith("asu."))
-for app in local_apps:
-    try:
-        module = importlib.import_module("%s.urls" % app)
-    except ModuleNotFoundError:
-        continue
-
-    app_router = getattr(module, "router", None)
-    app_urls = getattr(module, "api_urlpatterns", None)
-
-    if app_router is not None:
-        router.registry.extend(app_router.registry)
-
-    if app_urls is not None:
-        api_urls.extend(app_urls)
-
+api_urls = [
+    path("", APIRootView.as_view(), name="api-root"),
+    path("", include("asu.auth.urls")),
+    path("", include("asu.verification.urls")),
+    path("", include("asu.messaging.urls")),
+]
 
 docs_urls = [
     path("schema/", SpectacularAPIView.as_view(), name="openapi-schema"),
@@ -79,7 +52,7 @@ account_urls = [
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("account/", include((account_urls, "two_factor"))),
-    path("api/", include((router.urls + api_urls, "api"))),
+    path("api/", include((api_urls, "api"))),
     path("o/", include((oauth_urls, "oauth2_provider"))),
     path("docs/", include((docs_urls, "docs"))),
 ]

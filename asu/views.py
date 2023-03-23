@@ -15,7 +15,7 @@ from asu.utils import messages
 class APIRootView(BaseAPIRootView):
     namespaces = ("docs", "api", "oauth2_provider", "two_factor")
 
-    def _resolve_url(self, namespace, url):
+    def resolve_url(self, namespace, url):
         try:
             relpath = reverse(
                 namespace + ":" + url.name,
@@ -25,7 +25,7 @@ class APIRootView(BaseAPIRootView):
             return None
         return self.request.build_absolute_uri(relpath)
 
-    def _ordered(self, resolver):
+    def order(self, resolver):
         try:
             return self.namespaces.index(resolver.namespace)
         except (ValueError, AttributeError):
@@ -36,7 +36,7 @@ class APIRootView(BaseAPIRootView):
         resolvers = url_resolver.url_patterns
 
         routes = defaultdict(list)
-        for resolver in sorted(resolvers, key=self._ordered):
+        for resolver in sorted(resolvers, key=self.order):
             if not isinstance(resolver, URLResolver):
                 continue
 
@@ -44,17 +44,7 @@ class APIRootView(BaseAPIRootView):
             if namespace not in self.namespaces:
                 continue
 
-            values = []
-            for url in resolver.url_patterns:
-                name = url.name
-                pattern = str(url.pattern)
-
-                value = {"name": name, "pattern": pattern}
-                url = self._resolve_url(namespace, url)
-                if url is not None:
-                    value["url"] = url
-                values.append(value)
-
+            values = self.visit(resolver, namespace)
             regex = str(resolver.pattern)
             routes[regex] = values
 
@@ -65,6 +55,22 @@ class APIRootView(BaseAPIRootView):
             "routes": routes,
         }
         return Response(ret)
+
+    def visit(self, resolver, namespace):
+        values = []
+        for entry in resolver.url_patterns:
+            if isinstance(entry, URLResolver):
+                values.extend(self.visit(entry, namespace))
+            else:
+                values.append(self.get_value(entry, namespace))
+        return values
+
+    def get_value(self, url, namespace):
+        value = {"name": url.name, "pattern": str(url.pattern)}
+        url = self.resolve_url(namespace, url)
+        if url is not None:
+            value["url"] = url
+        return value
 
 
 def as_json(message, /, *, status):

@@ -20,3 +20,4 @@ router.register(
     PasswordResetViewSet,
     basename="password-reset",
 )
+urlpatterns = router.urls

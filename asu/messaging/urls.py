@@ -1,12 +1,12 @@
-from rest_framework_nested import routers
+from rest_framework.routers import SimpleRouter
+
+from rest_framework_nested.routers import NestedSimpleRouter
 
 from asu.messaging.views import ConversationViewSet, MessageViewSet
 
-router = routers.SimpleRouter()
+router = SimpleRouter()
 router.register("conversations", ConversationViewSet, basename="conversation")
 
-conversation_router = routers.NestedSimpleRouter(
-    router, "conversations", lookup="conversation"
-)
-conversation_router.register("messages", MessageViewSet, basename="message")
-api_urlpatterns = conversation_router.urls
+nested = NestedSimpleRouter(router, "conversations", lookup="conversation")
+nested.register("messages", MessageViewSet, basename="message")
+urlpatterns = router.urls + nested.urls

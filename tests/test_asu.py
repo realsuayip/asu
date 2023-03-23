@@ -41,3 +41,17 @@ class TestAPIRoot(TestCase):
         self.assertIn("routes", content)
         self.assertIn("user-agent", content)
         self.assertIn("version", content)
+
+    def test_alternating_error_page(self):
+        response = self.client.get("bad-page")
+
+        self.assertEqual(404, response.status_code)
+        self.assertIn("text/html", response.headers["Content-Type"])
+
+        response = self.client.get("/api/bad-page")
+        self.assertEqual(404, response.status_code)
+        self.assertIn("application/json", response.headers["Content-Type"])
+
+        response = self.client.get("bad-page", CONTENT_TYPE="application/json")
+        self.assertEqual(404, response.status_code)
+        self.assertIn("application/json", response.headers["Content-Type"])

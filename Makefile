@@ -45,3 +45,5 @@ coverage:
 	$(ex) /bin/sh -c "coverage run ./manage.py test --shuffle --settings=asu.settings.test --no-input &&\
  					  coverage html --omit='*/test_*.py,*/tests.py,*/migrations/*' --skip-empty"
 	open htmlcov/index.html
+format:
+	pre-commit run

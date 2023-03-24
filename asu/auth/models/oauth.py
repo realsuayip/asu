@@ -6,13 +6,17 @@ from oauth2_provider.models import (
     ApplicationManager as BaseApplicationManager,
 )
 
+from asu.utils.templatetags import get_variable
+
 
 class ApplicationManager(BaseApplicationManager):
     def get_default(self):
         # Figure out the default application, this is application is
         # used to programmatically issue tokens, outside the oauth
         # flows. For example, immediately after the registration.
+        default_client = get_variable("db.DEFAULT_OAUTH_CLIENT")
         apps = self.filter(
+            client_id=default_client,
             is_first_party=True,
             skip_authorization=True,
             client_type=Application.CLIENT_PUBLIC,

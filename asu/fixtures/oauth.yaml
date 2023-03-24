@@ -1,0 +1,15 @@
+- model: account.application
+  pk: 1
+  fields:
+    client_id: Xq4twhu4MT6Q5Lr9aGADgTJDAkeiWAVBvYiwGfks
+    user: null
+    redirect_uris: http://127.0.0.1:8000/local/
+    client_type: public
+    authorization_grant_type: authorization-code
+    client_secret: pbkdf2_sha256$390000$xQHknVydA0EaoWQGXYDzkY$gu4p1gA2avAMr9G0qAhiwX3SxWsZr5j2FxN/vKWrTTA=
+    name: Default client
+    skip_authorization: true
+    created: 2023-03-24 19:52:12.016125+00:00
+    updated: 2023-03-24 19:52:12.016141+00:00
+    algorithm: ''
+    is_first_party: true

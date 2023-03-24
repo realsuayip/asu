@@ -85,7 +85,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         write_only=True,
         style={"input_type": "password"},
     )
-    auth = AuthSerializer(source="issue_token", read_only=True)
+    auth = AuthSerializer(source="_auth_dict", read_only=True)
 
     def validate_email(self, email):
         return User.objects.normalize_email(email)
@@ -131,6 +131,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             update_fields=["user", "date_completed", "date_modified"]
         )
         verification.null_others()
+        user._auth_dict = user.issue_token()
         return user
 
     class Meta:

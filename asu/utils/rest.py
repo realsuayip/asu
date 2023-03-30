@@ -1,4 +1,5 @@
 from rest_framework import exceptions, pagination, serializers
+from rest_framework.metadata import BaseMetadata
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
 
@@ -54,6 +55,11 @@ class DynamicFieldsMixin:
             allowed, existing = set(fields), set(self.fields)
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
+
+
+class EmptyMetadata(BaseMetadata):
+    def determine_metadata(self, request, view):
+        return None
 
 
 class APIError(serializers.Serializer):

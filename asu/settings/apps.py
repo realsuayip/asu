@@ -13,6 +13,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",
+    "DEFAULT_METADATA_CLASS": "asu.utils.rest.EmptyMetadata",
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = "account.Application"

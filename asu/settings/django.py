@@ -139,5 +139,5 @@ if DEBUG:
     # Properly identify internal IP in Docker container
     import socket
 
-    _, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    *_, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips]

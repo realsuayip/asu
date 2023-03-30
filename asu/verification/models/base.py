@@ -12,6 +12,7 @@ from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from asu.utils import mailing
+from asu.utils.messages import EmailMessage
 
 
 def code_validator(code):
@@ -63,7 +64,7 @@ class Verification(models.Model):
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 
     # Specifies a namedtuple (subject, body) to be used in send_mail.
-    MESSAGES = None
+    MESSAGES: EmailMessage
 
     class Meta:
         abstract = True

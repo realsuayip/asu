@@ -1,10 +1,12 @@
+from typing import Type
+
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from asu.verification.models.base import code_validator
+from asu.verification.models.base import Verification, code_validator
 
 
 class BaseCheckSerializer(serializers.Serializer):
@@ -13,7 +15,7 @@ class BaseCheckSerializer(serializers.Serializer):
     return corresponding consent.
     """
 
-    model = None
+    model: Type[Verification]
 
     email = serializers.EmailField(label=_("email"))
     code = serializers.CharField(

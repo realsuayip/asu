@@ -1,7 +1,11 @@
+import datetime
 import types
+from typing import Any
 
 from rest_framework import exceptions, serializers
 from rest_framework.reverse import reverse
+
+from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.messaging.models import Conversation, ConversationRequest, Message
@@ -48,9 +52,6 @@ class MessageComposeSerializer(serializers.ModelSerializer):
         return message
 
 
-MessageSourceType = serializers.ChoiceField(choices=["sent", "received"])
-
-
 class MessageSerializer(serializers.ModelSerializer):
     date_read = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()
@@ -59,12 +60,12 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ("id", "body", "source", "date_created", "date_read")
 
-    def get_date_read(
-        self, message
-    ) -> serializers.DateTimeField(allow_null=True):
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_date_read(self, message) -> datetime.datetime | None:
         return message.date_read if message.has_receipt else None
 
-    def get_source(self, message) -> MessageSourceType:
+    @extend_schema_field(serializers.ChoiceField(choices=["sent", "received"]))
+    def get_source(self, message) -> str:
         user = self.context["request"].user
         return "sent" if message.sender_id == user.pk else "received"
 
@@ -100,7 +101,8 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         )
         extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
 
-    def get_last_message(self, obj) -> MessageSerializer(allow_null=True):
+    @extend_schema_field(MessageSerializer(allow_null=True))
+    def get_last_message(self, obj) -> dict[str, Any] | None:
         if obj.last_message is None:
             return None
 
@@ -108,7 +110,8 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         serializer = MessageSerializer(message, context=self.context)
         return serializer.data
 
-    def get_messages_url(self, obj) -> serializers.URLField:
+    @extend_schema_field(serializers.URLField)
+    def get_messages_url(self, obj) -> str:
         return reverse(
             "api:message-list",
             kwargs={"conversation_pk": obj.pk},

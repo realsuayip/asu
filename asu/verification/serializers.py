@@ -23,7 +23,7 @@ class BaseCheckSerializer(serializers.Serializer):
         max_length=6,
         validators=[code_validator],
     )
-    consent = serializers.CharField(
+    consent: serializers.CharField | None = serializers.CharField(
         read_only=True,
         help_text="This consent value will be needed while you perform the"
         " related action. It will expire after some time.",

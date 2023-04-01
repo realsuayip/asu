@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class ProjectVariableManager(models.Manager):
+class ProjectVariableManager(models.Manager["ProjectVariable"]):
     BUILD_VARS = {
         "BRAND": settings.PROJECT_BRAND,
         "SUPPORT_EMAIL": settings.PROJECT_SUPPORT_EMAIL,

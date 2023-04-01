@@ -1,6 +1,8 @@
+from typing import Type
+
 import django.core.validators
 from django.contrib.auth.password_validation import validate_password
-from django.db import transaction
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext
@@ -72,7 +74,7 @@ class PasswordResetSerializer(serializers.Serializer):
 
 class BlockSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserBlock
+        model: Type[models.Model] = UserBlock
         fields = ("from_user", "to_user")
         extra_kwargs = {
             "from_user": {"write_only": True},

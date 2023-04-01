@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import URLPattern, URLResolver, include, path
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
@@ -15,7 +15,7 @@ from asu.views import (
     server_error,
 )
 
-api_urls = [
+api_urls: list[URLResolver | URLPattern] = [
     path("", APIRootView.as_view(), name="api-root"),
     path("", include("asu.auth.urls")),
     path("", include("asu.verification.urls")),
@@ -49,7 +49,7 @@ account_urls = [
     path("two-factor/disable/", tf.DisableView.as_view(), name="disable"),
 ]
 
-urlpatterns = [
+urlpatterns: list[URLPattern | URLResolver] = [
     path("admin/", admin.site.urls),
     path("account/", include((account_urls, "two_factor"))),
     path("api/", include((api_urls, "api"))),

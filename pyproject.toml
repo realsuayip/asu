@@ -44,7 +44,7 @@ dev = [
 ]
 
 [tool.black]
-line-length = 79
+line-length = 88
 
 [tool.isort]
 profile = "black"
@@ -52,7 +52,7 @@ known_django = "django"
 known_rest_framework = "rest_framework"
 sections = "FUTURE,STDLIB,DJANGO,REST_FRAMEWORK,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 combine_as_imports = true
-line_length = 79
+line_length = 88
 
 [tool.ruff]
 select = [
@@ -65,7 +65,7 @@ select = [
     "C4", # flake8-comprehensions
     "C90", # mccabe
 ]
-line-length = 79
+line-length = 88
 exclude = [
     "migrations",
 ]

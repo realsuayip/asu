@@ -42,9 +42,7 @@ class MimeTypeValidator:
 
 @deconstructible
 class FileSizeValidator:
-    message = _(
-        "The size of the file you uploaded exceeded the maximum limit."
-    )
+    message = _("The size of the file you uploaded exceeded the maximum limit.")
 
     def __init__(self, max_size: int):
         self.max_size = max_size
@@ -63,6 +61,4 @@ class UserContentPath:
 
     def __call__(self, instance: Any, filename: str) -> str:
         _, ext = os.path.splitext(filename)
-        return self.template.format(
-            instance=instance, uuid=uuid.uuid4().hex, ext=ext
-        )
+        return self.template.format(instance=instance, uuid=uuid.uuid4().hex, ext=ext)

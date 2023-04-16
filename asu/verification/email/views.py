@@ -5,10 +5,7 @@ from rest_framework.response import Response
 from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.utils.views import ExtendedViewSet
 from asu.verification.email import schema
-from asu.verification.email.serializers import (
-    EmailCheckSerializer,
-    EmailSerializer,
-)
+from asu.verification.email.serializers import EmailCheckSerializer, EmailSerializer
 
 
 class EmailViewSet(ExtendedViewSet):

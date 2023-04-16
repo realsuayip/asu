@@ -25,9 +25,7 @@ class Migration(migrations.Migration):
                 ("value", models.TextField(verbose_name="value")),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "date_created",

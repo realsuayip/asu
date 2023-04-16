@@ -12,9 +12,7 @@ if TYPE_CHECKING:
     from rest_framework.views import APIView
 
 
-def exception_handler(
-    exc: Exception, context: dict[str, Any]
-) -> Response | None:
+def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
     response = default_exception_handler(exc, context)
 
     if response is None:
@@ -45,9 +43,7 @@ _pagination_map = {
 }
 
 
-def get_paginator(
-    name: str = "page_number", /, **kwargs: Any
-) -> Type[BasePagination]:
+def get_paginator(name: str = "page_number", /, **kwargs: Any) -> Type[BasePagination]:
     kwargs.setdefault("page_size", 10)
     klass = _pagination_map[name]
     return type("Factory%s" % klass.__name__, (klass,), kwargs)

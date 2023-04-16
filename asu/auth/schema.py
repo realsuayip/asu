@@ -8,10 +8,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
-from asu.auth.serializers.user import (
-    UserCreateSerializer,
-    UserPublicReadSerializer,
-)
+from asu.auth.serializers.user import UserCreateSerializer, UserPublicReadSerializer
 from asu.utils.rest import APIError
 
 if TYPE_CHECKING:
@@ -66,10 +63,7 @@ follow = action(
         not_found_example,
         OpenApiExample(
             "following is not allowed",
-            value={
-                "detail": "You do not have permission"
-                " to perform this action."
-            },
+            value={"detail": "You do not have permission to perform this action."},
             response_only=True,
             status_codes=["403"],
         ),

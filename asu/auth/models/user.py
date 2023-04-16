@@ -28,11 +28,7 @@ from asu.auth.models import Application
 from asu.auth.models.managers import UserManager
 from asu.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from asu.messaging.models import ConversationRequest
-from asu.utils.file import (
-    FileSizeValidator,
-    MimeTypeValidator,
-    UserContentPath,
-)
+from asu.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
 
 
 class UsernameValidator(RegexValidator):
@@ -107,8 +103,7 @@ class User(AbstractUser):
     is_private = models.BooleanField(
         _("private"),
         help_text=_(
-            "Users with private accounts has the"
-            " privilege of hiding their identity."
+            "Users with private accounts has the privilege of hiding their identity."
         ),
         default=False,
     )
@@ -162,13 +157,9 @@ class User(AbstractUser):
         return self.is_active and (not self.is_frozen)
 
     def add_following(self, *, to_user: "User") -> tuple[UserFollow, bool]:
-        return UserFollow.objects.get_or_create(
-            from_user=self, to_user=to_user
-        )
+        return UserFollow.objects.get_or_create(from_user=self, to_user=to_user)
 
-    def send_follow_request(
-        self, *, to_user: "User"
-    ) -> tuple[UserFollowRequest, bool]:
+    def send_follow_request(self, *, to_user: "User") -> tuple[UserFollowRequest, bool]:
         return UserFollowRequest.objects.get_or_create(
             from_user=self,
             to_user=to_user,
@@ -181,15 +172,12 @@ class User(AbstractUser):
         )
 
     def is_following(self, to_user: "User") -> bool:
-        return UserFollow.objects.filter(
-            from_user=self, to_user=to_user
-        ).exists()
+        return UserFollow.objects.filter(from_user=self, to_user=to_user).exists()
 
     def has_block_rel(self, to_user: "User") -> bool:
         # Check symmetric blocking status
         return UserBlock.objects.filter(
-            Q(from_user=self, to_user=to_user)
-            | Q(from_user=to_user, to_user=self)
+            Q(from_user=self, to_user=to_user) | Q(from_user=to_user, to_user=self)
         ).exists()
 
     def can_send_message(self, to_user: "User") -> bool:
@@ -272,9 +260,7 @@ class User(AbstractUser):
         self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)
         self.save(update_fields=["profile_picture", "date_modified"])
 
-    def get_profile_picture(
-        self, size: tuple[int, int] = (72, 72)
-    ) -> str | None:
+    def get_profile_picture(self, size: tuple[int, int] = (72, 72)) -> str | None:
         if not self.profile_picture:
             return None
 

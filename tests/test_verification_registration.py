@@ -39,9 +39,7 @@ class TestRegistrationVerification(APITestCase):
             self.assertEqual(1, len(callbacks))
             (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
 
-        verification = RegistrationVerification.objects.get(
-            code=code, email=email
-        )
+        verification = RegistrationVerification.objects.get(code=code, email=email)
 
         self.assertFalse(verification.is_eligible)
         self.assertIsNone(verification.user)
@@ -130,7 +128,5 @@ class TestRegistrationVerification(APITestCase):
         verification.save(update_fields=["date_verified"])
 
         # Should return nothing
-        actual = RegistrationVerification.objects.get_with_consent(
-            email, consent
-        )
+        actual = RegistrationVerification.objects.get_with_consent(email, consent)
         self.assertIsNone(actual)

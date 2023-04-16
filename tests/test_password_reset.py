@@ -39,9 +39,7 @@ class PasswordResetTest(APITestCase):
         # Send code to e-mail
         with self.settings(EMAIL_BACKEND=test_backend):
             with self.captureOnCommitCallbacks(execute=True) as callbacks:
-                send_response = self.client.post(
-                    url_send, data={"email": email}
-                )
+                send_response = self.client.post(url_send, data={"email": email})
             self.assertEqual(201, send_response.status_code)
             self.assertEqual(1, len(mail.outbox))
             self.assertEqual(1, len(callbacks))

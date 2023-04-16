@@ -24,9 +24,7 @@ class VerificationManager(models.Manager[V]):
     verify_period: int
 
     def verifiable(self) -> QuerySet[V]:
-        max_verify_date = timezone.now() - timedelta(
-            seconds=self.verify_period
-        )
+        max_verify_date = timezone.now() - timedelta(seconds=self.verify_period)
         return self.filter(
             date_verified__isnull=True,
             date_created__gt=max_verify_date,
@@ -47,9 +45,7 @@ class ConsentVerificationManager(VerificationManager[CV]):
             nulled_by__isnull=True,
         )
 
-    def get_with_consent(
-        self, email: str, consent: str, **kwargs: Any
-    ) -> CV | None:
+    def get_with_consent(self, email: str, consent: str, **kwargs: Any) -> CV | None:
         """
         Check consent, if valid, fetch related RegistrationVerification
         object and return it, else return None. 'email' should be normalized.

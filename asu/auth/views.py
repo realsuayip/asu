@@ -138,18 +138,12 @@ class UserViewSet(ExtendedViewSet):
         serializer = self.get_serializer(
             data={"from_user": self.request.user.pk, "to_user": to_user.pk}
         )
-        return self.get_action_save_response(
-            self.request, serializer, status_code=204
-        )
+        return self.get_action_save_response(self.request, serializer, status_code=204)
 
-    def delete_through(
-        self, pk: int, model: Type[UserFollow | UserBlock]
-    ) -> Response:
+    def delete_through(self, pk: int, model: Type[UserFollow | UserBlock]) -> Response:
         # Common delete method for user blocking and following.
         to_user = self.get_object()
-        model.objects.filter(
-            from_user=self.request.user, to_user=to_user
-        ).delete()
+        model.objects.filter(from_user=self.request.user, to_user=to_user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod

@@ -24,9 +24,7 @@ class TestPasswordReset(APITestCase):
             self.client.post(self.url_send, data={"email": email})
 
         v1, v2, v3 = verifications = tuple(
-            PasswordResetVerification.objects.filter(email=email).order_by(
-                "id"
-            )
+            PasswordResetVerification.objects.filter(email=email).order_by("id")
         )
         consents = []
 
@@ -78,9 +76,7 @@ class TestPasswordReset(APITestCase):
         # affect verification 2 as it is used already.
         self.client.post(self.url_send, data={"email": email})
         v4 = PasswordResetVerification.objects.latest("id")
-        check_4 = self.client.post(
-            self.url_check, {"email": email, "code": v4.code}
-        )
+        check_4 = self.client.post(self.url_check, {"email": email, "code": v4.code})
         response_4 = self.client.patch(
             self.url_change,
             data={

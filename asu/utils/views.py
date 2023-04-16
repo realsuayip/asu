@@ -90,11 +90,7 @@ class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
             )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        data = (
-            serializer.data
-            if status_code != status.HTTP_204_NO_CONTENT
-            else None
-        )
+        data = serializer.data if status_code != status.HTTP_204_NO_CONTENT else None
         return Response(data, status=status_code)
 
     def get_serializer_class(self) -> Type[serializers.Serializer[Any]]:

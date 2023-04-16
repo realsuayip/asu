@@ -38,9 +38,7 @@ class Migration(migrations.Migration):
                     "code",
                     models.CharField(
                         max_length=6,
-                        validators=[
-                            asu.verification.models.base.code_validator
-                        ],
+                        validators=[asu.verification.models.base.code_validator],
                         verbose_name="code",
                     ),
                 ),
@@ -52,9 +50,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "date_created",
@@ -118,9 +114,7 @@ class Migration(migrations.Migration):
                     "code",
                     models.CharField(
                         max_length=6,
-                        validators=[
-                            asu.verification.models.base.code_validator
-                        ],
+                        validators=[asu.verification.models.base.code_validator],
                         verbose_name="code",
                     ),
                 ),
@@ -132,9 +126,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "date_created",
@@ -198,9 +190,7 @@ class Migration(migrations.Migration):
                     "code",
                     models.CharField(
                         max_length=6,
-                        validators=[
-                            asu.verification.models.base.code_validator
-                        ],
+                        validators=[asu.verification.models.base.code_validator],
                         verbose_name="code",
                     ),
                 ),
@@ -212,9 +202,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "date_created",

@@ -99,17 +99,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "display_name",
-                    models.CharField(
-                        max_length=32, verbose_name="display name"
-                    ),
+                    models.CharField(max_length=32, verbose_name="display name"),
                 ),
                 (
                     "description",
                     models.TextField(
                         blank=True,
-                        validators=[
-                            django.core.validators.MaxLengthValidator(140)
-                        ],
+                        validators=[django.core.validators.MaxLengthValidator(140)],
                         verbose_name="description",
                     ),
                 ),
@@ -139,9 +135,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "birth_date",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="birth date"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="birth date"),
                 ),
                 (
                     "profile_picture",
@@ -191,9 +185,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
             ],
             options={
@@ -237,9 +229,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "from_user",
@@ -406,9 +396,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="user",
             constraint=models.CheckConstraint(
-                check=models.Q(
-                    ("username__regex", "^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$")
-                ),
+                check=models.Q(("username__regex", "^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$")),
                 name="regex_valid_username",
                 violation_error_message="Usernames can only contain latin letters, numerals and underscores. Trailing, leading or consecutive underscores are not allowed.",
             ),

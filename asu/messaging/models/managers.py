@@ -42,9 +42,7 @@ class ConversationManager(models.Manager["Conversation"]):
         mapping = dict(zip(fields, fields, strict=True))
 
         messages = (
-            self.model.messages.rel.model.objects.filter(
-                conversations=OuterRef("pk")
-            )
+            self.model.messages.rel.model.objects.filter(conversations=OuterRef("pk"))
             .order_by("-date_created")
             .values(data=JSONObject(**mapping))
         )

@@ -20,13 +20,9 @@ class PasswordResetVerificationSerializer(
         return User.objects.normalize_email(email)
 
     @transaction.atomic
-    def create(
-        self, validated_data: dict[str, Any]
-    ) -> PasswordResetVerification:
+    def create(self, validated_data: dict[str, Any]) -> PasswordResetVerification:
         try:
-            validated_data["user"] = User.objects.get(
-                email=validated_data["email"]
-            )
+            validated_data["user"] = User.objects.get(email=validated_data["email"])
         except User.DoesNotExist:
             return validated_data  # type: ignore[return-value]
 

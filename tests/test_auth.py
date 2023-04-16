@@ -237,9 +237,7 @@ class TestAuth(APITestCase):
             )
         )
         self.assertEqual(204, response2.status_code)
-        self.assertFalse(
-            self.user1.following.filter(pk=self.user2.pk).exists()
-        )
+        self.assertFalse(self.user1.following.filter(pk=self.user2.pk).exists())
 
     def _test_follow_subsequent_ok(self, user1, user2):
         self.client.force_login(user2)
@@ -261,9 +259,7 @@ class TestAuth(APITestCase):
 
     def test_follow_subsequent_ok(self):
         self._test_follow_subsequent_ok(self.user1, self.user2)
-        self.assertEqual(
-            1, self.user2.following.filter(pk=self.user1.pk).count()
-        )
+        self.assertEqual(1, self.user2.following.filter(pk=self.user1.pk).count())
 
     def test_follow_subsequent_ok_private(self):
         self._test_follow_subsequent_ok(self.private_user, self.user2)
@@ -294,21 +290,15 @@ class TestAuth(APITestCase):
 
         # Approve request
         detail = results[0]["url"]
-        approved_response = self.client.patch(
-            detail, data={"status": "approved"}
-        )
+        approved_response = self.client.patch(detail, data={"status": "approved"})
         self.assertEqual(200, approved_response.status_code)
 
         # Make sure the follow request is gone
-        subsequent_response = self.client.patch(
-            detail, data={"status": "approved"}
-        )
+        subsequent_response = self.client.patch(detail, data={"status": "approved"})
         self.assertEqual(404, subsequent_response.status_code)
 
         # Verify that sender follows the user now.
-        self.assertTrue(
-            self.user1.following.filter(pk=self.private_user.pk).exists()
-        )
+        self.assertTrue(self.user1.following.filter(pk=self.private_user.pk).exists())
         self.assertEqual(
             1,
             UserFollowRequest.objects.filter(
@@ -331,13 +321,9 @@ class TestAuth(APITestCase):
         response = self.client.get(reverse("api:follow-request-list"))
         detail = response.json()["results"][0]["url"]
 
-        rejected_response = self.client.patch(
-            detail, data={"status": "rejected"}
-        )
+        rejected_response = self.client.patch(detail, data={"status": "rejected"})
         self.assertEqual(200, rejected_response.status_code)
-        self.assertFalse(
-            self.user1.following.filter(pk=self.private_user.pk).exists()
-        )
+        self.assertFalse(self.user1.following.filter(pk=self.private_user.pk).exists())
         self.assertEqual(
             1,
             UserFollowRequest.objects.filter(
@@ -359,9 +345,7 @@ class TestAuth(APITestCase):
                 kwargs={"pk": self.user2.pk},
             )
         )
-        self.assertFalse(
-            self.user1.following.filter(pk=self.user2.pk).exists()
-        )
+        self.assertFalse(self.user1.following.filter(pk=self.user2.pk).exists())
         return response
 
     def test_follow_fails_if_blocked(self):

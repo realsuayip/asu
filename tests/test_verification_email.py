@@ -39,9 +39,7 @@ class TestEmailVerification(APITestCase):
         self.assertEqual(user, verification.user)
 
         # Use code to change email
-        response = self.client.post(
-            self.url_check, data={"email": email, "code": code}
-        )
+        response = self.client.post(self.url_check, data={"email": email, "code": code})
         self.assertContains(response, email, status_code=200)
 
         # Check if email changed

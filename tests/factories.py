@@ -20,6 +20,4 @@ class UserFactory(DjangoModelFactory):
 
 # Behaves as if first party oauth token in the context
 # of 'client.force_authenticate'
-first_party_token = SimpleNamespace(
-    application=SimpleNamespace(is_first_party=True)
-)
+first_party_token = SimpleNamespace(application=SimpleNamespace(is_first_party=True))

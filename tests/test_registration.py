@@ -21,9 +21,7 @@ class RegistrationTest(APITestCase):
         # Create a default oauth app that is going to be used during
         # registration to issue tokens.
         client = "first_party"
-        ProjectVariable.objects.create(
-            name="DEFAULT_OAUTH_CLIENT", value=client
-        )
+        ProjectVariable.objects.create(name="DEFAULT_OAUTH_CLIENT", value=client)
         Application.objects.create(
             client_id=client,
             client_secret="secret",
@@ -47,9 +45,7 @@ class RegistrationTest(APITestCase):
         # Send code to e-mail
         with self.settings(EMAIL_BACKEND=test_backend):
             with self.captureOnCommitCallbacks(execute=True) as callbacks:
-                send_response = self.client.post(
-                    url_send, data={"email": email}
-                )
+                send_response = self.client.post(url_send, data={"email": email})
             self.assertEqual(201, send_response.status_code)
             self.assertEqual(1, len(mail.outbox))
             self.assertEqual(1, len(callbacks))

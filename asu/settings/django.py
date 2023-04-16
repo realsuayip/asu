@@ -97,9 +97,7 @@ password_validators = [
     "django.contrib.auth.password_validation.CommonPasswordValidator",
     "django.contrib.auth.password_validation.NumericPasswordValidator",
 ]
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": validator} for validator in password_validators
-]
+AUTH_PASSWORD_VALIDATORS = [{"NAME": validator} for validator in password_validators]
 AUTH_USER_MODEL = "account.User"
 
 

@@ -97,9 +97,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         consent = validated_data.pop("consent")
         email = validated_data["email"]
 
-        verification = RegistrationVerification.objects.get_with_consent(
-            email, consent
-        )
+        verification = RegistrationVerification.objects.get_with_consent(email, consent)
 
         if verification is None:
             raise serializers.ValidationError(
@@ -129,9 +127,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         user.save()
         verification.user = user
         verification.date_completed = timezone.now()
-        verification.save(
-            update_fields=["user", "date_completed", "date_modified"]
-        )
+        verification.save(update_fields=["user", "date_completed", "date_modified"])
         verification.null_others()
         user._auth_dict = user.issue_token()  # type: ignore[attr-defined]
         return user

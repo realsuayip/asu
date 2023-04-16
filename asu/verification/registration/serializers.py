@@ -21,9 +21,7 @@ class RegistrationSerializer(
         fields = ("email",)
 
     @transaction.atomic
-    def create(
-        self, validated_data: dict[str, Any]
-    ) -> RegistrationVerification:
+    def create(self, validated_data: dict[str, Any]) -> RegistrationVerification:
         verification = super().create(validated_data)
         transaction.on_commit(verification.send_email)
         return verification

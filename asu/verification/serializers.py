@@ -10,9 +10,7 @@ from asu.auth.models import User
 from asu.verification.models.base import ConsentVerification, code_validator
 
 
-class BaseCheckSerializer(
-    serializers.Serializer[ConsentVerification | dict[str, Any]]
-):
+class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str, Any]]):
     """
     Check the verification, verify it and
     return corresponding consent.
@@ -34,9 +32,7 @@ class BaseCheckSerializer(
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         try:
-            verification = self.model.objects.verifiable().get(
-                **validated_data
-            )
+            verification = self.model.objects.verifiable().get(**validated_data)
         except self.model.DoesNotExist:
             raise NotFound
 
@@ -52,8 +48,6 @@ class EmailMixin:
         user = User.objects.filter(email=email)
 
         if user.exists():
-            raise serializers.ValidationError(
-                gettext("This e-mail is already in use.")
-            )
+            raise serializers.ValidationError(gettext("This e-mail is already in use."))
 
         return email

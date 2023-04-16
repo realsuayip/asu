@@ -10,9 +10,7 @@ from asu.verification.models import EmailVerification
 from asu.verification.serializers import BaseCheckSerializer, EmailMixin
 
 
-class EmailSerializer(
-    EmailMixin, serializers.ModelSerializer[EmailVerification]
-):
+class EmailSerializer(EmailMixin, serializers.ModelSerializer[EmailVerification]):
     class Meta:
         model = EmailVerification
         fields = ("email",)

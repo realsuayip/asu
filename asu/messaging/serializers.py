@@ -85,8 +85,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
     last_message = serializers.SerializerMethodField()
     messages = serializers.SerializerMethodField(
         method_name="get_messages_url",
-        help_text="URL from which messages belonging to this chat"
-        " can be retrieved.",
+        help_text="URL from which messages belonging to this chat can be retrieved.",
     )
 
     class Meta:

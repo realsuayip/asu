@@ -28,9 +28,7 @@ class Migration(migrations.Migration):
                 ("body", models.TextField(verbose_name="body")),
                 (
                     "has_receipt",
-                    models.BooleanField(
-                        default=True, verbose_name="has receipt"
-                    ),
+                    models.BooleanField(default=True, verbose_name="has receipt"),
                 ),
                 (
                     "date_read",
@@ -40,9 +38,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "date_created",
@@ -94,9 +90,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "date_created",
@@ -142,9 +136,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_modified",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="date modified"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="date modified"),
                 ),
                 (
                     "date_created",

@@ -13,9 +13,7 @@ class UserManager(DjangoUserManager["User"]):
         """
         Users who are publicly available.
         """
-        return self.exclude(
-            Q(is_active=False) | Q(is_frozen=True) | Q(is_private=True)
-        )
+        return self.exclude(Q(is_active=False) | Q(is_frozen=True) | Q(is_private=True))
 
     def active(self) -> QuerySet["User"]:
         """

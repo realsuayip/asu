@@ -23,9 +23,7 @@ OAUTH2_PROVIDER = {
             "Retrieve your account, including the private information."
         ),
         "user.profile:write": _("Alter your profile and account settings."),
-        "user.follow:read": _(
-            "Display your list of followers and follow requests."
-        ),
+        "user.follow:read": _("Display your list of followers and follow requests."),
         "user.follow:write": _(
             "Follow and unfollow people on your behalf, send follow requests."
         ),

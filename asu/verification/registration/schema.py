@@ -37,8 +37,7 @@ consent_examples = [
         value={
             "email": "test@example.com",
             "code": "595767",
-            "consent": "21:1nG4Qe:VnTCqKDQvtLxLHLSt1lZ5"
-            "nwGQF6gL8BQ6N_ywla_k9g",
+            "consent": "21:1nG4Qe:VnTCqKDQvtLxLHLSt1lZ5nwGQF6gL8BQ6N_ywla_k9g",
         },
         response_only=True,
         status_codes=["200"],

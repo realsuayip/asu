@@ -63,9 +63,7 @@ class APIRootView(BaseAPIRootView):
         }
         return Response(ret)
 
-    def visit(
-        self, resolver: URLResolver, namespace: str
-    ) -> list[dict[str, Any]]:
+    def visit(self, resolver: URLResolver, namespace: str) -> list[dict[str, Any]]:
         values = []
         for entry in resolver.url_patterns:
             if isinstance(entry, URLResolver):
@@ -88,8 +86,7 @@ def as_json(message: StrOrPromise, /, *, status: int) -> JsonResponse:
 
 def should_return_json(request: HttpRequest) -> bool:
     return (
-        request.path.startswith("/api/")
-        or request.content_type == "application/json"
+        request.path.startswith("/api/") or request.content_type == "application/json"
     )
 
 
@@ -105,9 +102,7 @@ def server_error(request: HttpRequest) -> HttpResponse:
     return defaults.server_error(request)
 
 
-def permission_denied(
-    request: HttpRequest, exception: Exception
-) -> HttpResponse:
+def permission_denied(request: HttpRequest, exception: Exception) -> HttpResponse:
     if should_return_json(request):
         return as_json(
             gettext("You do not have permission to perform this action."),

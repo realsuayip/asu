@@ -13,9 +13,7 @@ class OAuthPermission(BasePermission):
     def has_oauth_permission(self, request: Request, view: APIView) -> bool:
         raise NotImplementedError
 
-    def has_alternative_permission(
-        self, request: Request, view: APIView
-    ) -> bool:
+    def has_alternative_permission(self, request: Request, view: APIView) -> bool:
         # If authenticated through other mediums such as sessions, allow
         # permission. Useful *ONLY* for browsable api and tests.
         oauth2authenticated = False

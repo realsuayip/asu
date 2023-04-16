@@ -28,9 +28,9 @@ class TestMessaging(APITestCase):
         cls.user_disabled_msg_requests = UserFactory(allows_all_messages=False)
 
     def _accept_conversation(self, sender, recipient):
-        ConversationRequest.objects.filter(
-            sender=sender, recipient=recipient
-        ).update(date_accepted=timezone.now())
+        ConversationRequest.objects.filter(sender=sender, recipient=recipient).update(
+            date_accepted=timezone.now()
+        )
 
     def _send_message(self, sender, recipient, message):
         self.client.force_login(sender)
@@ -70,9 +70,7 @@ class TestMessaging(APITestCase):
         self.assertFalse(self.user1.can_send_message(self.inactive_user))
 
     def test_message_fails_if_requests_disabled(self):
-        response = self._send_message(
-            self.user1, self.user_disabled_msg_requests, "Hi"
-        )
+        response = self._send_message(self.user1, self.user_disabled_msg_requests, "Hi")
         self.assertEqual(response.status_code, 403)
 
     def test_message_reply_fails_if_not_accepted(self):
@@ -167,9 +165,7 @@ class TestMessaging(APITestCase):
             )
         )
 
-        response = self._send_message(
-            self.user2, self.user_disabled_msg_requests, "Yo"
-        )
+        response = self._send_message(self.user2, self.user_disabled_msg_requests, "Yo")
         self.assertEqual(201, response.status_code)
 
     def test_message_ok_if_previous_request_case_2(self):
@@ -199,9 +195,7 @@ class TestMessaging(APITestCase):
         self.user1.add_following(to_user=self.user2)
         self._send_message(self.user2, self.user1, "Hi")
 
-        UserFollow.objects.filter(
-            from_user=self.user1, to_user=self.user2
-        ).delete()
+        UserFollow.objects.filter(from_user=self.user1, to_user=self.user2).delete()
 
         r1 = self._send_message(self.user2, self.user1, "Hi again")
         r2 = self._send_message(self.user1, self.user2, "What?")
@@ -332,9 +326,7 @@ class TestMessaging(APITestCase):
         self._send_message(self.user1, self.user2, "Hi")
         conversation = Conversation.objects.get(holder=self.user2)
 
-        url = reverse(
-            "api:conversation-accept", kwargs={"pk": conversation.pk}
-        )
+        url = reverse("api:conversation-accept", kwargs={"pk": conversation.pk})
 
         self.client.force_login(self.user2)
 
@@ -369,9 +361,7 @@ class TestMessaging(APITestCase):
         # 2. Check conversation requests
         user1_conversation_requests_response = self.client.get(requests_url)
         self.assertEqual(200, user1_conversation_requests_response.status_code)
-        self.assertEqual(
-            0, len(user1_conversation_requests_response.data["results"])
-        )
+        self.assertEqual(0, len(user1_conversation_requests_response.data["results"]))
 
         # (Target perspective)
 
@@ -386,9 +376,7 @@ class TestMessaging(APITestCase):
         self.assertEqual(200, user2_conversation_requests_response.status_code)
         results = user2_conversation_requests_response.data["results"]
         self.assertEqual(1, len(results))
-        self.assertContains(
-            user2_conversation_requests_response, self.user1.username
-        )
+        self.assertContains(user2_conversation_requests_response, self.user1.username)
 
         # 3. Accept the conversation; we should observe the change
         # in lists.
@@ -399,9 +387,7 @@ class TestMessaging(APITestCase):
         self.assertEqual(1, len(user2_conversations_response.data["results"]))
 
         user2_conversation_requests_response = self.client.get(requests_url)
-        self.assertEqual(
-            0, len(user2_conversation_requests_response.data["results"])
-        )
+        self.assertEqual(0, len(user2_conversation_requests_response.data["results"]))
 
     def test_conversation_list_case_1(self):
         self._send_message(self.user0, self.user1, "Yo")
@@ -409,9 +395,7 @@ class TestMessaging(APITestCase):
         self._send_message(self.user1, self.user3, "Hello")
 
         r1 = self.client.get(reverse("api:conversation-list"))
-        r2 = self.client.get(
-            reverse("api:conversation-list") + "?type=requests"
-        )
+        r2 = self.client.get(reverse("api:conversation-list") + "?type=requests")
         self.assertEqual(2, len(r1.data["results"]))
         self.assertEqual(1, len(r2.data["results"]))
 
@@ -434,9 +418,7 @@ class TestMessaging(APITestCase):
         r2 = self.client.get(reverse("api:conversation-list"))
         self.assertEqual(1, len(r2.data["results"]))
 
-        r3 = self.client.get(
-            reverse("api:conversation-list") + "?type=requests"
-        )
+        r3 = self.client.get(reverse("api:conversation-list") + "?type=requests")
         url = r3.data["results"][0]["url"]
         accept = self.client.patch(url + "accept/")
         self.assertEqual(204, accept.status_code)
@@ -482,9 +464,7 @@ class TestMessaging(APITestCase):
 
         # Target should still have the deleted message.
         self.client.force_login(self.user2)
-        conversation_2 = (
-            Conversation.objects.filter(holder=self.user2).only("pk").get()
-        )
+        conversation_2 = Conversation.objects.filter(holder=self.user2).only("pk").get()
         r3 = self.client.get(
             reverse(
                 "api:conversation-detail",
@@ -575,9 +555,7 @@ class TestMessaging(APITestCase):
         conversation = Conversation.objects.get(holder=self.user1)
         other_conversation = Conversation.objects.get(holder=self.user2)
         self.assertFalse(conversation.messages.filter(pk=message_id).exists())
-        self.assertTrue(
-            other_conversation.messages.filter(pk=message_id).exists()
-        )
+        self.assertTrue(other_conversation.messages.filter(pk=message_id).exists())
 
     def test_message_delete_both_cascades(self):
         r1 = self._send_message(self.user1, self.user2, "Hi")
@@ -612,12 +590,8 @@ class TestMessaging(APITestCase):
         detail = self.client.get(conversation_url)
         self.assertEqual(404, detail.status_code)
 
-        self.assertFalse(
-            Conversation.objects.filter(holder=self.user1).exists()
-        )
-        self.assertTrue(
-            Conversation.objects.filter(holder=self.user2).exists()
-        )
+        self.assertFalse(Conversation.objects.filter(holder=self.user1).exists())
+        self.assertTrue(Conversation.objects.filter(holder=self.user2).exists())
         self.assertEqual(1, ConversationRequest.objects.all().count())
 
     def test_conversation_delete_both_cascades_message(self):
@@ -626,12 +600,8 @@ class TestMessaging(APITestCase):
         c1 = Conversation.objects.get(holder=self.user1)
         c2 = Conversation.objects.get(holder=self.user2)
 
-        conversation_url_1 = reverse(
-            "api:conversation-detail", kwargs={"pk": c1.pk}
-        )
-        conversation_url_2 = reverse(
-            "api:conversation-detail", kwargs={"pk": c2.pk}
-        )
+        conversation_url_1 = reverse("api:conversation-detail", kwargs={"pk": c1.pk})
+        conversation_url_2 = reverse("api:conversation-detail", kwargs={"pk": c2.pk})
 
         self.client.delete(conversation_url_1)
         self.client.force_login(self.user2)

@@ -9,6 +9,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from drf_spectacular.utils import extend_schema_view
 
+from asu.utils.typing import UserRequest
+
 if TYPE_CHECKING:
     ViewSetBase = GenericViewSet[Any]
 else:
@@ -69,6 +71,7 @@ class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
     schema_extensions: dict[str, Any] | None = None
     serializer_classes: dict[str, Any] = {}
     scopes: dict[str, list[str] | str] = {}
+    request: UserRequest
 
     def get_action_save_response(
         self,

@@ -33,6 +33,7 @@ from asu.auth.serializers.user import (
 )
 from asu.messaging.serializers import MessageComposeSerializer
 from asu.utils.rest import get_paginator
+from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
 
 if TYPE_CHECKING:
@@ -216,7 +217,7 @@ class UserViewSet(ExtendedViewSet):
         permission_classes=[RequireUser, RequireScope],
         serializer_class=UserBlockedSerializer,
     )
-    def blocked(self, request: Request) -> Response:
+    def blocked(self, request: UserRequest) -> Response:
         queryset = UserBlock.objects.filter(
             from_user=request.user,
             to_user__is_active=True,

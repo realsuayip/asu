@@ -74,8 +74,7 @@ class ConversationViewSet(ExtendedViewSet):
     filterset_class = ConversationFilterSet
 
     def get_queryset(self) -> QuerySet[Conversation]:
-        user = self.request.user
-        queryset = Conversation.objects.filter(holder=user)
+        queryset = Conversation.objects.filter(holder=self.request.user)
 
         if self.action not in ("list", "retrieve"):
             # i.e., accept & destroy

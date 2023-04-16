@@ -1,5 +1,4 @@
 import datetime
-import types
 from typing import Any
 
 from rest_framework import exceptions, serializers
@@ -108,7 +107,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         if obj.last_message is None:
             return None
 
-        message = types.SimpleNamespace(**obj.last_message)
+        message = Message(**obj.last_message)
         serializer = MessageSerializer(message, context=self.context)
         return serializer.data
 

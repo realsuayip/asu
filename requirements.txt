@@ -37,6 +37,8 @@ billiard==3.6.4.0
     # via celery
 celery==5.2.7
     # via asu (pyproject.toml)
+celery-types==0.15.0
+    # via asu (pyproject.toml)
 certifi==2022.12.7
     # via requests
 cffi==1.15.1
@@ -278,6 +280,7 @@ types-urllib3==1.26.25.10
     # via types-requests
 typing-extensions==4.5.0
     # via
+    #   celery-types
     #   django-stubs
     #   django-stubs-ext
     #   djangorestframework-stubs

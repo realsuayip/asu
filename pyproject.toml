@@ -41,6 +41,7 @@ dev = [
     "mypy",
     "types-oauthlib",
     "types-Pillow",
+    "celery-types",
 ]
 
 [tool.black]

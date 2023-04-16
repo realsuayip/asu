@@ -5,13 +5,14 @@ from typing import Any
 from rest_framework import exceptions, serializers
 from rest_framework.reverse import reverse
 
+from django_stubs_ext import WithAnnotations
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.messaging.models import Conversation, ConversationRequest, Message
 
 
-class MessageComposeSerializer(serializers.ModelSerializer):
+class MessageComposeSerializer(serializers.ModelSerializer[Message]):
     conversation = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name="api:conversation-detail",
@@ -29,7 +30,7 @@ class MessageComposeSerializer(serializers.ModelSerializer):
             "url",
         )
 
-    def get_url(self, obj):
+    def get_url(self, obj: Message) -> str:
         return reverse(
             "api:message-detail",
             kwargs={
@@ -39,7 +40,7 @@ class MessageComposeSerializer(serializers.ModelSerializer):
             request=self.context["request"],
         )
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> Message:
         sender = self.context["request"].user
         recipient = self.context["recipient"]
         body = validated_data["body"]
@@ -52,20 +53,20 @@ class MessageComposeSerializer(serializers.ModelSerializer):
         return message
 
 
-class MessageSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer[Message]):
     date_read = serializers.SerializerMethodField()
-    source = serializers.SerializerMethodField()
+    source = serializers.SerializerMethodField()  # type: ignore[assignment]
 
     class Meta:
         model = Message
         fields = ("id", "body", "source", "date_created", "date_read")
 
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
-    def get_date_read(self, message) -> datetime.datetime | None:
+    def get_date_read(self, message: Message) -> datetime.datetime | None:
         return message.date_read if message.has_receipt else None
 
     @extend_schema_field(serializers.ChoiceField(choices=["sent", "received"]))
-    def get_source(self, message) -> str:
+    def get_source(self, message: Message) -> str:
         user = self.context["request"].user
         return "sent" if message.sender_id == user.pk else "received"
 
@@ -102,7 +103,9 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
 
     @extend_schema_field(MessageSerializer(allow_null=True))
-    def get_last_message(self, obj) -> dict[str, Any] | None:
+    def get_last_message(
+        self, obj: WithAnnotations[Conversation]
+    ) -> dict[str, Any] | None:
         if obj.last_message is None:
             return None
 
@@ -111,7 +114,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         return serializer.data
 
     @extend_schema_field(serializers.URLField)
-    def get_messages_url(self, obj) -> str:
+    def get_messages_url(self, obj: Conversation) -> str:
         return reverse(
             "api:message-list",
             kwargs={"conversation_pk": obj.pk},
@@ -136,7 +139,7 @@ class ConversationDetailSerializer(ConversationSerializer):
         )
         extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
 
-    def get_accept_required(self, conversation) -> bool:
+    def get_accept_required(self, conversation: Conversation) -> bool:
         return ConversationRequest.objects.filter(
             date_accepted__isnull=True,
             recipient=conversation.holder_id,

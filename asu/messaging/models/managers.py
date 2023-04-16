@@ -1,12 +1,20 @@
+from typing import TYPE_CHECKING, Union
+
 from django.db import models, transaction
-from django.db.models import OuterRef, Q
+from django.db.models import OuterRef, Q, QuerySet
 from django.db.models.functions import JSONObject
 from django.utils import timezone
 
+if TYPE_CHECKING:
+    from asu.auth.models import User
+    from asu.messaging.models import Conversation, ConversationRequest, Message
 
-class MessageManager(models.Manager):
+
+class MessageManager(models.Manager["Message"]):
     @transaction.atomic
-    def compose(self, sender, recipient, body):
+    def compose(
+        self, sender: "User", recipient: "User", body: str
+    ) -> Union["Message", None]:
         if not sender.can_send_message(recipient):
             return None
 
@@ -19,8 +27,10 @@ class MessageManager(models.Manager):
         )
 
 
-class ConversationManager(models.Manager):
-    def annotate_last_message(self, queryset):
+class ConversationManager(models.Manager["Conversation"]):
+    def annotate_last_message(
+        self, queryset: QuerySet["Conversation"]
+    ) -> QuerySet["Conversation"]:
         fields = (
             "id",
             "body",
@@ -29,20 +39,22 @@ class ConversationManager(models.Manager):
             "date_read",
             "date_created",
         )
-        fields = dict(zip(fields, fields, strict=True))
+        mapping = dict(zip(fields, fields, strict=True))
 
         messages = (
             self.model.messages.rel.model.objects.filter(
                 conversations=OuterRef("pk")
             )
             .order_by("-date_created")
-            .values(data=JSONObject(**fields))
+            .values(data=JSONObject(**mapping))
         )
         return queryset.annotate(last_message=messages[:1])
 
 
-class ConversationRequestManager(models.Manager):
-    def compose(self, sender, recipient):
+class ConversationRequestManager(models.Manager["ConversationRequest"]):
+    def compose(
+        self, sender: "User", recipient: "User"
+    ) -> tuple["ConversationRequest", bool]:
         try:
             obj = self.get(
                 Q(sender=sender, recipient=recipient)

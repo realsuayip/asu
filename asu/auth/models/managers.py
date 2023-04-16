@@ -1,10 +1,15 @@
+from typing import TYPE_CHECKING
+
 from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.core import signing
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+
+if TYPE_CHECKING:
+    from asu.auth.models import User
 
 
-class UserManager(DjangoUserManager):
-    def public(self):
+class UserManager(DjangoUserManager["User"]):
+    def public(self) -> QuerySet["User"]:
         """
         Users who are publicly available.
         """
@@ -12,7 +17,7 @@ class UserManager(DjangoUserManager):
             Q(is_active=False) | Q(is_frozen=True) | Q(is_private=True)
         )
 
-    def active(self):
+    def active(self) -> QuerySet["User"]:
         """
         Users who are publicly available and can
         perform actions on the application.
@@ -27,4 +32,5 @@ class UserManager(DjangoUserManager):
         given_ident, value = obj.get("ident"), obj.get("value")
         if (not ident) or (not value) or ident != given_ident:
             raise signing.BadSignature
-        return value
+        pk, uuid = value
+        return pk, uuid

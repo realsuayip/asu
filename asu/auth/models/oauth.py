@@ -1,16 +1,13 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from oauth2_provider.models import (
-    AbstractApplication,
-    ApplicationManager as BaseApplicationManager,
-)
+from oauth2_provider.models import AbstractApplication
 
 from asu.utils.templatetags import get_variable
 
 
-class ApplicationManager(BaseApplicationManager):
-    def get_default(self):
+class ApplicationManager(models.Manager["Application"]):
+    def get_default(self) -> "Application":
         # Figure out the default application, this is application is
         # used to programmatically issue tokens, outside the oauth
         # flows. For example, immediately after the registration.
@@ -24,8 +21,11 @@ class ApplicationManager(BaseApplicationManager):
         )
         return apps.get()
 
+    def get_by_natural_key(self, client_id: str) -> "Application":
+        return self.get(client_id=client_id)
 
-class Application(AbstractApplication):
+
+class Application(AbstractApplication):  # type: ignore[misc]
     is_first_party = models.BooleanField(
         _("First party application"),
         help_text=_(
@@ -38,9 +38,9 @@ class Application(AbstractApplication):
 
     objects = ApplicationManager()
 
-    class Meta(AbstractApplication.Meta):
+    class Meta:
         verbose_name = _("application")
         verbose_name_plural = _("applications")
 
-    def natural_key(self):
+    def natural_key(self) -> tuple[str]:
         return (self.client_id,)

@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Generator
 
 from django.utils import autoreload
 
@@ -9,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class WatchfilesReloader(autoreload.BaseReloader):
-    def tick(self):
+    def tick(self) -> Generator[None, None, None]:
         watcher = watchfiles.watch(
             BASE_DIR,
             debug=False,

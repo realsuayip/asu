@@ -1,9 +1,9 @@
-from typing import Type
+from typing import Any, Type, TypeVar
 
-import django.core.validators
+import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext
 
@@ -13,6 +13,9 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.verification.models import PasswordResetVerification
+
+T = TypeVar("T", bound=models.Model)
+
 
 RelatedUserField = UserPublicReadSerializer(
     read_only=True,
@@ -28,7 +31,7 @@ RelatedUserField = UserPublicReadSerializer(
 )
 
 
-class PasswordResetSerializer(serializers.Serializer):
+class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
     email = serializers.EmailField()
     consent = serializers.CharField(write_only=True)
     password = serializers.CharField(
@@ -36,11 +39,11 @@ class PasswordResetSerializer(serializers.Serializer):
         style={"input_type": "password"},
     )
 
-    def validate_email(self, email):
+    def validate_email(self, email: str) -> str:
         return User.objects.normalize_email(email)
 
     @transaction.atomic
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         password = validated_data["password"]
         email = validated_data["email"]
 
@@ -51,7 +54,7 @@ class PasswordResetSerializer(serializers.Serializer):
 
         try:
             validate_password(password, user=user)
-        except django.core.validators.ValidationError as err:
+        except django.core.exceptions.ValidationError as err:
             raise serializers.ValidationError({"password": err.messages})
 
         verification = PasswordResetVerification.objects.get_with_consent(
@@ -72,7 +75,7 @@ class PasswordResetSerializer(serializers.Serializer):
         return validated_data
 
 
-class BlockSerializer(serializers.ModelSerializer):
+class BlockSerializer(serializers.ModelSerializer[UserBlock]):
     class Meta:
         model: Type[models.Model] = UserBlock
         fields = ("from_user", "to_user")
@@ -81,12 +84,14 @@ class BlockSerializer(serializers.ModelSerializer):
             "to_user": {"write_only": True},
         }
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if attrs["from_user"] == attrs["to_user"]:
             raise PermissionDenied
         return attrs
 
-    def get_rels(self, model, *, from_user, to_user):
+    def get_rels(
+        self, model: Type[T], *, from_user: User, to_user: User
+    ) -> QuerySet[T]:
         # Given m2m through model, return queryset
         # containing objects for both directions
         return model.objects.filter(
@@ -95,18 +100,19 @@ class BlockSerializer(serializers.ModelSerializer):
         )
 
     @transaction.atomic
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> UserBlock:
         # If there is a follow relationship between
         # users, delete it before blocking.
         self.get_rels(UserFollow, **validated_data).delete()
-        return UserBlock.objects.get_or_create(**validated_data)
+        block, _ = UserBlock.objects.get_or_create(**validated_data)
+        return block
 
 
 class FollowSerializer(BlockSerializer):
     class Meta(BlockSerializer.Meta):
         model = UserFollow
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         from_user = validated_data["from_user"]
         to_user = validated_data["to_user"]
 
@@ -124,7 +130,7 @@ class FollowSerializer(BlockSerializer):
         return validated_data
 
 
-class FollowRequestSerializer(serializers.ModelSerializer):
+class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):
     from_user = RelatedUserField
     status = serializers.ChoiceField(
         choices=[
@@ -140,32 +146,34 @@ class FollowRequestSerializer(serializers.ModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:follow-request-detail"}}
 
     @transaction.atomic
-    def update(self, instance, validated_data):
+    def update(
+        self, instance: UserFollowRequest, validated_data: dict[str, Any]
+    ) -> UserFollowRequest:
         instance = super().update(instance, validated_data)
         if instance.is_approved:
             instance.bond()
         return instance
 
 
-class UserFollowersSerializer(serializers.ModelSerializer):
+class UserFollowersSerializer(serializers.ModelSerializer[UserFollow]):
     from_user = RelatedUserField
 
     class Meta:
         model = UserFollow
         fields = ("from_user",)
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: UserFollow) -> Any:
         return super().to_representation(instance).pop("from_user")
 
 
-class UserFollowingSerializer(serializers.ModelSerializer):
+class UserFollowingSerializer(serializers.ModelSerializer[UserFollow]):
     to_user = RelatedUserField
 
     class Meta:
         model = UserFollow
         fields = ("to_user",)
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: UserFollow) -> Any:
         return super().to_representation(instance).pop("to_user")
 
 
@@ -175,24 +183,24 @@ class UserBlockedSerializer(UserFollowingSerializer):
         fields = ("to_user",)
 
 
-class TicketSerializer(serializers.Serializer):
+class TicketSerializer(serializers.Serializer[dict[str, Any]]):
     scope = serializers.ChoiceField(choices=["websocket"])
     ticket = serializers.CharField(read_only=True)
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         user = self.context["request"].user
         scope = validated_data["scope"]
         validated_data["ticket"] = user.create_ticket(ident=scope)
         return validated_data
 
 
-class ProfilePictureEditSerializer(serializers.ModelSerializer):
+class ProfilePictureEditSerializer(serializers.ModelSerializer[User]):
     class Meta:
         fields = ("profile_picture",)
         model = User
         extra_kwargs = {"profile_picture": {"required": True}}
 
-    def update(self, instance, validated_data):
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
         image = validated_data["profile_picture"]
         instance.set_profile_picture(image)
         return instance

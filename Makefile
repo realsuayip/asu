@@ -47,3 +47,6 @@ coverage:
 	open htmlcov/index.html
 format:
 	pre-commit run
+type:
+	$(ex) /bin/sh -c "MYPY_FORCE_COLOR=true mypy asu/ |\
+					   grep -v 'Metaclass conflict\|Import cycle\|AnonymousUser\|Constraint'"

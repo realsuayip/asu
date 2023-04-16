@@ -1,15 +1,29 @@
 from datetime import timedelta
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from django.conf import settings
 from django.core import signing
 from django.db import models
+from django.db.models import QuerySet
 from django.utils import timezone
 
+if TYPE_CHECKING:
+    from asu.verification.models import (  # noqa: F401
+        EmailVerification,
+        PasswordResetVerification,
+        RegistrationVerification,
+    )
+    from asu.verification.models.base import ConsentVerification, Verification
 
-class VerificationManager(models.Manager):
+
+V = TypeVar("V", bound="Verification")
+CV = TypeVar("CV", bound="ConsentVerification")
+
+
+class VerificationManager(models.Manager[V]):
     verify_period: int
 
-    def verifiable(self):
+    def verifiable(self) -> QuerySet[V]:
         max_verify_date = timezone.now() - timedelta(
             seconds=self.verify_period
         )
@@ -20,10 +34,10 @@ class VerificationManager(models.Manager):
         )
 
 
-class ConsentVerificationManager(VerificationManager):
+class ConsentVerificationManager(VerificationManager[CV]):
     eligible_period: int
 
-    def eligible(self):
+    def eligible(self) -> QuerySet[CV]:
         period = self.eligible_period
         max_register_date = timezone.now() - timedelta(seconds=period)
         return self.filter(
@@ -33,7 +47,9 @@ class ConsentVerificationManager(VerificationManager):
             nulled_by__isnull=True,
         )
 
-    def get_with_consent(self, email, consent, **kwargs):
+    def get_with_consent(
+        self, email: str, consent: str, **kwargs: Any
+    ) -> CV | None:
         """
         Check consent, if valid, fetch related RegistrationVerification
         object and return it, else return None. 'email' should be normalized.
@@ -53,21 +69,25 @@ class ConsentVerificationManager(VerificationManager):
             return None
 
 
-class RegistrationVerificationManager(ConsentVerificationManager):
+class RegistrationVerificationManager(
+    ConsentVerificationManager["RegistrationVerification"]
+):
     verify_period = settings.REGISTRATION_VERIFY_PERIOD
     eligible_period = settings.REGISTRATION_REGISTER_PERIOD
 
-    def eligible(self):
+    def eligible(self) -> QuerySet["RegistrationVerification"]:
         return super().eligible().filter(user__isnull=True)
 
 
-class PasswordResetVerificationManager(ConsentVerificationManager):
+class PasswordResetVerificationManager(
+    ConsentVerificationManager["PasswordResetVerification"]
+):
     verify_period = settings.PASSWORD_VERIFY_PERIOD
     eligible_period = settings.PASSWORD_RESET_PERIOD
 
 
-class EmailVerificationManager(VerificationManager):
+class EmailVerificationManager(VerificationManager["EmailVerification"]):
     verify_period = settings.EMAIL_VERIFY_PERIOD
 
-    def verifiable(self):
+    def verifiable(self) -> QuerySet["EmailVerification"]:
         return super().verifiable().filter(user__isnull=False)

@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
+from asu.messaging.models import Conversation
 from asu.messaging.models.managers import MessageManager
 
 channel_layer = get_channel_layer()
@@ -36,12 +37,12 @@ class Message(models.Model):
     objects = MessageManager()
 
     @cached_property
-    def sender_conversation(self):
+    def sender_conversation(self) -> Conversation:
         # Used in "MessageComposeSerializer" to retrieve related
         # conversation hyperlink.
         return self.conversations.only("pk").get(holder=self.sender)
 
-    def websocket_send(self, target_conversation_id):
+    def websocket_send(self, target_conversation_id: int) -> None:
         group = "conversations_%s" % self.recipient_id
         event = {
             "type": "conversation.message",

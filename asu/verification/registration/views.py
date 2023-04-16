@@ -1,4 +1,6 @@
 from rest_framework.decorators import action
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from asu.auth.permissions import RequireFirstParty
 from asu.utils.views import ExtendedViewSet
@@ -43,7 +45,7 @@ class RegistrationViewSet(ExtendedViewSet):
         serializer_class=RegistrationCheckSerializer,
         permission_classes=[RequireFirstParty],
     )
-    def check(self, request):
+    def check(self, request: Request) -> Response:
         return self.get_action_save_response(
             request, RegistrationCheckSerializer
         )

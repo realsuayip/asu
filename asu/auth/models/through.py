@@ -63,10 +63,10 @@ class UserFollowRequest(UserThrough):
         ]
 
     @property
-    def is_approved(self):
+    def is_approved(self) -> bool:
         return self.status == self.Status.APPROVED
 
-    def bond(self):
+    def bond(self) -> None:
         # Create the actual following relationship.
         assert self.is_approved, "Attempt to bond unapproved instance"
         self.from_user.add_following(to_user=self.to_user)

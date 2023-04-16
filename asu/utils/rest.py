@@ -1,10 +1,20 @@
+from typing import TYPE_CHECKING, Any, Type
+
 from rest_framework import exceptions, pagination, serializers
 from rest_framework.metadata import BaseMetadata
+from rest_framework.pagination import BasePagination
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
 
+if TYPE_CHECKING:
+    from rest_framework.views import APIView
 
-def exception_handler(exc, context):
+
+def exception_handler(
+    exc: Exception, context: dict[str, Any]
+) -> Response | None:
     response = default_exception_handler(exc, context)
 
     if response is None:
@@ -35,7 +45,9 @@ _pagination_map = {
 }
 
 
-def get_paginator(name="page_number", /, **kwargs):
+def get_paginator(
+    name: str = "page_number", /, **kwargs: Any
+) -> Type[BasePagination]:
     kwargs.setdefault("page_size", 10)
     klass = _pagination_map[name]
     return type("Factory%s" % klass.__name__, (klass,), kwargs)
@@ -47,7 +59,8 @@ class DynamicFieldsMixin:
     keyword argument.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        assert isinstance(self, serializers.Serializer)
         fields = kwargs.pop("fields", None)
         super().__init__(*args, **kwargs)
 
@@ -58,10 +71,10 @@ class DynamicFieldsMixin:
 
 
 class EmptyMetadata(BaseMetadata):
-    def determine_metadata(self, request, view):
+    def determine_metadata(self, request: Request, view: "APIView") -> None:
         return None
 
 
-class APIError(serializers.Serializer):
+class APIError(serializers.Serializer[dict[str, Any]]):
     # Generic error serializer for documentation rendering.
     detail = serializers.CharField()

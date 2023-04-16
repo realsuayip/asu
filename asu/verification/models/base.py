@@ -1,5 +1,6 @@
 import string
 import uuid
+from typing import Any
 
 from django.conf import settings
 from django.core import signing
@@ -13,9 +14,13 @@ from django.utils.translation import gettext_lazy as _
 
 from asu.utils import mailing
 from asu.utils.messages import EmailMessage
+from asu.verification.models.managers import (
+    ConsentVerificationManager,
+    VerificationManager,
+)
 
 
-def code_validator(code):
+def code_validator(code: str) -> None:
     errors = []
 
     if len(code) < 6:
@@ -66,6 +71,8 @@ class Verification(models.Model):
     # Specifies a namedtuple (subject, body) to be used in send_mail.
     MESSAGES: EmailMessage
 
+    objects: Any = VerificationManager()
+
     class Meta:
         abstract = True
         constraints = [
@@ -75,7 +82,7 @@ class Verification(models.Model):
             )
         ]
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         created = self.pk is None
 
         if created:
@@ -83,11 +90,11 @@ class Verification(models.Model):
 
         super().save(*args, **kwargs)
 
-    def null_others(self):
-        queryset = self._meta.model.objects.verifiable()
+    def null_others(self) -> None:
+        queryset = type(self).objects.verifiable()
         queryset.update(nulled_by=self)
 
-    def send_email(self):
+    def send_email(self) -> int:
         title = self.MESSAGES.subject
         content = mark_safe(self.MESSAGES.body % {"code": self.code})
         return mailing.send(
@@ -143,17 +150,19 @@ class ConsentVerification(Verification):
 
     ELIGIBLE_PERIOD: int
 
+    objects: ConsentVerificationManager[Any] = ConsentVerificationManager()
+
     class Meta(Verification.Meta):
         abstract = True
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "%s <#%s>" % (self.email, self.pk)
 
     @classproperty
-    def ident(cls):
-        return "consent_" + cls._meta.model_name
+    def ident(cls) -> str:
+        return "consent_" + cls._meta.db_table
 
-    def create_consent(self):
+    def create_consent(self) -> str:
         assert self.is_eligible
 
         obj = {"ident": self.ident, "value": self.uuid.hex}
@@ -161,7 +170,7 @@ class ConsentVerification(Verification):
         return signer.sign_object(obj)
 
     @property
-    def is_eligible(self):
+    def is_eligible(self) -> bool:
         if (self.date_verified is None) or self.date_completed:
             return False
 
@@ -169,6 +178,6 @@ class ConsentVerification(Verification):
         delta = (timezone.now() - self.date_verified).total_seconds()
         return delta < period
 
-    def null_others(self):
-        queryset = self._meta.model.objects.eligible()
+    def null_others(self) -> None:
+        queryset = type(self).objects.eligible()
         queryset.update(nulled_by=self)

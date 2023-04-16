@@ -27,6 +27,8 @@ dependencies = [
     "phonenumbers ~= 8.13",
     "django-widget-tweaks ~= 1.4",
     "envanter ~= 1.1",
+    "django-stubs ~= 1.16",
+    "djangorestframework-stubs ~= 1.10",
 ]
 
 [project.optional-dependencies]
@@ -36,6 +38,9 @@ dev = [
     "coverage",
     "tblib",
     "watchfiles",
+    "mypy",
+    "types-oauthlib",
+    "types-Pillow",
 ]
 
 [tool.black]
@@ -70,3 +75,14 @@ ignore = [
 
 [tool.ruff.mccabe]
 max-complexity = 20
+
+[tool.mypy]
+plugins = [
+    "mypy_django_plugin.main",
+    "mypy_drf_plugin.main",
+]
+strict = true
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "asu.settings"

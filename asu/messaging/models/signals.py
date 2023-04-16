@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models.signals import m2m_changed, post_save, pre_delete
 from django.dispatch import receiver
 
@@ -5,7 +7,7 @@ from asu.messaging.models import Conversation, ConversationRequest, Message
 
 
 @receiver(post_save, sender=Message, dispatch_uid="deliver_message")
-def deliver_message(instance, created, **kwargs):
+def deliver_message(instance: Message, created: bool, **kwargs: Any) -> None:
     if not created:
         return
 
@@ -23,7 +25,9 @@ def deliver_message(instance, created, **kwargs):
 
 
 @receiver(m2m_changed, sender=Conversation.messages.through)
-def delete_orphan_messages_individual(action, pk_set, **kwargs):
+def delete_orphan_messages_individual(
+    action: str, pk_set: list[str], **kwargs: Any
+) -> None:
     if (
         action == "post_remove"
         and not Conversation.objects.filter(messages__in=pk_set).exists()
@@ -32,5 +36,5 @@ def delete_orphan_messages_individual(action, pk_set, **kwargs):
 
 
 @receiver(pre_delete, sender=Conversation)
-def delete_orphan_messages_bulk(instance, **kwargs):
+def delete_orphan_messages_bulk(instance: Conversation, **kwargs: Any) -> None:
     instance.messages.remove(*instance.messages.all())

@@ -26,7 +26,7 @@ class RegistrationVerification(ConsentVerification):
         verbose_name_plural = _("registration verifications")
 
     @property
-    def is_eligible(self):
+    def is_eligible(self) -> bool:
         if self.user is not None:
             return False
         return super().is_eligible

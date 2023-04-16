@@ -4,7 +4,7 @@ from asu.celery import app
 
 
 @app.task
-def clear_expired_oauth_tokens():
+def clear_expired_oauth_tokens() -> None:
     """
     This is a periodic task run to clean now-unnecessary
     oauth token entries from the database.

@@ -1,14 +1,21 @@
+from typing import cast
+
 from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.views import APIView
 
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from oauth2_provider.contrib.rest_framework.permissions import TokenHasScope
+from oauth2_provider.models import AccessToken
 
 
 class OAuthPermission(BasePermission):
-    def has_oauth_permission(self, request, view):
+    def has_oauth_permission(self, request: Request, view: APIView) -> bool:
         raise NotImplementedError
 
-    def has_alternative_permission(self, request, view):
+    def has_alternative_permission(
+        self, request: Request, view: APIView
+    ) -> bool:
         # If authenticated through other mediums such as sessions, allow
         # permission. Useful *ONLY* for browsable api and tests.
         oauth2authenticated = False
@@ -19,7 +26,7 @@ class OAuthPermission(BasePermission):
             )
         return is_authenticated and (not oauth2authenticated)
 
-    def has_permission(self, request, view):
+    def has_permission(self, request: Request, view: APIView) -> bool:
         has_alternative = self.has_alternative_permission(request, view)
         has_oauth = self.has_oauth_permission(request, view)
         return has_alternative or has_oauth
@@ -31,9 +38,9 @@ class RequireFirstParty(OAuthPermission):
     party. Identified by 'is_first_party' attribute.
     """
 
-    def has_oauth_permission(self, request, view):
-        token = request.auth
-        return token and token.application.is_first_party
+    def has_oauth_permission(self, request: Request, view: APIView) -> bool:
+        token = cast(AccessToken, request.auth)
+        return bool(token and token.application.is_first_party)
 
 
 class RequireToken(OAuthPermission):
@@ -43,7 +50,7 @@ class RequireToken(OAuthPermission):
     'permissions.IsAuthenticated' however it does not require a user.
     """
 
-    def has_oauth_permission(self, request, view):
+    def has_oauth_permission(self, request: Request, view: APIView) -> bool:
         # In the context of OAuth2 authentication, this is set to
         # a token instance (regardless of the flow).
         return bool(request.auth)
@@ -56,7 +63,7 @@ class RequireUser(OAuthPermission):
     their profile.
     """
 
-    def has_oauth_permission(self, request, view):
+    def has_oauth_permission(self, request: Request, view: APIView) -> bool:
         return bool(request.auth) and bool(request.user)
 
 

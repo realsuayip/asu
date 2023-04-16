@@ -1,14 +1,21 @@
 from contextlib import suppress
-from typing import Dict, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Sequence, Type, cast
 
 from rest_framework import mixins, serializers, status
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from drf_spectacular.utils import extend_schema_view
 
-_viewset_mixin_map = {
+if TYPE_CHECKING:
+    ViewSetBase = GenericViewSet[Any]
+else:
+    ViewSetBase = GenericViewSet
+
+
+_viewset_mixin_map: dict[str, Type[Any]] = {
     "list": mixins.ListModelMixin,
     "create": mixins.CreateModelMixin,
     "retrieve": mixins.RetrieveModelMixin,
@@ -18,7 +25,9 @@ _viewset_mixin_map = {
 
 
 class ViewSetMeta(type):
-    def __new__(mcs, name, bases, classdict):
+    def __new__(
+        mcs, name: str, bases: tuple[Type[Any], ...], classdict: dict[str, Any]
+    ) -> Type[ViewSetBase]:
         cls_mixins = classdict.get("mixins")
 
         if cls_mixins is not None:
@@ -39,7 +48,10 @@ class ViewSetMeta(type):
 
                 bases += (mixin,)
 
-        cls = super().__new__(mcs, name, bases, classdict)
+        cls = cast(
+            Type[ViewSetBase],
+            super().__new__(mcs, name, bases, classdict),
+        )
         schema_extensions = classdict.get("schema_extensions")
 
         if schema_extensions is not None:
@@ -52,25 +64,27 @@ class ViewSetMeta(type):
         return cls
 
 
-class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
-    mixins: Optional[Sequence[str]] = None
-    schema_extensions: Optional[Dict] = None
-    serializer_classes: Dict = {}
+class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
+    mixins: Sequence[str] | None = None
+    schema_extensions: dict[str, Any] | None = None
+    serializer_classes: dict[str, Any] = {}
     scopes: dict[str, list[str] | str] = {}
 
     def get_action_save_response(
         self,
-        request,
-        serializer=None,
-        status_code=status.HTTP_200_OK,
-    ):
+        request: Request,
+        serializer: serializers.BaseSerializer[Any]
+        | Type[serializers.BaseSerializer[Any]]
+        | None = None,
+        status_code: int = status.HTTP_200_OK,
+    ) -> Response:
         # Similar functionality from mixins.CreateModelMixin
         # for ViewSet actions.
         assert status.is_success(status_code)
 
         if serializer is None:
             serializer = self.get_serializer(data=request.data)
-        elif not isinstance(serializer, serializers.Serializer):
+        elif not isinstance(serializer, serializers.BaseSerializer):
             serializer = serializer(
                 data=request.data, context=self.get_serializer_context()
             )
@@ -83,7 +97,7 @@ class ExtendedViewSet(GenericViewSet, metaclass=ViewSetMeta):
         )
         return Response(data, status=status_code)
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> Type[serializers.Serializer[Any]]:
         return self.serializer_classes.get(self.action, self.serializer_class)
 
     @property

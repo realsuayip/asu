@@ -1,4 +1,6 @@
-import django.core.validators
+from typing import Any
+
+import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.utils import timezone
@@ -55,7 +57,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:user-detail"}}
         read_only_fields = ("email", "date_joined")
 
-    def update(self, instance, validated_data):
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
         # This method is overriden so that the full_clean could be
         # called, triggering related database constraints.
         for attr, value in validated_data.items():
@@ -63,14 +65,14 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
         try:
             instance.full_clean()
-        except django.core.validators.ValidationError as exc:
+        except django.core.exceptions.ValidationError as exc:
             raise serializers.ValidationError(exc.messages)
 
         instance.save(update_fields=validated_data.keys())
         return instance
 
 
-class AuthSerializer(serializers.Serializer):
+class AuthSerializer(serializers.Serializer[dict[str, Any]]):
     access_token = serializers.CharField()
     token_type = serializers.ChoiceField(choices=["Bearer"])
     expires_in = serializers.IntegerField()
@@ -87,11 +89,11 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
     )
     auth = AuthSerializer(source="_auth_dict", read_only=True)
 
-    def validate_email(self, email):
+    def validate_email(self, email: str) -> str:
         return User.objects.normalize_email(email)
 
     @transaction.atomic
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> User:
         consent = validated_data.pop("consent")
         email = validated_data["email"]
 
@@ -114,14 +116,14 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
 
         try:
             validate_password(password, user=user)
-        except django.core.validators.ValidationError as err:
+        except django.core.exceptions.ValidationError as err:
             raise serializers.ValidationError({"password": err.messages})
 
         user.set_password(password)
 
         try:
             user.full_clean()
-        except django.core.validators.ValidationError as exc:
+        except django.core.exceptions.ValidationError as exc:
             raise serializers.ValidationError(exc.messages)
 
         user.save()
@@ -131,7 +133,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             update_fields=["user", "date_completed", "date_modified"]
         )
         verification.null_others()
-        user._auth_dict = user.issue_token()
+        user._auth_dict = user.issue_token()  # type: ignore[attr-defined]
         return user
 
     class Meta:

@@ -1,17 +1,18 @@
 import io
 import uuid
 from datetime import timedelta
+from typing import Any, AnyStr
 
 from django.contrib.auth.models import AbstractUser
 from django.core import signing
-from django.core.files.base import ContentFile
+from django.core.files.base import ContentFile, File
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     RegexValidator,
 )
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -133,7 +134,7 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
-    objects = UserManager()
+    objects = UserManager()  # type: ignore[assignment]
 
     class Meta:
         verbose_name = _("user")
@@ -153,43 +154,45 @@ class User(AbstractUser):
             ),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.username
 
     @property
-    def is_accessible(self):
+    def is_accessible(self) -> bool:
         return self.is_active and (not self.is_frozen)
 
-    def add_following(self, *, to_user):
+    def add_following(self, *, to_user: "User") -> tuple[UserFollow, bool]:
         return UserFollow.objects.get_or_create(
             from_user=self, to_user=to_user
         )
 
-    def send_follow_request(self, *, to_user):
+    def send_follow_request(
+        self, *, to_user: "User"
+    ) -> tuple[UserFollowRequest, bool]:
         return UserFollowRequest.objects.get_or_create(
             from_user=self,
             to_user=to_user,
             status=UserFollowRequest.Status.PENDING,
         )
 
-    def get_pending_follow_requests(self):
+    def get_pending_follow_requests(self) -> QuerySet[UserFollowRequest]:
         return UserFollowRequest.objects.filter(
             to_user=self, status=UserFollowRequest.Status.PENDING
         )
 
-    def is_following(self, to_user):
+    def is_following(self, to_user: "User") -> bool:
         return UserFollow.objects.filter(
             from_user=self, to_user=to_user
         ).exists()
 
-    def has_block_rel(self, to_user):
+    def has_block_rel(self, to_user: "User") -> bool:
         # Check symmetric blocking status
         return UserBlock.objects.filter(
             Q(from_user=self, to_user=to_user)
             | Q(from_user=to_user, to_user=self)
         ).exists()
 
-    def can_send_message(self, to_user):
+    def can_send_message(self, to_user: "User") -> bool:
         if self == to_user:
             return False
 
@@ -246,14 +249,14 @@ class User(AbstractUser):
         obj = {"ident": ident, "value": (self.pk, self.uuid.hex)}
         return signer.sign_object(obj)
 
-    def set_profile_picture(self, image):
+    def set_profile_picture(self, file: "File[AnyStr]") -> None:
         if self.profile_picture:
             sorl.thumbnail.delete(self.profile_picture, delete_file=False)
             self.profile_picture.delete(save=False)
 
-        name = image.name
+        name = file.name
         thumb_io = io.BytesIO()
-        image = Image.open(image)
+        image = Image.open(file)
 
         if image.mode != "RGB":
             image = image.convert("RGB")
@@ -269,26 +272,29 @@ class User(AbstractUser):
         self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)
         self.save(update_fields=["profile_picture", "date_modified"])
 
-    def get_profile_picture(self, size=(72, 72)):
+    def get_profile_picture(
+        self, size: tuple[int, int] = (72, 72)
+    ) -> str | None:
         if not self.profile_picture:
             return None
 
-        size = "%sx%s" % size
-        return get_thumbnail(
+        geometry = "%sx%s" % size
+        thumbnail: str | None = get_thumbnail(
             self.profile_picture,
-            size,
+            geometry,
             crop="center",
             quality=85,
         )
+        return thumbnail
 
-    def delete_profile_picture(self):
+    def delete_profile_picture(self) -> None:
         image = self.profile_picture
         if image:
             sorl.thumbnail.delete(image, delete_file=False)
             image.delete(save=False)
             self.save(update_fields=["profile_picture", "date_modified"])
 
-    def issue_token(self):
+    def issue_token(self) -> dict[str, Any]:
         # Programmatically issue tokens for this user. Used just after
         # registration so that user can be logged in without having to
         # enter their password again.

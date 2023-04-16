@@ -1,4 +1,5 @@
-from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.verification.password.serializers import (
     PasswordResetVerificationCheckSerializer,

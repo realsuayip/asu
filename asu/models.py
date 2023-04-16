@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class ProjectVariableManager(models.Manager["ProjectVariable"]):
-    BUILD_VARS = {
+    BUILD_VARS: dict[str, str] = {
         "BRAND": settings.PROJECT_BRAND,
         "SUPPORT_EMAIL": settings.PROJECT_SUPPORT_EMAIL,
     }
@@ -52,5 +52,5 @@ class ProjectVariable(models.Model):
         verbose_name = _("project variable")
         verbose_name_plural = _("project variables")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name

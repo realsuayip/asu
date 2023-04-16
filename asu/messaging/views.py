@@ -1,8 +1,9 @@
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.utils import timezone
 
 from rest_framework import serializers
 from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 import django_filters
@@ -24,7 +25,7 @@ class MessageViewSet(ExtendedViewSet):
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_created")
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Message]:
         user, conversation_id = (
             self.request.user,
             self.kwargs["conversation_pk"],
@@ -34,19 +35,21 @@ class MessageViewSet(ExtendedViewSet):
             conversations__id=conversation_id,
         )
 
-    def perform_destroy(self, instance):
+    def perform_destroy(self, instance: Message) -> None:
         conversation = instance.conversations.get(holder=self.request.user)
         conversation.messages.remove(instance)
 
 
-class ConversationFilterSet(django_filters.FilterSet):
+class ConversationFilterSet(django_filters.FilterSet):  # type: ignore[misc]
     type = django_filters.ChoiceFilter(
         label="Type",
         method="filter_type",
         choices=[("requests", "Requests")],
     )
 
-    def filter_type(self, queryset, name, value):
+    def filter_type(
+        self, queryset: QuerySet[Conversation], name: str, value: str
+    ) -> QuerySet[Conversation]:
         if value == "requests":
             return queryset.filter(
                 Exists(
@@ -70,7 +73,7 @@ class ConversationViewSet(ExtendedViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_class = ConversationFilterSet
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Conversation]:
         user = self.request.user
         queryset = Conversation.objects.filter(holder=user)
 
@@ -107,11 +110,11 @@ class ConversationViewSet(ExtendedViewSet):
         serializer_class=serializers.Serializer,
         permission_classes=[RequireUser, RequireFirstParty],
     )
-    def accept(self, request, pk):
+    def accept(self, request: Request, pk: int) -> Response:
         conversation = self.get_object()
 
         try:
-            request = ConversationRequest.objects.get(
+            obj = ConversationRequest.objects.get(
                 sender=conversation.target,
                 recipient=conversation.holder,
                 date_accepted__isnull=True,
@@ -119,7 +122,7 @@ class ConversationViewSet(ExtendedViewSet):
         except ConversationRequest.DoesNotExist:
             return Response(status=204)  # Maintain idempotency
 
-        request.date_accepted = timezone.now()
-        request.save(update_fields=["date_accepted", "date_modified"])
+        obj.date_accepted = timezone.now()
+        obj.save(update_fields=["date_accepted", "date_modified"])
         conversation.save(update_fields=["date_modified"])
         return Response(status=204)

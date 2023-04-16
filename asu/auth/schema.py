@@ -1,9 +1,11 @@
 import functools
+from typing import TYPE_CHECKING, Any
 
 from rest_framework import serializers
 
 from drf_spectacular.contrib import django_oauth_toolkit
-from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
 from asu.auth.serializers.user import (
@@ -12,17 +14,22 @@ from asu.auth.serializers.user import (
 )
 from asu.utils.rest import APIError
 
+if TYPE_CHECKING:
+    from drf_spectacular.openapi import AutoSchema
+
 
 class OAuthScheme(django_oauth_toolkit.DjangoOAuthToolkitScheme):
     priority = 1
 
-    def get_security_requirement(self, auto_schema):
+    def get_security_requirement(
+        self, auto_schema: "AutoSchema"
+    ) -> dict[str, list[Any]] | list[dict[str, list[Any]]]:
         view = auto_schema.view
         permissions = view.get_permissions()
 
         has_oauth = any(isinstance(p, OAuthPermission) for p in permissions)
         if not has_oauth:
-            return None
+            return []
 
         try:
             scopes = view.required_scopes

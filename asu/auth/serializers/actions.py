@@ -75,9 +75,8 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         return validated_data
 
 
-class BlockSerializer(serializers.ModelSerializer[UserBlock]):
+class UserRelationMixin:
     class Meta:
-        model: Type[models.Model] = UserBlock
         fields = ("from_user", "to_user")
         extra_kwargs = {
             "from_user": {"write_only": True},
@@ -99,6 +98,11 @@ class BlockSerializer(serializers.ModelSerializer[UserBlock]):
             | (Q(to_user=from_user) & Q(from_user=to_user))
         )
 
+
+class BlockSerializer(UserRelationMixin, serializers.ModelSerializer[UserBlock]):
+    class Meta(UserRelationMixin.Meta):
+        model = UserBlock
+
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> UserBlock:
         # If there is a follow relationship between
@@ -108,13 +112,15 @@ class BlockSerializer(serializers.ModelSerializer[UserBlock]):
         return block
 
 
-class FollowSerializer(BlockSerializer):
-    class Meta(BlockSerializer.Meta):
+class FollowSerializer(
+    UserRelationMixin, serializers.ModelSerializer[UserFollow | UserFollowRequest]
+):
+    class Meta(UserRelationMixin.Meta):
         model = UserFollow
 
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        from_user = validated_data["from_user"]
-        to_user = validated_data["to_user"]
+    def create(self, validated_data: dict[str, Any]) -> UserFollow | UserFollowRequest:
+        from_user: User = validated_data["from_user"]
+        to_user: User = validated_data["to_user"]
 
         # If users block each other in any
         # direction, following is not allowed.
@@ -123,11 +129,11 @@ class FollowSerializer(BlockSerializer):
             raise PermissionDenied
 
         if to_user.is_private:
-            from_user.send_follow_request(to_user=to_user)
-        else:
-            from_user.add_following(to_user=to_user)
+            follow_request, _ = from_user.send_follow_request(to_user=to_user)
+            return follow_request
 
-        return validated_data
+        follow, _ = from_user.add_following(to_user=to_user)
+        return follow
 
 
 class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):

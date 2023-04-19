@@ -12,7 +12,7 @@ from asu.messaging.models import Conversation, ConversationRequest, Message
 
 
 class MessageComposeSerializer(serializers.ModelSerializer[Message]):
-    conversation = serializers.HyperlinkedRelatedField(
+    conversation = serializers.HyperlinkedRelatedField(  # type: ignore[var-annotated]
         read_only=True,
         view_name="api:conversation-detail",
         source="sender_conversation",

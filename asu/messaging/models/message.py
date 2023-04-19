@@ -50,7 +50,8 @@ class Message(models.Model):
             "message_id": self.pk,
             "timestamp": dateformat.format(self.date_created, "U"),
         }
-        async_to_sync(channel_layer.group_send)(group, event)
+        send = async_to_sync(channel_layer.group_send)  # type: ignore[no-untyped-call]
+        send(group, event)
 
     class Meta:
         verbose_name = _("message")

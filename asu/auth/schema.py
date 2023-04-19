@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from rest_framework import serializers
 
-from drf_spectacular.contrib import django_oauth_toolkit
+from drf_spectacular.contrib.django_oauth_toolkit import DjangoOAuthToolkitScheme
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from drf_spectacular.openapi import AutoSchema
 
 
-class OAuthScheme(django_oauth_toolkit.DjangoOAuthToolkitScheme):
+class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
     priority = 1
 
     def get_security_requirement(

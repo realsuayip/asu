@@ -26,7 +26,7 @@ dependencies = [
     "django-two-factor-auth ~= 1.15",
     "phonenumbers ~= 8.13",
     "django-widget-tweaks ~= 1.4",
-    "envanter ~= 1.1",
+    "envanter ~= 1.2",
     "django-stubs ~= 1.16",
     "djangorestframework-stubs ~= 1.10",
 ]

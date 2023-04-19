@@ -40,7 +40,7 @@ class UsernameValidator(RegexValidator):
     )
 
 
-class User(AbstractUser):
+class User(AbstractUser):  # type: ignore[django-manager-missing]
     class Gender(models.TextChoices):
         MALE = "male", _("Male")
         FEMALE = "female", _("Female")

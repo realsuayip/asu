@@ -47,15 +47,10 @@ dev = [
 [tool.black]
 line-length = 88
 
-[tool.isort]
-profile = "black"
-known_django = "django"
-known_rest_framework = "rest_framework"
-sections = "FUTURE,STDLIB,DJANGO,REST_FRAMEWORK,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-combine_as_imports = true
-line_length = 88
-
 [tool.ruff]
+fix = true
+fixable = ["I"]
+show-fixes = true
 select = [
     "E", # pycodestyle errors
     "W", # pycodestyle warnings
@@ -65,15 +60,29 @@ select = [
     "RUF", # Ruff-specific
     "C4", # flake8-comprehensions
     "C90", # mccabe
+    "I", # isort
 ]
 line-length = 88
-exclude = [
-    "migrations",
-]
-ignore = [
-    "B904",
+exclude = ["migrations"]
+ignore = ["B904"]
+
+[tool.ruff.isort]
+combine-as-imports = true
+section-order = [
+    "future",
+    "standard-library",
+    "django",
+    "rest_framework",
+    "third-party",
+    "first-party",
+    "local-folder",
 ]
 
+[tool.ruff.isort.sections]
+django = ["django"]
+rest_framework = ["rest_framework"]
+
+# Typ-checking related toolse
 [tool.ruff.mccabe]
 max-complexity = 20
 

@@ -16,18 +16,25 @@ from asu.verification.models import PasswordResetVerification
 
 T = TypeVar("T", bound=models.Model)
 
-
+user_fields = (
+    "id",
+    "display_name",
+    "username",
+    "profile_picture",
+    "description",
+    "is_private",
+    "url",
+)
 RelatedUserField = UserPublicReadSerializer(
     read_only=True,
-    fields=(
-        "id",
-        "display_name",
-        "username",
-        "profile_picture",
-        "description",
-        "is_private",
-        "url",
-    ),
+    fields=user_fields,
+    ref_name="RelatedUser",
+)
+ManyRelatedUserField = UserPublicReadSerializer(
+    many=True,
+    read_only=True,
+    fields=user_fields,
+    ref_name="ManyRelatedUser",
 )
 
 

@@ -8,6 +8,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
+from asu.auth.serializers.actions import ManyRelatedUserField
 from asu.auth.serializers.user import UserCreateSerializer, UserPublicReadSerializer
 from asu.utils.rest import APIError
 
@@ -113,4 +114,14 @@ retrieve = extend_schema(
     summary="Retrieve a user",
     examples=[not_found_example],
     responses={200: UserPublicReadSerializer, 404: APIError},
+)
+
+followers = extend_schema(
+    summary="List followers of a user", responses={200: ManyRelatedUserField}
+)
+following = extend_schema(
+    summary="List follows of a user", responses={200: ManyRelatedUserField}
+)
+blocked = extend_schema(
+    summary="List blocked users", responses={200: ManyRelatedUserField}
 )

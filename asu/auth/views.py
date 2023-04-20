@@ -178,6 +178,7 @@ class UserViewSet(ExtendedViewSet):
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @schema.followers
     @action(
         detail=True,
         methods=["get"],
@@ -194,6 +195,7 @@ class UserViewSet(ExtendedViewSet):
         ).select_related("from_user")
         return self.list_follow_through(queryset)
 
+    @schema.following
     @action(
         detail=True,
         methods=["get"],
@@ -210,6 +212,7 @@ class UserViewSet(ExtendedViewSet):
         ).select_related("to_user")
         return self.list_follow_through(queryset)
 
+    @schema.blocked
     @action(
         detail=False,
         methods=["get"],

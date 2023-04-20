@@ -50,14 +50,17 @@ def get_paginator(name: str = "page_number", /, **kwargs: Any) -> Type[BasePagin
 
 
 class DynamicFieldsMixin:
-    """
-    Allows creating of serializer fields selectively by passing 'fields'
-    keyword argument.
-    """
+    # Allows creating of serializer fields selectively by passing 'fields'
+    # keyword argument.
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         assert isinstance(self, serializers.Serializer)
         fields = kwargs.pop("fields", None)
+        ref_name = kwargs.pop("ref_name", None)
+
+        if fields is not None:
+            assert ref_name, "ref_name is required when specifying fields"
+        self.ref_name = ref_name
         super().__init__(*args, **kwargs)
 
         if fields is not None:

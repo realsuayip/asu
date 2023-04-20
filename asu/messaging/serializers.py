@@ -79,7 +79,8 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
             "profile_picture",
             "is_private",
             "url",
-        )
+        ),
+        ref_name="ConversationUserTarget",
     )
     last_message = serializers.SerializerMethodField()
     messages = serializers.SerializerMethodField(

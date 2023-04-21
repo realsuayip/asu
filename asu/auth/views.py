@@ -107,6 +107,7 @@ class UserViewSet(ExtendedViewSet):
         user: User = super().get_object()
         return user
 
+    @schema.me
     @action(
         detail=False,
         methods=["get", "patch"],
@@ -123,6 +124,7 @@ class UserViewSet(ExtendedViewSet):
         serializer = self.get_serializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @schema.password_reset
     @action(
         detail=False,
         methods=["patch"],
@@ -228,6 +230,7 @@ class UserViewSet(ExtendedViewSet):
         ).select_related("to_user")
         return self.list_follow_through(queryset)
 
+    @schema.message
     @action(
         detail=True,
         methods=["post"],

@@ -8,8 +8,13 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
-from asu.auth.serializers.actions import ManyRelatedUserField
-from asu.auth.serializers.user import UserCreateSerializer, UserPublicReadSerializer
+from asu.auth.serializers.actions import ManyRelatedUserField, PasswordResetSerializer
+from asu.auth.serializers.user import (
+    UserCreateSerializer,
+    UserPublicReadSerializer,
+    UserSerializer,
+)
+from asu.messaging.serializers import MessageComposeSerializer
 from asu.utils.rest import APIError
 
 if TYPE_CHECKING:
@@ -116,12 +121,67 @@ retrieve = extend_schema(
     responses={200: UserPublicReadSerializer, 404: APIError},
 )
 
-followers = extend_schema(
-    summary="List followers of a user", responses={200: ManyRelatedUserField}
+user_resp = {200: ManyRelatedUserField, 403: APIError, 404: APIError}
+followers = extend_schema(summary="List followers of a user", responses=user_resp)
+following = extend_schema(summary="List follows of a user", responses=user_resp)
+blocked = extend_schema(summary="List blocked users", responses=user_resp)
+
+message = extend_schema(
+    summary="Send a message to user",
+    responses={
+        200: MessageComposeSerializer,
+        403: APIError,
+        404: APIError,
+    },
 )
-following = extend_schema(
-    summary="List follows of a user", responses={200: ManyRelatedUserField}
+
+get_me = extend_schema(
+    summary="Retrieve authenticated user",
+    responses={200: UserSerializer},
+    methods=["get"],
 )
-blocked = extend_schema(
-    summary="List blocked users", responses={200: ManyRelatedUserField}
+patch_me = extend_schema(
+    summary="Update authenticated user",
+    responses={200: UserSerializer, 400: OpenApiTypes.OBJECT},
+    methods=["patch"],
+    examples=[
+        OpenApiExample(
+            "bad values",
+            value={
+                "username": ["This field may not be blank."],
+                "gender": ['"potato" is not a valid choice.'],
+                "birth_date": [
+                    "Date has wrong format. Use one of these"
+                    " formats instead: YYYY-MM-DD."
+                ],
+                "website": ["Enter a valid URL."],
+            },
+            response_only=True,
+            status_codes=["400"],
+        )
+    ],
+)
+me = lambda f: get_me(patch_me(f))  # noqa: E731
+
+password_reset = extend_schema(
+    summary="Reset password",
+    responses={
+        200: PasswordResetSerializer,
+        400: OpenApiTypes.OBJECT,
+    },
+    examples=[
+        OpenApiExample(
+            "bad values",
+            value={
+                "email": ["This e-mail could not be verified."],
+                "password": [
+                    "This password is too common.",
+                    "This password is too short. It must contain at"
+                    " least 8 characters.",
+                ],
+            },
+            response_only=True,
+            status_codes=["400"],
+        )
+    ],
 )

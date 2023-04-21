@@ -101,7 +101,7 @@ class TestPasswordReset(APITestCase):
                 "password": "1234567890*",
             },
         )
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_create_invalid_email_ok(self):
         self.client.force_authenticate(token=first_party_token)

@@ -1,4 +1,4 @@
-from typing import Any, Type, TypeVar
+from typing import Any, NoReturn, Type, TypeVar
 
 import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext
 
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.serializers.user import UserPublicReadSerializer
@@ -49,6 +49,11 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
     def validate_email(self, email: str) -> str:
         return User.objects.normalize_email(email)
 
+    def fail_email(self) -> NoReturn:
+        raise serializers.ValidationError(
+            {"email": gettext("This e-mail could not be verified.")}
+        )
+
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         password = validated_data["password"]
@@ -57,7 +62,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise NotFound
+            self.fail_email()
 
         try:
             validate_password(password, user=user)
@@ -69,9 +74,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         )
 
         if verification is None:
-            raise serializers.ValidationError(
-                {"email": gettext("This e-mail could not be verified.")}
-            )
+            self.fail_email()
 
         verification.date_completed = timezone.now()
         verification.save(update_fields=["date_completed", "date_modified"])

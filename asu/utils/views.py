@@ -1,4 +1,3 @@
-from contextlib import suppress
 from typing import TYPE_CHECKING, Any, Sequence, Type, cast
 
 from rest_framework import mixins, serializers, status
@@ -9,6 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from drf_spectacular.utils import extend_schema_view
 
+from asu.utils.rest import PartialUpdateModelMixin
 from asu.utils.typing import UserRequest
 
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ _viewset_mixin_map: dict[str, Type[Any]] = {
     "list": mixins.ListModelMixin,
     "create": mixins.CreateModelMixin,
     "retrieve": mixins.RetrieveModelMixin,
-    "update": mixins.UpdateModelMixin,
+    "partial_update": PartialUpdateModelMixin,
     "destroy": mixins.DestroyModelMixin,
 }
 
@@ -60,9 +60,6 @@ class ViewSetMeta(type):
             # Get related action and decorate
             # it with extension e.g. extend_schema.
             cls = extend_schema_view(**schema_extensions)(cls)
-
-        with suppress(ValueError):
-            cls.http_method_names.remove("put")
         return cls
 
 

@@ -49,7 +49,7 @@ line-length = 88
 
 [tool.ruff]
 fix = true
-fixable = ["I"]
+fixable = ["I", "F401"]
 show-fixes = true
 select = [
     "E", # pycodestyle errors

@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, Callable, Type, TypeVar
 
 from django.db.models import Count, QuerySet
 
-from rest_framework import status
+from rest_framework import parsers, status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -71,6 +71,14 @@ class UserViewSet(ExtendedViewSet):
         "unblock": schema.unblock,
         "follow": schema.follow,
         "unfollow": schema.unfollow,
+        "me": schema.me,
+        "reset_password": schema.reset_password,
+        "followers": schema.followers,
+        "following": schema.following,
+        "blocked": schema.blocked,
+        "message": schema.message,
+        "profile_picture": schema.profile_picture,
+        "ticket": schema.ticket,
     }
     scopes = {
         "me": "user.profile",
@@ -107,7 +115,6 @@ class UserViewSet(ExtendedViewSet):
         user: User = super().get_object()
         return user
 
-    @schema.me
     @action(
         detail=False,
         methods=["get", "patch"],
@@ -124,7 +131,6 @@ class UserViewSet(ExtendedViewSet):
         serializer = self.get_serializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @schema.password_reset
     @action(
         detail=False,
         methods=["patch"],
@@ -180,7 +186,6 @@ class UserViewSet(ExtendedViewSet):
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @schema.followers
     @action(
         detail=True,
         methods=["get"],
@@ -197,7 +202,6 @@ class UserViewSet(ExtendedViewSet):
         ).select_related("from_user")
         return self.list_follow_through(queryset)
 
-    @schema.following
     @action(
         detail=True,
         methods=["get"],
@@ -214,7 +218,6 @@ class UserViewSet(ExtendedViewSet):
         ).select_related("to_user")
         return self.list_follow_through(queryset)
 
-    @schema.blocked
     @action(
         detail=False,
         methods=["get"],
@@ -230,7 +233,6 @@ class UserViewSet(ExtendedViewSet):
         ).select_related("to_user")
         return self.list_follow_through(queryset)
 
-    @schema.message
     @action(
         detail=True,
         methods=["post"],
@@ -254,6 +256,12 @@ class UserViewSet(ExtendedViewSet):
         serializer_class=TicketSerializer,
     )
     def ticket(self, request: Request) -> Response:
+        """
+        Used to create an authentication ticket for the current user. A
+        signed string will be returned, which can be used as an
+        authentication token in case conventional methods are not
+        possible e.g., through WebSocket protocol.
+        """
         return self.get_action_save_response(
             request, status_code=status.HTTP_201_CREATED
         )
@@ -261,9 +269,9 @@ class UserViewSet(ExtendedViewSet):
     @action(
         detail=False,
         methods=["put", "delete"],
-        http_method_names=["put", "delete", "options", "trace"],
         permission_classes=[RequireUser, RequireFirstParty],
         serializer_class=ProfilePictureEditSerializer,
+        parser_classes=[parsers.MultiPartParser],
         url_path="profile-picture",
     )
     def profile_picture(self, request: Request) -> Response:
@@ -276,10 +284,14 @@ class UserViewSet(ExtendedViewSet):
 
 
 class FollowRequestViewSet(ExtendedViewSet):
-    mixins = ("list", "update")
+    mixins = ("list", "partial_update")
     permission_classes = [RequireUser, RequireScope]
     serializer_class = FollowRequestSerializer
     pagination_class = get_paginator("cursor", ordering="-date_created")
+    schema_extensions = {
+        "list": schema.list_follow_requests,
+        "partial_update": schema.update_follow_request,
+    }
     scopes = {"list": "user.follow", "partial_update": "user.follow"}
 
     def get_queryset(self) -> QuerySet[UserFollowRequest]:

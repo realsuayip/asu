@@ -163,7 +163,7 @@ patch_me = extend_schema(
 )
 me = lambda f: get_me(patch_me(f))  # noqa: E731
 
-password_reset = extend_schema(
+reset_password = extend_schema(
     summary="Reset password",
     responses={
         200: PasswordResetSerializer,
@@ -185,3 +185,18 @@ password_reset = extend_schema(
         )
     ],
 )
+
+list_follow_requests = extend_schema(summary="List follow requests")
+update_follow_request = extend_schema(summary="Respond to a follow request")
+
+put_profile_picture = extend_schema(
+    summary="Upload new profile picture",
+    methods=["put"],
+)
+delete_profile_picture = extend_schema(
+    summary="Remove profile picture",
+    methods=["delete"],
+)
+profile_picture = lambda f: put_profile_picture(delete_profile_picture(f))  # noqa: E731
+
+ticket = extend_schema("Create authentication ticket")

@@ -21,6 +21,9 @@ if TYPE_CHECKING:
     from drf_spectacular.openapi import AutoSchema
 
 
+__all__ = ["user", "follow_request"]
+
+
 class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
     priority = 1
 
@@ -186,9 +189,6 @@ reset_password = extend_schema(
     ],
 )
 
-list_follow_requests = extend_schema(summary="List follow requests")
-update_follow_request = extend_schema(summary="Respond to a follow request")
-
 put_profile_picture = extend_schema(
     summary="Upload new profile picture",
     methods=["put"],
@@ -200,3 +200,28 @@ delete_profile_picture = extend_schema(
 profile_picture = lambda f: put_profile_picture(delete_profile_picture(f))  # noqa: E731
 
 ticket = extend_schema("Create authentication ticket")
+
+user = {
+    "create": create,
+    "retrieve": retrieve,
+    "block": block,
+    "unblock": unblock,
+    "follow": follow,
+    "unfollow": unfollow,
+    "me": me,
+    "reset_password": reset_password,
+    "followers": followers,
+    "following": following,
+    "blocked": blocked,
+    "message": message,
+    "profile_picture": profile_picture,
+    "ticket": ticket,
+}
+
+list_follow_requests = extend_schema(summary="List follow requests")
+update_follow_request = extend_schema(summary="Respond to a follow request")
+
+follow_request = {
+    "list": list_follow_requests,
+    "partial_update": update_follow_request,
+}

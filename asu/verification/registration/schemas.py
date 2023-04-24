@@ -1,13 +1,17 @@
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
+from asu.utils.rest import APIError
 from asu.verification.registration.serializers import (
     RegistrationCheckSerializer,
     RegistrationSerializer,
 )
 
+__all__ = ["registration"]
+
+
 registration_create = extend_schema(
-    summary="Registration: send email verification",
+    summary="Send registration verification",
     description="Given that provided email that is not already taken,"
     " sends an e-mail containing a six-digit that could"
     " be used to verify the e-mail.",
@@ -64,14 +68,16 @@ consent_examples = [
 
 
 registration_check = extend_schema(
-    summary="Registration: check email verification",
+    summary="Check registration verification",
     description="Given an e-mail (one that received verification"
     " e-mail via related endpoint) and code, check if the pairs make"
     " a valid combination.",
     examples=consent_examples,
     responses={
         200: RegistrationCheckSerializer,
-        404: OpenApiTypes.OBJECT,
+        404: APIError,
         400: OpenApiTypes.OBJECT,
     },
 )
+
+registration = {"create": registration_create, "check": registration_check}

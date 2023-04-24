@@ -54,18 +54,18 @@ class ViewSetMeta(type):
             Type[ViewSetBase],
             super().__new__(mcs, name, bases, classdict),
         )
-        schema_extensions = classdict.get("schema_extensions")
+        schemas = classdict.get("schemas")
 
-        if schema_extensions is not None:
+        if schemas is not None:
             # Get related action and decorate
             # it with extension e.g. extend_schema.
-            cls = extend_schema_view(**schema_extensions)(cls)
+            cls = extend_schema_view(**schemas)(cls)
         return cls
 
 
 class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
     mixins: Sequence[str] | None = None
-    schema_extensions: dict[str, Any] | None = None
+    schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, Any] = {}
     scopes: dict[str, list[str] | str] = {}
     request: UserRequest

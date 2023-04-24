@@ -9,7 +9,7 @@ from rest_framework.response import Response
 import django_filters
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
-from asu.messaging import schema
+from asu.messaging import schemas
 from asu.messaging.models import Conversation, ConversationRequest, Message
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
@@ -25,11 +25,7 @@ class MessageViewSet(ExtendedViewSet):
     serializer_class = MessageSerializer
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_created")
-    schema_extensions = {
-        "list": schema.message.list,
-        "retrieve": schema.message.retrieve,
-        "destroy": schema.message.destroy,
-    }
+    schemas = schemas.message
 
     def get_queryset(self) -> QuerySet[Message]:
         user, conversation_id = (
@@ -75,16 +71,9 @@ class ConversationViewSet(ExtendedViewSet):
     serializer_classes = {"retrieve": ConversationDetailSerializer}
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_modified")
-
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_class = ConversationFilterSet
-
-    schema_extensions = {
-        "list": schema.conversation.list,
-        "retrieve": schema.conversation.retrieve,
-        "destroy": schema.conversation.destroy,
-        "accept": schema.conversation.accept,
-    }
+    schemas = schemas.conversation
 
     def get_queryset(self) -> QuerySet[Conversation]:
         queryset = Conversation.objects.filter(holder=self.request.user)

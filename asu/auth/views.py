@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from asu.auth import schema
+from asu.auth import schemas
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.permissions import (
     RequireFirstParty,
@@ -64,22 +64,7 @@ class UserViewSet(ExtendedViewSet):
         "profile_picture": ProfilePictureEditSerializer,
     }
     serializer_class = UserPublicReadSerializer
-    schema_extensions = {
-        "create": schema.create,
-        "retrieve": schema.retrieve,
-        "block": schema.block,
-        "unblock": schema.unblock,
-        "follow": schema.follow,
-        "unfollow": schema.unfollow,
-        "me": schema.me,
-        "reset_password": schema.reset_password,
-        "followers": schema.followers,
-        "following": schema.following,
-        "blocked": schema.blocked,
-        "message": schema.message,
-        "profile_picture": schema.profile_picture,
-        "ticket": schema.ticket,
-    }
+    schemas = schemas.user
     scopes = {
         "me": "user.profile",
         "block": "user.block",
@@ -288,10 +273,7 @@ class FollowRequestViewSet(ExtendedViewSet):
     permission_classes = [RequireUser, RequireScope]
     serializer_class = FollowRequestSerializer
     pagination_class = get_paginator("cursor", ordering="-date_created")
-    schema_extensions = {
-        "list": schema.list_follow_requests,
-        "partial_update": schema.update_follow_request,
-    }
+    schemas = schemas.follow_request
     scopes = {"list": "user.follow", "partial_update": "user.follow"}
 
     def get_queryset(self) -> QuerySet[UserFollowRequest]:

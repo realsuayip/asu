@@ -102,6 +102,12 @@ class EmptyMetadata(BaseMetadata):
         return None
 
 
+class EmptySerializer(serializers.Serializer[None]):
+    # Response serializer in views which yield 204 No Content.
+    # Request serializer in views which do not require a body.
+    pass
+
+
 class APIError(serializers.Serializer[dict[str, Any]]):
     # Generic error serializer for documentation rendering.
     detail = serializers.CharField()

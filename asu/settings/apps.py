@@ -51,6 +51,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "asu API",
     "SCHEMA_PATH_PREFIX": "/api",
     "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_COERCE_PATH_PK_SUFFIX": True,
     "REDOC_UI_SETTINGS": {
         "expandResponses": "200,201",
         "downloadFileName": "asu-openapi-spec",

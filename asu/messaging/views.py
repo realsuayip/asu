@@ -1,12 +1,12 @@
 from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.utils import timezone
 
-from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 import django_filters
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.messaging import schemas
@@ -16,10 +16,11 @@ from asu.messaging.serializers import (
     ConversationSerializer,
     MessageSerializer,
 )
-from asu.utils.rest import get_paginator
+from asu.utils.rest import EmptySerializer, get_paginator
 from asu.utils.views import ExtendedViewSet
 
 
+@extend_schema(parameters=[OpenApiParameter("conversation_id", int, "path")])
 class MessageViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "destroy")
     serializer_class = MessageSerializer
@@ -28,6 +29,9 @@ class MessageViewSet(ExtendedViewSet):
     schemas = schemas.message
 
     def get_queryset(self) -> QuerySet[Message]:
+        if getattr(self, "swagger_fake_view", False):
+            return Message.objects.none()
+
         user, conversation_id = (
             self.request.user,
             self.kwargs["conversation_pk"],
@@ -108,7 +112,7 @@ class ConversationViewSet(ExtendedViewSet):
     @action(
         detail=True,
         methods=["patch"],
-        serializer_class=serializers.Serializer,
+        serializer_class=EmptySerializer,
         permission_classes=[RequireUser, RequireFirstParty],
     )
     def accept(self, request: Request, pk: int) -> Response:

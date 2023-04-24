@@ -1,8 +1,6 @@
 import functools
 from typing import TYPE_CHECKING, Any
 
-from rest_framework import serializers
-
 from drf_spectacular.contrib.django_oauth_toolkit import DjangoOAuthToolkitScheme
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
@@ -15,7 +13,7 @@ from asu.auth.serializers.user import (
     UserSerializer,
 )
 from asu.messaging.serializers import MessageComposeSerializer
-from asu.utils.rest import APIError
+from asu.utils.rest import APIError, EmptySerializer
 
 if TYPE_CHECKING:
     from drf_spectacular.openapi import AutoSchema
@@ -53,7 +51,7 @@ not_found_example = OpenApiExample(
 
 action = functools.partial(
     extend_schema,
-    request=serializers.Serializer,
+    request=EmptySerializer,
     examples=[not_found_example],
     responses={204: None, 404: APIError},
 )

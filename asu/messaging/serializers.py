@@ -29,6 +29,7 @@ class MessageComposeSerializer(serializers.ModelSerializer[Message]):
             "url",
         )
 
+    @extend_schema_field(serializers.URLField)
     def get_url(self, obj: Message) -> str:
         return reverse(
             "api:message-detail",

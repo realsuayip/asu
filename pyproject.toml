@@ -15,7 +15,7 @@ dependencies = [
     "factory-boy ~= 3.2",
     "celery ~= 5.2",
     "drf-nested-routers ~= 0.93",
-    "django-filter ~= 23.1",
+    "django-filter ~= 23.2",
     "channels[daphne] ~= 4.0",
     "channels-redis ~= 4.1",
     "asgiref ~= 3.6",
@@ -27,8 +27,6 @@ dependencies = [
     "phonenumbers ~= 8.13",
     "django-widget-tweaks ~= 1.4",
     "envanter ~= 1.2",
-    "django-stubs ~= 1.16",
-    "djangorestframework-stubs ~= 1.10",
 ]
 
 [project.optional-dependencies]
@@ -39,6 +37,8 @@ dev = [
     "tblib",
     "watchfiles",
     "mypy",
+    "django-stubs",
+    "djangorestframework-stubs",
     "types-oauthlib",
     "types-Pillow",
     "celery-types",

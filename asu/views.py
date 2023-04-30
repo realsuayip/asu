@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django import urls
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -11,9 +11,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.routers import APIRootView as BaseAPIRootView
 
-from django_stubs_ext import StrOrPromise
-
 from asu.utils import messages
+
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
 
 
 class APIRootView(BaseAPIRootView):
@@ -80,7 +81,7 @@ class APIRootView(BaseAPIRootView):
         return value
 
 
-def as_json(message: StrOrPromise, /, *, status: int) -> JsonResponse:
+def as_json(message: "StrOrPromise", /, *, status: int) -> JsonResponse:
     return JsonResponse({"detail": message}, status=status)
 
 

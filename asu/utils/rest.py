@@ -29,8 +29,9 @@ def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | Non
             detail = {}
             for key, value in exc.detail.items():
                 if isinstance(value, str):
-                    value = [value]
-                detail[key] = value
+                    detail[key] = [value]
+                else:
+                    detail[key] = value
             response.data = detail
 
     return response

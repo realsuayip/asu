@@ -659,6 +659,11 @@ class TestMessaging(APITestCase):
         with self.assertRaises(django.core.signing.BadSignature):
             await self.communicator.receive_from(timeout=0.001)
 
+    def _capture_message(self, sender, recipient, message):
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self._send_message(sender, recipient, message)
+            return response, callbacks
+
     async def test_ws_sends_message(self):
         await self.communicator.connect()
 
@@ -672,7 +677,7 @@ class TestMessaging(APITestCase):
         await self.communicator.send_json_to({"ticket": ticket})
 
         # Send message while connected to conversation ws
-        api_result = await sync_to_async(self._send_message)(
+        api_result, callbacks = await sync_to_async(self._capture_message)(
             self.user2, self.user1, "Hi"
         )
         ws_result = await self.communicator.receive_json_from(timeout=0.01)
@@ -682,6 +687,7 @@ class TestMessaging(APITestCase):
             holder=self.user1
         )
 
+        self.assertEqual(1, len(callbacks))
         self.assertEqual(ws_result["type"], "conversation.message")
         self.assertEqual(ws_result["conversation_id"], target_conversation.id)
         self.assertEqual(ws_result["message_id"], message_id)

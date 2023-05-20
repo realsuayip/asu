@@ -1,5 +1,7 @@
+from functools import partial
 from typing import Any
 
+from django.db import transaction
 from django.db.models.signals import m2m_changed, post_save, pre_delete
 from django.dispatch import receiver
 
@@ -21,7 +23,9 @@ def deliver_message(instance: Message, created: bool, **kwargs: Any) -> None:
     target.messages.add(instance)
     holder.save(update_fields=["date_modified"])
     target.save(update_fields=["date_modified"])
-    instance.websocket_send(target.pk)
+
+    relay = partial(instance.websocket_send, target.pk)
+    transaction.on_commit(relay)
 
 
 @receiver(m2m_changed, sender=Conversation.messages.through)

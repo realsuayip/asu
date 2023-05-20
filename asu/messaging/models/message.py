@@ -1,5 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.utils import dateformat
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -8,9 +12,27 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from asu.messaging.models import Conversation
-from asu.messaging.models.managers import MessageManager
+
+if TYPE_CHECKING:
+    from asu.auth.models import User
+
 
 channel_layer = get_channel_layer()
+
+
+class MessageManager(models.Manager["Message"]):
+    @transaction.atomic
+    def compose(self, sender: "User", recipient: "User", body: str) -> Message | None:
+        if not sender.can_send_message(recipient):
+            return None
+
+        has_receipt = sender.allows_receipts and recipient.allows_receipts
+        return self.create(
+            sender=sender,
+            recipient=recipient,
+            body=body,
+            has_receipt=has_receipt,
+        )
 
 
 class Message(models.Model):

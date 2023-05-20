@@ -3,7 +3,7 @@ import uuid
 from datetime import timedelta
 from typing import Any, AnyStr
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.core import signing
 from django.core.files.base import ContentFile, File
 from django.core.validators import (
@@ -25,7 +25,6 @@ from PIL import Image
 from sorl.thumbnail import get_thumbnail
 
 from asu.auth.models import Application
-from asu.auth.models.managers import UserManager
 from asu.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from asu.messaging.models import ConversationRequest
 from asu.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
@@ -38,6 +37,32 @@ class UsernameValidator(RegexValidator):
         " numerals and underscores. Trailing, leading or"
         " consecutive underscores are not allowed."
     )
+
+
+class UserManager(DjangoUserManager["User"]):
+    def public(self) -> QuerySet["User"]:
+        """
+        Users who are publicly available.
+        """
+        return self.exclude(Q(is_active=False) | Q(is_frozen=True) | Q(is_private=True))
+
+    def active(self) -> QuerySet["User"]:
+        """
+        Users who are publicly available and can
+        perform actions on the application.
+        """
+        return self.exclude(Q(is_active=False) | Q(is_frozen=True))
+
+    def verify_ticket(
+        self, ticket: str, *, ident: str, max_age: int
+    ) -> tuple[int, str]:
+        signer = signing.TimestampSigner()
+        obj = signer.unsign_object(ticket, max_age=max_age)
+        given_ident, value = obj.get("ident"), obj.get("value")
+        if (not ident) or (not value) or ident != given_ident:
+            raise signing.BadSignature
+        pk, uuid = value
+        return pk, uuid
 
 
 class User(AbstractUser):  # type: ignore[django-manager-missing]

@@ -1,11 +1,13 @@
 import string
 import uuid
-from typing import Any
+from datetime import timedelta
+from typing import Any, TypeVar
 
 from django.conf import settings
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import QuerySet
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.functional import classproperty
@@ -14,10 +16,9 @@ from django.utils.translation import gettext_lazy as _
 
 from asu.utils import mailing
 from asu.utils.messages import EmailMessage
-from asu.verification.models.managers import (
-    ConsentVerificationManager,
-    VerificationManager,
-)
+
+V = TypeVar("V", bound="Verification")
+CV = TypeVar("CV", bound="ConsentVerification")
 
 
 def code_validator(code: str) -> None:
@@ -30,6 +31,18 @@ def code_validator(code: str) -> None:
         errors.append(_("Ensure this field contains only digits."))
 
     raise ValidationError(errors)
+
+
+class VerificationManager(models.Manager[V]):
+    verify_period: int
+
+    def verifiable(self) -> QuerySet[V]:
+        max_verify_date = timezone.now() - timedelta(seconds=self.verify_period)
+        return self.filter(
+            date_verified__isnull=True,
+            date_created__gt=max_verify_date,
+            nulled_by__isnull=True,
+        )
 
 
 class Verification(models.Model):
@@ -103,6 +116,39 @@ class Verification(models.Model):
             content=content,
             recipients=[self.email],
         )
+
+
+class ConsentVerificationManager(VerificationManager[CV]):
+    eligible_period: int
+
+    def eligible(self) -> QuerySet[CV]:
+        period = self.eligible_period
+        max_register_date = timezone.now() - timedelta(seconds=period)
+        return self.filter(
+            date_verified__isnull=False,
+            date_completed__isnull=True,
+            date_verified__gt=max_register_date,
+            nulled_by__isnull=True,
+        )
+
+    def get_with_consent(self, email: str, consent: str, **kwargs: Any) -> CV | None:
+        """
+        Check consent, if valid, fetch related RegistrationVerification
+        object and return it, else return None. 'email' should be normalized.
+        """
+        signer = signing.TimestampSigner()
+        try:
+            obj = signer.unsign_object(consent, max_age=self.eligible_period)
+            ident, value = obj.get("ident"), obj.get("value")
+            if (not value) or (not ident) or ident != self.model.ident:
+                raise signing.BadSignature
+            return self.eligible().get(uuid=value, email=email, **kwargs)
+        except (
+            signing.BadSignature,
+            signing.SignatureExpired,
+            self.model.DoesNotExist,
+        ):
+            return None
 
 
 class ConsentVerification(Verification):

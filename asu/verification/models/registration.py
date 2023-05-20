@@ -1,10 +1,22 @@
+from __future__ import annotations
+
 from django.conf import settings
 from django.db import models
+from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from asu.utils import messages
-from asu.verification.models.base import ConsentVerification
-from asu.verification.models.managers import RegistrationVerificationManager
+from asu.verification.models.base import ConsentVerification, ConsentVerificationManager
+
+
+class RegistrationVerificationManager(
+    ConsentVerificationManager["RegistrationVerification"]
+):
+    verify_period = settings.REGISTRATION_VERIFY_PERIOD
+    eligible_period = settings.REGISTRATION_REGISTER_PERIOD
+
+    def eligible(self) -> QuerySet[RegistrationVerification]:
+        return super().eligible().filter(user__isnull=True)
 
 
 class RegistrationVerification(ConsentVerification):

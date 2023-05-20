@@ -7,7 +7,6 @@ import django.db.models.deletion
 import django.db.models.functions.text
 import django.utils.timezone
 import uuid
-import asu.auth.models.managers
 import asu.auth.models.user
 import asu.utils.file
 
@@ -193,7 +192,7 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "users",
             },
             managers=[
-                ("objects", asu.auth.models.managers.UserManager()),
+                ("objects", asu.auth.models.user.UserManager()),
             ],
         ),
         migrations.CreateModel(

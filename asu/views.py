@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any
 
@@ -81,7 +83,7 @@ class APIRootView(BaseAPIRootView):
         return value
 
 
-def as_json(message: "StrOrPromise", /, *, status: int) -> JsonResponse:
+def as_json(message: StrOrPromise, /, *, status: int) -> JsonResponse:
     return JsonResponse({"detail": message}, status=status)
 
 

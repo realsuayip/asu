@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any
 
 from django.core.mail import EmailMessage
@@ -22,8 +24,8 @@ def determine_language(lang_code: str | None) -> str:
 def send(
     template: str,
     *,
-    title: "StrOrPromise",
-    content: "StrOrPromise",
+    title: StrOrPromise,
+    content: StrOrPromise,
     recipients: list[str],
     context: dict[str, Any] | None = None,
     lang_code: str | None = None,

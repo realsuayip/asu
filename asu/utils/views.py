@@ -1,4 +1,7 @@
-from typing import TYPE_CHECKING, Any, Sequence, Type, cast
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, cast
 
 from rest_framework import mixins, serializers, status
 from rest_framework.permissions import SAFE_METHODS
@@ -17,7 +20,7 @@ else:
     ViewSetBase = GenericViewSet
 
 
-_viewset_mixin_map: dict[str, Type[Any]] = {
+_viewset_mixin_map: dict[str, type[Any]] = {
     "list": mixins.ListModelMixin,
     "create": mixins.CreateModelMixin,
     "retrieve": mixins.RetrieveModelMixin,
@@ -28,8 +31,8 @@ _viewset_mixin_map: dict[str, Type[Any]] = {
 
 class ViewSetMeta(type):
     def __new__(
-        mcs, name: str, bases: tuple[Type[Any], ...], classdict: dict[str, Any]
-    ) -> Type[ViewSetBase]:
+        mcs, name: str, bases: tuple[type[Any], ...], classdict: dict[str, Any]
+    ) -> type[ViewSetBase]:
         cls_mixins = classdict.get("mixins")
 
         if cls_mixins is not None:
@@ -51,7 +54,7 @@ class ViewSetMeta(type):
                 bases += (mixin,)
 
         cls = cast(
-            Type[ViewSetBase],
+            type[ViewSetBase],
             super().__new__(mcs, name, bases, classdict),
         )
         schemas = classdict.get("schemas")
@@ -74,7 +77,7 @@ class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
         self,
         request: Request,
         serializer: serializers.BaseSerializer[Any]
-        | Type[serializers.BaseSerializer[Any]]
+        | type[serializers.BaseSerializer[Any]]
         | None = None,
         status_code: int = status.HTTP_200_OK,
     ) -> Response:
@@ -93,7 +96,7 @@ class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
         data = serializer.data if status_code != status.HTTP_204_NO_CONTENT else None
         return Response(data, status=status_code)
 
-    def get_serializer_class(self) -> Type[serializers.Serializer[Any]]:
+    def get_serializer_class(self) -> type[serializers.Serializer[Any]]:
         return self.serializer_classes.get(self.action, self.serializer_class)
 
     @property

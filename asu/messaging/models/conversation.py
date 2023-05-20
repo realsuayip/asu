@@ -71,7 +71,7 @@ class Conversation(models.Model):
 
 class ConversationRequestManager(models.Manager["ConversationRequest"]):
     def compose(
-        self, sender: "User", recipient: "User"
+        self, sender: User, recipient: User
     ) -> tuple[ConversationRequest, bool]:
         try:
             obj = self.get(

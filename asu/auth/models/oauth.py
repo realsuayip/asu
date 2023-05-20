@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -7,7 +9,7 @@ from asu.utils.templatetags import get_variable
 
 
 class ApplicationManager(models.Manager["Application"]):
-    def get_default(self) -> "Application":
+    def get_default(self) -> Application:
         # Figure out the default application, this is application is
         # used to programmatically issue tokens, outside the oauth
         # flows. For example, immediately after the registration.
@@ -21,7 +23,7 @@ class ApplicationManager(models.Manager["Application"]):
         )
         return apps.get()
 
-    def get_by_natural_key(self, client_id: str) -> "Application":
+    def get_by_natural_key(self, client_id: str) -> Application:
         return self.get(client_id=client_id)
 
 

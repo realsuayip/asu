@@ -22,7 +22,7 @@ channel_layer = get_channel_layer()
 
 class MessageManager(models.Manager["Message"]):
     @transaction.atomic
-    def compose(self, sender: "User", recipient: "User", body: str) -> Message | None:
+    def compose(self, sender: User, recipient: User, body: str) -> Message | None:
         if not sender.can_send_message(recipient):
             return None
 

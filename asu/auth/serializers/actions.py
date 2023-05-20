@@ -1,4 +1,6 @@
-from typing import Any, NoReturn, Type, TypeVar
+from __future__ import annotations
+
+from typing import Any, NoReturn, TypeVar
 
 import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
@@ -99,7 +101,7 @@ class UserRelationMixin:
         return attrs
 
     def get_rels(
-        self, model: Type[T], *, from_user: User, to_user: User
+        self, model: type[T], *, from_user: User, to_user: User
     ) -> QuerySet[T]:
         # Given m2m through model, return queryset
         # containing objects for both directions

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -106,7 +108,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
 
     @extend_schema_field(MessageSerializer(allow_null=True))
     def get_last_message(
-        self, obj: "WithAnnotations[Conversation]"
+        self, obj: WithAnnotations[Conversation]
     ) -> dict[str, Any] | None:
         if obj.last_message is None:
             return None

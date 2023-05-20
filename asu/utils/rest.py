@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, Callable, Type
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from rest_framework import exceptions, pagination, serializers
 from rest_framework.metadata import BaseMetadata
@@ -44,7 +45,7 @@ _pagination_map = {
 }
 
 
-def get_paginator(name: str = "page_number", /, **kwargs: Any) -> Type[BasePagination]:
+def get_paginator(name: str = "page_number", /, **kwargs: Any) -> type[BasePagination]:
     kwargs.setdefault("page_size", 10)
     klass = _pagination_map[name]
     return type("Factory%s" % klass.__name__, (klass,), kwargs)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import io
 import uuid
 from datetime import timedelta
@@ -40,13 +42,13 @@ class UsernameValidator(RegexValidator):
 
 
 class UserManager(DjangoUserManager["User"]):
-    def public(self) -> QuerySet["User"]:
+    def public(self) -> QuerySet[User]:
         """
         Users who are publicly available.
         """
         return self.exclude(Q(is_active=False) | Q(is_frozen=True) | Q(is_private=True))
 
-    def active(self) -> QuerySet["User"]:
+    def active(self) -> QuerySet[User]:
         """
         Users who are publicly available and can
         perform actions on the application.
@@ -181,10 +183,10 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     def is_accessible(self) -> bool:
         return self.is_active and (not self.is_frozen)
 
-    def add_following(self, *, to_user: "User") -> tuple[UserFollow, bool]:
+    def add_following(self, *, to_user: User) -> tuple[UserFollow, bool]:
         return UserFollow.objects.get_or_create(from_user=self, to_user=to_user)
 
-    def send_follow_request(self, *, to_user: "User") -> tuple[UserFollowRequest, bool]:
+    def send_follow_request(self, *, to_user: User) -> tuple[UserFollowRequest, bool]:
         return UserFollowRequest.objects.get_or_create(
             from_user=self,
             to_user=to_user,
@@ -196,16 +198,16 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             to_user=self, status=UserFollowRequest.Status.PENDING
         )
 
-    def is_following(self, to_user: "User") -> bool:
+    def is_following(self, to_user: User) -> bool:
         return UserFollow.objects.filter(from_user=self, to_user=to_user).exists()
 
-    def has_block_rel(self, to_user: "User") -> bool:
+    def has_block_rel(self, to_user: User) -> bool:
         # Check symmetric blocking status
         return UserBlock.objects.filter(
             Q(from_user=self, to_user=to_user) | Q(from_user=to_user, to_user=self)
         ).exists()
 
-    def can_send_message(self, to_user: "User") -> bool:
+    def can_send_message(self, to_user: User) -> bool:
         if self == to_user:
             return False
 
@@ -262,7 +264,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         obj = {"ident": ident, "value": (self.pk, self.uuid.hex)}
         return signer.sign_object(obj)
 
-    def set_profile_picture(self, file: "File[AnyStr]") -> None:
+    def set_profile_picture(self, file: File[AnyStr]) -> None:
         if self.profile_picture:
             sorl.thumbnail.delete(self.profile_picture, delete_file=False)
             self.profile_picture.delete(save=False)

@@ -1,4 +1,7 @@
-from typing import TYPE_CHECKING, Any, Callable, Type, TypeVar
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from django.db.models import Count, QuerySet
 
@@ -134,14 +137,14 @@ class UserViewSet(ExtendedViewSet):
         )
         return self.get_action_save_response(self.request, serializer, status_code=204)
 
-    def delete_through(self, pk: int, model: Type[UserFollow | UserBlock]) -> Response:
+    def delete_through(self, pk: int, model: type[UserFollow | UserBlock]) -> Response:
         # Common delete method for user blocking and following.
         to_user = self.get_object()
         model.objects.filter(from_user=self.request.user, to_user=to_user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def through_action(method: F) -> "ViewSetAction[F]":
+    def through_action(method: F) -> ViewSetAction[F]:
         return action(
             detail=True,
             methods=["post"],

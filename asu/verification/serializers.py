@@ -1,4 +1,6 @@
-from typing import Any, Type
+from __future__ import annotations
+
+from typing import Any
 
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
@@ -16,7 +18,7 @@ class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str,
     return corresponding consent.
     """
 
-    model: Type[ConsentVerification]
+    model: type[ConsentVerification]
 
     email = serializers.EmailField(label=_("email"))
     code = serializers.CharField(

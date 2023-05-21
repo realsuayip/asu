@@ -6,7 +6,10 @@ media
 .env
 .idea
 .vscode
-docker.py
 .DS_Store
 .coverage
+.github
+celerybeat-schedule
+.pre-commit-config.yaml
+Makefile
 htmlcov

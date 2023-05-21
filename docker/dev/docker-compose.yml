@@ -5,7 +5,7 @@ services:
     container_name: asu-postgres
     image: postgres:15.2-alpine
     user: postgres
-    env_file: ../conf/postgres.env
+    env_file: ../../conf/postgres.env
 
   redis:
     container_name: asu-redis
@@ -18,15 +18,18 @@ services:
 
   web:
     container_name: asu-web
+    image: asu-python
     build:
-      context: ..
-      dockerfile: docker/web/Dockerfile
+      context: ../..
+      dockerfile: docker/dev/Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
     env_file: &django_env
-      - ../conf/django.env
-      - ../conf/postgres.env
+      - ../../conf/django.env
+      - ../../conf/postgres.env
+    environment:
+      DJANGO_CONTEXT: web
     volumes:
-      - ..:/code
+      - ../..:/code
     ports:
       - "8000:8000"
     depends_on:
@@ -35,18 +38,18 @@ services:
     restart: on-failure
 
   celery-worker: &celery
+    image: asu-python
     container_name: asu-celery-worker
-    build:
-      context: ..
-      dockerfile: docker/celery/Dockerfile
     command: celery -A asu worker -l info
     env_file: *django_env
+    environment:
+      DJANGO_CONTEXT: celery
     volumes:
-      - ..:/code
+      - ../..:/code
     depends_on:
-      - redis
-      - db
+      - web
       - rabbitmq
+    restart: on-failure
 
   celery-beat:
     <<: *celery

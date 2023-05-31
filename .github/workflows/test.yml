@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build containers
-      run: docker-compose -p asu -f docker/docker-compose.yml up -d
+      run: docker compose -p asu -f docker/dev/docker-compose.yml up -d
     - name: Waiting a bit for the containers
       run: sleep 5s
       shell: bash

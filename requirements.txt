@@ -33,7 +33,7 @@ billiard==3.6.4.0
     # via celery
 celery==5.2.7
     # via asu (pyproject.toml)
-celery-types==0.16.0
+celery-types==0.17.0
     # via asu (pyproject.toml)
 certifi==2023.5.7
     # via requests
@@ -63,7 +63,7 @@ constantly==15.1.0
     # via twisted
 coverage==7.2.7
     # via asu (pyproject.toml)
-cryptography==41.0.0
+cryptography==41.0.1
     # via
     #   autobahn
     #   jwcrypto
@@ -99,17 +99,17 @@ django-formtools==2.4.1
     # via django-two-factor-auth
 django-ipware==5.0.0
     # via asu (pyproject.toml)
-django-oauth-toolkit==2.2.0
+django-oauth-toolkit==2.3.0
     # via asu (pyproject.toml)
 django-otp==1.2.1
     # via django-two-factor-auth
 django-phonenumber-field==6.4.0
     # via django-two-factor-auth
-django-stubs==4.2.0
+django-stubs==4.2.1
     # via
     #   asu (pyproject.toml)
     #   djangorestframework-stubs
-django-stubs-ext==4.2.0
+django-stubs-ext==4.2.1
     # via django-stubs
 django-two-factor-auth==1.15.2
     # via asu (pyproject.toml)
@@ -120,7 +120,7 @@ djangorestframework==3.14.0
     #   asu (pyproject.toml)
     #   drf-nested-routers
     #   drf-spectacular
-djangorestframework-stubs==3.14.0
+djangorestframework-stubs==3.14.1
     # via asu (pyproject.toml)
 drf-nested-routers==0.93.4
     # via asu (pyproject.toml)
@@ -132,7 +132,7 @@ executing==1.2.0
     # via stack-data
 factory-boy==3.2.1
     # via asu (pyproject.toml)
-faker==18.9.0
+faker==18.10.0
     # via factory-boy
 hiredis==2.2.3
     # via asu (pyproject.toml)
@@ -150,7 +150,7 @@ incremental==22.10.0
     # via twisted
 inflection==0.5.1
     # via drf-spectacular
-ipython==8.13.2
+ipython==8.14.0
     # via asu (pyproject.toml)
 jedi==0.18.2
     # via ipython
@@ -274,7 +274,7 @@ types-requests==2.31.0.1
     # via djangorestframework-stubs
 types-urllib3==1.26.25.13
     # via types-requests
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via
     #   celery-types
     #   django-stubs

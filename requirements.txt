@@ -6,11 +6,9 @@
 #
 amqp==5.1.1
     # via kombu
-anyio==3.6.2
+anyio==3.7.0
     # via watchfiles
-appnope==0.1.3
-    # via ipython
-asgiref==3.6.0
+asgiref==3.7.2
     # via
     #   asu (pyproject.toml)
     #   channels
@@ -19,8 +17,6 @@ asgiref==3.6.0
     #   django
 asttokens==2.2.1
     # via stack-data
-async-timeout==4.0.2
-    # via redis
 attrs==23.1.0
     # via
     #   automat
@@ -37,9 +33,9 @@ billiard==3.6.4.0
     # via celery
 celery==5.2.7
     # via asu (pyproject.toml)
-celery-types==0.15.0
+celery-types==0.16.0
     # via asu (pyproject.toml)
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via cryptography
@@ -65,9 +61,9 @@ click-repl==0.2.0
     # via celery
 constantly==15.1.0
     # via twisted
-coverage==7.2.5
+coverage==7.2.7
     # via asu (pyproject.toml)
-cryptography==40.0.2
+cryptography==41.0.0
     # via
     #   autobahn
     #   jwcrypto
@@ -77,9 +73,9 @@ daphne==4.0.0
     # via channels
 decorator==5.1.1
     # via ipython
-deprecated==1.2.13
+deprecated==1.2.14
     # via jwcrypto
-django==4.2
+django==4.2.1
     # via
     #   asu (pyproject.toml)
     #   channels
@@ -95,15 +91,17 @@ django==4.2
     #   djangorestframework
     #   drf-nested-routers
     #   drf-spectacular
-django-debug-toolbar==4.0.0
+django-debug-toolbar==4.1.0
     # via asu (pyproject.toml)
 django-filter==23.2
     # via asu (pyproject.toml)
-django-formtools==2.4
+django-formtools==2.4.1
     # via django-two-factor-auth
+django-ipware==5.0.0
+    # via asu (pyproject.toml)
 django-oauth-toolkit==2.2.0
     # via asu (pyproject.toml)
-django-otp==1.1.6
+django-otp==1.2.1
     # via django-two-factor-auth
 django-phonenumber-field==6.4.0
     # via django-two-factor-auth
@@ -113,7 +111,7 @@ django-stubs==4.2.0
     #   djangorestframework-stubs
 django-stubs-ext==4.2.0
     # via django-stubs
-django-two-factor-auth==1.15.1
+django-two-factor-auth==1.15.2
     # via asu (pyproject.toml)
 django-widget-tweaks==1.4.12
     # via asu (pyproject.toml)
@@ -134,9 +132,9 @@ executing==1.2.0
     # via stack-data
 factory-boy==3.2.1
     # via asu (pyproject.toml)
-faker==18.6.0
+faker==18.9.0
     # via factory-boy
-hiredis==2.2.2
+hiredis==2.2.3
     # via asu (pyproject.toml)
 hyperlink==21.0.0
     # via
@@ -152,13 +150,13 @@ incremental==22.10.0
     # via twisted
 inflection==0.5.1
     # via drf-spectacular
-ipython==8.13.1
+ipython==8.13.2
     # via asu (pyproject.toml)
 jedi==0.18.2
     # via ipython
 jsonschema==4.17.3
     # via drf-spectacular
-jwcrypto==1.4.2
+jwcrypto==1.5.0
     # via django-oauth-toolkit
 kombu==5.2.4
     # via celery
@@ -166,7 +164,7 @@ matplotlib-inline==0.1.6
     # via ipython
 msgpack==1.0.5
     # via channels-redis
-mypy==1.2.0
+mypy==1.3.0
     # via
     #   asu (pyproject.toml)
     #   django-stubs
@@ -179,7 +177,7 @@ parso==0.8.3
     # via jedi
 pexpect==4.8.0
     # via ipython
-phonenumbers==8.13.11
+phonenumbers==8.13.13
     # via asu (pyproject.toml)
 pickleshare==0.7.5
     # via ipython
@@ -189,9 +187,9 @@ prompt-toolkit==3.0.38
     # via
     #   click-repl
     #   ipython
-psycopg[c]==3.1.8
+psycopg[c]==3.1.9
     # via asu (pyproject.toml)
-psycopg-c==3.1.8
+psycopg-c==3.1.9
     # via psycopg
 ptyprocess==0.7.0
     # via pexpect
@@ -207,7 +205,7 @@ pycparser==2.21
     # via cffi
 pygments==2.15.1
     # via ipython
-pyopenssl==23.1.1
+pyopenssl==23.2.0
     # via twisted
 pypng==0.20220715.0
     # via qrcode
@@ -225,11 +223,11 @@ pyyaml==6.0
     # via drf-spectacular
 qrcode==7.4.2
     # via django-two-factor-auth
-redis==4.5.4
+redis==4.5.5
     # via
     #   asu (pyproject.toml)
     #   channels-redis
-requests==2.29.0
+requests==2.31.0
     # via
     #   django-oauth-toolkit
     #   djangorestframework-stubs
@@ -262,21 +260,21 @@ twisted[tls]==22.10.0
     # via daphne
 txaio==23.1.1
     # via autobahn
-types-oauthlib==3.2.0.7
+types-oauthlib==3.2.0.8
     # via asu (pyproject.toml)
-types-pillow==9.5.0.2
+types-pillow==9.5.0.4
     # via asu (pyproject.toml)
 types-pytz==2023.3.0.0
     # via django-stubs
-types-pyyaml==6.0.12.9
+types-pyyaml==6.0.12.10
     # via
     #   django-stubs
     #   djangorestframework-stubs
-types-requests==2.29.0.0
+types-requests==2.31.0.1
     # via djangorestframework-stubs
-types-urllib3==1.26.25.11
+types-urllib3==1.26.25.13
     # via types-requests
-typing-extensions==4.5.0
+typing-extensions==4.6.2
     # via
     #   celery-types
     #   django-stubs
@@ -288,7 +286,7 @@ typing-extensions==4.5.0
     #   twisted
 uritemplate==4.1.1
     # via drf-spectacular
-urllib3==1.26.15
+urllib3==2.0.2
     # via requests
 vine==5.0.0
     # via

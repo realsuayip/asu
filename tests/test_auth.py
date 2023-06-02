@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -11,7 +12,7 @@ from rest_framework.test import APITestCase
 from oauth2_provider.models import AccessToken
 from PIL import Image
 
-from asu.auth.models import Application, UserFollowRequest
+from asu.auth.models import Application, Session, UserFollowRequest
 from asu.verification.models import RegistrationVerification
 from tests.factories import UserFactory
 
@@ -750,3 +751,36 @@ class TestOAuthPermissions(APITestCase):
             HTTP_AUTHORIZATION="Bearer third-party-token",
         )
         self.assertEqual(405, r.status_code)
+
+
+class TestSession(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user1 = UserFactory()
+
+    def test_session_anonymous(self):
+        self.client.get(
+            reverse("two_factor:login"),
+            headers={"User-Agent": "TestAgent/1.0"},
+        )
+
+        session_key = self.client.session.session_key
+        session = Session.objects.get(session_key=session_key)
+
+        self.assertIsNone(session.user)
+        self.assertEqual("TestAgent/1.0", session.user_agent)
+        self.assertEqual("127.0.0.1", session.ip)
+
+    def test_session_authenticated(self):
+        self.client.force_login(self.user1)
+        self.client.get(
+            reverse("two_factor:login"),
+            headers={"User-Agent": "TestAgent/2.0"},
+        )
+
+        session_key = self.client.session.session_key
+        session = Session.objects.get(session_key=session_key)
+
+        self.assertEqual(self.user1.pk, session.user)
+        self.assertEqual("TestAgent/2.0", session.user_agent)
+        self.assertEqual("127.0.0.1", session.ip)

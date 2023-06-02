@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "asu.auth.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -100,7 +100,7 @@ password_validators = [
 ]
 AUTH_PASSWORD_VALIDATORS = [{"NAME": validator} for validator in password_validators]
 AUTH_USER_MODEL = "account.User"
-
+SESSION_ENGINE = env.str("SESSION_ENGINE")
 
 LANGUAGE_CODE = env.str("DJANGO_LANGUAGE_CODE")
 TIME_ZONE = env.str("DJANGO_TIME_ZONE")

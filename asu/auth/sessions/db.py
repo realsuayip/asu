@@ -18,7 +18,7 @@ class SessionStore(DBStore):
         super().__init__(session_key)
 
     @classmethod
-    def get_model_class(cls) -> type[AbstractBaseSession]:  # type: ignore[override]
+    def get_model_class(cls) -> type[AbstractBaseSession]:
         return Session
 
     def create_model_instance(self, data: dict[str, Any]) -> Session:

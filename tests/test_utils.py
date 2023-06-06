@@ -1,8 +1,12 @@
+from unittest.mock import Mock
+
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
+from asu.utils.cache import cached_context
 from asu.utils.file import FileSizeValidator, MimeTypeValidator
 
 
@@ -40,3 +44,20 @@ class TestFileUtils(TestCase):
         validate.max_size = 11200
         with self.assertRaises(ValidationError):
             validate(image)
+
+
+class TestCacheUtils(TestCase):
+    def test_cached_context(self):
+        mock = Mock()
+
+        @cached_context(key="asu.test.my_func")
+        def my_func() -> int:
+            """Some function."""
+            mock.compute()
+            return 256
+
+        self.assertEqual(256, my_func())
+        self.assertEqual(256, my_func())
+        mock.compute.assert_called_once()
+        self.assertEqual(256, cache.get("asu.test.my_func"))
+        self.assertEqual("Some function.", my_func.__doc__)

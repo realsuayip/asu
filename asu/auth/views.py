@@ -3,12 +3,17 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from django.db.models import Count, QuerySet
+import django.core.exceptions
+from django.contrib.postgres.validators import ArrayMaxLengthValidator
+from django.db.models import Count, Exists, OuterRef, QuerySet
+from django.db.models.functions import JSONObject
 
-from rest_framework import parsers, status
+from rest_framework import parsers, serializers, status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+
+from django_filters import rest_framework as filters
 
 from asu.auth import schemas
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
@@ -24,6 +29,7 @@ from asu.auth.serializers.actions import (
     FollowSerializer,
     PasswordResetSerializer,
     ProfilePictureEditSerializer,
+    RelationSerializer,
     TicketSerializer,
     UserBlockedSerializer,
     UserFollowersSerializer,
@@ -35,7 +41,7 @@ from asu.auth.serializers.user import (
     UserSerializer,
 )
 from asu.messaging.serializers import MessageComposeSerializer
-from asu.utils.rest import get_paginator
+from asu.utils.rest import NumberInFilter, get_paginator
 from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
 
@@ -269,6 +275,80 @@ class UserViewSet(ExtendedViewSet):
 
         serializer = self.get_serializer(self.request.user, data=request.data)
         return self.get_action_save_response(request, serializer)
+
+
+class RelationFilter(filters.FilterSet):
+    ids = NumberInFilter(
+        min_value=1,
+        required=True,
+        method="filter_ids",
+        help_text="Multiple values may be separated by commas. Enter 50 at most.",
+    )
+
+    def filter_ids(
+        self, queryset: QuerySet[User], name: str, value: list[str]
+    ) -> QuerySet[User]:
+        validator = ArrayMaxLengthValidator(50)
+        try:
+            validator(value)
+        except django.core.exceptions.ValidationError as err:
+            raise serializers.ValidationError({"ids": err.messages})
+        return queryset.filter(id__in=value)
+
+
+class RelationViewSet(ExtendedViewSet):
+    mixins = ("list",)
+    permission_classes = [RequireUser, RequireScope]
+    serializer_class = RelationSerializer
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = RelationFilter
+    scopes = {"list": "user.profile"}
+
+    def get_queryset(self) -> QuerySet[User]:
+        user = self.request.user
+        queryset = User.objects.active().only("id", "username", "display_name")
+        return queryset.annotate(
+            rels=JSONObject(
+                following=Exists(
+                    UserFollow.objects.filter(
+                        to_user=OuterRef("pk"),
+                        from_user=user,
+                    )
+                ),
+                followed_by=Exists(
+                    UserFollow.objects.filter(
+                        to_user=user,
+                        from_user=OuterRef("pk"),
+                    )
+                ),
+                blocking=Exists(
+                    UserBlock.objects.filter(
+                        to_user=OuterRef("pk"),
+                        from_user=user,
+                    )
+                ),
+                blocked_by=Exists(
+                    UserFollow.objects.filter(
+                        to_user=user,
+                        from_user=OuterRef("pk"),
+                    )
+                ),
+                follow_request_sent=Exists(
+                    UserFollowRequest.objects.filter(
+                        to_user=OuterRef("pk"),
+                        from_user=user,
+                        status=UserFollowRequest.Status.PENDING,
+                    )
+                ),
+                follow_request_received=Exists(
+                    UserFollowRequest.objects.filter(
+                        to_user=user,
+                        from_user=OuterRef("pk"),
+                        status=UserFollowRequest.Status.PENDING,
+                    )
+                ),
+            ),
+        )
 
 
 class FollowRequestViewSet(ExtendedViewSet):

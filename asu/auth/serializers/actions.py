@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, NoReturn, TypeVar
+from typing import TYPE_CHECKING, Any, NoReturn, TypeVar
 
 import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
@@ -12,9 +12,14 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from drf_spectacular.utils import extend_schema_field
+
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.verification.models import PasswordResetVerification
+
+if TYPE_CHECKING:
+    from django_stubs_ext import WithAnnotations
 
 T = TypeVar("T", bound=models.Model)
 
@@ -222,3 +227,30 @@ class ProfilePictureEditSerializer(serializers.ModelSerializer[User]):
         image = validated_data["profile_picture"]
         instance.set_profile_picture(image)
         return instance
+
+
+rels = {
+    "following",
+    "followed_by",
+    "follow_request_sent",
+    "follow_request_received",
+    "blocking",
+    "blocked_by",
+}
+
+
+class RelationSerializer(serializers.ModelSerializer[User]):
+    relations = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ("id", "username", "display_name", "relations")
+
+    @extend_schema_field(
+        serializers.ListField(
+            child=serializers.ChoiceField(choices=rels),
+            help_text="May contain multiple relations.",
+        )
+    )
+    def get_relations(self, obj: WithAnnotations[User]) -> list[str]:
+        return [name for name, exits in obj.rels.items() if exits]

@@ -1,6 +1,8 @@
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
+from django import forms
+
 from rest_framework import exceptions, pagination, serializers
 from rest_framework.metadata import BaseMetadata
 from rest_framework.pagination import BasePagination
@@ -8,6 +10,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
+
+from django_filters import rest_framework as filters
 
 if TYPE_CHECKING:
     from rest_framework.views import APIView
@@ -113,3 +117,11 @@ class EmptySerializer(serializers.Serializer[None]):
 class APIError(serializers.Serializer[dict[str, Any]]):
     # Generic error serializer for documentation rendering.
     detail = serializers.CharField()
+
+
+class IntegerFilter(filters.Filter):
+    field_class = forms.IntegerField
+
+
+class NumberInFilter(filters.BaseInFilter, IntegerFilter):
+    pass

@@ -1,6 +1,6 @@
 from rest_framework.routers import SimpleRouter
 
-from asu.auth.views import FollowRequestViewSet, UserViewSet
+from asu.auth.views import FollowRequestViewSet, RelationViewSet, UserViewSet
 
 router = SimpleRouter()
 
@@ -9,5 +9,6 @@ router.register(
     FollowRequestViewSet,
     basename="follow-request",
 )
+router.register("users/relations", RelationViewSet, basename="relation")
 router.register("users", UserViewSet, basename="user")
 urlpatterns = router.urls

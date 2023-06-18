@@ -253,4 +253,4 @@ class RelationSerializer(serializers.ModelSerializer[User]):
         )
     )
     def get_relations(self, obj: WithAnnotations[User]) -> list[str]:
-        return [name for name, exits in obj.rels.items() if exits]
+        return [name for name, exists in obj.rels.items() if exists]

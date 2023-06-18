@@ -819,6 +819,32 @@ class TestUserRelationLookup(APITestCase):
             self.assertTrue(user["display_name"])
             self.assertEqual([], user["relations"])
 
+    def test_related_multiple(self):
+        self.client.force_login(self.user1)
+        self.user1.following.add(self.user4)
+        self.user2.send_follow_request(to_user=self.user1)
+        self.user3.blocked.add(self.user1)
+
+        response = self.client.get(
+            self.url,
+            data={
+                "ids": self.make_id_list(
+                    self.user2,
+                    self.user3,
+                    self.user4,
+                )
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(3, len(response.data))
+
+        user2, user3, user4 = sorted(response.data, key=lambda user: user["id"])
+
+        self.assertEqual(["follow_request_received"], user2["relations"])
+        self.assertEqual(["blocked_by"], user3["relations"])
+        self.assertEqual(["following"], user4["relations"])
+
     def test_following(self):
         self.client.force_login(self.user1)
         self.user1.add_following(to_user=self.user2)

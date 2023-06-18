@@ -311,7 +311,7 @@ class RelationViewSet(ExtendedViewSet):
                     )
                 ),
                 blocked_by=Exists(
-                    UserFollow.objects.filter(
+                    UserBlock.objects.filter(
                         to_user=user,
                         from_user=OuterRef("pk"),
                     )

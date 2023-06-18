@@ -6,7 +6,11 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
-from asu.auth.serializers.actions import ManyRelatedUserField, PasswordResetSerializer
+from asu.auth.serializers.actions import (
+    ManyRelatedUserField,
+    PasswordResetSerializer,
+    RelationSerializer,
+)
 from asu.auth.serializers.user import (
     UserCreateSerializer,
     UserPublicReadSerializer,
@@ -223,3 +227,28 @@ follow_request = {
     "list": list_follow_requests,
     "partial_update": update_follow_request,
 }
+
+list_relations = extend_schema(
+    "List relations with given users",
+    responses={
+        200: RelationSerializer,
+        400: OpenApiTypes.OBJECT,
+    },
+    examples=[
+        OpenApiExample(
+            "ids not provided",
+            value={"ids": ["This field is required."]},
+            response_only=True,
+            status_codes=["400"],
+        ),
+        OpenApiExample(
+            "too many ids",
+            value={
+                "ids": ["List contains 51 items, it should contain no more than 50."]
+            },
+            response_only=True,
+            status_codes=["400"],
+        ),
+    ],
+)
+relation = {"list": list_relations}

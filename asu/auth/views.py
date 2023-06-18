@@ -285,6 +285,7 @@ class RelationViewSet(ExtendedViewSet):
     serializer_class = RelationSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = RelationFilter
+    schemas = schemas.relation
     scopes = {"list": "user.profile"}
 
     def get_queryset(self) -> QuerySet[User]:

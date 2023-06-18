@@ -784,3 +784,153 @@ class TestSession(TestCase):
         self.assertEqual(self.user1.pk, session.user)
         self.assertEqual("TestAgent/2.0", session.user_agent)
         self.assertEqual("127.0.0.1", session.ip)
+
+
+class TestUserRelationLookup(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user1 = UserFactory()
+        cls.user2 = UserFactory()
+        cls.user3 = UserFactory()
+        cls.user4 = UserFactory()
+        cls.url = reverse("api:relation-list")
+
+    def make_id_list(self, *users):
+        return ",".join(str(user.pk) for user in users)
+
+    def test_unrelated(self):
+        self.client.force_login(self.user1)
+        response = self.client.get(
+            self.url,
+            data={
+                "ids": self.make_id_list(
+                    self.user2,
+                    self.user3,
+                    self.user4,
+                )
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(3, len(response.data))
+
+        for user in response.data:
+            self.assertTrue(user["username"])
+            self.assertTrue(user["display_name"])
+            self.assertEqual([], user["relations"])
+
+    def test_following(self):
+        self.client.force_login(self.user1)
+        self.user1.add_following(to_user=self.user2)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["following"], user["relations"])
+
+    def test_followed_by(self):
+        self.client.force_login(self.user1)
+        self.user2.add_following(to_user=self.user1)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["followed_by"], user["relations"])
+
+    def test_following_and_followed_by(self):
+        self.client.force_login(self.user1)
+        self.user1.add_following(to_user=self.user2)
+        self.user2.add_following(to_user=self.user1)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["following", "followed_by"], user["relations"])
+
+    def test_blocking(self):
+        self.client.force_login(self.user1)
+        self.user1.blocked.add(self.user2)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["blocking"], user["relations"])
+
+    def test_blocked_by(self):
+        self.client.force_login(self.user1)
+        self.user2.blocked.add(self.user1)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["blocked_by"], user["relations"])
+
+    def test_blocking_and_blocked_by(self):
+        self.client.force_login(self.user1)
+        self.user1.blocked.add(self.user2)
+        self.user2.blocked.add(self.user1)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["blocking", "blocked_by"], user["relations"])
+
+    def test_follow_request_sent(self):
+        self.client.force_login(self.user1)
+        self.user1.send_follow_request(to_user=self.user2)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["follow_request_sent"], user["relations"])
+
+    def test_follow_request_received(self):
+        self.client.force_login(self.user1)
+        self.user2.send_follow_request(to_user=self.user1)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["follow_request_received"], user["relations"])
+
+    def test_follow_request_sent_and_received(self):
+        self.client.force_login(self.user1)
+        self.user1.send_follow_request(to_user=self.user2)
+        self.user2.send_follow_request(to_user=self.user1)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(
+            ["follow_request_sent", "follow_request_received"], user["relations"]
+        )
+
+    def test_mixed_followed_by_follow_request_sent(self):
+        self.client.force_login(self.user1)
+        self.user1.send_follow_request(to_user=self.user2)
+        self.user2.add_following(to_user=self.user1)
+
+        response = self.client.get(self.url, data={"ids": self.user2.id})
+
+        self.assertEqual(200, response.status_code)
+        user = response.data[0]
+
+        self.assertEqual(["followed_by", "follow_request_sent"], user["relations"])

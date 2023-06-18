@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-import django_filters
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
@@ -46,8 +46,8 @@ class MessageViewSet(ExtendedViewSet):
         conversation.messages.remove(instance)
 
 
-class ConversationFilterSet(django_filters.FilterSet):
-    type = django_filters.ChoiceFilter(
+class ConversationFilterSet(filters.FilterSet):
+    type = filters.ChoiceFilter(
         label="Type",
         method="filter_type",
         choices=[("requests", "Requests")],
@@ -75,9 +75,14 @@ class ConversationViewSet(ExtendedViewSet):
     serializer_classes = {"retrieve": ConversationDetailSerializer}
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_modified")
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_class = ConversationFilterSet
+    filter_backends = [filters.DjangoFilterBackend]
     schemas = schemas.conversation
+
+    @property
+    def filterset_class(self) -> type[filters.FilterSet] | None:
+        if self.action == "list":
+            return ConversationFilterSet
+        return None
 
     def get_queryset(self) -> QuerySet[Conversation]:
         queryset = Conversation.objects.filter(holder=self.request.user)

@@ -130,7 +130,7 @@ class APIError(serializers.Serializer[dict[str, Any]]):
     }
 )
 class IDFilter(filters.Filter):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("field_name", "id")
         kwargs.setdefault("lookup_expr", "in")
         kwargs.setdefault("base_field", forms.IntegerField(min_value=1))

@@ -27,7 +27,7 @@ class ApplicationManager(models.Manager["Application"]):
         return self.get(client_id=client_id)
 
 
-class Application(AbstractApplication):  # type: ignore[misc]
+class Application(AbstractApplication):
     is_first_party = models.BooleanField(
         _("First party application"),
         help_text=_(

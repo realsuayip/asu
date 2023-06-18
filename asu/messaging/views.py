@@ -46,7 +46,7 @@ class MessageViewSet(ExtendedViewSet):
         conversation.messages.remove(instance)
 
 
-class ConversationFilterSet(django_filters.FilterSet):  # type: ignore[misc]
+class ConversationFilterSet(django_filters.FilterSet):
     type = django_filters.ChoiceFilter(
         label="Type",
         method="filter_type",

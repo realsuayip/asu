@@ -93,6 +93,7 @@ plugins = [
 ]
 strict = true
 ignore_missing_imports = true
+allow_subclassing_any = true
 
 [tool.django-stubs]
 django_settings_module = "asu.settings"

@@ -50,6 +50,10 @@ if TYPE_CHECKING:
 F = TypeVar("F", bound=Callable[..., Any])
 
 
+class RelationFilter(filters.FilterSet):
+    ids = IDFilter(required=True)
+
+
 class UserViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "create")
     permission_classes = [RequireToken]
@@ -78,7 +82,14 @@ class UserViewSet(ExtendedViewSet):
         "unblock": "user.block",
         "follow": "user.follow",
         "unfollow": "user.follow",
+        "relations": "user.profile",
     }
+
+    @property
+    def filterset_class(self) -> type[filters.FilterSet] | None:
+        if self.action == "relations":
+            return RelationFilter
+        return None
 
     def get_queryset(self) -> QuerySet[User]:
         queryset = User.objects.active()
@@ -274,24 +285,17 @@ class UserViewSet(ExtendedViewSet):
         serializer = self.get_serializer(self.request.user, data=request.data)
         return self.get_action_save_response(request, serializer)
 
-
-class RelationFilter(filters.FilterSet):
-    ids = IDFilter(required=True)
-
-
-class RelationViewSet(ExtendedViewSet):
-    mixins = ("list",)
-    permission_classes = [RequireUser, RequireScope]
-    serializer_class = RelationSerializer
-    filter_backends = [filters.DjangoFilterBackend]
-    filterset_class = RelationFilter
-    schemas = schemas.relation
-    scopes = {"list": "user.profile"}
-
-    def get_queryset(self) -> QuerySet[User]:
-        user = self.request.user
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[RequireUser, RequireScope],
+        serializer_class=RelationSerializer,
+        filter_backends=[filters.DjangoFilterBackend],
+    )
+    def relations(self, request: UserRequest) -> Response:
+        user = request.user
         queryset = User.objects.active().only("id", "username", "display_name")
-        return queryset.annotate(
+        queryset = queryset.annotate(
             rels=JSONObject(
                 following=Exists(
                     UserFollow.objects.filter(
@@ -333,6 +337,9 @@ class RelationViewSet(ExtendedViewSet):
                 ),
             ),
         )
+        queryset = self.filter_queryset(queryset)
+        serializer = self.get_serializer({"results": queryset})
+        return Response(serializer.data)
 
 
 class FollowRequestViewSet(ExtendedViewSet):

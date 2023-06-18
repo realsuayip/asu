@@ -815,7 +815,7 @@ class TestUserRelationLookup(APITestCase):
         cls.user2 = UserFactory()
         cls.user3 = UserFactory()
         cls.user4 = UserFactory()
-        cls.url = reverse("api:relation-list")
+        cls.url = reverse("api:user-relations")
 
     def make_id_list(self, *users):
         return ",".join(str(user.pk) for user in users)
@@ -834,9 +834,10 @@ class TestUserRelationLookup(APITestCase):
         )
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(3, len(response.data))
+        results = response.data["results"]
+        self.assertEqual(3, len(results))
 
-        for user in response.data:
+        for user in results:
             self.assertTrue(user["username"])
             self.assertTrue(user["display_name"])
             self.assertEqual([], user["relations"])
@@ -859,9 +860,10 @@ class TestUserRelationLookup(APITestCase):
         )
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(3, len(response.data))
+        results = response.data["results"]
+        self.assertEqual(3, len(results))
 
-        user2, user3, user4 = sorted(response.data, key=lambda user: user["id"])
+        user2, user3, user4 = sorted(results, key=lambda user: user["id"])
 
         self.assertEqual(["follow_request_received"], user2["relations"])
         self.assertEqual(["blocked_by"], user3["relations"])
@@ -874,7 +876,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["following"], user["relations"])
 
@@ -885,7 +887,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["followed_by"], user["relations"])
 
@@ -897,7 +899,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["following", "followed_by"], user["relations"])
 
@@ -908,7 +910,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["blocking"], user["relations"])
 
@@ -919,7 +921,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["blocked_by"], user["relations"])
 
@@ -931,7 +933,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["blocking", "blocked_by"], user["relations"])
 
@@ -942,7 +944,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["follow_request_sent"], user["relations"])
 
@@ -953,7 +955,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["follow_request_received"], user["relations"])
 
@@ -965,7 +967,7 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(
             ["follow_request_sent", "follow_request_received"], user["relations"]
@@ -979,6 +981,6 @@ class TestUserRelationLookup(APITestCase):
         response = self.client.get(self.url, data={"ids": self.user2.id})
 
         self.assertEqual(200, response.status_code)
-        user = response.data[0]
+        user = response.data["results"][0]
 
         self.assertEqual(["followed_by", "follow_request_sent"], user["relations"])

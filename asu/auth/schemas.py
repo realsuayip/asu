@@ -203,32 +203,7 @@ profile_picture = lambda f: put_profile_picture(delete_profile_picture(f))  # no
 
 ticket = extend_schema("Create authentication ticket")
 
-user = {
-    "create": create,
-    "retrieve": retrieve,
-    "block": block,
-    "unblock": unblock,
-    "follow": follow,
-    "unfollow": unfollow,
-    "me": me,
-    "reset_password": reset_password,
-    "followers": followers,
-    "following": following,
-    "blocked": blocked,
-    "message": message,
-    "profile_picture": profile_picture,
-    "ticket": ticket,
-}
-
-list_follow_requests = extend_schema(summary="List follow requests")
-update_follow_request = extend_schema(summary="Respond to a follow request")
-
-follow_request = {
-    "list": list_follow_requests,
-    "partial_update": update_follow_request,
-}
-
-list_relations = extend_schema(
+relations = extend_schema(
     "List relations with given users",
     responses={
         200: RelationSerializer,
@@ -251,4 +226,29 @@ list_relations = extend_schema(
         ),
     ],
 )
-relation = {"list": list_relations}
+
+user = {
+    "create": create,
+    "retrieve": retrieve,
+    "block": block,
+    "unblock": unblock,
+    "follow": follow,
+    "unfollow": unfollow,
+    "me": me,
+    "reset_password": reset_password,
+    "followers": followers,
+    "following": following,
+    "blocked": blocked,
+    "message": message,
+    "profile_picture": profile_picture,
+    "ticket": ticket,
+    "relations": relations,
+}
+
+list_follow_requests = extend_schema(summary="List follow requests")
+update_follow_request = extend_schema(summary="Respond to a follow request")
+
+follow_request = {
+    "list": list_follow_requests,
+    "partial_update": update_follow_request,
+}

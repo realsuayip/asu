@@ -28,6 +28,7 @@ dependencies = [
     "django-widget-tweaks ~= 1.4",
     "envanter ~= 1.2",
     "django-ipware ~= 5.0",
+    "sentry-sdk ~= 1.25"
 ]
 
 [project.optional-dependencies]

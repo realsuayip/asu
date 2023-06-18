@@ -3,12 +3,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
-import django.core.exceptions
-from django.contrib.postgres.validators import ArrayMaxLengthValidator
 from django.db.models import Count, Exists, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 
-from rest_framework import parsers, serializers, status
+from rest_framework import parsers, status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -41,7 +39,7 @@ from asu.auth.serializers.user import (
     UserSerializer,
 )
 from asu.messaging.serializers import MessageComposeSerializer
-from asu.utils.rest import NumberInFilter, get_paginator
+from asu.utils.rest import IDFilter, get_paginator
 from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
 
@@ -278,22 +276,7 @@ class UserViewSet(ExtendedViewSet):
 
 
 class RelationFilter(filters.FilterSet):
-    ids = NumberInFilter(
-        min_value=1,
-        required=True,
-        method="filter_ids",
-        help_text="Multiple values may be separated by commas. Enter 50 at most.",
-    )
-
-    def filter_ids(
-        self, queryset: QuerySet[User], name: str, value: list[str]
-    ) -> QuerySet[User]:
-        validator = ArrayMaxLengthValidator(50)
-        try:
-            validator(value)
-        except django.core.exceptions.ValidationError as err:
-            raise serializers.ValidationError({"ids": err.messages})
-        return queryset.filter(id__in=value)
+    ids = IDFilter(required=True)
 
 
 class RelationViewSet(ExtendedViewSet):

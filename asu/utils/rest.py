@@ -2,6 +2,8 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from django import forms
+from django.contrib.postgres.forms import SimpleArrayField
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import exceptions, pagination, serializers
 from rest_framework.metadata import BaseMetadata
@@ -12,6 +14,7 @@ from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
 
 from django_filters import rest_framework as filters
+from drf_spectacular.utils import extend_schema_field
 
 if TYPE_CHECKING:
     from rest_framework.views import APIView
@@ -119,9 +122,19 @@ class APIError(serializers.Serializer[dict[str, Any]]):
     detail = serializers.CharField()
 
 
-class IntegerFilter(filters.Filter):
-    field_class = forms.IntegerField
+@extend_schema_field(
+    {
+        "type": "array",
+        "items": {"type": "integer"},
+        "description": _("Multiple values may be separated by commas."),
+    }
+)
+class IDFilter(filters.Filter):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("field_name", "id")
+        kwargs.setdefault("lookup_expr", "in")
+        kwargs.setdefault("base_field", forms.IntegerField(min_value=1))
+        kwargs.setdefault("max_length", 50)
+        super().__init__(*args, **kwargs)
 
-
-class NumberInFilter(filters.BaseInFilter, IntegerFilter):
-    pass
+    field_class = SimpleArrayField

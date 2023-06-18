@@ -11,7 +11,7 @@ REST_FRAMEWORK = {
         "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "asu.utils.openapi.CustomAutoSchema",
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",
     "DEFAULT_METADATA_CLASS": "asu.utils.rest.EmptyMetadata",
 }

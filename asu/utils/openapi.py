@@ -18,3 +18,10 @@ class DynamicFieldsModelSerializerExtension(OpenApiSerializerExtension):
 
     def get_name(self, auto_schema: AutoSchema, direction: Direction) -> Any:
         return self.target.ref_name
+
+
+class CustomAutoSchema(AutoSchema):
+    def get_filter_backends(self) -> Any:
+        # Display query parameters for filters if the action/view
+        # defines `filter_backends`.
+        return getattr(self.view, "filter_backends", [])

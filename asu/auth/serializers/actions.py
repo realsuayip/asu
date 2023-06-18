@@ -242,7 +242,7 @@ rels = {
 }
 
 
-class RelationSerializer(serializers.ModelSerializer[User]):
+class UserWithRelationSerializer(serializers.ModelSerializer[User]):
     relations = serializers.SerializerMethodField()
 
     class Meta:
@@ -257,3 +257,7 @@ class RelationSerializer(serializers.ModelSerializer[User]):
     )
     def get_relations(self, obj: WithAnnotations[User]) -> list[str]:
         return [name for name, exists in obj.rels.items() if exists]
+
+
+class RelationSerializer(serializers.Serializer[dict[str, Any]]):
+    results = UserWithRelationSerializer(many=True)

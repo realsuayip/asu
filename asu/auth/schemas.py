@@ -168,6 +168,11 @@ patch_me = extend_schema(
 )
 me = lambda f: get_me(patch_me(f))  # noqa: E731
 
+by = extend_schema(
+    summary="Retrieve a user by username",
+    responses={200: UserPublicReadSerializer, 404: APIError},
+)
+
 reset_password = extend_schema(
     summary="Reset password",
     responses={
@@ -235,6 +240,7 @@ user = {
     "follow": follow,
     "unfollow": unfollow,
     "me": me,
+    "by": by,
     "reset_password": reset_password,
     "followers": followers,
     "following": following,

@@ -179,6 +179,31 @@ class TestAuth(APITestCase):
         self.assertEqual(404, frozen.status_code)
         self.assertEqual(404, inactive.status_code)
 
+    def test_by(self):
+        # Since the `test_detail_*` cases uses the common code,
+        # only testing the sanity of this endpoint here.
+        self.client.force_authenticate(token="UserNotRequired")
+
+        response = self.client.get(
+            reverse("api:user-lookup"),
+            {"username": self.user2.username},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, "follower_count")
+        self.assertContains(response, "following_count")
+        self._compare_instance_to_dict(
+            self.user2,
+            response.json(),
+            exclude=[
+                "follower_count",
+                "following_count",
+                "url",
+                "date_joined",
+                "profile_picture",
+            ],
+        )
+
     def test_user_create_invalid_consent_case_1(self):
         self.client.force_authenticate(token="UserNotRequired")
 

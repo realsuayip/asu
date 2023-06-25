@@ -98,3 +98,14 @@ allow_subclassing_any = true
 
 [tool.django-stubs]
 django_settings_module = "asu.settings"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    'if getattr\(self, "swagger_fake_view", False\):',
+]
+
+[tool.coverage.html]
+skip_empty = true
+skip_covered = true

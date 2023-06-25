@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from django.db.models import Count, Exists, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
+from django.shortcuts import get_object_or_404
 
 from rest_framework import parsers, status
 from rest_framework.decorators import action
@@ -54,6 +55,10 @@ class RelationFilter(filters.FilterSet):
     ids = IDFilter(required=True)
 
 
+class UserLookupFilter(filters.FilterSet):
+    username = filters.CharFilter(required=True, lookup_expr="iexact")
+
+
 class UserViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "create")
     permission_classes = [RequireToken]
@@ -62,6 +67,7 @@ class UserViewSet(ExtendedViewSet):
     serializer_classes = {
         "create": UserCreateSerializer,
         "me": UserSerializer,
+        "by": UserPublicReadSerializer,
         "block": BlockSerializer,
         "unblock": BlockSerializer,
         "follow": FollowSerializer,
@@ -89,6 +95,10 @@ class UserViewSet(ExtendedViewSet):
     def filterset_class(self) -> type[filters.FilterSet] | None:
         if self.action == "relations":
             return RelationFilter
+
+        if self.action == "by":
+            return UserLookupFilter
+
         return None
 
     def get_queryset(self) -> QuerySet[User]:
@@ -97,7 +107,7 @@ class UserViewSet(ExtendedViewSet):
         if self.request.user and self.request.user.is_authenticated:
             queryset = queryset.exclude(blocked__in=[self.request.user])
 
-        if self.action in ["list", "retrieve"]:
+        if self.action in ["list", "retrieve", "by"]:
             return queryset.annotate(
                 following_count=Count("following", distinct=True),
                 follower_count=Count("followed_by", distinct=True),
@@ -133,6 +143,21 @@ class UserViewSet(ExtendedViewSet):
 
         serializer = self.get_serializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[RequireToken],
+        serializer_class=UserPublicReadSerializer,
+        filter_backends=[filters.DjangoFilterBackend],
+        url_name="lookup",
+    )
+    def by(self, request: Request) -> Response:
+        queryset = self.filter_queryset(self.get_queryset())
+        user = get_object_or_404(queryset)
+
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 
     @action(
         detail=False,

@@ -80,6 +80,7 @@ class UserViewSet(ExtendedViewSet):
         "ticket": TicketSerializer,
         "profile_picture": ProfilePictureEditSerializer,
     }
+    filterset_classes = {"relations": RelationFilter, "by": UserLookupFilter}
     serializer_class = UserPublicReadSerializer
     schemas = schemas.user
     scopes = {
@@ -90,16 +91,6 @@ class UserViewSet(ExtendedViewSet):
         "unfollow": "user.follow",
         "relations": "user.profile",
     }
-
-    @property
-    def filterset_class(self) -> type[filters.FilterSet] | None:
-        if self.action == "relations":
-            return RelationFilter
-
-        if self.action == "by":
-            return UserLookupFilter
-
-        return None
 
     def get_queryset(self) -> QuerySet[User]:
         queryset = User.objects.active()

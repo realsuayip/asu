@@ -73,16 +73,11 @@ class ConversationViewSet(ExtendedViewSet):
     mixins = ("list", "retrieve", "destroy")
     serializer_class = ConversationSerializer
     serializer_classes = {"retrieve": ConversationDetailSerializer}
+    filterset_classes = {"list": ConversationFilterSet}
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_modified")
     filter_backends = [filters.DjangoFilterBackend]
     schemas = schemas.conversation
-
-    @property
-    def filterset_class(self) -> type[filters.FilterSet] | None:
-        if self.action == "list":
-            return ConversationFilterSet
-        return None
 
     def get_queryset(self) -> QuerySet[Conversation]:
         queryset = Conversation.objects.filter(holder=self.request.user)

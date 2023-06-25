@@ -9,6 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema_view
 
 from asu.utils.rest import PartialUpdateModelMixin
@@ -70,6 +71,7 @@ class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
     mixins: Sequence[str] | None = None
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, Any] = {}
+    filterset_classes: dict[str, type[filters.FilterSet]] = {}
     scopes: dict[str, list[str] | str] = {}
     request: UserRequest
 
@@ -95,6 +97,10 @@ class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
         serializer.save()
         data = serializer.data if status_code != status.HTTP_204_NO_CONTENT else None
         return Response(data, status=status_code)
+
+    @property
+    def filterset_class(self) -> type[filters.FilterSet] | None:
+        return self.filterset_classes.get(self.action)
 
     def get_serializer_class(self) -> type[serializers.Serializer[Any]]:
         return self.serializer_classes.get(self.action, self.serializer_class)

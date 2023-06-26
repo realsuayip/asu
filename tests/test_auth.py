@@ -204,6 +204,24 @@ class TestAuth(APITestCase):
             ],
         )
 
+    def test_by_query_param_required(self):
+        self.client.force_authenticate(token="UserNotRequired")
+        response = self.client.get(reverse("api:user-lookup"))
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(
+            {"username": ["This field is required."]},
+            response.json(),
+        )
+
+    def test_by_case_not_found(self):
+        self.client.force_authenticate(token="UserNotRequired")
+        response = self.client.get(
+            reverse("api:user-lookup"),
+            {"username": self.inactive_user.username},
+        )
+        self.assertEqual(404, response.status_code)
+
     def test_user_create_invalid_consent_case_1(self):
         self.client.force_authenticate(token="UserNotRequired")
 

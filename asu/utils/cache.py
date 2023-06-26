@@ -6,7 +6,7 @@ from typing import Any, ParamSpec, TypeVar
 
 from django.core.cache import cache
 
-__all__ = ["cached_context"]
+__all__ = ["cached_context", "build_vary_key"]
 
 
 P = ParamSpec("P")
@@ -46,6 +46,10 @@ def get_argument(
             return default
 
 
+def build_vary_key(key: str, name: str, value: str) -> str:
+    return "%s.vary(%s=%s)" % (key, name, value)
+
+
 def get_vary_string(
     parameter: Parameter,
     name: str,
@@ -70,7 +74,7 @@ def get_vary_string(
     else:
         value = operator.attrgetter(attr)(arg)
         name = name + "." + attr
-    return "%s.vary(%s=%s)" % (key, name, value)
+    return build_vary_key(key, name, value)
 
 
 def fallback(key: str, *args: Any, **kwargs: Any) -> str:

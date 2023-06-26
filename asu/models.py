@@ -1,6 +1,11 @@
+from typing import Any
+
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from asu.utils.cache import build_vary_key, cached_context
 
 
 class ProjectVariableManager(models.Manager["ProjectVariable"]):
@@ -27,16 +32,18 @@ class ProjectVariableManager(models.Manager["ProjectVariable"]):
             ) from exc
 
         if prefix == "db":
-            # Todo: Employ a cache mechanism here.
-            try:
-                var = self.only("value").get(name=name)
-            except self.model.DoesNotExist as exc:
-                raise KeyError(
-                    "variable '%s' could not be found in the database" % name
-                ) from exc
-
-            return var.value
+            return self.from_db(name)
         return self.BUILD_VARS[name]
+
+    @cached_context(key="variable", vary="name")
+    def from_db(self, name: str) -> str:
+        try:
+            var = self.only("value").get(name=name)
+        except self.model.DoesNotExist as exc:
+            raise KeyError(
+                "variable '%s' could not be found in the database" % name
+            ) from exc
+        return var.value
 
 
 class ProjectVariable(models.Model):
@@ -51,6 +58,10 @@ class ProjectVariable(models.Model):
     class Meta:
         verbose_name = _("project variable")
         verbose_name_plural = _("project variables")
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        super().save(*args, **kwargs)
+        cache.delete(build_vary_key("variable", "name", self.name))
 
     def __str__(self) -> str:
         return self.name

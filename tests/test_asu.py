@@ -1,7 +1,9 @@
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
 from asu.models import ProjectVariable
+from asu.utils.cache import build_vary_key
 
 
 class TestProjectVariable(TestCase):
@@ -14,6 +16,30 @@ class TestProjectVariable(TestCase):
 
         value = ProjectVariable.objects.get_value(name="db.HELLO_KITTY")
         self.assertEqual("im pink", value)
+        self.assertEqual(
+            "im pink",
+            cache.get(build_vary_key("variable", "name", "HELLO_KITTY")),
+        )
+
+    def test_get_value_db_cache_invalidates_on_save(self):
+        var = ProjectVariable.objects.create(name="HELLO_KITTY", value="im pink")
+
+        value = ProjectVariable.objects.get_value(name="db.HELLO_KITTY")
+        self.assertEqual("im pink", value)
+        self.assertEqual(
+            "im pink", cache.get(build_vary_key("variable", "name", "HELLO_KITTY"))
+        )
+
+        var.value = "im blue"
+        var.save(update_fields=["value"])
+
+        self.assertIsNone(cache.get(build_vary_key("variable", "name", "HELLO_KITTY")))
+
+        new_value = ProjectVariable.objects.get_value(name="db.HELLO_KITTY")
+        self.assertEqual("im blue", new_value)
+        self.assertEqual(
+            "im blue", cache.get(build_vary_key("variable", "name", "HELLO_KITTY"))
+        )
 
     def test_get_value_exceptions(self):
         cases = {

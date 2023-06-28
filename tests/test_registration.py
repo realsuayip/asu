@@ -5,8 +5,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from asu.auth.models import Application, User
-from asu.models import ProjectVariable
+from asu.auth.models import User
 from asu.verification.models import RegistrationVerification
 from tests.factories import first_party_token
 
@@ -16,22 +15,7 @@ class RegistrationTest(APITestCase):
     Test the entire registration process.
     """
 
-    @classmethod
-    def setUpTestData(cls):
-        # Create a default oauth app that is going to be used during
-        # registration to issue tokens.
-        client = "first_party"
-        ProjectVariable.objects.create(name="DEFAULT_OAUTH_CLIENT", value=client)
-        Application.objects.create(
-            client_id=client,
-            client_secret="secret",
-            redirect_uris="http://127.0.0.1/local/",
-            client_type=Application.CLIENT_PUBLIC,
-            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
-            name="First party app",
-            is_first_party=True,
-            skip_authorization=True,
-        )
+    fixtures = ("oauth", "vars")
 
     def test_registration(self):
         self.client.force_authenticate(token=first_party_token)

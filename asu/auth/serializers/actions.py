@@ -61,6 +61,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        request = self.context["request"]
         password = validated_data["password"]
         email = validated_data["email"]
 
@@ -87,6 +88,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
 
         user.set_password(password)
         user.save(update_fields=["password", "date_modified"])
+        user.revoke_other_tokens(request.auth)
         return validated_data
 
 

@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
-from oauth2_provider.models import AccessToken
+from oauth2_provider.models import AccessToken, RefreshToken
 from PIL import Image
 
 from asu.auth.models import Application, Session, UserFollowRequest
@@ -18,6 +18,8 @@ from tests.factories import UserFactory
 
 
 class TestAuth(APITestCase):
+    fixtures = ("oauth", "vars")
+
     @classmethod
     def setUpTestData(cls):
         cls.url_create = reverse("api:user-list")
@@ -710,6 +712,22 @@ class TestAuth(APITestCase):
 
         self.assertEqual(204, r.status_code)
         self.assertEqual(204, r1.status_code)
+
+    def test_revoke_other_tokens(self):
+        r1 = self.user1.issue_token()
+        r2 = self.user1.issue_token()
+        r3 = self.user1.issue_token()
+
+        current = AccessToken.objects.get(token=r3["access_token"])
+        self.user1.revoke_other_tokens(current)
+
+        revoke1 = RefreshToken.objects.get(token=r1["refresh_token"])
+        revoke2 = RefreshToken.objects.get(token=r2["refresh_token"])
+        not_revoked = RefreshToken.objects.get(token=r3["refresh_token"])
+
+        self.assertIsNotNone(revoke1.revoked)
+        self.assertIsNotNone(revoke2.revoked)
+        self.assertIsNone(not_revoked.revoked)
 
 
 class TestOAuthPermissions(APITestCase):

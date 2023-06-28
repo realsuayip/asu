@@ -1,7 +1,7 @@
 - model: account.application
   pk: 1
   fields:
-    client_id: Xq4twhu4MT6Q5Lr9aGADgTJDAkeiWAVBvYiwGfks
+    client_id: test_client
     user: null
     redirect_uris: http://127.0.0.1:8000/local/
     client_type: public

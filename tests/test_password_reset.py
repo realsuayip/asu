@@ -1,18 +1,24 @@
 import re
+from unittest.mock import patch
 
 from django.core import mail
 from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
+from oauth2_provider.models import AccessToken
+
+from asu.auth.models import User
 from asu.verification.models import PasswordResetVerification
-from tests.factories import UserFactory, first_party_token
+from tests.factories import UserFactory
 
 
 class PasswordResetTest(APITestCase):
     """
     Test the entire password reset process.
     """
+
+    fixtures = ("oauth", "vars")
 
     @classmethod
     def setUpTestData(cls):
@@ -28,8 +34,12 @@ class PasswordResetTest(APITestCase):
             },
         )
 
-    def test_password_reset(self):
-        self.client.force_authenticate(token=first_party_token)
+    @patch.object(User, "revoke_other_tokens")
+    def test_password_reset(self, mock):
+        auth = self.user.issue_token()
+        token = AccessToken.objects.get(token=auth["access_token"])
+
+        self.client.force_authenticate(token=token)
 
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("api:password-reset-check")
@@ -62,6 +72,7 @@ class PasswordResetTest(APITestCase):
         self.assertContains(bad_2, "numeric", status_code=400)
         self.assertContains(bad_2, "too common", status_code=400)
         self.assertContains(bad_3, "similar", status_code=400)
+        self.assertFalse(mock.called)
 
         # Make a valid request to change the password.
         password = "12345678*"
@@ -75,3 +86,4 @@ class PasswordResetTest(APITestCase):
 
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password(password))
+        self.assertTrue(mock.called)

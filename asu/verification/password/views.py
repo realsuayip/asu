@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 from asu.auth.permissions import RequireFirstParty
 from asu.utils.views import ExtendedViewSet
+from asu.verification.models import PasswordResetVerification
 from asu.verification.password import schemas
 from asu.verification.password.serializers import (
     PasswordResetVerificationCheckSerializer,
@@ -11,7 +12,7 @@ from asu.verification.password.serializers import (
 )
 
 
-class PasswordResetViewSet(ExtendedViewSet):
+class PasswordResetViewSet(ExtendedViewSet[PasswordResetVerification]):
     """
     This ViewSet is partly responsible for password *reset* flow, in
     other words, account recovery, in case the user forgets their

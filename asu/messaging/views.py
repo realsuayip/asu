@@ -21,7 +21,7 @@ from asu.utils.views import ExtendedViewSet
 
 
 @extend_schema(parameters=[OpenApiParameter("conversation_id", int, "path")])
-class MessageViewSet(ExtendedViewSet):
+class MessageViewSet(ExtendedViewSet[Message]):
     mixins = ("list", "retrieve", "destroy")
     serializer_class = MessageSerializer
     permission_classes = [RequireUser, RequireFirstParty]
@@ -69,7 +69,7 @@ class ConversationFilterSet(filters.FilterSet):
         return queryset  # pragma: no cover
 
 
-class ConversationViewSet(ExtendedViewSet):
+class ConversationViewSet(ExtendedViewSet[Conversation]):
     mixins = ("list", "retrieve", "destroy")
     serializer_class = ConversationSerializer
     serializer_classes = {"retrieve": ConversationDetailSerializer}

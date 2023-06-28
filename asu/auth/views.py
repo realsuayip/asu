@@ -59,7 +59,7 @@ class UserLookupFilter(filters.FilterSet):
     username = filters.CharFilter(required=True, lookup_expr="iexact")
 
 
-class UserViewSet(ExtendedViewSet):
+class UserViewSet(ExtendedViewSet[User]):
     mixins = ("list", "retrieve", "create")
     permission_classes = [RequireToken]
     # ^ Allow everyone for mixins listed above, for actions, each
@@ -188,7 +188,7 @@ class UserViewSet(ExtendedViewSet):
     def list_follow_through(
         self, queryset: QuerySet[UserFollow | UserBlock]
     ) -> Response:
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(queryset)  # type: ignore[arg-type]
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
@@ -345,7 +345,7 @@ class UserViewSet(ExtendedViewSet):
         return Response(serializer.data)
 
 
-class FollowRequestViewSet(ExtendedViewSet):
+class FollowRequestViewSet(ExtendedViewSet[UserFollowRequest]):
     mixins = ("list", "partial_update")
     permission_classes = [RequireUser, RequireScope]
     serializer_class = FollowRequestSerializer

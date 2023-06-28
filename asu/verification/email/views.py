@@ -6,9 +6,10 @@ from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.utils.views import ExtendedViewSet
 from asu.verification.email import schemas
 from asu.verification.email.serializers import EmailCheckSerializer, EmailSerializer
+from asu.verification.models import EmailVerification
 
 
-class EmailViewSet(ExtendedViewSet):
+class EmailViewSet(ExtendedViewSet[EmailVerification]):
     """
     This ViewSet is responsible for e-email change flow, in which the
     user receives a verification code to their new email address (this

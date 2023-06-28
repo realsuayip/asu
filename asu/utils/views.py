@@ -1,24 +1,24 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, TypeVar
 
-from rest_framework import mixins, serializers, status
+from django.db import models
+
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
+import django_stubs_ext
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema_view
 
 from asu.utils.rest import PartialUpdateModelMixin
 from asu.utils.typing import UserRequest
 
-if TYPE_CHECKING:
-    ViewSetBase = GenericViewSet[Any]
-else:
-    ViewSetBase = GenericViewSet
+django_stubs_ext.monkeypatch(extra_classes=[viewsets.GenericViewSet])
+MT = TypeVar("MT", bound=models.Model, covariant=True)
 
 
 _viewset_mixin_map: dict[str, type[Any]] = {
@@ -33,7 +33,7 @@ _viewset_mixin_map: dict[str, type[Any]] = {
 class ViewSetMeta(type):
     def __new__(
         mcs, name: str, bases: tuple[type[Any], ...], classdict: dict[str, Any]
-    ) -> type[ViewSetBase]:
+    ) -> ViewSetMeta:
         cls_mixins = classdict.get("mixins")
 
         if cls_mixins is not None:
@@ -54,10 +54,7 @@ class ViewSetMeta(type):
 
                 bases += (mixin,)
 
-        cls = cast(
-            type[ViewSetBase],
-            super().__new__(mcs, name, bases, classdict),
-        )
+        cls = super().__new__(mcs, name, bases, classdict)
         schemas = classdict.get("schemas")
 
         if schemas is not None:
@@ -67,7 +64,7 @@ class ViewSetMeta(type):
         return cls
 
 
-class ExtendedViewSet(ViewSetBase, metaclass=ViewSetMeta):
+class ExtendedViewSet(viewsets.GenericViewSet[MT], metaclass=ViewSetMeta):
     mixins: Sequence[str] | None = None
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, Any] = {}

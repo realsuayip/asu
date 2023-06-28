@@ -46,4 +46,4 @@ class RegistrationViewSet(ExtendedViewSet[RegistrationVerification]):
         permission_classes=[RequireFirstParty],
     )
     def check(self, request: Request) -> Response:
-        return self.get_action_save_response(request, RegistrationCheckSerializer)
+        return self.get_action_save_response(request)

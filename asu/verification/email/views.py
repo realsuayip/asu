@@ -37,4 +37,4 @@ class EmailViewSet(ExtendedViewSet[EmailVerification]):
         permission_classes=[RequireUser, RequireFirstParty],
     )
     def check(self, request: Request) -> Response:
-        return self.get_action_save_response(request, EmailCheckSerializer)
+        return self.get_action_save_response(request)

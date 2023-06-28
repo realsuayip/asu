@@ -45,6 +45,4 @@ class PasswordResetViewSet(ExtendedViewSet[PasswordResetVerification]):
         permission_classes=[RequireFirstParty],
     )
     def check(self, request: Request) -> Response:
-        return self.get_action_save_response(
-            request, PasswordResetVerificationCheckSerializer
-        )
+        return self.get_action_save_response(request)

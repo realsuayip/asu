@@ -34,7 +34,7 @@ def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | Non
         if isinstance(exc.detail, list):
             response.data = {non_field_errors: exc.detail}
         elif isinstance(exc.detail, dict):
-            detail = {}
+            detail: dict[str, Any] = {}
             for key, value in exc.detail.items():
                 if isinstance(value, str):
                     detail[key] = [value]
@@ -123,11 +123,10 @@ class APIError(serializers.Serializer[dict[str, Any]]):
 
 
 @extend_schema_field(
-    {
-        "type": "array",
-        "items": {"type": "integer"},
-        "description": _("Multiple values may be separated by commas."),
-    }
+    serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        help_text=_("Multiple values may be separated by commas."),
+    )
 )
 class IDFilter(filters.Filter):
     def __init__(self, *args: Any, **kwargs: Any) -> None:

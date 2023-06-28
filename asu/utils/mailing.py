@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils import translation
 
-if TYPE_CHECKING:
-    from django_stubs_ext import StrOrPromise
+from django_stubs_ext import StrOrPromise
 
 
 def determine_language(lang_code: str | None) -> str:

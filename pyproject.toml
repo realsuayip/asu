@@ -28,7 +28,8 @@ dependencies = [
     "django-widget-tweaks ~= 1.4",
     "envanter ~= 1.2",
     "django-ipware ~= 5.0",
-    "sentry-sdk ~= 1.25"
+    "sentry-sdk ~= 1.25",
+    "django-stubs-ext",
 ]
 
 [project.optional-dependencies]
@@ -66,7 +67,7 @@ select = [
 ]
 line-length = 88
 exclude = ["migrations"]
-ignore = ["B904"]
+ignore = ["B904", "RUF012"]
 
 [tool.ruff.isort]
 combine-as-imports = true

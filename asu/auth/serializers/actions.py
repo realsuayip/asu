@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn, TypeVar
+from typing import Any, NoReturn, TypeVar
 
 import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
@@ -12,14 +12,12 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from django_stubs_ext import WithAnnotations
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.verification.models import PasswordResetVerification
-
-if TYPE_CHECKING:
-    from django_stubs_ext import WithAnnotations
 
 T = TypeVar("T", bound=models.Model)
 

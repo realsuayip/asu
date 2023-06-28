@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django import urls
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -13,10 +13,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.routers import APIRootView as BaseAPIRootView
 
-from asu.utils import messages
+from django_stubs_ext import StrOrPromise
 
-if TYPE_CHECKING:
-    from django_stubs_ext import StrOrPromise
+from asu.utils import messages
 
 
 class APIRootView(BaseAPIRootView):

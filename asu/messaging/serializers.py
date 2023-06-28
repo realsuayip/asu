@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from rest_framework import exceptions, serializers
 from rest_framework.reverse import reverse
 
+from django_stubs_ext import WithAnnotations
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.messaging.models import Conversation, ConversationRequest, Message
-
-if TYPE_CHECKING:
-    from django_stubs_ext import WithAnnotations
 
 
 class MessageComposeSerializer(serializers.ModelSerializer[Message]):

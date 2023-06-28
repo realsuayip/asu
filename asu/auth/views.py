@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from django.db.models import Count, Exists, OuterRef, QuerySet
+from django.db.models import Exists, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
 
@@ -94,29 +94,16 @@ class UserViewSet(ExtendedViewSet):
 
     def get_queryset(self) -> QuerySet[User]:
         queryset = User.objects.active()
-
         if self.request.user and self.request.user.is_authenticated:
             queryset = queryset.exclude(blocked__in=[self.request.user])
-
-        if self.action in ["list", "retrieve", "by"]:
-            return queryset.annotate(
-                following_count=Count("following", distinct=True),
-                follower_count=Count("followed_by", distinct=True),
-            )
-
         return queryset
 
     def get_object(self) -> User:
-        pk = self.kwargs["pk"]
+        pk, user = self.kwargs["pk"], self.request.user
+        if (user is not None) and user.is_authenticated and (user.pk == pk):
+            return self.request.user
 
-        if self.request.user is not None:
-            # Todo: 'retrieve' check might be removed once follower
-            #  annotations above are removed.
-            self_view = self.request.user.pk == pk
-            if self_view and self.action != "retrieve":
-                return self.request.user
-
-        user: User = super().get_object()
+        user = super().get_object()
         return user
 
     @action(

@@ -137,6 +137,26 @@ class TestAuth(APITestCase):
         )
         self.assertEqual(200, response.status_code)
 
+    def test_detail_follow_counts(self):
+        self.client.force_login(self.user1)
+
+        self.user1.following.add(self.user2)
+        self.user1.following.add(self.user3)
+
+        self.user1.followed_by.add(self.user4)
+
+        response = self.client.get(
+            reverse(
+                "api:user-detail",
+                kwargs={"pk": self.user1.pk},
+            )
+        )
+        self.assertEqual(200, response.status_code)
+
+        detail = response.data
+        self.assertEqual(1, detail["follower_count"])
+        self.assertEqual(2, detail["following_count"])
+
     def test_detail_returns_200_when_blocked(self):
         self.user1.blocked.add(self.user2)
         self.client.force_login(self.user1)

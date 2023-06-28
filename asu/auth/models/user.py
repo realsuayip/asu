@@ -179,6 +179,12 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     def __str__(self) -> str:
         return self.username
 
+    def following_count(self) -> int:
+        return self.following.count()
+
+    def follower_count(self) -> int:
+        return self.followed_by.count()
+
     @property
     def is_accessible(self) -> bool:
         return self.is_active and (not self.is_frozen)

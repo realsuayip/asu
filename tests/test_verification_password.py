@@ -2,11 +2,15 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
+from oauth2_provider.models import AccessToken
+
 from asu.verification.models import PasswordResetVerification
 from tests.factories import UserFactory, first_party_token
 
 
 class TestPasswordReset(APITestCase):
+    fixtures = ("oauth", "vars")
+
     @classmethod
     def setUpTestData(cls):
         cls.url_send = reverse("api:password-reset-list")
@@ -14,10 +18,13 @@ class TestPasswordReset(APITestCase):
         cls.url_change = reverse("api:user-reset-password")
 
     def test_check_nullification(self):
-        self.client.force_authenticate(token=first_party_token)
-
         email = "null_test@example.com"
-        UserFactory(email=email)
+        user = UserFactory(email=email)
+
+        auth = user.issue_token()
+        token = AccessToken.objects.get(token=auth["access_token"])
+
+        self.client.force_authenticate(token=token)
 
         # Create & get verifications
         for _ in range(3):

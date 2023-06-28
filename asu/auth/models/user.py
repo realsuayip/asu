@@ -343,3 +343,14 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             "refresh_token": refresh.token,
             "scope": scope,
         }
+
+    def revoke_other_tokens(self, current: AccessToken | None = None) -> None:
+        # Revokes all OAuth tokens for this user. Set `current` to an access
+        # token instance to exclude a token. Called when password gets changed.
+        tokens = RefreshToken.objects.filter(user=self, revoked__isnull=True)
+
+        if current is not None:
+            tokens = tokens.exclude(access_token=current)
+
+        for token in tokens.iterator():
+            token.revoke()

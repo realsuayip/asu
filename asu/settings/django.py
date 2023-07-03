@@ -110,11 +110,14 @@ USE_I18N = True
 USE_TZ = True
 
 
+# TODO: Switch to 4.2 `STORAGES` setting once all
+#  dependencies support using it.
+DEFAULT_FILE_STORAGE = env.str("DEFAULT_FILE_STORAGE")
+STATICFILES_STORAGE = env.str("STATICFILES_STORAGE")
+
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# FileSystemStorage related functionality
-# won't be required for remote file storages.
 MEDIA_URL = "media/"
 MEDIA_ROOT = "/code/asu/media"
 

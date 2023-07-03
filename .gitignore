@@ -37,3 +37,4 @@ node_modules
 datadump.json
 venv/
 media/
+staticfiles.json

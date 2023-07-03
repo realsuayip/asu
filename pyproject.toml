@@ -30,6 +30,8 @@ dependencies = [
     "django-ipware ~= 5.0",
     "sentry-sdk ~= 1.25",
     "django-stubs-ext",
+    "django-storages ~= 1.13",
+    "boto3 ~= 1.26.163",
 ]
 
 [project.optional-dependencies]

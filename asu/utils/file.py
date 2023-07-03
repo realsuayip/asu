@@ -73,7 +73,7 @@ class S3StaticStorage(S3ManifestStaticStorage):
     location = "static"
     default_acl = "public-read"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         # Store `staticfiles.json` in local filesystem so that no
         # additional requests are made to remote file storage just to
         # fetch file mappings.

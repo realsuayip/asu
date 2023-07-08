@@ -4,7 +4,7 @@ $(eval $(WHATEVER):;@:)
 # to pass options, you may do so by using "--" e.g.:
 # make up -- --build
 
-file = docker/dev/docker-compose.yml
+file = docker/prod/docker-compose.yml
 ifeq (${CONTEXT}, production)
 	file = docker/prod/docker-compose.yml
 endif
@@ -20,7 +20,7 @@ dj = $(ex) python manage.py
 build:
 	$(cc) build $(WHATEVER)
 up:
-	$(cc) up $(WHATEVER)
+	$(cc) --verbose up $(WHATEVER)
 detach:
 	$(cc) up -d $(WHATEVER)
 ifneq (${CONTEXT}, production)

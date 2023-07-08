@@ -1,0 +1,68 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: asu-postgres
+    image: postgres:15.2-alpine
+    user: postgres
+    env_file: ../../conf/postgres.env
+    restart: always
+
+  redis:
+    container_name: asu-redis
+    image: redis:7-alpine
+    user: redis
+    restart: always
+
+  rabbitmq:
+    container_name: asu-rabbitmq
+    image: rabbitmq:3.11-alpine
+    restart: always
+
+  nginx:
+    container_name: asu-nginx
+    build:
+      context: ../..
+      dockerfile: docker/prod/nginx/Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+
+  web: &django
+    container_name: asu-web
+    image: asu-python
+    build:
+      context: ../..
+      dockerfile: docker/prod/django/Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    env_file: &django_env
+      - ../../conf/prod/django.env
+      - ../../conf/prod/postgres.env
+    environment:
+      DJANGO_CONTEXT: web
+    depends_on:
+      - redis
+      - db
+    restart: always
+
+  websocket:
+    <<: *django
+    container_name: asu-websocket
+    command: python manage.py runserver 0.0.0.0:8000
+
+  celery-worker: &celery
+    image: asu-python
+    container_name: asu-celery-worker
+    command: celery -A asu worker -l info
+    env_file: *django_env
+    environment:
+      DJANGO_CONTEXT: celery
+    depends_on:
+      - web
+      - rabbitmq
+    restart: always
+
+  celery-beat:
+    <<: *celery
+    container_name: asu-celery-beat
+    command: celery -A asu beat -l info

@@ -103,6 +103,9 @@ password_validators = [
 AUTH_PASSWORD_VALIDATORS = [{"NAME": validator} for validator in password_validators]
 AUTH_USER_MODEL = "account.User"
 SESSION_ENGINE = env.str("SESSION_ENGINE")
+SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
+
 
 LANGUAGE_CODE = env.str("DJANGO_LANGUAGE_CODE")
 TIME_ZONE = env.str("DJANGO_TIME_ZONE")
@@ -130,6 +133,7 @@ EMAIL_PORT = env.int("EMAIL_PORT")
 EMAIL_HOST_USER = env.str("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
 
 
 LOGIN_URL = "two_factor:login"
@@ -145,3 +149,7 @@ if DEBUG:
 
     *_, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips]
+
+
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")

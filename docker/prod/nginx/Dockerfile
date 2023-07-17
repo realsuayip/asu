@@ -1,4 +1,4 @@
-FROM nginx:1.25.1-alpine
+FROM nginx:1.25-alpine
 
 COPY docker/prod/nginx /etc/nginx/
 

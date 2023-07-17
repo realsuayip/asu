@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import URLPattern, URLResolver, include, path
+from django.urls import URLPattern, URLResolver, include, path, re_path
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
 from two_factor import views as tf
 
+from asu.messaging.websocket import ConversationConsumer
 from asu.views import (
     APIRootView,
     bad_request,
@@ -48,6 +49,11 @@ account_urls = [
     ),
     path("two-factor/disable/", tf.DisableView.as_view(), name="disable"),
 ]
+
+websocket_urls = [
+    re_path(r"conversations/$", ConversationConsumer.as_asgi()),
+]
+
 
 urlpatterns: list[URLPattern | URLResolver] = [
     path("admin/", admin.site.urls),

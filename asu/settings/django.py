@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 ROOT_URLCONF = "asu.urls"
-ASGI_APPLICATION = "asu.asgi.application"
+ASGI_APPLICATION = "asu.gateways.dev.application"
 WSGI_APPLICATION = "asu.wsgi.application"
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")

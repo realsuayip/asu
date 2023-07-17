@@ -6,18 +6,18 @@ services:
     image: postgres:15.2-alpine
     user: postgres
     env_file: ../../conf/postgres.env
-    restart: always
+    restart: unless-stopped
 
   redis:
     container_name: asu-redis
     image: redis:7-alpine
     user: redis
-    restart: always
+    restart: unless-stopped
 
   rabbitmq:
     container_name: asu-rabbitmq
     image: rabbitmq:3.11-alpine
-    restart: always
+    restart: unless-stopped
 
   nginx:
     container_name: asu-nginx
@@ -26,7 +26,7 @@ services:
       dockerfile: docker/prod/nginx/Dockerfile
     ports:
       - "80:80"
-    restart: always
+    restart: unless-stopped
 
   web: &django
     container_name: asu-web
@@ -34,7 +34,13 @@ services:
     build:
       context: ../..
       dockerfile: docker/prod/django/Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      gunicorn
+      asu.gateways.http
+      --bind 0.0.0.0:8000
+      --workers 4
+      --worker-class asu.utils.workers.UvicornWorker
+      --access-logfile '-'
     env_file: &django_env
       - ../../conf/prod/django.env
       - ../../conf/prod/postgres.env
@@ -43,12 +49,19 @@ services:
     depends_on:
       - redis
       - db
-    restart: always
+    restart: unless-stopped
 
   websocket:
     <<: *django
     container_name: asu-websocket
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      gunicorn asu.gateways.websocket
+      --bind 0.0.0.0:8000
+      --workers 4
+      --worker-class asu.utils.workers.UvicornWorker
+      --access-logfile '-'
+    environment:
+      DJANGO_CONTEXT: websocket
 
   celery-worker: &celery
     image: asu-python
@@ -60,7 +73,7 @@ services:
     depends_on:
       - web
       - rabbitmq
-    restart: always
+    restart: unless-stopped
 
   celery-beat:
     <<: *celery

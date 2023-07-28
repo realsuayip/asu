@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "sorl.thumbnail",
     "widget_tweaks",
     "django_celery_beat",
+    "corsheaders",
     # OAuth2
     "oauth2_provider",
     # Two-factor authentication
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "asu.auth.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -153,3 +155,4 @@ if DEBUG:
 
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")

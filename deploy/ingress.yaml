@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: asu-ingress
+spec:
+  rules:
+    - host: asu.web
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-service
+                port:
+                  number: 8000
+
+---
+
+# Define a separate Ingress for websocket connections
+# as they require custom read & send timeouts.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: asu-ingress-ws
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  rules:
+    - host: ws.asu.web
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: websocket-service
+                port:
+                  number: 8000
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+data:
+  server-tokens: "false"

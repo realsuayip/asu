@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  labels:
+    name: celery-worker
+    py-context: celery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: celery-worker
+  template:
+    metadata:
+      labels:
+        name: celery-worker
+    spec:
+      containers:
+        - name: asu-celery-worker
+          image: docker.io/library/asu-python:latest
+          command: [ "celery" ]
+          args: [ "-A", "asu", "worker", "-l", "info" ]
+          imagePullPolicy: Never
+          envFrom:
+            - secretRef:
+                name: asu-secrets
+            - secretRef:
+                name: postgres-secrets
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-beat
+  labels:
+    name: celery-beat
+    py-context: celery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: celery-beat
+  template:
+    metadata:
+      labels:
+        name: celery-beat
+    spec:
+      containers:
+        - name: asu-celery-beat
+          image: docker.io/library/asu-python:latest
+          command: [ "celery" ]
+          args: [ "-A", "asu", "beat", "-l", "info" ]
+          imagePullPolicy: Never
+          envFrom:
+            - secretRef:
+                name: asu-secrets
+            - secretRef:
+                name: postgres-secrets

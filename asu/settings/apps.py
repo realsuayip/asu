@@ -70,6 +70,7 @@ SPECTACULAR_SETTINGS = {
 
 REDIS_URL = env.str("REDIS_URL")
 CELERY_BROKER_URL = env.str("RABBITMQ_URL")
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CHANNEL_LAYERS = {
     "default": {

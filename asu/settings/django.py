@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "channels",
     "sorl.thumbnail",
     "widget_tweaks",
+    "django_celery_beat",
     # OAuth2
     "oauth2_provider",
     # Two-factor authentication

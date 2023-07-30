@@ -19,8 +19,6 @@ asgiref==3.7.2
     #   django
 asttokens==2.2.1
     # via stack-data
-async-timeout==4.0.2
-    # via redis
 attrs==23.1.0
     # via
     #   automat
@@ -42,7 +40,9 @@ botocore==1.29.163
     #   boto3
     #   s3transfer
 celery==5.3.1
-    # via asu (pyproject.toml)
+    # via
+    #   asu (pyproject.toml)
+    #   django-celery-beat
 celery-types==0.18.0
     # via asu (pyproject.toml)
 certifi==2023.5.7
@@ -75,6 +75,8 @@ constantly==15.1.0
     # via twisted
 coverage==7.2.7
     # via asu (pyproject.toml)
+cron-descriptor==1.4.0
+    # via django-celery-beat
 cryptography==41.0.1
     # via
     #   autobahn
@@ -91,6 +93,7 @@ django==4.2.2
     # via
     #   asu (pyproject.toml)
     #   channels
+    #   django-celery-beat
     #   django-debug-toolbar
     #   django-filter
     #   django-formtools
@@ -100,10 +103,13 @@ django==4.2.2
     #   django-storages
     #   django-stubs
     #   django-stubs-ext
+    #   django-timezone-field
     #   django-two-factor-auth
     #   djangorestframework
     #   drf-nested-routers
     #   drf-spectacular
+django-celery-beat==2.5.0
+    # via asu (pyproject.toml)
 django-debug-toolbar==4.1.0
     # via asu (pyproject.toml)
 django-filter==23.2
@@ -128,6 +134,8 @@ django-stubs-ext==4.2.2
     # via
     #   asu (pyproject.toml)
     #   django-stubs
+django-timezone-field==5.1
+    # via django-celery-beat
 django-two-factor-auth==1.15.2
     # via asu (pyproject.toml)
 django-widget-tweaks==1.4.12
@@ -232,15 +240,20 @@ pypng==0.20220715.0
     # via qrcode
 pyrsistent==0.19.3
     # via jsonschema
+python-crontab==3.0.0
+    # via django-celery-beat
 python-dateutil==2.8.2
     # via
     #   botocore
     #   celery
     #   faker
+    #   python-crontab
 python-magic==0.4.27
     # via asu (pyproject.toml)
 pytz==2023.3
-    # via djangorestframework
+    # via
+    #   django-timezone-field
+    #   djangorestframework
 pyyaml==6.0
     # via drf-spectacular
 qrcode==7.4.2
@@ -309,7 +322,9 @@ typing-extensions==4.6.3
     #   qrcode
     #   twisted
 tzdata==2023.3
-    # via celery
+    # via
+    #   celery
+    #   django-celery-beat
 uritemplate==4.1.1
     # via drf-spectacular
 urllib3==1.26.16

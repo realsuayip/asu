@@ -20,7 +20,7 @@ spec:
           image: docker.io/library/asu-python:latest
           command: [ "gunicorn" ]
           args: [
-            "asu.gateways.http",
+            "asu.gateways.asgi",
             "--bind", "0.0.0.0:8000",
             "--workers", "4",
             "--worker-class", "asu.utils.workers.UvicornWorker",

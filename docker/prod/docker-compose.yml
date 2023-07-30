@@ -36,7 +36,7 @@ services:
       dockerfile: docker/prod/django/Dockerfile
     command: >
       gunicorn
-      asu.gateways.http
+      asu.gateways.asgi
       --bind 0.0.0.0:8000
       --workers 4
       --worker-class asu.utils.workers.UvicornWorker

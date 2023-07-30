@@ -5,15 +5,16 @@ import os
 import uuid
 from typing import Any, AnyStr
 
-from django.conf import settings
-from django.contrib.staticfiles.storage import StaticFilesStorage
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
 import magic
-from storages.backends.s3boto3 import S3Boto3Storage, S3ManifestStaticStorage
+from storages.backends.s3boto3 import (
+    S3Boto3Storage,
+    S3StaticStorage as BaseS3StaticStorage,
+)
 
 
 def get_mime_type(file: File[AnyStr]) -> str:
@@ -69,16 +70,9 @@ class UserContentPath:
         return self.template.format(instance=instance, uuid=uuid.uuid4().hex, ext=ext)
 
 
-class S3StaticStorage(S3ManifestStaticStorage):
+class S3StaticStorage(BaseS3StaticStorage):
     location = "static"
     default_acl = "public-read"
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        # Store `staticfiles.json` in local filesystem so that no
-        # additional requests are made to remote file storage just to
-        # fetch file mappings.
-        manifest_storage = StaticFilesStorage(location=settings.BASE_DIR / "static")
-        super().__init__(*args, manifest_storage=manifest_storage, **kwargs)
 
 
 class S3MediaStorage(S3Boto3Storage):

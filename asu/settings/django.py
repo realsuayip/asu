@@ -6,8 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 ROOT_URLCONF = "asu.urls"
-ASGI_APPLICATION = "asu.asgi.application"
-WSGI_APPLICATION = "asu.wsgi.application"
+ASGI_APPLICATION = "asu.gateways.dev.application"
+WSGI_APPLICATION = "asu.gateways.wsgi.application"
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG")
@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "sorl.thumbnail",
     "widget_tweaks",
     "django_celery_beat",
+    "corsheaders",
     # OAuth2
     "oauth2_provider",
     # Two-factor authentication
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "asu.auth.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -103,6 +105,9 @@ password_validators = [
 AUTH_PASSWORD_VALIDATORS = [{"NAME": validator} for validator in password_validators]
 AUTH_USER_MODEL = "account.User"
 SESSION_ENGINE = env.str("SESSION_ENGINE")
+SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
+
 
 LANGUAGE_CODE = env.str("DJANGO_LANGUAGE_CODE")
 TIME_ZONE = env.str("DJANGO_TIME_ZONE")
@@ -130,6 +135,7 @@ EMAIL_PORT = env.int("EMAIL_PORT")
 EMAIL_HOST_USER = env.str("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
 
 
 LOGIN_URL = "two_factor:login"
@@ -145,3 +151,8 @@ if DEBUG:
 
     *_, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips]
+
+
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")

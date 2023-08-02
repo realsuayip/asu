@@ -13,3 +13,7 @@ celerybeat-schedule
 .pre-commit-config.yaml
 Makefile
 htmlcov
+.mypy_cache
+.pytest_cache
+.ruff_cache
+tests

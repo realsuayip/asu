@@ -3,17 +3,32 @@ from django.utils.translation import gettext_lazy as _
 
 from envanter import env
 
+DEBUG = env.bool("DJANGO_DEBUG")
+
+DEFAULT_RENDERER_CLASSES = ["rest_framework.renderers.JSONRenderer"]
+DEFAULT_AUTHENTICATION_CLASSES = [
+    "oauth2_provider.contrib.rest_framework.OAuth2Authentication"
+]
+if DEBUG:
+    DEFAULT_RENDERER_CLASSES = [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ]
+    DEFAULT_AUTHENTICATION_CLASSES = [
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ]
+
+
 REST_FRAMEWORK = {
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",  # noqa: E501
     "DEFAULT_VERSION": "latest",
     "ALLOWED_VERSIONS": ["latest", "1.0"],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,
     "DEFAULT_SCHEMA_CLASS": "asu.utils.openapi.CustomAutoSchema",
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",
     "DEFAULT_METADATA_CLASS": "asu.utils.rest.EmptyMetadata",
+    "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = "account.Application"
@@ -88,6 +103,8 @@ AWS_SECRET_ACCESS_KEY = env.str("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = env.str("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_ENDPOINT_URL = env.str("AWS_S3_ENDPOINT_URL")
 AWS_S3_REGION_NAME = env.str("AWS_S3_REGION_NAME")
+
+THUMBNAIL_FORCE_OVERWRITE = True
 
 # ----- Local apps -----
 

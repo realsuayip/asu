@@ -33,6 +33,7 @@ dependencies = [
     "django-stubs-ext",
     "django-storages ~= 1.13",
     "boto3 ~= 1.26.163",
+    "django-cors-headers ~= 4.2",
 ]
 
 [project.optional-dependencies]
@@ -48,6 +49,13 @@ dev = [
     "types-oauthlib",
     "types-Pillow",
     "celery-types",
+]
+prod = [
+    "gunicorn ~= 20.1",
+    "uvicorn ~= 0.22",
+    "uvloop ~= 0.17",
+    "httptools ~= 0.6",
+    "websockets ~= 11.0",
 ]
 
 [tool.black]

@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: asu-rabbitmq
+          image: rabbitmq:3.11-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5672
+          env:
+            # Setting this to a static value makes single node setup easier.
+            # By default, nodename (and thus data directory) is determined by
+            # hostname, which might change every deployment. This works against
+            # the volume configuration.
+            - name: RABBITMQ_NODENAME
+              value: rabbit@localhost
+          volumeMounts:
+            - mountPath: /var/lib/rabbitmq/mnesia
+              name: rabbitmq-vol
+      volumes:
+        - name: rabbitmq-vol
+          persistentVolumeClaim:
+            claimName: rabbitmq-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - protocol: TCP
+      port: 5672
+      targetPort: 5672
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbitmq-pv
+  labels:
+    app: rabbitmq-pv
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 500M
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/mqdata"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-pvc
+  labels:
+    app: rabbitmq-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500M

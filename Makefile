@@ -6,7 +6,7 @@ $(eval $(WHATEVER):;@:)
 
 file = docker/prod/docker-compose.yml
 ifeq (${CONTEXT}, production)
-	file = docker/prod/docker-compose.yml
+	file = docker/dev/docker-compose.yml
 endif
 
 project = asu
@@ -20,7 +20,7 @@ dj = $(ex) python manage.py
 build:
 	$(cc) build $(WHATEVER)
 up:
-	$(cc) --verbose up $(WHATEVER)
+	$(cc) up $(WHATEVER)
 detach:
 	$(cc) up -d $(WHATEVER)
 ifneq (${CONTEXT}, production)

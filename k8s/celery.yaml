@@ -18,14 +18,16 @@ spec:
       containers:
         - name: asu-celery-worker
           image: docker.io/library/asu-python:latest
-          command: [ "celery" ]
-          args: [ "-A", "asu", "worker", "-l", "info" ]
+          args: [ "celery", "-A", "asu", "worker", "-l", "info" ]
           imagePullPolicy: Never
           envFrom:
             - secretRef:
                 name: asu-secrets
             - secretRef:
                 name: postgres-secrets
+          env:
+            - name: DJANGO_CONTEXT
+              value: celery
 
 ---
 
@@ -49,8 +51,7 @@ spec:
       containers:
         - name: asu-celery-beat
           image: docker.io/library/asu-python:latest
-          command: [ "celery" ]
-          args: [ "-A", "asu", "beat", "-l", "info" ]
+          args: [ "celery", "-A", "asu", "beat", "-l", "info" ]
           imagePullPolicy: Never
           envFrom:
             - secretRef:

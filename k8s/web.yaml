@@ -18,8 +18,8 @@ spec:
       containers:
         - name: asu-web
           image: docker.io/library/asu-python:latest
-          command: [ "gunicorn" ]
           args: [
+            "gunicorn",
             "asu.gateways.asgi",
             "--bind", "0.0.0.0:8000",
             "--workers", "4",
@@ -56,8 +56,8 @@ spec:
       containers:
         - name: asu-websocket
           image: docker.io/library/asu-python:latest
-          command: [ "gunicorn" ]
           args: [
+            "gunicorn",
             "asu.gateways.websocket",
             "--bind", "0.0.0.0:8000",
             "--workers", "4",

@@ -10,8 +10,4 @@ if [ "${DJANGO_CONTEXT}" = "celery" ]; then
   done
 fi
 
-if [ "${DJANGO_CONTEXT}" = "web" ]; then
-  python manage.py migrate --no-input
-fi
-
 exec "$@"

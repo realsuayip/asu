@@ -6,8 +6,8 @@ This folder includes the complete Kubernetes stack for this project.
 
 ```shell
 # Deploy & remove deployments
-kubectl apply -f deploy/
-kubectl delete -f deploy/
+kubectl apply -f k8s/
+kubectl delete -f k8s/
 
 # Create secrets
 kubectl create secret generic asu-secrets --from-env-file=conf/prod/django.env
@@ -19,8 +19,8 @@ kubectl rollout restart deployment --selector=py-context=celery
 kubectl rollout restart deployment postgres
 
 # Run & remove jobs
-kubectl apply -f deploy/jobs/migrate.yaml
-kubectl apply -f deploy/jobs/collectstatic.yaml
-kubectl delete -f deploy/jobs/migrate.yaml
-kubectl delete -f deploy/jobs/collectstatic.yaml
+kubectl apply -f k8s/jobs/migrate.yaml
+kubectl apply -f k8s/jobs/collectstatic.yaml
+kubectl delete -f k8s/jobs/migrate.yaml
+kubectl delete -f k8s/jobs/collectstatic.yaml
 ```

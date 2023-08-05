@@ -22,8 +22,8 @@ if DEBUG:
 
 REST_FRAMEWORK = {
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",  # noqa: E501
-    "DEFAULT_VERSION": "latest",
-    "ALLOWED_VERSIONS": ["latest", "1.0"],
+    "DEFAULT_VERSION": env.str("API_DEFAULT_VERSION"),
+    "ALLOWED_VERSIONS": env.list("API_ALLOWED_VERSIONS"),
     "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,
     "DEFAULT_SCHEMA_CLASS": "asu.utils.openapi.CustomAutoSchema",
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",

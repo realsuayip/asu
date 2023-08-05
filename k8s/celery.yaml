@@ -58,3 +58,6 @@ spec:
                 name: asu-secrets
             - secretRef:
                 name: postgres-secrets
+          env:
+            - name: DJANGO_CONTEXT
+              value: celery

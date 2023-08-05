@@ -28,9 +28,6 @@ class PasswordResetViewSet(ExtendedViewSet[PasswordResetVerification]):
 
     The actual password change endpoint is located in 'reset_password'
     action of 'UserViewSet'.
-
-    TODO: Should consider revoking other active tokens when password
-     gets changed.
     """
 
     mixins = ("create",)

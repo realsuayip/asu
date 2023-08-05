@@ -20,9 +20,6 @@ class EmailViewSet(ExtendedViewSet[EmailVerification]):
     'send' & 'verify' the code. There is no interim step such as in
     registration, where the user fills out profile information or in
     password reset, we ask for new password.
-
-    TODO: Should consider revoking other active tokens when email
-     gets changed.
     """
 
     mixins = ("create",)

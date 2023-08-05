@@ -160,10 +160,7 @@ class ReadConversationSerializer(serializers.Serializer[dict[str, Any]]):
         read_by = self.context["request"].user
 
         until = validated_data["until"]
-        until = min(timezone.now(), until)
-
         affected = conversation.messages.filter(
-            recipient=read_by,
-            date_read__isnull=True,
-        ).update(date_read=until)
+            recipient=read_by, date_created__lte=until
+        ).update(date_read=timezone.now())
         return {"until": until, "affected": affected}

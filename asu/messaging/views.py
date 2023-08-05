@@ -15,8 +15,10 @@ from asu.messaging.serializers import (
     ConversationDetailSerializer,
     ConversationSerializer,
     MessageSerializer,
+    ReadConversationSerializer,
 )
 from asu.utils.rest import EmptySerializer, get_paginator
+from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
 
 
@@ -131,3 +133,15 @@ class ConversationViewSet(ExtendedViewSet[Conversation]):
         obj.save(update_fields=["date_accepted", "date_modified"])
         conversation.save(update_fields=["date_modified"])
         return Response(status=204)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        serializer_class=ReadConversationSerializer,
+        permission_classes=[RequireUser, RequireFirstParty],
+    )
+    def read(self, request: UserRequest, pk: int) -> Response:
+        context = self.get_serializer_context()
+        context["conversation"] = self.get_object()
+        serializer = self.get_serializer(data=request.data, context=context)
+        return self.get_action_save_response(request, serializer)

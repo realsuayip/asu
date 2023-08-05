@@ -1,4 +1,7 @@
+import datetime
+
 import django.core.signing
+from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -472,6 +475,77 @@ class TestMessaging(APITestCase):
             )
         )
         self.assertEqual("Gary says hello", r3.data["last_message"]["body"])
+
+    def test_conversation_read(self):
+        self._send_message(self.user1, self.user2, "Howdy")
+        self._send_message(self.user1, self.user2, "Are you there?")
+        self._send_message(self.user1, self.user2, "Whatever.")
+        self._accept_conversation(self.user1, self.user2)
+        r1 = self._send_message(self.user2, self.user1, "Whats up?")
+
+        conversation = r1.data["conversation"]
+        response = self.client.post(
+            conversation + "read/",
+            data={"until": timezone.now()},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(3, response.data["affected"])
+        self.assertEqual(
+            3,
+            Message.objects.filter(
+                date_read__isnull=False,
+                sender=self.user1,
+            ).count(),
+        )
+        self.assertEqual(
+            1,
+            Message.objects.filter(
+                date_read__isnull=True,
+                sender=self.user2,
+            ).count(),
+        )
+
+    def test_conversation_read_case_partial_update(self):
+        self._send_message(self.user1, self.user2, "Howdy")
+        second = self._send_message(self.user1, self.user2, "Are you there?")
+        third = self._send_message(self.user1, self.user2, "Whatever.")
+
+        # Change the send date of the last message. Only the first two
+        # messages are going to be set as 'read'.
+        msg_id = third.data["id"]
+        Message.objects.filter(pk=msg_id).update(
+            date_created=F("date_created") + datetime.timedelta(hours=4)
+        )
+
+        # Read the conversation from target user.
+        self.client.force_login(self.user2)
+        conversation = Conversation.objects.get(holder=self.user2)
+        response = self.client.post(
+            reverse(
+                "api:conversation-read",
+                kwargs={"pk": conversation.pk},
+            ),
+            data={"until": second.data["date_created"]},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(2, response.data["affected"])
+        self.assertEqual(
+            2,
+            Message.objects.filter(
+                date_read__isnull=False,
+                sender=self.user1,
+            ).count(),
+        )
+        self.assertEqual(
+            1,
+            Message.objects.filter(
+                date_read__isnull=True,
+                sender=self.user1,
+                body="Whatever.",
+            ).count(),
+        )
 
     def test_message_list(self):
         self._send_message(self.user1, self.user2, "Howdy")

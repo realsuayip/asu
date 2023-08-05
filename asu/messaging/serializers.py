@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import Any
 
+from django.utils import timezone
+
 from rest_framework import exceptions, serializers
 from rest_framework.reverse import reverse
 
@@ -147,3 +149,18 @@ class ConversationDetailSerializer(ConversationSerializer):
             recipient=conversation.holder_id,
             sender=conversation.target_id,
         ).exists()
+
+
+class ReadConversationSerializer(serializers.Serializer[dict[str, Any]]):
+    until = serializers.DateTimeField()
+    affected = serializers.IntegerField(read_only=True, min_value=0)
+
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        conversation = self.context["conversation"]
+        read_by = self.context["request"].user
+
+        until = validated_data["until"]
+        affected = conversation.messages.filter(
+            recipient=read_by, date_created__lte=until
+        ).update(date_read=timezone.now())
+        return {"until": until, "affected": affected}

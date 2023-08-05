@@ -473,6 +473,36 @@ class TestMessaging(APITestCase):
         )
         self.assertEqual("Gary says hello", r3.data["last_message"]["body"])
 
+    def test_conversation_read(self):
+        self._send_message(self.user1, self.user2, "Howdy")
+        self._send_message(self.user1, self.user2, "Are you there?")
+        self._send_message(self.user1, self.user2, "Whatever.")
+        self._accept_conversation(self.user1, self.user2)
+        r1 = self._send_message(self.user2, self.user1, "Whats up?")
+
+        conversation = r1.data["conversation"]
+        response = self.client.post(
+            conversation + "read/",
+            data={"until": timezone.now()},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(3, response.data["affected"])
+        self.assertEqual(
+            3,
+            Message.objects.filter(
+                date_read__isnull=False,
+                sender=self.user1,
+            ).count(),
+        )
+        self.assertEqual(
+            1,
+            Message.objects.filter(
+                date_read__isnull=True,
+                sender=self.user2,
+            ).count(),
+        )
+
     def test_message_list(self):
         self._send_message(self.user1, self.user2, "Howdy")
         r1 = self._send_message(self.user1, self.user2, "World is great!")

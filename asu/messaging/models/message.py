@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.db import models, transaction
-from django.utils import dateformat
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
@@ -70,7 +69,7 @@ class Message(models.Model):
             "type": "conversation.message",
             "conversation_id": target_conversation_id,
             "message_id": self.pk,
-            "timestamp": dateformat.format(self.date_created, "U"),
+            "timestamp": self.date_created.isoformat()[:-6] + "Z",
         }
         send = async_to_sync(channel_layer.group_send)
         send(group, event)

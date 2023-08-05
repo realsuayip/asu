@@ -683,6 +683,7 @@ class TestMessaging(APITestCase):
         ws_result = await self.communicator.receive_json_from(timeout=0.01)
 
         message_id = api_result.data["id"]
+        timestamp = api_result.data["date_created"]
         target_conversation = await sync_to_async(Conversation.objects.get)(
             holder=self.user1
         )
@@ -691,4 +692,5 @@ class TestMessaging(APITestCase):
         self.assertEqual(ws_result["type"], "conversation.message")
         self.assertEqual(ws_result["conversation_id"], target_conversation.id)
         self.assertEqual(ws_result["message_id"], message_id)
+        self.assertEqual(ws_result["timestamp"], timestamp)
         await self.communicator.disconnect()

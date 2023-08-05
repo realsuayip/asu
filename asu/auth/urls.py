@@ -2,6 +2,8 @@ from rest_framework.routers import SimpleRouter
 
 from asu.auth.views import FollowRequestViewSet, UserViewSet
 
+app_name = "auth"
+
 router = SimpleRouter()
 
 router.register(

@@ -4,12 +4,11 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN apt-get update && apt-get install -y --no-install-recommends netcat
-RUN python -m pip install pip-tools~=6.12
 
 WORKDIR /code
 
 ADD ./deps/dev.txt /code/requirements.txt
-RUN pip-sync requirements.txt --pip-args "--no-cache-dir --no-deps"
+RUN pip install -r requirements.txt --no-cache-dir --no-deps
 
 COPY ../.. /code
 ENTRYPOINT ["/code/docker/dev/entrypoint.sh"]

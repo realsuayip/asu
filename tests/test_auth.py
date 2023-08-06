@@ -22,7 +22,7 @@ class TestAuth(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.url_create = reverse("api:user-list")
+        cls.url_create = reverse("api:auth:user-list")
         cls.create_payload = {
             "display_name": "Janet",
             "username": "janet_48",
@@ -51,7 +51,7 @@ class TestAuth(APITestCase):
 
     def test_me(self):
         self.client.force_login(self.user1)
-        response = self.client.get(reverse("api:user-me"))
+        response = self.client.get(reverse("api:auth:user-me"))
         self.assertEqual(200, response.status_code)
         detail = response.json()
 
@@ -64,7 +64,7 @@ class TestAuth(APITestCase):
     def test_me_update(self):
         self.client.force_login(self.user2)
         response = self.client.patch(
-            reverse("api:user-me"),
+            reverse("api:auth:user-me"),
             data={
                 "display_name": "__Potato__",
                 "description": "Lorem ipsum",
@@ -86,7 +86,7 @@ class TestAuth(APITestCase):
 
         self.client.force_login(self.user2)
         response = self.client.patch(
-            reverse("api:user-me"),
+            reverse("api:auth:user-me"),
             data={"username": "Suzie"},
         )
 
@@ -99,7 +99,7 @@ class TestAuth(APITestCase):
     def test_me_update_disallow_email(self):
         email = "hello@example.com"
         self.client.force_login(self.user1)
-        self.client.patch(reverse("api:user-me"), data={"email": email})
+        self.client.patch(reverse("api:auth:user-me"), data={"email": email})
         self.user1.refresh_from_db()
         self.assertNotEqual(email, self.user1)
 
@@ -108,7 +108,7 @@ class TestAuth(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -133,7 +133,7 @@ class TestAuth(APITestCase):
         self.client.force_login(self.user1)
         response = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -149,7 +149,7 @@ class TestAuth(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -165,7 +165,7 @@ class TestAuth(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -177,7 +177,7 @@ class TestAuth(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -188,13 +188,13 @@ class TestAuth(APITestCase):
 
         frozen = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.frozen_user.pk},
             )
         )
         inactive = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.inactive_user.pk},
             )
         )
@@ -207,7 +207,7 @@ class TestAuth(APITestCase):
         self.client.force_authenticate(token="UserNotRequired")
 
         response = self.client.get(
-            reverse("api:user-lookup"),
+            reverse("api:auth:user-lookup"),
             {"username": self.user2.username},
         )
 
@@ -228,7 +228,7 @@ class TestAuth(APITestCase):
 
     def test_by_query_param_required(self):
         self.client.force_authenticate(token="UserNotRequired")
-        response = self.client.get(reverse("api:user-lookup"))
+        response = self.client.get(reverse("api:auth:user-lookup"))
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
@@ -239,7 +239,7 @@ class TestAuth(APITestCase):
     def test_by_case_not_found(self):
         self.client.force_authenticate(token="UserNotRequired")
         response = self.client.get(
-            reverse("api:user-lookup"),
+            reverse("api:auth:user-lookup"),
             {"username": self.inactive_user.username},
         )
         self.assertEqual(404, response.status_code)
@@ -288,7 +288,7 @@ class TestAuth(APITestCase):
         # Follow
         response = self.client.post(
             reverse(
-                "api:user-follow",
+                "api:auth:user-follow",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -298,7 +298,7 @@ class TestAuth(APITestCase):
         # Unfollow
         response2 = self.client.post(
             reverse(
-                "api:user-unfollow",
+                "api:auth:user-unfollow",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -310,13 +310,13 @@ class TestAuth(APITestCase):
 
         response1 = self.client.post(
             reverse(
-                "api:user-follow",
+                "api:auth:user-follow",
                 kwargs={"pk": user1.pk},
             )
         )
         response2 = self.client.post(
             reverse(
-                "api:user-follow",
+                "api:auth:user-follow",
                 kwargs={"pk": user1.pk},
             )
         )
@@ -341,7 +341,7 @@ class TestAuth(APITestCase):
         self.client.force_login(self.user1)
         self.client.post(
             reverse(
-                "api:user-follow",
+                "api:auth:user-follow",
                 kwargs={"pk": self.private_user.pk},
             )
         )
@@ -349,7 +349,7 @@ class TestAuth(APITestCase):
 
         # Switch to recipient, check follow request list
         self.client.force_login(self.private_user)
-        response = self.client.get(reverse("api:follow-request-list"))
+        response = self.client.get(reverse("api:auth:follow-request-list"))
         data = response.json()
         results = data["results"]
         self.assertEqual(1, len(results))
@@ -378,13 +378,13 @@ class TestAuth(APITestCase):
         self.client.force_login(self.user1)
         self.client.post(
             reverse(
-                "api:user-follow",
+                "api:auth:user-follow",
                 kwargs={"pk": self.private_user.pk},
             )
         )
 
         self.client.force_login(self.private_user)
-        response = self.client.get(reverse("api:follow-request-list"))
+        response = self.client.get(reverse("api:auth:follow-request-list"))
         detail = response.json()["results"][0]["url"]
 
         rejected_response = self.client.patch(detail, data={"status": "rejected"})
@@ -407,7 +407,7 @@ class TestAuth(APITestCase):
         a.blocked.add(b)
         response = self.client.post(
             reverse(
-                "api:user-follow",
+                "api:auth:user-follow",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -425,7 +425,7 @@ class TestAuth(APITestCase):
     def test_self_follow_not_allowed(self):
         self.client.force_login(self.user1)
         response = self.client.post(
-            reverse("api:user-follow", kwargs={"pk": self.user1.pk})
+            reverse("api:auth:user-follow", kwargs={"pk": self.user1.pk})
         )
         self.assertEqual(403, response.status_code)
 
@@ -435,7 +435,7 @@ class TestAuth(APITestCase):
         # Block
         response = self.client.post(
             reverse(
-                "api:user-block",
+                "api:auth:user-block",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -445,7 +445,7 @@ class TestAuth(APITestCase):
         # Unblock
         response = self.client.post(
             reverse(
-                "api:user-unblock",
+                "api:auth:user-unblock",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -457,13 +457,13 @@ class TestAuth(APITestCase):
 
         response1 = self.client.post(
             reverse(
-                "api:user-block",
+                "api:auth:user-block",
                 kwargs={"pk": self.user1.pk},
             )
         )
         response2 = self.client.post(
             reverse(
-                "api:user-block",
+                "api:auth:user-block",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -477,7 +477,7 @@ class TestAuth(APITestCase):
         a.following.add(b)
         response = self.client.post(
             reverse(
-                "api:user-block",
+                "api:auth:user-block",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -496,7 +496,7 @@ class TestAuth(APITestCase):
         a.send_follow_request(to_user=b)
         response = self.client.post(
             reverse(
-                "api:user-block",
+                "api:auth:user-block",
                 kwargs={"pk": self.user2.pk},
             )
         )
@@ -516,7 +516,7 @@ class TestAuth(APITestCase):
         self.client.force_login(self.user1)
         response = self.client.post(
             reverse(
-                "api:user-block",
+                "api:auth:user-block",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -547,16 +547,16 @@ class TestAuth(APITestCase):
         self.assertEqual(404, response3.status_code)
 
     def test_follow_yields_404(self):
-        self._test_action_yields_404("api:user-follow")
+        self._test_action_yields_404("api:auth:user-follow")
 
     def test_unfollow_yields_404(self):
-        self._test_action_yields_404("api:user-unfollow")
+        self._test_action_yields_404("api:auth:user-unfollow")
 
     def test_block_yields_404(self):
-        self._test_action_yields_404("api:user-block")
+        self._test_action_yields_404("api:auth:user-block")
 
     def test_unblock_yields_404(self):
-        self._test_action_yields_404("api:user-unblock")
+        self._test_action_yields_404("api:auth:user-unblock")
 
     def _test_get_yields_404(self, url_name):
         self.client.force_authenticate(token="UserNotRequired")
@@ -584,10 +584,10 @@ class TestAuth(APITestCase):
         self.assertEqual(404, response3.status_code)
 
     def test_followers_yields_404(self):
-        self._test_get_yields_404("api:user-followers")
+        self._test_get_yields_404("api:auth:user-followers")
 
     def test_following_yields_404(self):
-        self._test_get_yields_404("api:user-following")
+        self._test_get_yields_404("api:auth:user-following")
 
     def _test_through_list_response(self, response):
         results = response.data["results"]
@@ -611,7 +611,7 @@ class TestAuth(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:user-followers",
+                "api:auth:user-followers",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -628,7 +628,7 @@ class TestAuth(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:user-following",
+                "api:auth:user-following",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -643,7 +643,7 @@ class TestAuth(APITestCase):
         self.user1.blocked.add(self.inactive_user)
         self.user1.blocked.add(self.frozen_user)
 
-        response = self.client.get(reverse("api:user-blocked"))
+        response = self.client.get(reverse("api:auth:user-blocked"))
         self._test_through_list_response(response)
 
     def test_upload_delete_profile_picture(self):
@@ -654,7 +654,7 @@ class TestAuth(APITestCase):
         self.client.force_login(self.user1)
 
         response = self.client.put(
-            reverse("api:user-profile-picture"),
+            reverse("api:auth:user-profile-picture"),
             data={"profile_picture": image},
         )
         self.assertEqual(200, response.status_code)
@@ -663,7 +663,7 @@ class TestAuth(APITestCase):
         self.user1.refresh_from_db()
         self.assertTrue(self.user1.profile_picture.name)
 
-        r2 = self.client.delete(reverse("api:user-profile-picture"))
+        r2 = self.client.delete(reverse("api:auth:user-profile-picture"))
         self.assertEqual(204, r2.status_code)
 
         self.user1.refresh_from_db()
@@ -676,7 +676,7 @@ class TestAuth(APITestCase):
 
         with open(file_path, "rb") as file:
             r1 = self.client.put(
-                reverse("api:user-profile-picture"),
+                reverse("api:auth:user-profile-picture"),
                 data={"profile_picture": file},
             )
             self.assertEqual(200, r1.status_code)
@@ -689,14 +689,14 @@ class TestAuth(APITestCase):
             picture = ContentFile(buf.getvalue(), name="hello.png")
 
             r2 = self.client.put(
-                reverse("api:user-profile-picture"),
+                reverse("api:auth:user-profile-picture"),
                 data={"profile_picture": picture},
             )
             self.assertEqual(200, r2.status_code)
 
         profile = self.client.get(
             reverse(
-                "api:user-detail",
+                "api:auth:user-detail",
                 kwargs={"pk": self.user1.pk},
             )
         )
@@ -707,8 +707,8 @@ class TestAuth(APITestCase):
     def test_delete_profile_picture_idempotent(self):
         self.client.force_login(self.user1)
 
-        r = self.client.delete(reverse("api:user-profile-picture"))
-        r1 = self.client.delete(reverse("api:user-profile-picture"))
+        r = self.client.delete(reverse("api:auth:user-profile-picture"))
+        r1 = self.client.delete(reverse("api:auth:user-profile-picture"))
 
         self.assertEqual(204, r.status_code)
         self.assertEqual(204, r1.status_code)
@@ -790,7 +790,7 @@ class TestOAuthPermissions(APITestCase):
     def test_require_first_party(self):
         user2 = UserFactory()
         url = reverse(
-            "api:user-message",
+            "api:auth:user-message",
             kwargs={"pk": user2.pk},
         )
 
@@ -811,7 +811,7 @@ class TestOAuthPermissions(APITestCase):
             )
 
     def test_require_token(self):
-        url = reverse("api:user-detail", kwargs={"pk": self.user.pk})
+        url = reverse("api:auth:user-detail", kwargs={"pk": self.user.pk})
 
         response = self.client.get(url)
         self.assertEqual(401, response.status_code)
@@ -825,7 +825,7 @@ class TestOAuthPermissions(APITestCase):
             self.assertEqual(200, r.status_code, msg="used %s" % token)
 
     def test_require_user(self):
-        url = reverse("api:user-me")
+        url = reverse("api:auth:user-me")
 
         params = [
             (200, "first-party-token"),
@@ -837,7 +837,7 @@ class TestOAuthPermissions(APITestCase):
             self.assertEqual(status_code, r.status_code, msg="used %s" % token)
 
     def test_require_scope(self):
-        url = reverse("api:user-me")
+        url = reverse("api:auth:user-me")
 
         params = [(200, "first-party-token"), (403, "third-party-token")]
         for status_code, token in params:
@@ -850,7 +850,7 @@ class TestOAuthPermissions(APITestCase):
 
     def test_properly_responds_with_405_rather_than_403(self):
         r = self.client.post(
-            reverse("api:user-me"),
+            reverse("api:auth:user-me"),
             HTTP_AUTHORIZATION="Bearer third-party-token",
         )
         self.assertEqual(405, r.status_code)
@@ -896,7 +896,7 @@ class TestUserRelationLookup(APITestCase):
         cls.user2 = UserFactory()
         cls.user3 = UserFactory()
         cls.user4 = UserFactory()
-        cls.url = reverse("api:user-relations")
+        cls.url = reverse("api:auth:user-relations")
 
     def make_id_list(self, *users):
         return ",".join(str(user.pk) for user in users)

@@ -13,9 +13,9 @@ class TestPasswordReset(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.url_send = reverse("api:password-reset-list")
-        cls.url_check = reverse("api:password-reset-check")
-        cls.url_change = reverse("api:user-reset-password")
+        cls.url_send = reverse("api:verification:password-reset-list")
+        cls.url_check = reverse("api:verification:password-reset-check")
+        cls.url_change = reverse("api:auth:user-reset-password")
 
     def test_check_nullification(self):
         email = "null_test@example.com"

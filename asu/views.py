@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections import defaultdict
-from typing import Any
+from typing import Any, cast
 
 from django import urls
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -44,7 +43,7 @@ class APIRootView(BaseAPIRootView):
         url_resolver = urls.get_resolver(urls.get_urlconf())
         resolvers = url_resolver.url_patterns
 
-        routes = defaultdict(list)
+        routes = {}
         for resolver in sorted(resolvers, key=self.order):
             if not isinstance(resolver, URLResolver):
                 continue
@@ -79,7 +78,9 @@ class APIRootView(BaseAPIRootView):
                     ns = "%s:%s" % (namespace, sub)
                     namespaces[sub] = self.visit(entry, ns)
                 else:
-                    values.extend(self.visit(entry, namespace))
+                    patterns = self.visit(entry, namespace)
+                    patterns = cast(list[dict[str, Any]], patterns)
+                    values.extend(patterns)
             else:
                 # This is a plain URLPattern, just append it to
                 # the values.

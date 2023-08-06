@@ -21,9 +21,9 @@ class RegistrationTest(APITestCase):
         self.client.force_authenticate(token=first_party_token)
 
         test_backend = "django.core.mail.backends.locmem.EmailBackend"
-        url_check = reverse("api:registration-verification-check")
-        url_send = reverse("api:registration-verification-list")
-        url_register = reverse("api:user-list")
+        url_check = reverse("api:verification:registration-verification-check")
+        url_send = reverse("api:verification:registration-verification-list")
+        url_register = reverse("api:auth:user-list")
         email = "test@example.com"
 
         # Send code to e-mail
@@ -83,7 +83,7 @@ class RegistrationTest(APITestCase):
         self.client.logout()
         # ^ Disable force_authenticate done above (i.e., server token).
         response = self.client.get(
-            reverse("api:user-me"), HTTP_AUTHORIZATION=authorization
+            reverse("api:auth:user-me"), HTTP_AUTHORIZATION=authorization
         )
         self.assertEqual(200, response.status_code)
         self.assertEqual(register_data["username"], response.data["username"])

@@ -16,8 +16,8 @@ from tests.factories import UserFactory
 class TestEmailVerification(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url_send = reverse("api:email-verification-list")
-        cls.url_check = reverse("api:email-verification-check")
+        cls.url_send = reverse("api:verification:email-verification-list")
+        cls.url_check = reverse("api:verification:email-verification-check")
 
     def test_email_verification(self):
         # Test email verification as whole

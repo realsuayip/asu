@@ -169,7 +169,7 @@ class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):
     class Meta:
         model = UserFollowRequest
         fields = ("from_user", "status", "url")
-        extra_kwargs = {"url": {"view_name": "api:follow-request-detail"}}
+        extra_kwargs = {"url": {"view_name": "api:auth:follow-request-detail"}}
 
     @transaction.atomic
     def update(

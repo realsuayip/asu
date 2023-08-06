@@ -38,14 +38,14 @@ class TestMessaging(APITestCase):
     def _send_message(self, sender, recipient, message):
         self.client.force_login(sender)
         return self.client.post(
-            reverse("api:user-message", kwargs={"pk": recipient.pk}),
+            reverse("api:auth:user-message", kwargs={"pk": recipient.pk}),
             data={"body": message},
         )
 
     def test_message_basic(self):
         self.client.force_login(self.user1)
         response = self.client.post(
-            reverse("api:user-message", kwargs={"pk": self.user2.pk}),
+            reverse("api:auth:user-message", kwargs={"pk": self.user2.pk}),
             data={"body": "Hello world!"},
         )
         self.assertEqual(201, response.status_code)
@@ -85,7 +85,7 @@ class TestMessaging(APITestCase):
         conversation = Conversation.objects.get(holder=self.user2)
         conversation = self.client.get(
             reverse(
-                "api:conversation-detail",
+                "api:messaging:conversation-detail",
                 kwargs={"pk": conversation.pk},
             )
         )
@@ -163,7 +163,7 @@ class TestMessaging(APITestCase):
         self.client.force_login(self.user2)
         self.client.patch(
             reverse(
-                "api:conversation-accept",
+                "api:messaging:conversation-accept",
                 kwargs={"pk": target_conversation.pk},
             )
         )
@@ -181,7 +181,7 @@ class TestMessaging(APITestCase):
 
         self.client.patch(
             reverse(
-                "api:conversation-accept",
+                "api:messaging:conversation-accept",
                 kwargs={"pk": target_conversation.pk},
             )
         )
@@ -254,7 +254,7 @@ class TestMessaging(APITestCase):
 
         conversation = self.client.get(
             reverse(
-                "api:conversation-detail",
+                "api:messaging:conversation-detail",
                 kwargs={"pk": conversation.pk},
             )
         )
@@ -329,7 +329,9 @@ class TestMessaging(APITestCase):
         self._send_message(self.user1, self.user2, "Hi")
         conversation = Conversation.objects.get(holder=self.user2)
 
-        url = reverse("api:conversation-accept", kwargs={"pk": conversation.pk})
+        url = reverse(
+            "api:messaging:conversation-accept", kwargs={"pk": conversation.pk}
+        )
 
         self.client.force_login(self.user2)
 
@@ -348,8 +350,8 @@ class TestMessaging(APITestCase):
         self.assertEqual(date_accepted, request.date_accepted)
 
     def test_conversation_list(self):
-        url = reverse("api:conversation-list")
-        requests_url = reverse("api:conversation-list") + "?type=requests"
+        url = reverse("api:messaging:conversation-list")
+        requests_url = reverse("api:messaging:conversation-list") + "?type=requests"
 
         self._send_message(self.user1, self.user2, "Hi")
         self._send_message(self.user1, self.user3, "Hi")
@@ -397,8 +399,10 @@ class TestMessaging(APITestCase):
         self._send_message(self.user1, self.user2, "Hi")
         self._send_message(self.user1, self.user3, "Hello")
 
-        r1 = self.client.get(reverse("api:conversation-list"))
-        r2 = self.client.get(reverse("api:conversation-list") + "?type=requests")
+        r1 = self.client.get(reverse("api:messaging:conversation-list"))
+        r2 = self.client.get(
+            reverse("api:messaging:conversation-list") + "?type=requests"
+        )
         self.assertEqual(2, len(r1.data["results"]))
         self.assertEqual(1, len(r2.data["results"]))
 
@@ -407,7 +411,7 @@ class TestMessaging(APITestCase):
         self._send_message(self.user1, self.user2, "Hello")
 
         self.client.force_login(self.user2)
-        r1 = self.client.get(reverse("api:conversation-list"))
+        r1 = self.client.get(reverse("api:messaging:conversation-list"))
         self.assertEqual(0, len(r1.data["results"]))
 
     def test_conversation_list_case_3(self):
@@ -418,10 +422,12 @@ class TestMessaging(APITestCase):
         self._send_message(self.user3, self.user1, "Hello")
 
         self.client.force_login(self.user1)
-        r2 = self.client.get(reverse("api:conversation-list"))
+        r2 = self.client.get(reverse("api:messaging:conversation-list"))
         self.assertEqual(1, len(r2.data["results"]))
 
-        r3 = self.client.get(reverse("api:conversation-list") + "?type=requests")
+        r3 = self.client.get(
+            reverse("api:messaging:conversation-list") + "?type=requests"
+        )
         url = r3.data["results"][0]["url"]
         accept = self.client.patch(url + "accept/")
         self.assertEqual(204, accept.status_code)
@@ -451,7 +457,7 @@ class TestMessaging(APITestCase):
         pk = r2.data["id"]
         self.assertTrue(
             r2.data["messages"].endswith(
-                reverse("api:message-list", kwargs={"conversation_pk": pk})
+                reverse("api:messaging:message-list", kwargs={"conversation_pk": pk})
             )
         )
 
@@ -470,7 +476,7 @@ class TestMessaging(APITestCase):
         conversation_2 = Conversation.objects.filter(holder=self.user2).only("pk").get()
         r3 = self.client.get(
             reverse(
-                "api:conversation-detail",
+                "api:messaging:conversation-detail",
                 kwargs={"pk": conversation_2.pk},
             )
         )
@@ -523,7 +529,7 @@ class TestMessaging(APITestCase):
         conversation = Conversation.objects.get(holder=self.user2)
         response = self.client.post(
             reverse(
-                "api:conversation-read",
+                "api:messaging:conversation-read",
                 kwargs={"pk": conversation.pk},
             ),
             data={"until": second.data["date_created"]},
@@ -568,7 +574,7 @@ class TestMessaging(APITestCase):
         conversation = Conversation.objects.get(holder=self.user2)
         target_messages = self.client.get(
             reverse(
-                "api:conversation-detail",
+                "api:messaging:conversation-detail",
                 kwargs={"pk": conversation.pk},
             )
             + "messages/"
@@ -638,11 +644,11 @@ class TestMessaging(APITestCase):
         c2 = Conversation.objects.get(holder=self.user2)
 
         message_url_1 = reverse(
-            "api:message-detail",
+            "api:messaging:message-detail",
             kwargs={"conversation_pk": c1.pk, "pk": message_id},
         )
         message_url_2 = reverse(
-            "api:message-detail",
+            "api:messaging:message-detail",
             kwargs={"conversation_pk": c2.pk, "pk": message_id},
         )
         self.client.delete(message_url_1)
@@ -674,8 +680,12 @@ class TestMessaging(APITestCase):
         c1 = Conversation.objects.get(holder=self.user1)
         c2 = Conversation.objects.get(holder=self.user2)
 
-        conversation_url_1 = reverse("api:conversation-detail", kwargs={"pk": c1.pk})
-        conversation_url_2 = reverse("api:conversation-detail", kwargs={"pk": c2.pk})
+        conversation_url_1 = reverse(
+            "api:messaging:conversation-detail", kwargs={"pk": c1.pk}
+        )
+        conversation_url_2 = reverse(
+            "api:messaging:conversation-detail", kwargs={"pk": c2.pk}
+        )
 
         self.client.delete(conversation_url_1)
         self.client.force_login(self.user2)
@@ -744,7 +754,7 @@ class TestMessaging(APITestCase):
         # Verify ticket
         await sync_to_async(self.client.force_login)(self.user1)
         response = await sync_to_async(self.client.post)(
-            reverse("api:user-ticket"),
+            reverse("api:auth:user-ticket"),
             data={"scope": "websocket"},
         )
         ticket = response.data["ticket"]

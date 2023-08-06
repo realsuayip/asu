@@ -35,7 +35,7 @@ class UserPublicReadSerializer(
             "follower_count",
             "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:user-detail"}}
+        extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -54,7 +54,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             "website",
             "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:user-detail"}}
+        extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
         read_only_fields = ("email", "date_joined")
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
@@ -146,4 +146,4 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             "auth",
             "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:user-detail"}}
+        extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}

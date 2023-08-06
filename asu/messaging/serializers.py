@@ -18,7 +18,7 @@ from asu.messaging.models import Conversation, ConversationRequest, Message
 class MessageComposeSerializer(serializers.ModelSerializer[Message]):
     conversation = serializers.HyperlinkedRelatedField(  # type: ignore[var-annotated]
         read_only=True,
-        view_name="api:conversation-detail",
+        view_name="api:messaging:conversation-detail",
         source="sender_conversation",
     )
     url = serializers.SerializerMethodField()
@@ -36,7 +36,7 @@ class MessageComposeSerializer(serializers.ModelSerializer[Message]):
     @extend_schema_field(serializers.URLField)
     def get_url(self, obj: Message) -> str:
         return reverse(
-            "api:message-detail",
+            "api:messaging:message-detail",
             kwargs={
                 "pk": obj.pk,
                 "conversation_pk": obj.sender_conversation.pk,
@@ -104,7 +104,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
             "messages",
             "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
+        extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
 
     @extend_schema_field(MessageSerializer(allow_null=True))
     def get_last_message(
@@ -120,7 +120,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
     @extend_schema_field(serializers.URLField)
     def get_messages_url(self, obj: Conversation) -> str:
         return reverse(
-            "api:message-list",
+            "api:messaging:message-list",
             kwargs={"conversation_pk": obj.pk},
             request=self.context["request"],
         )
@@ -141,7 +141,7 @@ class ConversationDetailSerializer(ConversationSerializer):
             "messages",
             "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:conversation-detail"}}
+        extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
 
     def get_accept_required(self, conversation: Conversation) -> bool:
         return ConversationRequest.objects.filter(

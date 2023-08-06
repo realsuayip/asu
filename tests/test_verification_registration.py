@@ -16,8 +16,8 @@ from tests.factories import UserFactory, first_party_token
 class TestRegistrationVerification(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url_send = reverse("api:registration-verification-list")
-        cls.url_check = reverse("api:registration-verification-check")
+        cls.url_send = reverse("api:verification:registration-verification-list")
+        cls.url_check = reverse("api:verification:registration-verification-check")
 
     def test_code_gen(self):
         verification = RegistrationVerification.objects.create(

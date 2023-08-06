@@ -4,6 +4,8 @@ from asu.verification.email.views import EmailViewSet
 from asu.verification.password.views import PasswordResetViewSet
 from asu.verification.registration.views import RegistrationViewSet
 
+app_name = "verification"
+
 router = SimpleRouter()
 router.register(
     "verifications/registration",

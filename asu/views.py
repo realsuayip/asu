@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections import defaultdict
-from typing import Any
+from typing import Any, cast
 
 from django import urls
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -44,7 +43,7 @@ class APIRootView(BaseAPIRootView):
         url_resolver = urls.get_resolver(urls.get_urlconf())
         resolvers = url_resolver.url_patterns
 
-        routes = defaultdict(list)
+        routes = {}
         for resolver in sorted(resolvers, key=self.order):
             if not isinstance(resolver, URLResolver):
                 continue
@@ -65,13 +64,37 @@ class APIRootView(BaseAPIRootView):
         }
         return Response(ret)
 
-    def visit(self, resolver: URLResolver, namespace: str) -> list[dict[str, Any]]:
-        values = []
+    def visit(
+        self, resolver: URLResolver, namespace: str
+    ) -> list[dict[str, Any]] | dict[str, Any]:
+        values, namespaces = [], {}
         for entry in resolver.url_patterns:
             if isinstance(entry, URLResolver):
-                values.extend(self.visit(entry, namespace))
+                # This is a `URLResolver`, we have to recursively check
+                # for `URLPattern`s inside. While doing that, check
+                # if the resolver has any namespace, if so, group
+                # `URLPatterns` by namespace.
+                if (sub := entry.namespace) is not None:
+                    ns = "%s:%s" % (namespace, sub)
+                    namespaces[sub] = self.visit(entry, ns)
+                else:
+                    patterns = self.visit(entry, namespace)
+                    patterns = cast(list[dict[str, Any]], patterns)
+                    values.extend(patterns)
             else:
+                # This is a plain URLPattern, just append it to
+                # the values.
                 values.append(self.get_value(entry, namespace))
+        # If there are any namespaces inside this resolver, return
+        # a mapping that contains URLs for given namespace. Otherwise,
+        # just return a list which points to root namespace.
+        if namespaces:
+            if values:
+                # `URLPattern`s that use the root namespace are
+                # grouped here (this only happens in case there
+                # are namespaced & non-namespaced patterns together).
+                namespaces = {"~": values, **namespaces}
+            return namespaces
         return values
 
     def get_value(self, pattern: URLPattern, namespace: str) -> dict[str, Any]:

@@ -29,6 +29,14 @@ password_reset = EmailMessage(
         "<div class='code'><strong>%(code)s</strong></div>"
     ),
 )
+password_change_notice = EmailMessage(
+    subject=_("Your password has been changed"),
+    body=_(
+        "The password for your account was just changed. If this was you,"
+        " you can safely ignore this email. Otherwise, reset your password"
+        " immediately, or contact the support team to restore your password."
+    ),
+)
 registration = EmailMessage(
     subject=_("Verify your email for registration"),
     body=_(

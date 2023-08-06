@@ -76,8 +76,14 @@ class PasswordResetTest(APITestCase):
 
         # Make a valid request to change the password.
         password = "12345678*"
-        response = self._send_new_password(**kwargs, password=password)
-        self.assertEqual(200, response.status_code)
+
+        with self.settings(EMAIL_BACKEND=test_backend):
+            with self.captureOnCommitCallbacks(execute=True) as callbacks:
+                response = self._send_new_password(**kwargs, password=password)
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(2, len(mail.outbox))
+            self.assertEqual(1, len(callbacks))
+            self.assertIn("Your password has been changed", mail.outbox[1].body)
 
         # Let's make sure everything is in the database.
         verification = PasswordResetVerification.objects.get(user=self.user)

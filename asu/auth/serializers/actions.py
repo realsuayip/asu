@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 from typing import Any, NoReturn, TypeVar
 
 import django.core.exceptions
@@ -17,6 +18,7 @@ from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.serializers.user import UserPublicReadSerializer
+from asu.utils import messages
 from asu.verification.models import PasswordResetVerification
 
 T = TypeVar("T", bound=models.Model)
@@ -89,6 +91,11 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         user.set_password(password)
         user.save(update_fields=["password", "date_modified"])
         user.revoke_other_tokens(request.auth)
+
+        send_notice = functools.partial(
+            user.send_transactional_mail, message=messages.password_change_notice
+        )
+        transaction.on_commit(send_notice)
         return validated_data
 
 

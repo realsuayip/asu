@@ -29,7 +29,9 @@ from sorl.thumbnail import get_thumbnail
 from asu.auth.models import Application
 from asu.auth.models.through import UserBlock, UserFollow, UserFollowRequest
 from asu.messaging.models import ConversationRequest
+from asu.utils import mailing
 from asu.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
+from asu.utils.messages import EmailMessage
 
 
 class UsernameValidator(RegexValidator):
@@ -354,3 +356,19 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
 
         for token in tokens.iterator():
             token.revoke()
+
+    def send_transactional_mail(self, message: EmailMessage) -> int:
+        """
+        Send a simple transactional mail to this user.
+
+        :param message: Specify an `EmailMessage` instance which will
+        determine subject and body.
+        :param email: Optionally override email that is going to receive
+        the message.
+        """
+        return mailing.send(
+            "transactional",
+            title=message.subject,
+            content=message.body,
+            recipients=[self.email],
+        )

@@ -1,4 +1,5 @@
 import types
+import unittest
 from unittest.mock import Mock
 
 from django.conf import settings
@@ -7,8 +8,11 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
+from rest_framework import exceptions
+
 from asu.utils.cache import cached_context
 from asu.utils.file import FileSizeValidator, MimeTypeValidator
+from asu.utils.rest import exception_handler
 
 
 class TestFileUtils(TestCase):
@@ -188,3 +192,56 @@ class TestCacheUtils(TestCase):
 
         self.assertEqual(257 + 2, cache.get("asu.test.fun7.vary(param=2)"))
         self.assertEqual(257 + 3, cache.get("asu.test.fun7.vary(param=3)"))
+
+
+class TestRestUtils(unittest.TestCase):
+    def test_exception_handler(self):
+        mapping = {
+            exceptions.NotAuthenticated(): {
+                "status": 401,
+                "code": "not_authenticated",
+                "message": exceptions.NotAuthenticated.default_detail,
+            },
+            exceptions.MethodNotAllowed("GET"): {
+                "status": 405,
+                "code": "method_not_allowed",
+                "message": exceptions.MethodNotAllowed.default_detail.format(
+                    method="GET"
+                ),
+            },
+            exceptions.NotFound(): {
+                "status": 404,
+                "code": "not_found",
+                "message": exceptions.NotFound.default_detail,
+            },
+            exceptions.ValidationError("some message"): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": ["some message"],
+            },
+            exceptions.ValidationError(["multi", "messages"]): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": ["multi", "messages"],
+            },
+            exceptions.ValidationError(
+                {"key": "value", "key2": ["value1", "value2"]}
+            ): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {"key": ["value"], "key2": ["value1", "value2"]},
+            },
+            exceptions.ValidationError({"non_field_errors": ["hey you"]}): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": ["hey you"],
+            },
+        }
+
+        for exception, result in mapping.items():
+            response = exception_handler(exception, {})
+            self.assertEqual(result, response.data)

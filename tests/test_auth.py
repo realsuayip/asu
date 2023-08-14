@@ -233,7 +233,7 @@ class TestAuth(APITestCase):
         self.assertEqual(400, response.status_code)
         self.assertEqual(
             {"username": ["This field is required."]},
-            response.json(),
+            response.json()["errors"],
         )
 
     def test_by_case_not_found(self):

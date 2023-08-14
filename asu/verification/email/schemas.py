@@ -1,6 +1,6 @@
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
+from asu.utils import get_error_repr
 from asu.utils.rest import APIError
 from asu.verification.registration.serializers import (
     RegistrationCheckSerializer,
@@ -19,20 +19,20 @@ email_create = extend_schema(
     examples=[
         OpenApiExample(
             "e-mail taken",
-            value={"email": ["This e-mail is already in use."]},
+            value=get_error_repr({"email": ["This e-mail is already in use."]}),
             response_only=True,
             status_codes=["400"],
         ),
         OpenApiExample(
             "e-mail is invalid",
-            value={"email": ["Enter a valid email address."]},
+            value=get_error_repr({"email": ["Enter a valid email address."]}),
             response_only=True,
             status_codes=["400"],
         ),
     ],
     responses={
         201: RegistrationSerializer,
-        400: OpenApiTypes.OBJECT,
+        400: APIError,
     },
 )
 
@@ -51,19 +51,25 @@ email_check = extend_schema(
         ),
         OpenApiExample(
             "combination did not verify",
-            value={"detail": "Not found."},
+            value={
+                "status": 404,
+                "code": "not_found",
+                "message": "Not found.",
+            },
             response_only=True,
             status_codes=["404"],
         ),
         OpenApiExample(
             "fields have errors",
-            value={
-                "email": ["Enter a valid email address."],
-                "code": [
-                    "Ensure this field has at least 6 digits.",
-                    "Ensure this field contains only digits.",
-                ],
-            },
+            value=get_error_repr(
+                {
+                    "email": ["Enter a valid email address."],
+                    "code": [
+                        "Ensure this field has at least 6 digits.",
+                        "Ensure this field contains only digits.",
+                    ],
+                }
+            ),
             response_only=True,
             status_codes=["400"],
         ),
@@ -71,7 +77,7 @@ email_check = extend_schema(
     responses={
         200: RegistrationCheckSerializer,
         404: APIError,
-        400: OpenApiTypes.OBJECT,
+        400: APIError,
     },
 )
 

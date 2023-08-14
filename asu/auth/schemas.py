@@ -2,7 +2,6 @@ import functools
 from typing import TYPE_CHECKING, Any
 
 from drf_spectacular.contrib.django_oauth_toolkit import DjangoOAuthToolkitScheme
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
@@ -17,6 +16,7 @@ from asu.auth.serializers.user import (
     UserSerializer,
 )
 from asu.messaging.serializers import MessageComposeSerializer
+from asu.utils import get_error_repr
 from asu.utils.rest import APIError, EmptySerializer
 
 if TYPE_CHECKING:
@@ -48,7 +48,11 @@ class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
 
 not_found_example = OpenApiExample(
     "user was not found",
-    value={"detail": "Not found."},
+    value={
+        "status": 404,
+        "code": "not_found",
+        "message": "Not found.",
+    },
     response_only=True,
     status_codes=["404"],
 )
@@ -74,7 +78,11 @@ follow = action(
         not_found_example,
         OpenApiExample(
             "following is not allowed",
-            value={"detail": "You do not have permission to perform this action."},
+            value={
+                "status": 403,
+                "code": "permission_denied",
+                "message": "You do not have permission to perform this action.",
+            },
             response_only=True,
             status_codes=["403"],
         ),
@@ -93,31 +101,35 @@ create = extend_schema(
     examples=[
         OpenApiExample(
             "bad user information",
-            value={
-                "email": ["Enter a valid email address."],
-                "display_name": ["This field may not be blank."],
-                "username": [
-                    "Usernames can only contain latin letters,"
-                    "numerals and underscores. Trailing, leading"
-                    " or consecutive underscores are not allowed."
-                ],
-            },
+            value=get_error_repr(
+                {
+                    "email": ["Enter a valid email address."],
+                    "display_name": ["This field may not be blank."],
+                    "username": [
+                        "Usernames can only contain latin letters,"
+                        "numerals and underscores. Trailing, leading"
+                        " or consecutive underscores are not allowed."
+                    ],
+                }
+            ),
             response_only=True,
             status_codes=["400"],
         ),
         OpenApiExample(
             "bad consent",
-            value={
-                "email": [
-                    "This e-mail could not be verified. Please provide a"
-                    " validated e-mail address."
-                ]
-            },
+            value=get_error_repr(
+                {
+                    "email": [
+                        "This e-mail could not be verified. Please provide a"
+                        " validated e-mail address."
+                    ]
+                }
+            ),
             response_only=True,
             status_codes=["400"],
         ),
     ],
-    responses={201: UserCreateSerializer, 400: OpenApiTypes.OBJECT},
+    responses={201: UserCreateSerializer, 400: APIError},
 )
 
 retrieve = extend_schema(
@@ -147,20 +159,22 @@ get_me = extend_schema(
 )
 patch_me = extend_schema(
     summary="Update authenticated user",
-    responses={200: UserSerializer, 400: OpenApiTypes.OBJECT},
+    responses={200: UserSerializer, 400: APIError},
     methods=["patch"],
     examples=[
         OpenApiExample(
             "bad values",
-            value={
-                "username": ["This field may not be blank."],
-                "gender": ['"potato" is not a valid choice.'],
-                "birth_date": [
-                    "Date has wrong format. Use one of these"
-                    " formats instead: YYYY-MM-DD."
-                ],
-                "website": ["Enter a valid URL."],
-            },
+            value=get_error_repr(
+                {
+                    "username": ["This field may not be blank."],
+                    "gender": ['"potato" is not a valid choice.'],
+                    "birth_date": [
+                        "Date has wrong format. Use one of these"
+                        " formats instead: YYYY-MM-DD."
+                    ],
+                    "website": ["Enter a valid URL."],
+                }
+            ),
             response_only=True,
             status_codes=["400"],
         )
@@ -177,19 +191,21 @@ reset_password = extend_schema(
     summary="Reset password",
     responses={
         200: PasswordResetSerializer,
-        400: OpenApiTypes.OBJECT,
+        400: APIError,
     },
     examples=[
         OpenApiExample(
             "bad values",
-            value={
-                "email": ["This e-mail could not be verified."],
-                "password": [
-                    "This password is too common.",
-                    "This password is too short. It must contain at"
-                    " least 8 characters.",
-                ],
-            },
+            value=get_error_repr(
+                {
+                    "email": ["This e-mail could not be verified."],
+                    "password": [
+                        "This password is too common.",
+                        "This password is too short. It must contain at"
+                        " least 8 characters.",
+                    ],
+                }
+            ),
             response_only=True,
             status_codes=["400"],
         )
@@ -212,20 +228,20 @@ relations = extend_schema(
     "List relations with given users",
     responses={
         200: RelationSerializer,
-        400: OpenApiTypes.OBJECT,
+        400: APIError,
     },
     examples=[
         OpenApiExample(
             "ids not provided",
-            value={"ids": ["This field is required."]},
+            value=get_error_repr({"ids": ["This field is required."]}),
             response_only=True,
             status_codes=["400"],
         ),
         OpenApiExample(
             "too many ids",
-            value={
-                "ids": ["List contains 51 items, it should contain no more than 50."]
-            },
+            value=get_error_repr(
+                {"ids": ["List contains 51 items, it should contain no more than 50."]}
+            ),
             response_only=True,
             status_codes=["400"],
         ),

@@ -60,7 +60,7 @@ class UserLookupFilter(filters.FilterSet):
 
 
 class UserViewSet(ExtendedViewSet[User]):
-    mixins = ("list", "retrieve", "create")
+    mixins = ("retrieve", "create")
     permission_classes = [RequireToken]
     # ^ Allow everyone for mixins listed above, for actions, each
     # have their permission classes set separately.

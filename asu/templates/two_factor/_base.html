@@ -17,12 +17,12 @@
 <main class="container">
     {% block content_wrapper %}{% block content %}{% endblock %}{% endblock %}
     <footer>
-        {# StubLink's to be replaced with frontend-links #}
+        {% get_variable "build.SUPPORT_EMAIL" as support_mail %}
         <section class="links">
-            <a href="#StubLink">Terms</a>
-            <a href="#StubLink">Privacy</a>
-            <a href="#StubLink">Security</a>
-            <a href="#StubLink">Contact</a>
+            <a href="{% get_variable "build.URL_TERMS" %}">Terms</a>
+            <a href="{% get_variable "build.URL_PRIVACY" %}">Privacy</a>
+            <a href="{% get_variable "build.URL_SECURITY" %}">Security</a>
+            <a href="{% get_variable "build.URL_CONTACT" %}">Contact</a>
         </section>
         <article>
             {% get_variable "build.BRAND" as brand %}

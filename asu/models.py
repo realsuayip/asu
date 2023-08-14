@@ -12,6 +12,12 @@ class ProjectVariableManager(models.Manager["ProjectVariable"]):
     BUILD_VARS: dict[str, str] = {
         "BRAND": settings.PROJECT_BRAND,
         "SUPPORT_EMAIL": settings.PROJECT_SUPPORT_EMAIL,
+        "URL_ACCOUNT_CREATION": settings.PROJECT_URL_ACCOUNT_CREATION,
+        "URL_PASSWORD_RESET": settings.PROJECT_URL_PASSWORD_RESET,
+        "URL_TERMS": settings.PROJECT_URL_TERMS,
+        "URL_PRIVACY": settings.PROJECT_URL_PRIVACY,
+        "URL_SECURITY": settings.PROJECT_URL_SECURITY,
+        "URL_CONTACT": settings.PROJECT_URL_CONTACT,
     }
 
     def get_value(self, *, name: str) -> str:

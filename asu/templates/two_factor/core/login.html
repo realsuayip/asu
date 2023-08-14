@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load widget_tweaks %}
 {% load two_factor_tags %}
+{% load asu %}
 
 {% block content %}
     <header>
@@ -69,7 +70,7 @@
                                 <small class="text-danger">{{ error }}</small>
                             {% endfor %}
                         {% endif %}
-                        <small><a href="#StubLink">Forgot password?</a></small>
+                        <small><a href="{% get_variable "build.URL_PASSWORD_RESET" %}">Forgot password?</a></small>
                     </div>
                 </div>
             {% elif wizard.steps.current == 'token' or wizard.steps.current == 'backup' %}
@@ -87,7 +88,7 @@
             <input type="submit" value="" hidden/>
             {% include "two_factor/_wizard_actions.html" %}
             {% if wizard.steps.current == 'auth' %}
-                <a class="btn secondary muted" href="#StubLink">{% translate "Create a new account" %}</a>
+                <a class="btn secondary muted" href="{% get_variable "build.URL_ACCOUNT_CREATION" %}">{% translate "Create a new account" %}</a>
             {% endif %}
         </form>
 

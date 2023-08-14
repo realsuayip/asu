@@ -25,3 +25,14 @@ class CustomAutoSchema(AutoSchema):
         # Display query parameters for filters if the action/view
         # defines `filter_backends`.
         return getattr(self.view, "filter_backends", [])
+
+
+def get_error_repr(errors: Any) -> dict[str, Any]:
+    # Create an error response representation from given
+    # errors. Used in OpenAPI examples.
+    return {
+        "status": 400,
+        "code": "invalid",
+        "message": "One or more parameters to your request was invalid.",
+        "errors": errors,
+    }

@@ -1,6 +1,6 @@
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
+from asu.utils import get_error_repr
 from asu.utils.rest import APIError
 from asu.verification.password.serializers import (
     PasswordResetVerificationCheckSerializer,
@@ -19,14 +19,14 @@ password_reset_create = extend_schema(
     examples=[
         OpenApiExample(
             "e-mail is invalid",
-            value={"email": ["Enter a valid email address."]},
+            value=get_error_repr({"email": ["Enter a valid email address."]}),
             response_only=True,
             status_codes=["400"],
         ),
     ],
     responses={
         201: PasswordResetVerificationSerializer,
-        400: OpenApiTypes.OBJECT,
+        400: APIError,
     },
 )
 
@@ -40,7 +40,7 @@ password_reset_check = extend_schema(
     responses={
         200: PasswordResetVerificationCheckSerializer,
         404: APIError,
-        400: OpenApiTypes.OBJECT,
+        400: APIError,
     },
 )
 

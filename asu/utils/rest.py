@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib.postgres.forms import SimpleArrayField
-from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
+from django.utils.translation import gettext, gettext_lazy as _
 
 from rest_framework import exceptions, pagination, serializers
 from rest_framework.metadata import BaseMetadata
@@ -21,27 +23,49 @@ if TYPE_CHECKING:
 
 
 def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
-    response = default_exception_handler(exc, context)
+    """
+    Replaces the default exception handler with a more structured one.
+    """
 
+    if isinstance(exc, Http404):
+        exc = exceptions.NotFound()
+    elif isinstance(exc, PermissionDenied):
+        exc = exceptions.PermissionDenied()
+
+    response = default_exception_handler(exc, context)
     if response is None:
+        # In case the exception is not a subclass of `APIException`,
+        # default to `handler500` implementation.
         return None
+    assert isinstance(exc, exceptions.APIException)
+
+    template = {
+        "status": exc.status_code,
+        "code": exc.default_code,
+        "message": exc.detail,
+    }
 
     if isinstance(exc, exceptions.ValidationError):
         # ValidationError's raised in serializer methods like create() and
         # update() should behave as if they were raised in validate().
-        non_field_errors = api_settings.NON_FIELD_ERRORS_KEY
+        template["message"] = gettext(
+            "One or more parameters to your request was invalid."
+        )
+        detail: Any = exc.detail
 
-        if isinstance(exc.detail, list):
-            response.data = {non_field_errors: exc.detail}
-        elif isinstance(exc.detail, dict):
-            detail: dict[str, Any] = {}
-            for key, value in exc.detail.items():
+        if isinstance(detail, dict):
+            non_field_errors = detail.pop(api_settings.NON_FIELD_ERRORS_KEY, None)
+            for key, value in detail.items():
                 if isinstance(value, str):
                     detail[key] = [value]
                 else:
                     detail[key] = value
-            response.data = detail
+            detail = detail or non_field_errors
 
+        if detail:
+            template["errors"] = detail
+
+    response.data = template
     return response
 
 
@@ -119,7 +143,18 @@ class EmptySerializer(serializers.Serializer[None]):
 
 class APIError(serializers.Serializer[dict[str, Any]]):
     # Generic error serializer for documentation rendering.
-    detail = serializers.CharField()
+    status = serializers.IntegerField(
+        min_value=100,
+        max_value=599,
+        help_text="HTTP status code.",
+    )
+    code = serializers.CharField(help_text="A code identifying the class of the error.")
+    message = serializers.CharField(help_text="Human readable summary of the error.")
+    errors = serializers.JSONField(  # type: ignore[assignment]
+        required=False,
+        help_text="This could a list of errors, or a mapping with the"
+        " keys referencing the given parameters.",
+    )
 
 
 @extend_schema_field(

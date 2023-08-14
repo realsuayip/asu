@@ -30,6 +30,18 @@ class TestMessaging(APITestCase):
         cls.inactive_user = UserFactory(is_active=False)
         cls.user_disabled_msg_requests = UserFactory(allows_all_messages=False)
 
+    def _open_conversation(self, sender, recipient):
+        # Create a conversation request and accept it immediately. If you need to
+        # accept conversation before sending message you can use this.
+
+        # To accept conversations after sending messages, use
+        # `_accept_conversation` method instead.
+        ConversationRequest.objects.create(
+            sender=sender,
+            recipient=recipient,
+            date_accepted=timezone.now(),
+        )
+
     def _accept_conversation(self, sender, recipient):
         ConversationRequest.objects.filter(sender=sender, recipient=recipient).update(
             date_accepted=timezone.now()
@@ -299,7 +311,38 @@ class TestMessaging(APITestCase):
         self.assertNotEqual(md1, c1.date_modified)
         self.assertNotEqual(md2, c2.date_modified)
 
+    def test_receipt_registry_unaccepted_conversation(self):
+        # Messages sent to unaccepted conversations should not
+        # have read receipts.
+
+        # Notice: both of these users allow read receipts.
+        m1 = self._send_message(self.user1, self.user2, "Hi")
+        m2 = self._send_message(self.user1, self.user2, "Hello?")
+
+        m1 = Message.objects.get(pk=m1.data["id"])
+        m2 = Message.objects.get(pk=m2.data["id"])
+        self.assertFalse(m1.has_receipt)
+        self.assertFalse(m2.has_receipt)
+
+        # Read receipts should appear for subsequent messages after
+        # accepting the conversation.
+        self._accept_conversation(self.user1, self.user2)
+
+        m3 = self._send_message(self.user1, self.user2, "Finally, you accepted!")
+        m3 = Message.objects.get(pk=m3.data["id"])
+        self.assertTrue(m3.has_receipt)
+
     def test_receipt_registry(self):
+        # Tests all possible cases for read receipt registry.
+
+        # Make sure conversations are accepted before sending messages
+        # so that we can check read receipt registry without having to
+        # send multiple messages.
+        self._open_conversation(self.user1, self.user4)
+        self._open_conversation(self.user4, self.user3)
+        self._open_conversation(self.user4, self.user5)
+        self._open_conversation(self.user1, self.user2)
+
         yes_no = self._send_message(self.user1, self.user4, "Hi")
         no_yes = self._send_message(self.user4, self.user3, "Hi")
         no_no = self._send_message(self.user4, self.user5, "Hi")
@@ -627,6 +670,8 @@ class TestMessaging(APITestCase):
         self.assertContains(r2, "Howdy")
 
     def _test_receipt_fragment(self, u1, u2):
+        self._open_conversation(sender=u1, recipient=u2)
+
         r1 = self._send_message(u1, u2, "Howdy")
         message_id = r1.data["id"]
         conversation = r1.data["conversation"]
@@ -639,10 +684,12 @@ class TestMessaging(APITestCase):
         return r2.data["date_read"]
 
     def test_message_receipt_hidden(self):
+        # Make sure `date_read` is set to `null` if receipts are disabled.
         date_read = self._test_receipt_fragment(self.user4, self.user1)
         self.assertIsNone(date_read)
 
     def test_message_receipt_shown(self):
+        # Make sure `date_read` is NOT set to `null` if receipts are enabled.
         date_read = self._test_receipt_fragment(self.user1, self.user2)
         self.assertIsNotNone(date_read)
 

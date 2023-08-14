@@ -132,3 +132,7 @@ class ConversationRequest(models.Model):
                 name="unique_conversation_request",
             )
         ]
+
+    @property
+    def is_accepted(self) -> bool:
+        return self.date_accepted is not None

@@ -17,7 +17,13 @@ def deliver_message(instance: Message, created: bool, **kwargs: Any) -> None:
 
     holder, _ = sender.conversations.get_or_create(target=recipient)
     target, _ = recipient.conversations.get_or_create(target=sender)
-    ConversationRequest.objects.compose(sender, recipient)
+    request, _ = ConversationRequest.objects.compose(sender, recipient)
+
+    if (not request.is_accepted) and instance.has_receipt:
+        # Disable read receipts (regardless of user preference) in case
+        # the conversation is yet to be accepted.
+        instance.has_receipt = False
+        instance.save(update_fields=["has_receipt"])
 
     holder.messages.add(instance)
     target.messages.add(instance)

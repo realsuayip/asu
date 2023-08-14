@@ -251,13 +251,9 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
 
         try:
             # Check if this message is sent as a reply. To reply,
-            # the user needs to accept the request first, so 'accept
-            # date' should not be null to send this message.
-            replying = ConversationRequest.objects.get(
-                sender=to_user,
-                recipient=self,
-            )
-            return replying.date_accepted is not None
+            # the user needs to accept the request first.
+            request = ConversationRequest.objects.get(sender=to_user, recipient=self)
+            return request.is_accepted
         except ConversationRequest.DoesNotExist:
             # Not a reply either, this means it might be a new
             # conversation request, or new messages are added to

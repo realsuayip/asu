@@ -268,3 +268,21 @@ class UserWithRelationSerializer(serializers.ModelSerializer[User]):
 
 class RelationSerializer(serializers.Serializer[dict[str, Any]]):
     results = UserWithRelationSerializer(many=True)
+
+
+class DeactivationSerializer(serializers.Serializer[dict[str, Any]]):
+    password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+    )
+
+    def validate_password(self, password: str) -> str:
+        user = self.context["request"].user
+        if not user.check_password(password):
+            raise serializers.ValidationError("Your password was not correct.")
+        return password
+
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        user = self.context["request"].user
+        user.deactivate()
+        return validated_data

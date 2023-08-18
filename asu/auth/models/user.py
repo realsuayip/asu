@@ -1,22 +1,26 @@
 from __future__ import annotations
 
+import functools
 import io
 import uuid
 from datetime import timedelta
 from typing import Any, AnyStr
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.core import signing
+from django.core.cache import cache
 from django.core.files.base import ContentFile, File
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     RegexValidator,
 )
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 from django.utils import timezone
+from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 
 import oauthlib.common
@@ -26,10 +30,16 @@ from oauth2_provider.settings import oauth2_settings
 from PIL import Image
 from sorl.thumbnail import get_thumbnail
 
-from asu.auth.models import Application
-from asu.auth.models.through import UserBlock, UserFollow, UserFollowRequest
+from asu.auth.models import (
+    Application,
+    Session,
+    UserBlock,
+    UserDeactivation,
+    UserFollow,
+    UserFollowRequest,
+)
 from asu.messaging.models import ConversationRequest
-from asu.utils import mailing
+from asu.utils import mailing, messages
 from asu.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
 from asu.utils.messages import EmailMessage
 
@@ -352,6 +362,41 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
 
         for token in tokens.iterator():
             token.revoke()
+
+    def revoke_all_sessions(self) -> None:
+        engine = import_string(f"{settings.SESSION_ENGINE}.SessionStore")
+        sessions = Session.objects.filter(user=self.pk)
+
+        if prefix := getattr(engine, "cache_key_prefix", None):
+            for session in sessions.only("session_key").iterator():
+                key = prefix + session.session_key
+                cache.delete(key)
+        sessions.delete()
+
+    @transaction.atomic
+    def deactivate(self) -> None:
+        self.is_frozen = True
+        self.save(update_fields=["is_frozen", "date_modified"])
+
+        UserDeactivation.objects.create(user=self)
+
+        self.revoke_other_tokens()
+        self.revoke_all_sessions()
+
+        send_notice = functools.partial(
+            self.send_transactional_mail, message=messages.account_deactivated
+        )
+        transaction.on_commit(send_notice)
+
+    @transaction.atomic
+    def reactivate(self) -> None:
+        self.is_frozen = False
+        self.save(update_fields=["is_frozen", "date_modified"])
+
+        UserDeactivation.objects.filter(
+            user=self,
+            date_revoked__isnull=True,
+        ).update(date_revoked=timezone.now())
 
     def send_transactional_mail(self, message: EmailMessage) -> int:
         """

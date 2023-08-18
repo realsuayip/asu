@@ -2,8 +2,11 @@ import io
 from datetime import timedelta
 
 from django.conf import settings
+from django.core import mail
+from django.core.cache import cache
 from django.core.files.base import ContentFile
-from django.test import TestCase
+from django.db import IntegrityError
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -12,7 +15,8 @@ from rest_framework.test import APITestCase
 from oauth2_provider.models import AccessToken, RefreshToken
 from PIL import Image
 
-from asu.auth.models import Application, Session, UserFollowRequest
+from asu.auth.models import Application, Session, UserDeactivation, UserFollowRequest
+from asu.auth.sessions.cached_db import KEY_PREFIX
 from asu.verification.models import RegistrationVerification
 from tests.factories import UserFactory
 
@@ -728,6 +732,110 @@ class TestAuth(APITestCase):
         self.assertIsNotNone(revoke1.revoked)
         self.assertIsNotNone(revoke2.revoked)
         self.assertIsNone(not_revoked.revoked)
+
+    def test_revoke_all_sessions(self):
+        self.client.force_login(self.user1)
+        session_key = self.client.session.session_key
+
+        self.assertTrue(Session.objects.filter(session_key=session_key).exists())
+
+        self.user1.revoke_all_sessions()
+        self.assertFalse(Session.objects.filter(session_key=session_key).exists())
+
+    @override_settings(SESSION_ENGINE="asu.auth.sessions.cached_db")
+    def test_revoke_all_sessions_case_cached_db(self):
+        self.client.force_login(self.user1)
+        session_key = self.client.session.session_key
+
+        cached = cache.get(KEY_PREFIX + session_key)
+        self.assertIsNotNone(cached)
+        self.assertTrue(Session.objects.filter(session_key=session_key).exists())
+
+        self.user1.revoke_all_sessions()
+        cached = cache.get(KEY_PREFIX + session_key)
+        self.assertFalse(Session.objects.filter(session_key=session_key).exists())
+        self.assertIsNone(cached)
+
+    def test_deactivation_unique_constraint(self):
+        UserDeactivation.objects.create(user=self.user1, date_revoked=timezone.now())
+        UserDeactivation.objects.create(user=self.user1)
+
+        try:
+            UserDeactivation.objects.create(user=self.user1)
+        except IntegrityError:
+            pass
+
+    def test_user_deactivate(self):
+        self.user1.set_password("hello")
+        self.user1.save(update_fields=["password"])
+        token = self.user1.issue_token()
+        authorization = f"{token['token_type']} {token['access_token']}"
+
+        url = reverse("api:auth:user-deactivate")
+
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self.client.post(
+                url,
+                data={"password": "hello"},
+                headers={"Authorization": authorization},
+            )
+
+        self.assertEqual(204, response.status_code)
+        self.assertIsNone(response.data)
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual(1, len(callbacks))
+        self.assertIn("account has been deactivated", mail.outbox[0].body)
+
+        self.user1.refresh_from_db()
+        deactivation = UserDeactivation.objects.get(user=self.user1)
+
+        self.assertTrue(self.user1.is_frozen)
+        self.assertIsNone(deactivation.date_revoked)
+        self.assertFalse(Session.objects.filter(user=self.user1.pk).exists())
+        self.assertFalse(AccessToken.objects.exists())
+        self.assertFalse(
+            RefreshToken.objects.filter(
+                user=self.user1,
+                revoked__isnull=True,
+            ).exists()
+        )
+
+    def test_user_deactivate_invalid_password(self):
+        self.client.force_login(self.user1)
+
+        url = reverse("api:auth:user-deactivate")
+        response = self.client.post(url, data={"password": "hello"})
+        self.assertContains(
+            response,
+            "password was not correct",
+            status_code=400,
+        )
+
+    def test_user_reactivate(self):
+        self.user1.deactivate()
+        self.user1.reactivate()
+        self.user1.refresh_from_db()
+
+        deactivation = UserDeactivation.objects.get(user=self.user1)
+
+        self.assertIsNotNone(deactivation.date_revoked)
+        self.assertFalse(self.user1.is_frozen)
+
+    def test_user_reactivate_by_activity(self):
+        # If user is caught logged-in, their account should
+        # be activated.
+        self.user1.deactivate()
+        self.client.force_login(self.user1)
+
+        self.client.get(reverse("api:api-root"))
+
+        self.user1.refresh_from_db()
+        self.assertFalse(self.user1.is_frozen)
+        self.assertFalse(
+            UserDeactivation.objects.filter(
+                date_revoked__isnull=True,
+            ).exists()
+        )
 
 
 class TestOAuthPermissions(APITestCase):

@@ -24,6 +24,7 @@ from asu.auth.permissions import (
 )
 from asu.auth.serializers.actions import (
     BlockSerializer,
+    DeactivationSerializer,
     FollowRequestSerializer,
     FollowSerializer,
     PasswordResetSerializer,
@@ -343,6 +344,17 @@ class UserViewSet(ExtendedViewSet[User]):
         queryset = self.filter_queryset(queryset)
         serializer = self.get_serializer({"results": queryset})
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[RequireUser, RequireFirstParty],
+        serializer_class=DeactivationSerializer,
+    )
+    def deactivate(self, request: UserRequest) -> Response:
+        return self.get_action_save_response(
+            request, status_code=status.HTTP_204_NO_CONTENT
+        )
 
 
 class FollowRequestViewSet(ExtendedViewSet[UserFollowRequest]):

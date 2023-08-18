@@ -1,3 +1,4 @@
+from asu.auth.models.deactivation import UserDeactivation
 from asu.auth.models.oauth import Application
 from asu.auth.models.session import Session
 from asu.auth.models.through import UserBlock, UserFollow, UserFollowRequest
@@ -7,6 +8,7 @@ __all__ = [
     "Application",
     "Session",
     "User",
+    "UserDeactivation",
     "UserBlock",
     "UserFollow",
     "UserFollowRequest",

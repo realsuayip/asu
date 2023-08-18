@@ -54,3 +54,11 @@ email_verification = EmailMessage(
         "<div class='code'><strong>%(code)s</strong></div>"
     ),
 )
+account_deactivated = EmailMessage(
+    subject=_("Your account has been deactivated"),
+    body=_(
+        "You have now deactivated your account. Your account will be"
+        " permanently deleted in 30 days. If you change your mind,"
+        " you can simply login to reactivate your account."
+    ),
+)

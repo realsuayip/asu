@@ -29,15 +29,12 @@ class TestRegistrationVerification(APITestCase):
 
     def test_send(self):
         self.client.force_authenticate(token=first_party_token)
-
-        test_backend = "django.core.mail.backends.locmem.EmailBackend"
         email = "patato@example.com"
 
-        with self.settings(EMAIL_BACKEND=test_backend):
-            with self.captureOnCommitCallbacks(execute=True) as callbacks:
-                self.client.post(self.url_send, data={"email": email})
-            self.assertEqual(1, len(callbacks))
-            (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.client.post(self.url_send, data={"email": email})
+        self.assertEqual(1, len(callbacks))
+        (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
 
         verification = RegistrationVerification.objects.get(code=code, email=email)
 

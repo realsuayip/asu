@@ -20,20 +20,19 @@ class RegistrationTest(APITestCase):
     def test_registration(self):
         self.client.force_authenticate(token=first_party_token)
 
-        test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("api:verification:registration-verification-check")
         url_send = reverse("api:verification:registration-verification-list")
         url_register = reverse("api:auth:user-list")
         email = "test@example.com"
 
         # Send code to e-mail
-        with self.settings(EMAIL_BACKEND=test_backend):
-            with self.captureOnCommitCallbacks(execute=True) as callbacks:
-                send_response = self.client.post(url_send, data={"email": email})
-            self.assertEqual(201, send_response.status_code)
-            self.assertEqual(1, len(mail.outbox))
-            self.assertEqual(1, len(callbacks))
-            (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            send_response = self.client.post(url_send, data={"email": email})
+
+        self.assertEqual(201, send_response.status_code)
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual(1, len(callbacks))
+        (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
 
         # Check and verify the combination, get consent
         check_response = self.client.post(

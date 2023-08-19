@@ -23,16 +23,14 @@ class TestEmailVerification(APITestCase):
         # Test email verification as whole
         email = "patato@example.com"
         user = UserFactory(email="old_patato@example.com")
-        test_backend = "django.core.mail.backends.locmem.EmailBackend"
 
         self.client.force_login(user)
 
         # Send code to email and parse it
-        with self.settings(EMAIL_BACKEND=test_backend):
-            with self.captureOnCommitCallbacks(execute=True) as callbacks:
-                self.client.post(self.url_send, data={"email": email})
-            self.assertEqual(1, len(callbacks))
-            (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.client.post(self.url_send, data={"email": email})
+        self.assertEqual(1, len(callbacks))
+        (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
 
         # Check EmailVerification has related user assigned
         verification = EmailVerification.objects.get()

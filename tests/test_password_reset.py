@@ -41,19 +41,18 @@ class PasswordResetTest(APITestCase):
 
         self.client.force_authenticate(token=token)
 
-        test_backend = "django.core.mail.backends.locmem.EmailBackend"
         url_check = reverse("api:verification:password-reset-check")
         url_send = reverse("api:verification:password-reset-list")
         email = self.user.email
 
         # Send code to e-mail
-        with self.settings(EMAIL_BACKEND=test_backend):
-            with self.captureOnCommitCallbacks(execute=True) as callbacks:
-                send_response = self.client.post(url_send, data={"email": email})
-            self.assertEqual(201, send_response.status_code)
-            self.assertEqual(1, len(mail.outbox))
-            self.assertEqual(1, len(callbacks))
-            (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            send_response = self.client.post(url_send, data={"email": email})
+
+        self.assertEqual(201, send_response.status_code)
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual(1, len(callbacks))
+        (code,) = re.findall(r"[\d]{6}", mail.outbox[0].body)
 
         # Check and verify the combination, get consent
         check_response = self.client.post(
@@ -77,13 +76,13 @@ class PasswordResetTest(APITestCase):
         # Make a valid request to change the password.
         password = "12345678*"
 
-        with self.settings(EMAIL_BACKEND=test_backend):
-            with self.captureOnCommitCallbacks(execute=True) as callbacks:
-                response = self._send_new_password(**kwargs, password=password)
-            self.assertEqual(200, response.status_code)
-            self.assertEqual(2, len(mail.outbox))
-            self.assertEqual(1, len(callbacks))
-            self.assertIn("Your password has been changed", mail.outbox[1].body)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self._send_new_password(**kwargs, password=password)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(2, len(mail.outbox))
+        self.assertEqual(1, len(callbacks))
+        self.assertIn("Your password has been changed", mail.outbox[1].body)
 
         # Let's make sure everything is in the database.
         verification = PasswordResetVerification.objects.get(user=self.user)

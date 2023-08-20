@@ -111,11 +111,21 @@ allow_subclassing_any = true
 [tool.django-stubs]
 django_settings_module = "asu.settings"
 
+[tool.coverage.run]
+source = ["asu"]
+omit = [
+    "asu/gateways/*"
+]
+
 [tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
+exclude_also = [
     "if TYPE_CHECKING:",
+    'if settings.DEBUG',
     'if getattr\(self, "swagger_fake_view", False\):',
+    'raise NotImplementedError',
+    'raise AssertionError',
+    'def __str__',
+    'def __repr__',
 ]
 
 [tool.coverage.html]

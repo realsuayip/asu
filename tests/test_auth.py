@@ -5,8 +5,9 @@ from django.conf import settings
 from django.core import mail
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -135,12 +136,22 @@ class TestAuth(APITestCase):
 
     def test_detail_self(self):
         self.client.force_login(self.user1)
-        response = self.client.get(
-            reverse(
-                "api:auth:user-detail",
-                kwargs={"pk": self.user1.pk},
+
+        with CaptureQueriesContext(connection) as context:
+            response = self.client.get(
+                reverse(
+                    "api:auth:user-detail",
+                    kwargs={"pk": self.user1.pk},
+                )
             )
-        )
+
+        user_queries = [
+            query
+            for query in context.captured_queries
+            if '"account_user"."username"' in query["sql"]
+        ]
+
+        self.assertEqual(1, len(user_queries))
         self.assertEqual(200, response.status_code)
 
     def test_detail_follow_counts(self):

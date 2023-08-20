@@ -54,12 +54,6 @@ class UsernameValidator(RegexValidator):
 
 
 class UserManager(DjangoUserManager["User"]):
-    def public(self) -> QuerySet[User]:
-        """
-        Users who are publicly available.
-        """
-        return self.exclude(Q(is_active=False) | Q(is_frozen=True) | Q(is_private=True))
-
     def active(self) -> QuerySet[User]:
         """
         Users who are publicly available and can

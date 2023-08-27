@@ -1,9 +1,9 @@
-FROM python:3.11-bullseye
+FROM python:3.11-alpine
 
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends netcat
+RUN apk add --no-cache build-base libffi-dev python3-dev libpq-dev netcat-openbsd
 
 WORKDIR /code
 

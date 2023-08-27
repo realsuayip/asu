@@ -110,6 +110,16 @@ class TestRegistrationVerification(APITestCase):
         )
         self.assertEqual(verification, actual)
 
+    def test_check_case_bad_code(self):
+        self.client.force_authenticate(token=first_party_token)
+
+        response = self.client.post(
+            self.url_check,
+            {"email": "test@example.com", "code": "AB132"},
+        )
+        self.assertContains(response, text="at least 6 digits", status_code=400)
+        self.assertContains(response, text="only digits", status_code=400)
+
     def test_get_with_consent(self):
         period = settings.REGISTRATION_REGISTER_PERIOD + 10
         email = "janet2@example.com"

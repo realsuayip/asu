@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 
 from asu.auth.models import User
 from asu.verification.models import RegistrationVerification
-from tests.factories import first_party_token
+from tests.factories import UserFactory, first_party_token
 
 
 class RegistrationTest(APITestCase):
@@ -18,6 +18,7 @@ class RegistrationTest(APITestCase):
     fixtures = ("oauth", "vars")
 
     def test_registration(self):
+        UserFactory(username="Howdy")  # used to test 'username taken' functionality
         self.client.force_authenticate(token=first_party_token)
 
         url_check = reverse("api:verification:registration-verification-check")
@@ -56,6 +57,21 @@ class RegistrationTest(APITestCase):
             data={**register_data, "password": 123},
         )
         self.assertContains(fail_response, "too common", status_code=400)
+
+        # Fail username constraint
+        fail_response = self.client.post(
+            url_register,
+            data={
+                **register_data,
+                "username": "howdy",
+                "password": "very_secret",
+            },
+        )
+        self.assertContains(
+            fail_response,
+            "username you specified is already in use",
+            status_code=400,
+        )
 
         # Create the actual user
         register_response = self.client.post(

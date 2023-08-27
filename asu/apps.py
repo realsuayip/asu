@@ -20,7 +20,7 @@ class AsuConfig(AppConfig):
         enabled = env.bool("SENTRY_ENABLED")
 
         if enabled:
-            sentry_sdk.init(
+            sentry_sdk.init(  # pragma: no cover
                 dsn=env.str("SENTRY_DSN"),
                 environment=env.str("SENTRY_ENVIRONMENT"),
                 traces_sample_rate=env.float("SENTRY_TRACES_SAMPLE_RATE"),

@@ -23,7 +23,7 @@ class ApplicationManager(models.Manager["Application"]):
         )
         return apps.get()
 
-    def get_by_natural_key(self, client_id: str) -> Application:
+    def get_by_natural_key(self, client_id: str) -> Application:  # pragma: no cover
         return self.get(client_id=client_id)
 
 
@@ -44,5 +44,5 @@ class Application(AbstractApplication):
         verbose_name = _("application")
         verbose_name_plural = _("applications")
 
-    def natural_key(self) -> tuple[str]:
+    def natural_key(self) -> tuple[str]:  # pragma: no cover
         return (self.client_id,)

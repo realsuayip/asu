@@ -25,15 +25,13 @@ from asu.utils.views import ExtendedViewSet
 @extend_schema(parameters=[OpenApiParameter("conversation_id", int, "path")])
 class MessageViewSet(ExtendedViewSet[Message]):
     mixins = ("list", "retrieve", "destroy")
+    queryset = Message.objects.none()
     serializer_class = MessageSerializer
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_created")
     schemas = schemas.message
 
     def get_queryset(self) -> QuerySet[Message]:
-        if getattr(self, "swagger_fake_view", False):
-            return Message.objects.none()
-
         user, conversation_id = (
             self.request.user,
             self.kwargs["conversation_pk"],
@@ -73,6 +71,7 @@ class ConversationFilterSet(filters.FilterSet):
 
 class ConversationViewSet(ExtendedViewSet[Conversation]):
     mixins = ("list", "retrieve", "destroy")
+    queryset = Conversation.objects.none()
     serializer_class = ConversationSerializer
     serializer_classes = {"retrieve": ConversationDetailSerializer}
     filterset_classes = {"list": ConversationFilterSet}

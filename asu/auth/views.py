@@ -360,6 +360,7 @@ class UserViewSet(ExtendedViewSet[User]):
 class FollowRequestViewSet(ExtendedViewSet[UserFollowRequest]):
     mixins = ("list", "partial_update")
     permission_classes = [RequireUser, RequireScope]
+    queryset = UserFollowRequest.objects.none()
     serializer_class = FollowRequestSerializer
     pagination_class = get_paginator("cursor", ordering="-date_created")
     schemas = schemas.follow_request

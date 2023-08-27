@@ -81,3 +81,13 @@ class TestAPIRoot(TestCase):
         response = self.client.get("bad-page", CONTENT_TYPE="application/json")
         self.assertEqual(404, response.status_code)
         self.assertIn("application/json", response.headers["Content-Type"])
+
+    def test_docs(self):
+        browser = reverse("docs:browse")
+        schema = reverse("docs:openapi-schema")
+
+        r1 = self.client.get(browser)
+        r2 = self.client.get(schema)
+
+        self.assertEqual(200, r1.status_code)
+        self.assertEqual(200, r2.status_code)

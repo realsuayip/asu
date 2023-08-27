@@ -1,5 +1,8 @@
+import datetime
 import io
+import zoneinfo
 from datetime import timedelta
+from unittest import mock
 
 from django.conf import settings
 from django.core import mail
@@ -16,8 +19,15 @@ from rest_framework.test import APITestCase
 from oauth2_provider.models import AccessToken, RefreshToken
 from PIL import Image
 
-from asu.auth.models import Application, Session, UserDeactivation, UserFollowRequest
+from asu.auth.models import (
+    Application,
+    Session,
+    User,
+    UserDeactivation,
+    UserFollowRequest,
+)
 from asu.auth.sessions.cached_db import KEY_PREFIX
+from asu.auth.tasks import delete_users_permanently
 from asu.verification.models import RegistrationVerification
 from tests.factories import UserFactory
 
@@ -847,6 +857,38 @@ class TestAuth(APITestCase):
                 date_revoked__isnull=True,
             ).exists()
         )
+
+    def test_task_delete_users_permanently(self):
+        delete_immediately, to_be_deleted_later, deletion_cancelled = (
+            UserFactory(),
+            UserFactory(),
+            UserFactory(),
+        )
+        UserFactory()  # unrelated user obj, should not be affected.
+
+        now = datetime.datetime(2022, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC"))
+
+        # This deactivation will be triggered immediately.
+        with mock.patch("django.utils.timezone.now", return_value=now):
+            UserDeactivation.objects.create(user=delete_immediately)
+            UserDeactivation.objects.create(user=deletion_cancelled, date_revoked=now)
+
+        # This one should not trigger.
+        UserDeactivation.objects.create(user=to_be_deleted_later)
+
+        future = now + datetime.timedelta(days=30)
+        with mock.patch("django.utils.timezone.now", return_value=future):
+            num, objs = delete_users_permanently()
+
+        self.assertEqual(1, objs["account.User"])
+        self.assertEqual(2, num)  # `d1` & `delete_immediately`
+
+        try:
+            delete_immediately.refresh_from_db()
+        except User.DoesNotExist:
+            pass
+        else:
+            self.fail("user still in database")
 
 
 class TestOAuthPermissions(APITestCase):

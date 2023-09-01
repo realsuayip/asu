@@ -50,3 +50,5 @@ format:
 type:
 	$(ex) /bin/sh -c "MYPY_FORCE_COLOR=true mypy asu/ |\
 					   grep -v 'Metaclass conflict\|Import cycle'"
+docs:
+	make -C docs clean html

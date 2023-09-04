@@ -10,6 +10,7 @@ Home
     features
     getting-started
     development/index
+    license
 
 This is a comprehensive Django project for reference. The project roughly
 constitutes a real-time chat application with **complete** user management.

@@ -7,6 +7,9 @@ ongoing development patterns:
 .. toctree::
     :maxdepth: 2
 
-    views
-    typing
+    layout
+    configuration
     requirements
+    typing
+    views
+    tests

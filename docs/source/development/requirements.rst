@@ -1,3 +1,5 @@
+.. _handling-requirements:
+
 Handling Python Requirements
 ============================
 

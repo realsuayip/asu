@@ -2,6 +2,8 @@
 
 [![codecov](https://codecov.io/github/realsuayip/asu/branch/main/graph/badge.svg?token=A0BJ9TINW1)](https://codecov.io/github/realsuayip/asu)
 
+Documentation available at: [https://asu.readthedocs.io](https://asu.readthedocs.io)
+
 This is a comprehensive Django project for reference. The project roughly
 constitutes a real-time chat application with **complete** user management (see
 feature rundown for details).

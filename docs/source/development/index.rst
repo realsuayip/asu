@@ -13,3 +13,4 @@ ongoing development patterns:
     typing
     views
     tests
+    code-style

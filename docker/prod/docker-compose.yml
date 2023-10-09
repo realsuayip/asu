@@ -36,10 +36,9 @@ services:
       dockerfile: docker/prod/django/Dockerfile
     command: >
       gunicorn
-      asu.gateways.asgi
+      asu.gateways.wsgi
       --bind 0.0.0.0:8000
       --workers 4
-      --worker-class asu.utils.workers.UvicornWorker
       --access-logfile '-'
     env_file: &django_env
       - ../../conf/prod/django.env

@@ -4,9 +4,9 @@
 #
 #    pip-compile --extra=dev --output-file=deps/dev.txt pyproject.toml
 #
-amqp==5.1.1
+amqp==5.2.0
     # via kombu
-anyio==3.7.1
+anyio==4.0.0
     # via watchfiles
 appnope==0.1.3
     # via ipython
@@ -17,7 +17,7 @@ asgiref==3.7.2
     #   channels-redis
     #   daphne
     #   django
-asttokens==2.2.1
+asttokens==2.4.1
     # via stack-data
 attrs==23.1.0
     # via
@@ -30,27 +30,25 @@ autobahn==23.6.2
     # via daphne
 automat==22.10.0
     # via twisted
-backcall==0.2.0
-    # via ipython
-billiard==4.1.0
+billiard==4.2.0
     # via celery
-boto3==1.26.165
+boto3==1.28.84
     # via asu (pyproject.toml)
-botocore==1.29.165
+botocore==1.31.84
     # via
     #   boto3
     #   s3transfer
-celery==5.3.1
+celery==5.3.5
     # via
     #   asu (pyproject.toml)
     #   django-celery-beat
-celery-types==0.19.0
+celery-types==0.20.0
     # via asu (pyproject.toml)
 certifi==2023.7.22
     # via
     #   requests
     #   sentry-sdk
-cffi==1.15.1
+cffi==1.16.0
     # via cryptography
 channels[daphne]==4.0.0
     # via
@@ -58,7 +56,7 @@ channels[daphne]==4.0.0
     #   channels-redis
 channels-redis==4.1.0
     # via asu (pyproject.toml)
-charset-normalizer==3.2.0
+charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via
@@ -72,13 +70,13 @@ click-plugins==1.1.1
     # via celery
 click-repl==0.3.0
     # via celery
-constantly==15.1.0
+constantly==23.10.4
     # via twisted
-coverage==7.3.0
+coverage==7.3.2
     # via asu (pyproject.toml)
 cron-descriptor==1.4.0
     # via django-celery-beat
-cryptography==41.0.3
+cryptography==41.0.5
     # via
     #   autobahn
     #   jwcrypto
@@ -90,7 +88,7 @@ decorator==5.1.1
     # via ipython
 deprecated==1.2.14
     # via jwcrypto
-django==4.2.4
+django==4.2.7
     # via
     #   asu (pyproject.toml)
     #   channels
@@ -112,35 +110,35 @@ django==4.2.4
     #   drf-spectacular
 django-celery-beat==2.5.0
     # via asu (pyproject.toml)
-django-cors-headers==4.2.0
+django-cors-headers==4.3.0
     # via asu (pyproject.toml)
 django-debug-toolbar==4.2.0
     # via asu (pyproject.toml)
-django-filter==23.2
+django-filter==23.3
     # via asu (pyproject.toml)
 django-formtools==2.4.1
     # via django-two-factor-auth
-django-ipware==5.0.0
+django-ipware==5.0.2
     # via asu (pyproject.toml)
 django-oauth-toolkit==2.3.0
     # via asu (pyproject.toml)
-django-otp==1.2.2
+django-otp==1.3.0
     # via django-two-factor-auth
-django-phonenumber-field==6.4.0
+django-phonenumber-field==7.2.0
     # via django-two-factor-auth
-django-storages==1.13.2
+django-storages==1.14.2
     # via asu (pyproject.toml)
-django-stubs==4.2.3
+django-stubs==4.2.6
     # via
     #   asu (pyproject.toml)
     #   djangorestframework-stubs
-django-stubs-ext==4.2.2
+django-stubs-ext==4.2.5
     # via
     #   asu (pyproject.toml)
     #   django-stubs
-django-timezone-field==6.0
+django-timezone-field==6.0.1
     # via django-celery-beat
-django-two-factor-auth==1.15.4
+django-two-factor-auth==1.15.5
     # via asu (pyproject.toml)
 django-widget-tweaks==1.5.0
     # via asu (pyproject.toml)
@@ -149,19 +147,19 @@ djangorestframework==3.14.0
     #   asu (pyproject.toml)
     #   drf-nested-routers
     #   drf-spectacular
-djangorestframework-stubs==3.14.2
+djangorestframework-stubs==3.14.4
     # via asu (pyproject.toml)
 drf-nested-routers==0.93.4
     # via asu (pyproject.toml)
-drf-spectacular==0.26.4
+drf-spectacular==0.26.5
     # via asu (pyproject.toml)
 envanter==1.2.0
     # via asu (pyproject.toml)
-executing==1.2.0
+executing==2.0.1
     # via stack-data
 factory-boy==3.3.0
     # via asu (pyproject.toml)
-faker==19.3.1
+faker==20.0.0
     # via factory-boy
 hiredis==2.2.3
     # via asu (pyproject.toml)
@@ -179,30 +177,29 @@ incremental==22.10.0
     # via twisted
 inflection==0.5.1
     # via drf-spectacular
-ipython==8.14.0
+ipython==8.17.2
     # via asu (pyproject.toml)
-jedi==0.19.0
+jedi==0.19.1
     # via ipython
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-jsonschema==4.19.0
+jsonschema==4.19.2
     # via drf-spectacular
 jsonschema-specifications==2023.7.1
     # via jsonschema
 jwcrypto==1.5.0
     # via django-oauth-toolkit
-kombu==5.3.1
+kombu==5.3.3
     # via celery
 matplotlib-inline==0.1.6
     # via ipython
-msgpack==1.0.5
+msgpack==1.0.7
     # via channels-redis
-mypy==1.4.1
+mypy==1.7.0
     # via
     #   asu (pyproject.toml)
-    #   django-stubs
     #   djangorestframework-stubs
 mypy-extensions==1.0.0
     # via mypy
@@ -212,19 +209,17 @@ parso==0.8.3
     # via jedi
 pexpect==4.8.0
     # via ipython
-phonenumbers==8.13.19
+phonenumbers==8.13.24
     # via asu (pyproject.toml)
-pickleshare==0.7.5
-    # via ipython
-pillow==10.0.0
+pillow==10.1.0
     # via asu (pyproject.toml)
-prompt-toolkit==3.0.39
+prompt-toolkit==3.0.40
     # via
     #   click-repl
     #   ipython
-psycopg[c]==3.1.10
+psycopg[c]==3.1.12
     # via asu (pyproject.toml)
-psycopg-c==3.1.10
+psycopg-c==3.1.12
     # via psycopg
 ptyprocess==0.7.0
     # via pexpect
@@ -240,7 +235,7 @@ pycparser==2.21
     # via cffi
 pygments==2.16.1
     # via ipython
-pyopenssl==23.2.0
+pyopenssl==23.3.0
     # via twisted
 pypng==0.20220715.0
     # via qrcode
@@ -254,13 +249,13 @@ python-dateutil==2.8.2
     #   python-crontab
 python-magic==0.4.27
     # via asu (pyproject.toml)
-pytz==2023.3
+pytz==2023.3.post1
     # via djangorestframework
 pyyaml==6.0.1
     # via drf-spectacular
 qrcode==7.4.2
     # via django-two-factor-auth
-redis==4.6.0
+redis==5.0.1
     # via
     #   asu (pyproject.toml)
     #   channels-redis
@@ -272,13 +267,13 @@ requests==2.31.0
     # via
     #   django-oauth-toolkit
     #   djangorestframework-stubs
-rpds-py==0.9.2
+rpds-py==0.12.0
     # via
     #   jsonschema
     #   referencing
-s3transfer==0.6.2
+s3transfer==0.7.0
     # via boto3
-sentry-sdk==1.29.2
+sentry-sdk==1.34.0
     # via asu (pyproject.toml)
 service-identity==23.1.0
     # via twisted
@@ -289,39 +284,37 @@ six==1.16.0
     #   python-dateutil
 sniffio==1.3.0
     # via anyio
-sorl-thumbnail==12.9.0
+sorl-thumbnail==12.10.0
     # via asu (pyproject.toml)
 sqlparse==0.4.4
     # via
     #   django
     #   django-debug-toolbar
-stack-data==0.6.2
+stack-data==0.6.3
     # via ipython
-tblib==2.0.0
+tblib==3.0.0
     # via asu (pyproject.toml)
-traitlets==5.9.0
+traitlets==5.13.0
     # via
     #   ipython
     #   matplotlib-inline
-twisted[tls]==22.10.0
+twisted[tls]==23.10.0
     # via daphne
 txaio==23.1.1
     # via autobahn
-types-oauthlib==3.2.0.9
+types-oauthlib==3.2.0.10
     # via asu (pyproject.toml)
-types-pillow==10.0.0.2
+types-pillow==10.1.0.2
     # via asu (pyproject.toml)
-types-pytz==2023.3.0.1
+types-pytz==2023.3.1.1
     # via django-stubs
-types-pyyaml==6.0.12.11
+types-pyyaml==6.0.12.12
     # via
     #   django-stubs
     #   djangorestframework-stubs
-types-requests==2.31.0.2
+types-requests==2.31.0.10
     # via djangorestframework-stubs
-types-urllib3==1.26.25.14
-    # via types-requests
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   celery-types
     #   django-stubs
@@ -337,23 +330,24 @@ tzdata==2023.3
     #   django-celery-beat
 uritemplate==4.1.1
     # via drf-spectacular
-urllib3==1.26.16
+urllib3==2.0.7
     # via
     #   botocore
     #   requests
     #   sentry-sdk
-vine==5.0.0
+    #   types-requests
+vine==5.1.0
     # via
     #   amqp
     #   celery
     #   kombu
-watchfiles==0.20.0
+watchfiles==0.21.0
     # via asu (pyproject.toml)
-wcwidth==0.2.6
+wcwidth==0.2.9
     # via prompt-toolkit
-wrapt==1.15.0
+wrapt==1.16.0
     # via deprecated
-zope-interface==6.0
+zope-interface==6.1
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:

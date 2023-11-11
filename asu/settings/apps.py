@@ -21,7 +21,7 @@ if DEBUG:
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",  # noqa: E501
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",
     "DEFAULT_VERSION": env.str("API_DEFAULT_VERSION"),
     "ALLOWED_VERSIONS": env.list("API_ALLOWED_VERSIONS"),
     "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,

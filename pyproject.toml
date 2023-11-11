@@ -76,6 +76,7 @@ select = [
     "C90", # mccabe
     "I", # isort
 ]
+target-version = "py311"
 line-length = 88
 exclude = ["migrations"]
 ignore = ["B904", "RUF012"]

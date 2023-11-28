@@ -15,7 +15,6 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
 INSTALLED_APPS = [
-    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,6 +44,12 @@ INSTALLED_APPS = [
     "two_factor",
     "two_factor.plugins.phonenumber",
 ]
+
+if DEBUG:
+    # Overrides `runserver` command to add WebSocket capabilities
+    # in local development environment. In production, `uvicorn`
+    # is used instead.
+    INSTALLED_APPS.insert(0, "daphne")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

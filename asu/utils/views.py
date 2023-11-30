@@ -67,7 +67,7 @@ class ViewSetMeta(type):
 class ExtendedViewSet(viewsets.GenericViewSet[MT], metaclass=ViewSetMeta):
     mixins: Sequence[str] | None = None
     schemas: dict[str, Any] | None = None
-    serializer_classes: dict[str, Any] = {}
+    serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}
     filterset_classes: dict[str, type[filters.FilterSet]] = {}
     scopes: dict[str, list[str] | str] = {}
     request: UserRequest
@@ -99,8 +99,10 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT], metaclass=ViewSetMeta):
     def filterset_class(self) -> type[filters.FilterSet] | None:
         return self.filterset_classes.get(self.action)
 
-    def get_serializer_class(self) -> type[serializers.Serializer[Any]]:
-        return self.serializer_classes.get(self.action, self.serializer_class)
+    def get_serializer_class(self) -> type[serializers.BaseSerializer[Any]]:
+        serializer = self.serializer_classes.get(self.action, self.serializer_class)
+        assert serializer is not None
+        return serializer
 
     @property
     def required_scopes(self) -> list[str]:

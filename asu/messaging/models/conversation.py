@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import OuterRef, Q, QuerySet
@@ -28,7 +29,8 @@ class ConversationManager(models.Manager["Conversation"]):
         mapping = dict(zip(fields, fields, strict=True))
 
         messages = (
-            self.model.messages.rel.model.objects.filter(conversations=OuterRef("pk"))
+            apps.get_model("messaging.Message")
+            .objects.filter(conversations=OuterRef("pk"))
             .order_by("-date_created")
             .values(data=JSONObject(**mapping))
         )
@@ -50,7 +52,7 @@ class Conversation(models.Model):
     )
 
     messages = models.ManyToManyField(
-        "Message", related_name="conversations", verbose_name=_("messages")
+        "messaging.Message", related_name="conversations", verbose_name=_("messages")
     )
 
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)

@@ -48,7 +48,7 @@ coverage:
 format:
 	pre-commit run
 type:
-	$(ex) /bin/sh -c "MYPY_FORCE_COLOR=true mypy asu/ |\
+	$(ex) /bin/sh -c "MYPY_FORCE_COLOR=true mypy asu/ --no-incremental |\
 					   grep -v 'Metaclass conflict\|Import cycle'"
 docs:
 	make -C docs clean html

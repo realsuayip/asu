@@ -4,7 +4,7 @@ import functools
 import io
 import uuid
 from datetime import timedelta
-from typing import Any, AnyStr
+from typing import Any, AnyStr, ClassVar
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
@@ -162,7 +162,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
-    objects = UserManager()  # type: ignore[assignment]
+    objects: ClassVar[UserManager] = UserManager()
 
     class Meta:
         verbose_name = _("user")

@@ -117,7 +117,7 @@ class UserRelationMixin:
     ) -> QuerySet[T]:
         # Given m2m through model, return queryset
         # containing objects for both directions
-        return model.objects.filter(
+        return model._default_manager.filter(
             (Q(from_user=from_user) & Q(to_user=to_user))
             | (Q(to_user=from_user) & Q(from_user=to_user))
         )

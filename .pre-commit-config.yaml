@@ -5,9 +5,15 @@ repos:
       - id: trailing-whitespace
       - id: mixed-line-ending
         args: [ '--fix=lf' ]
+      - id: debug-statements
+      - id: detect-private-key
+      - id: check-merge-conflict
       - id: end-of-file-fixer
+      - id: check-toml
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.1.5'
+    rev: 'v0.1.6'
     hooks:
       - id: ruff
       - id: ruff-format

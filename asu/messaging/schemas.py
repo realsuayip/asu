@@ -36,6 +36,6 @@ conversation = {
         summary="Read a conversation",
         description="Reading a conversation will mark"
         " received messages as read, until the specified threshold.",
-        responses={204: ReadConversationSerializer, 404: APIError},
+        responses={200: ReadConversationSerializer, 404: APIError},
     ),
 }

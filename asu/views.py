@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.routers import APIRootView as BaseAPIRootView
 
 from django_stubs_ext import StrOrPromise
+from ipware import get_client_ip
 
 from asu.utils import messages
 
@@ -56,10 +57,12 @@ class APIRootView(BaseAPIRootView):
             regex = str(resolver.pattern)
             routes[regex] = values
 
+        ip, _ = get_client_ip(request)
         ret = {
             "status": "ok",
             "version": request.version,
             "user-agent": request.headers.get("user-agent"),
+            "ip": ip,
             "routes": routes,
         }
         return Response(ret)

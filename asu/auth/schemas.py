@@ -248,6 +248,20 @@ relations = extend_schema(
     ],
 )
 
+deactivate = extend_schema(
+    "Deactivate authenticated user",
+    responses={204: None, 400: APIError},
+    examples=[
+        OpenApiExample(
+            "bad password",
+            value=get_error_repr({"password": ["Your password was not correct."]}),
+            response_only=True,
+            status_codes=["400"],
+        )
+    ],
+)
+
+
 user = {
     "create": create,
     "retrieve": retrieve,
@@ -265,6 +279,7 @@ user = {
     "profile_picture": profile_picture,
     "ticket": ticket,
     "relations": relations,
+    "deactivate": deactivate,
 }
 
 list_follow_requests = extend_schema(summary="List follow requests")

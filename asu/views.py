@@ -4,15 +4,22 @@ from typing import Any, cast
 
 from django import urls
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.urls import URLPattern, URLResolver, reverse
+from django.urls import URLPattern, URLResolver
 from django.utils.translation import gettext
 from django.views import defaults
 
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.routers import APIRootView as BaseAPIRootView
+from rest_framework.views import APIView
 
 from django_stubs_ext import StrOrPromise
+from drf_spectacular.plumbing import get_relative_url, set_query_parameters
+from drf_spectacular.settings import spectacular_settings
+from drf_spectacular.utils import extend_schema
+from drf_spectacular.views import AUTHENTICATION_CLASSES
 from ipware import get_client_ip
 
 from asu.utils import messages
@@ -26,6 +33,7 @@ class APIRootView(BaseAPIRootView):
             relpath = reverse(
                 namespace + ":" + str(url.name),
                 kwargs=dict(url.pattern.regex.groupindex),
+                request=self.request,
             )
         except urls.NoReverseMatch:
             return None
@@ -106,6 +114,33 @@ class APIRootView(BaseAPIRootView):
         if url is not None:
             value["url"] = url
         return value
+
+
+class DocsView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = spectacular_settings.SERVE_PERMISSIONS
+    authentication_classes = AUTHENTICATION_CLASSES
+
+    url_name = "docs:openapi-schema"
+    template_name = "docs.html"
+
+    @extend_schema(exclude=True)
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(
+            data={
+                "title": spectacular_settings.TITLE,
+                "schema_url": self.get_schema_url(request),
+            },
+            template_name=self.template_name,
+        )
+
+    def get_schema_url(self, request: Request) -> str:
+        schema_url = get_relative_url(reverse(self.url_name, request=request))
+        return set_query_parameters(
+            url=schema_url,
+            lang=request.GET.get("lang"),
+            version=request.GET.get("version"),
+        )
 
 
 def as_json(message: StrOrPromise, /, *, status: int) -> JsonResponse:

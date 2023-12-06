@@ -3,13 +3,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path, re_path
 
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
+from drf_spectacular.views import SpectacularAPIView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
 from two_factor import views as tf
 
 from asu.messaging.websocket import ConversationConsumer
 from asu.views import (
     APIRootView,
+    DocsView,
     bad_request,
     page_not_found,
     permission_denied,
@@ -25,11 +26,7 @@ api_urls: list[URLResolver | URLPattern] = [
 
 docs_urls = [
     path("schema/", SpectacularAPIView.as_view(), name="openapi-schema"),
-    path(
-        "",
-        SpectacularRedocView.as_view(url_name="docs:openapi-schema"),
-        name="browse",
-    ),
+    path("", DocsView.as_view(), name="browse"),
 ]
 
 account_urls = [

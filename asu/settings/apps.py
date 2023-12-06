@@ -64,20 +64,11 @@ ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace
 SPECTACULAR_SETTINGS = {
     "VERSION": None,
     "TITLE": "asu API",
+    "DESCRIPTION": "Welcome to asu OpenAPI documentation. Select an endpoint"
+    " from the sidebar to start.",
     "SCHEMA_PATH_PREFIX": "/api",
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_COERCE_PATH_PK_SUFFIX": True,
-    "REDOC_UI_SETTINGS": {
-        "expandResponses": "200,201",
-        "downloadFileName": "asu-openapi-spec",
-        "theme": {
-            "typography": {
-                "fontFamily": _system_font,
-                "code": {"fontFamily": _system_font_mono},
-                "headings": {"fontFamily": _system_font, "fontWeight": 600},
-            },
-        },
-    },
     "OAUTH2_FLOWS": ["authorizationCode", "clientCredentials"],
     "OAUTH2_AUTHORIZATION_URL": reverse_lazy("oauth2_provider:authorize"),
     "OAUTH2_TOKEN_URL": reverse_lazy("oauth2_provider:token"),

@@ -152,7 +152,7 @@ class APIError(serializers.Serializer[dict[str, Any]]):
     message = serializers.CharField(help_text="Human readable summary of the error.")
     errors = serializers.JSONField(  # type: ignore[assignment]
         required=False,
-        help_text="This could a list of errors, or a mapping with the"
+        help_text="This could be a list of errors, or a mapping with the"
         " keys referencing the given parameters.",
     )
 

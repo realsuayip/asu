@@ -185,6 +185,7 @@ me = lambda f: get_me(patch_me(f))  # noqa: E731
 by = extend_schema(
     summary="Retrieve a user by username",
     responses={200: UserPublicReadSerializer, 404: APIError},
+    filters=True,
 )
 
 reset_password = extend_schema(
@@ -246,6 +247,7 @@ relations = extend_schema(
             status_codes=["400"],
         ),
     ],
+    filters=True,
 )
 
 deactivate = extend_schema(

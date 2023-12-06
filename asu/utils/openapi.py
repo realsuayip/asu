@@ -20,13 +20,6 @@ class DynamicFieldsModelSerializerExtension(OpenApiSerializerExtension):
         return self.target.ref_name
 
 
-class CustomAutoSchema(AutoSchema):
-    def get_filter_backends(self) -> Any:
-        # Display query parameters for filters if the action/view
-        # defines `filter_backends`.
-        return getattr(self.view, "filter_backends", [])
-
-
 def get_error_repr(errors: Any) -> dict[str, Any]:
     # Create an error response representation from given
     # errors. Used in OpenAPI examples.

@@ -55,7 +55,7 @@ services:
     container_name: asu-websocket
     command: >
       gunicorn asu.gateways.websocket
-      --bind 0.0.0.0:8000
+      --bind 0.0.0.0:7000
       --workers 4
       --worker-class asu.utils.workers.UvicornWorker
       --access-logfile '-'

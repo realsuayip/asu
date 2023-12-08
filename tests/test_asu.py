@@ -62,8 +62,8 @@ class TestAPIRoot(TestCase):
         content = response.json()
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual("ok", content["status"])
 
+        self.assertIn("ip", content)
         self.assertIn("routes", content)
         self.assertIn("user-agent", content)
         self.assertIn("version", content)

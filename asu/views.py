@@ -67,11 +67,10 @@ class APIRootView(BaseAPIRootView):
 
         ip, _ = get_client_ip(request)
         ret = {
-            "status": "ok",
-            "secure": request.is_secure(),
             "version": request.version,
-            "user-agent": request.headers.get("user-agent"),
+            "secure": request.is_secure(),
             "ip": ip,
+            "user-agent": request.headers.get("user-agent"),
             "routes": routes,
         }
         return Response(ret)

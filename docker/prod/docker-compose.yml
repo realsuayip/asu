@@ -25,7 +25,7 @@ services:
       context: ../..
       dockerfile: docker/prod/nginx/Dockerfile
     ports:
-      - "80:80"
+      - "443:443"
     restart: unless-stopped
 
   web: &django

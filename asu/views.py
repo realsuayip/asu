@@ -5,9 +5,9 @@ from typing import Any, cast
 from django import urls
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import URLPattern, URLResolver
-from django.utils.translation import gettext
 from django.views import defaults
 
+from rest_framework.exceptions import APIException, NotFound, PermissionDenied
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -15,7 +15,6 @@ from rest_framework.reverse import reverse
 from rest_framework.routers import APIRootView as BaseAPIRootView
 from rest_framework.views import APIView
 
-from django_stubs_ext import StrOrPromise
 from drf_spectacular.plumbing import get_relative_url, set_query_parameters
 from drf_spectacular.settings import spectacular_settings
 from drf_spectacular.utils import extend_schema
@@ -23,6 +22,7 @@ from drf_spectacular.views import AUTHENTICATION_CLASSES
 from ipware import get_client_ip
 
 from asu.utils import messages
+from asu.utils.rest import exception_handler
 
 
 class APIRootView(BaseAPIRootView):
@@ -143,8 +143,25 @@ class DocsView(APIView):
         )
 
 
-def as_json(message: StrOrPromise, /, *, status: int) -> JsonResponse:
-    return JsonResponse({"detail": message}, status=status)
+class GenericServerError(APIException):
+    status_code = 500
+    default_detail = messages.GENERIC_ERROR
+    default_code = "server_error"
+
+
+class GenericBadRequest(APIException):
+    status_code = 400
+    default_detail = messages.GENERIC_ERROR
+    default_code = "invalid"
+
+
+def as_json(exc: type[APIException]) -> JsonResponse:
+    # To properly serialize the error, the exception
+    # class must be a subclass of APIException.
+    assert issubclass(exc, APIException)
+
+    response = cast(Response, exception_handler(exc(), {}))
+    return JsonResponse(response.data, status=response.status_code)
 
 
 def should_return_json(request: HttpRequest) -> bool:
@@ -155,26 +172,23 @@ def should_return_json(request: HttpRequest) -> bool:
 
 def bad_request(request: HttpRequest, exception: Exception) -> HttpResponse:
     if should_return_json(request):
-        return as_json(messages.GENERIC_ERROR, status=400)
+        return as_json(GenericBadRequest)
     return defaults.bad_request(request, exception)
 
 
 def server_error(request: HttpRequest) -> HttpResponse:
     if should_return_json(request):
-        return as_json(messages.GENERIC_ERROR, status=500)
+        return as_json(GenericServerError)
     return defaults.server_error(request)
 
 
 def permission_denied(request: HttpRequest, exception: Exception) -> HttpResponse:
     if should_return_json(request):
-        return as_json(
-            gettext("You do not have permission to perform this action."),
-            status=403,
-        )
+        return as_json(PermissionDenied)
     return defaults.permission_denied(request, exception)
 
 
 def page_not_found(request: HttpRequest, exception: Exception) -> HttpResponse:
     if should_return_json(request):
-        return as_json(gettext("Not found."), status=404)
+        return as_json(NotFound)
     return defaults.page_not_found(request, exception)

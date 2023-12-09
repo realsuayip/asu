@@ -1,9 +1,20 @@
+from typing import Any, Callable, NoReturn
+from unittest.mock import patch
+
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.test import TestCase
 from django.urls import reverse
 
 from asu.models import ProjectVariable
 from asu.utils.cache import build_vary_key
+
+
+def error_view(exc: type[Exception]) -> Callable[..., NoReturn]:
+    def view(*args: Any, **kwargs: Any) -> NoReturn:
+        raise exc
+
+    return view
 
 
 class TestProjectVariable(TestCase):
@@ -68,19 +79,112 @@ class TestAPIRoot(TestCase):
         self.assertIn("user-agent", content)
         self.assertIn("version", content)
 
-    def test_alternating_error_page(self):
+    def test_not_found(self):
+        expected_json = {
+            "status": 404,
+            "code": "not_found",
+            "message": "Not found.",
+        }
         response = self.client.get("bad-page")
 
-        self.assertEqual(404, response.status_code)
+        # HTML
+        self.assertContains(
+            response,
+            "requested resource was not found on this server",
+            status_code=404,
+        )
         self.assertIn("text/html", response.headers["Content-Type"])
 
+        # JSON with /api/ prefix
         response = self.client.get("/api/bad-page")
         self.assertEqual(404, response.status_code)
         self.assertIn("application/json", response.headers["Content-Type"])
+        self.assertEqual(expected_json, response.json())
 
+        # JSON with request content-type
         response = self.client.get("bad-page", CONTENT_TYPE="application/json")
         self.assertEqual(404, response.status_code)
         self.assertIn("application/json", response.headers["Content-Type"])
+        self.assertEqual(expected_json, response.json())
+
+    def test_bad_request(self):
+        expected_json = {
+            "status": 400,
+            "code": "invalid",
+            "message": "We could not handle your request. Please try again later.",
+        }
+
+        with patch("asu.views.APIRootView.get", error_view(SuspiciousOperation)):
+            response = self.client.get(reverse("api:api-root"))
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn("application/json", response.headers["Content-Type"])
+        self.assertEqual(expected_json, response.json())
+
+        # Test HTML version
+        with patch("two_factor.views.LoginView.get", error_view(SuspiciousOperation)):
+            response = self.client.get(reverse("two_factor:login"))
+            self.assertContains(
+                response,
+                "We could not handle your request",
+                status_code=400,
+            )
+
+    def test_server_error(self):
+        # To properly test server error case, change client instance
+        # so that exceptions are not propagated to the test.
+        client = self.client_class(raise_request_exception=False)
+        expected_json = {
+            "status": 500,
+            "code": "server_error",
+            "message": "We could not handle your request. Please try again later.",
+        }
+
+        with patch("asu.views.APIRootView.get", error_view(ZeroDivisionError)):
+            response = client.get(
+                reverse("api:api-root"), raise_request_exception=False
+            )
+
+        self.assertEqual(500, response.status_code)
+        self.assertIn("application/json", response.headers["Content-Type"])
+        self.assertEqual(expected_json, response.json())
+
+        # Test HTML version
+        with patch("two_factor.views.LoginView.get", error_view(ZeroDivisionError)):
+            response = client.get(reverse("two_factor:login"))
+            self.assertContains(
+                response,
+                "We could not handle your request",
+                status_code=500,
+            )
+
+    def test_permission_denied(self):
+        expected_json = {
+            "status": 403,
+            "code": "permission_denied",
+            "message": "You do not have permission to perform this action.",
+        }
+
+        # Since REST framework automatically handles PermissionDenied cases,
+        # use non-API view with explict accept headers to simulate this error.
+        with patch("two_factor.views.LoginView.get", error_view(PermissionDenied)):
+            response = self.client.get(
+                reverse("two_factor:login"),
+                headers={"Content-Type": "application/json"},
+            )
+
+        self.assertEqual(403, response.status_code)
+        self.assertIn("application/json", response.headers["Content-Type"])
+        self.assertEqual(expected_json, response.json())
+
+        # Test HTML version
+        with patch("two_factor.views.LoginView.get", error_view(PermissionDenied)):
+            response = self.client.get(reverse("two_factor:login"))
+            self.assertContains(
+                response,
+                "You do not have permission to perform this action",
+                status_code=403,
+            )
 
     def test_docs(self):
         browser = reverse("docs:browse")

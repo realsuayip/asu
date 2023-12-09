@@ -195,3 +195,7 @@ class TestAPIRoot(TestCase):
 
         self.assertEqual(200, r1.status_code)
         self.assertEqual(200, r2.status_code)
+
+    def test_empty_metadata(self):
+        response = self.client.options(reverse("api:api-root"))
+        self.assertEqual(b"", response.content)

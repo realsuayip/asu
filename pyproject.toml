@@ -118,7 +118,8 @@ django_settings_module = "asu.settings"
 [tool.coverage.run]
 source = ["asu"]
 omit = [
-    "asu/gateways/*"
+    "asu/gateways/*",
+    "asu/utils/workers.py",
 ]
 
 [tool.coverage.report]

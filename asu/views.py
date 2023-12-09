@@ -161,7 +161,11 @@ def as_json(exc: type[APIException]) -> JsonResponse:
     assert issubclass(exc, APIException)
 
     response = cast(Response, exception_handler(exc(), {}))
-    return JsonResponse(response.data, status=response.status_code)
+    return JsonResponse(
+        response.data,
+        status=response.status_code,
+        json_dumps_params={"separators": (",", ":")},
+    )
 
 
 def should_return_json(request: HttpRequest) -> bool:

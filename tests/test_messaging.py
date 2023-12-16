@@ -1,10 +1,11 @@
 import datetime
+import time
+from unittest.mock import patch
 
-import django.core.signing
+from django.core.signing import b62_encode
 from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.functional import cached_property
 
 from rest_framework.test import APITestCase
 
@@ -12,8 +13,8 @@ from asgiref.sync import sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from asu.auth.models import UserFollow
+from asu.gateways.dev import websocket
 from asu.messaging.models import Conversation, ConversationRequest, Message
-from asu.messaging.websocket import ConversationConsumer
 from tests.factories import UserFactory
 
 
@@ -801,25 +802,70 @@ class TestMessaging(APITestCase):
 
     # Websocket related
 
-    @cached_property
-    def communicator(self):
-        return WebsocketCommunicator(
-            ConversationConsumer.as_asgi(),
-            "/ws/conversations/",
-        )
+    def get_conversation_communicator(self, ticket: str = ""):
+        path = "/conversations/"
+        if ticket:
+            path += f"?ticket={ticket}"
+        return WebsocketCommunicator(websocket, path)
 
-    async def test_ws_connects(self):
-        connected, _ = await self.communicator.connect()
-        self.assertTrue(connected)
-        await self.communicator.receive_nothing()
-        await self.communicator.disconnect()
+    async def test_ws_no_ticket(self):
+        communicator = self.get_conversation_communicator()
+
+        connected, _ = await communicator.connect()
+        self.assertFalse(connected)
 
     async def test_ws_bad_ticket(self):
-        await self.communicator.connect()
-        await self.communicator.send_json_to({"ticket": "ticket"})
+        communicator = self.get_conversation_communicator("bad-ticket:here")
 
-        with self.assertRaises(django.core.signing.BadSignature):
-            await self.communicator.receive_from(timeout=0.001)
+        connected, _ = await communicator.connect()
+        self.assertFalse(connected)
+
+    async def test_ws_expired_ticket(self):
+        with patch(
+            "django.core.signing.TimestampSigner.timestamp",
+            return_value=b62_encode(int(time.time()) - 11),
+        ):
+            # This will create a ticket that is 11 seconds old. Tickets
+            # are not valid after 10 seconds of their creation.
+            ticket = self.user1.create_ticket(ident="websocket")
+
+        communicator = self.get_conversation_communicator(ticket)
+
+        connected, _ = await communicator.connect()
+        self.assertFalse(connected)
+
+    async def test_ws_connect(self):
+        ticket = self.user1.create_ticket(ident="websocket")
+        communicator = self.get_conversation_communicator(ticket)
+
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        await communicator.receive_nothing()
+        await communicator.disconnect()
+
+    async def test_ws_discards_incoming(self):
+        ticket = self.user1.create_ticket(ident="websocket")
+        communicator = self.get_conversation_communicator(ticket)
+
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        await communicator.send_to("Hello")
+        await communicator.receive_nothing()
+        await communicator.disconnect()
+
+    async def test_ws_connect_scope_correct(self):
+        ticket = self.user1.create_ticket(ident="websocket")
+        communicator = self.get_conversation_communicator(ticket)
+
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        self.assertEqual(self.user1.id, communicator.scope["user_id"])
+        self.assertEqual(self.user1.uuid.hex, communicator.scope["user_uuid"])
+
+        await communicator.disconnect()
 
     def _capture_message(self, sender, recipient, message):
         with self.captureOnCommitCallbacks(execute=True) as callbacks:
@@ -827,22 +873,23 @@ class TestMessaging(APITestCase):
             return response, callbacks
 
     async def test_ws_sends_message(self):
-        await self.communicator.connect()
-
-        # Verify ticket
+        # Get ticket via API.
         await sync_to_async(self.client.force_login)(self.user1)
         response = await sync_to_async(self.client.post)(
             reverse("api:auth:user-ticket"),
             data={"scope": "websocket"},
         )
         ticket = response.data["ticket"]
-        await self.communicator.send_json_to({"ticket": ticket})
+
+        communicator = self.get_conversation_communicator(ticket)
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
 
         # Send message while connected to conversation ws
         api_result, callbacks = await sync_to_async(self._capture_message)(
             self.user2, self.user1, "Hi"
         )
-        ws_result = await self.communicator.receive_json_from(timeout=0.01)
+        ws_result = await communicator.receive_json_from()
 
         message_id = api_result.data["id"]
         timestamp = api_result.data["date_created"]
@@ -855,4 +902,4 @@ class TestMessaging(APITestCase):
         self.assertEqual(ws_result["conversation_id"], target_conversation.id)
         self.assertEqual(ws_result["message_id"], message_id)
         self.assertEqual(ws_result["timestamp"], timestamp)
-        await self.communicator.disconnect()
+        await communicator.disconnect()

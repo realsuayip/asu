@@ -7,8 +7,8 @@ from channels.security.websocket import AllowedHostsOriginValidator
 # is populated before importing code that may import ORM models.
 django.setup(set_prefix=False)
 
+from asu.auth.middleware import QueryAuthMiddleware  # noqa: E402
 from asu.urls import websocket_urls  # noqa: E402
 
-application = ProtocolTypeRouter(
-    {"websocket": AllowedHostsOriginValidator(URLRouter(websocket_urls))}
-)
+websocket = QueryAuthMiddleware(AllowedHostsOriginValidator(URLRouter(websocket_urls)))
+application = ProtocolTypeRouter({"websocket": websocket})

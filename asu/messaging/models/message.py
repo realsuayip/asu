@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from django.conf import settings
 from django.db import models, transaction
@@ -17,6 +17,13 @@ if TYPE_CHECKING:
 
 
 channel_layer = get_channel_layer()
+
+
+class MessageEvent(TypedDict):
+    type: Literal["conversation.message"]
+    conversation_id: int
+    message_id: int
+    timestamp: str
 
 
 class MessageManager(models.Manager["Message"]):
@@ -65,12 +72,12 @@ class Message(models.Model):
 
     def websocket_send(self, target_conversation_id: int) -> None:
         group = "conversations_%s" % self.recipient_id
-        event = {
-            "type": "conversation.message",
-            "conversation_id": target_conversation_id,
-            "message_id": self.pk,
-            "timestamp": self.date_created.isoformat()[:-6] + "Z",
-        }
+        event = MessageEvent(
+            type="conversation.message",
+            conversation_id=target_conversation_id,
+            message_id=self.pk,
+            timestamp=self.date_created.isoformat()[:-6] + "Z",
+        )
         send = async_to_sync(channel_layer.group_send)
         send(group, event)
 

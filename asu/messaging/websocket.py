@@ -1,4 +1,8 @@
+from typing import Any
+
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+
+from asu.messaging.models.message import MessageEvent
 
 
 class ConversationConsumer(AsyncJsonWebsocketConsumer):
@@ -9,12 +13,12 @@ class ConversationConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add(self.get_group(), self.channel_name)
         await self.accept()
 
-    async def disconnect(self, code: str) -> None:
+    async def disconnect(self, code: int) -> None:
         await self.channel_layer.group_discard(self.get_group(), self.channel_name)
 
-    async def conversation_message(self, event: str) -> None:
+    async def conversation_message(self, event: MessageEvent) -> None:
         await self.send_json(event)
 
-    async def websocket_receive(self, message: str) -> None:
+    async def websocket_receive(self, message: dict[str, Any]) -> None:
         # Deny incoming frames.
         await self.close()

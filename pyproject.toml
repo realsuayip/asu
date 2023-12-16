@@ -66,7 +66,7 @@ line-length = 88
 
 [tool.ruff]
 fix = true
-fixable = ["I", "F401"]
+fixable = ["I"]
 show-fixes = true
 select = [
     "E", # pycodestyle errors
@@ -81,7 +81,6 @@ select = [
 ]
 target-version = "py311"
 line-length = 88
-exclude = ["migrations"]
 ignore = ["B904", "RUF012"]
 
 [tool.ruff.isort]
@@ -102,6 +101,9 @@ rest_framework = ["rest_framework"]
 
 [tool.ruff.mccabe]
 max-complexity = 20
+
+[tool.ruff.extend-per-file-ignores]
+"*/migrations/*" = ["E501"]
 
 [tool.mypy]
 plugins = [

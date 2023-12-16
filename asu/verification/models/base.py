@@ -205,7 +205,7 @@ class ConsentVerification(Verification):
         return "%s <#%s>" % (self.email, self.pk)
 
     @classproperty
-    def ident(cls) -> str:
+    def ident(cls) -> str:  # noqa: N805
         return "consent_" + cls._meta.db_table
 
     def create_consent(self) -> str:

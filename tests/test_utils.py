@@ -19,7 +19,7 @@ class TestFileUtils(TestCase):
     @classmethod
     def setUpClass(cls):
         file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
-        cls.image = open(file_path, "rb")
+        cls.image = open(file_path, "rb")  # noqa: SIM115
 
     @classmethod
     def tearDownClass(cls):

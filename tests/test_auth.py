@@ -673,20 +673,20 @@ class TestAuth(APITestCase):
 
     def test_upload_delete_profile_picture(self):
         file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
-        image = open(file_path, "rb")
 
         self.assertFalse(self.user1.profile_picture.name)
         self.client.force_login(self.user1)
 
-        response = self.client.put(
-            reverse("api:auth:user-profile-picture"),
-            data={"profile_picture": image},
-        )
+        with open(file_path, "rb") as image:
+            response = self.client.put(
+                reverse("api:auth:user-profile-picture"),
+                data={"profile_picture": image},
+            )
         self.assertEqual(200, response.status_code)
 
-        image.close()
         self.user1.refresh_from_db()
         self.assertTrue(self.user1.profile_picture.name)
+        self.assertTrue(self.user1.profile_picture.name.endswith(".jpeg"))
 
         r2 = self.client.delete(reverse("api:auth:user-profile-picture"))
         self.assertEqual(204, r2.status_code)

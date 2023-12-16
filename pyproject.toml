@@ -78,10 +78,23 @@ select = [
     "C4", # flake8-comprehensions
     "C90", # mccabe
     "I", # isort
+    "N", # pep8-naming,
+    "BLE", # flake8-blind-except
+    "DTZ", # flake8-datetimez
+    "DJ", # flake8-django
+    "FA", # flake8-future-annotations
+    "G", # flake8-logging-format
+    "T20", # flake8-print
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "PTH", # flake8-use-pathlib
+    "ERA", # eradicate
+    "PL", # pylint
+    "PERF", # perflint
 ]
 target-version = "py311"
 line-length = 88
-ignore = ["B904", "RUF012"]
+ignore = ["B904", "RUF012", "SIM105", "PTH123", "PLR2004", "PLR0913", "PLR0911"]
 
 [tool.ruff.isort]
 combine-as-imports = true

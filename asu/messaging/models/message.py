@@ -64,6 +64,13 @@ class Message(models.Model):
 
     objects = MessageManager()
 
+    class Meta:
+        verbose_name = _("message")
+        verbose_name_plural = _("messages")
+
+    def __str__(self) -> str:
+        return str(self.pk)
+
     @cached_property
     def sender_conversation(self) -> Conversation:
         # Used in "MessageComposeSerializer" to retrieve related
@@ -80,7 +87,3 @@ class Message(models.Model):
         )
         send = async_to_sync(channel_layer.group_send)
         send(group, event)
-
-    class Meta:
-        verbose_name = _("message")
-        verbose_name_plural = _("messages")

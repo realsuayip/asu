@@ -18,25 +18,21 @@ class UserThrough(models.Model):
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["from_user", "to_user"],
+                name="unique_%(app_label)s_%(class)s",
+            )
+        ]
         abstract = True
 
 
 class UserFollow(UserThrough):
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["from_user", "to_user"], name="unique_user_follow"
-            )
-        ]
+    pass
 
 
 class UserBlock(UserThrough):
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["from_user", "to_user"], name="unique_user_block"
-            )
-        ]
+    pass
 
 
 class UserFollowRequest(UserThrough):

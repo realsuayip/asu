@@ -1,3 +1,5 @@
+from typing import Any
+
 from django import template
 
 from asu.models import ProjectVariable
@@ -6,7 +8,7 @@ register = template.Library()
 
 
 @register.simple_tag
-def get_variable(name: str) -> str:
+def get_variable(name: str) -> Any:
     """
     A template tag to get some constant values used in templates:
          {% get_variable "build.BRAND" as brand %}

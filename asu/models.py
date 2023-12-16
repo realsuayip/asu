@@ -20,7 +20,7 @@ class ProjectVariableManager(models.Manager["ProjectVariable"]):
         "URL_CONTACT": settings.PROJECT_URL_CONTACT,
     }
 
-    def get_value(self, *, name: str) -> str:
+    def get_value(self, *, name: str) -> Any:
         """
         Get a project variable, either from database or some build
         variables defined above. This function includes a subset of
@@ -42,7 +42,7 @@ class ProjectVariableManager(models.Manager["ProjectVariable"]):
         return self.BUILD_VARS[name]
 
     @cached_context(key="variable", vary="name")
-    def from_db(self, name: str) -> str:
+    def from_db(self, name: str) -> Any:
         try:
             var = self.only("value").get(name=name)
         except self.model.DoesNotExist as exc:
@@ -54,7 +54,7 @@ class ProjectVariableManager(models.Manager["ProjectVariable"]):
 
 class ProjectVariable(models.Model):
     name = models.TextField(_("name"), unique=True)
-    value = models.TextField(_("value"))
+    value = models.JSONField(_("value"))
 
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)

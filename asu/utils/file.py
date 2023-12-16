@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import mimetypes
-import os
 import uuid
+from pathlib import Path
 from typing import Any, AnyStr
 
 from django.core.exceptions import ValidationError
@@ -66,8 +66,11 @@ class UserContentPath:
         self.template = self.base_path + template
 
     def __call__(self, instance: Any, filename: str) -> str:
-        _, ext = os.path.splitext(filename)
-        return self.template.format(instance=instance, uuid=uuid.uuid4().hex, ext=ext)
+        return self.template.format(
+            instance=instance,
+            uuid=uuid.uuid4().hex,
+            ext=Path(filename).suffix,
+        )
 
 
 class S3StaticStorage(BaseS3StaticStorage):

@@ -65,9 +65,9 @@ class ProjectVariable(models.Model):
         verbose_name = _("project variable")
         verbose_name_plural = _("project variables")
 
+    def __str__(self) -> str:
+        return self.name
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         super().save(*args, **kwargs)
         cache.delete(build_vary_key("variable", "name", self.name))
-
-    def __str__(self) -> str:
-        return self.name

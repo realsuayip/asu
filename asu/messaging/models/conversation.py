@@ -70,6 +70,9 @@ class Conversation(models.Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return str(self.pk)
+
 
 class ConversationRequestManager(models.Manager["ConversationRequest"]):
     def compose(
@@ -134,6 +137,9 @@ class ConversationRequest(models.Model):
                 name="unique_conversation_request",
             )
         ]
+
+    def __str__(self) -> str:
+        return str(self.pk)
 
     @property
     def is_accepted(self) -> bool:

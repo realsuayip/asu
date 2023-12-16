@@ -103,9 +103,7 @@ class UserViewSet(ExtendedViewSet[User]):
         pk, user = self.kwargs["pk"], self.request.user
         if (user is not None) and user.is_authenticated and (str(user.pk) == pk):
             return self.request.user
-
-        user = super().get_object()
-        return user
+        return super().get_object()
 
     @action(
         detail=False,

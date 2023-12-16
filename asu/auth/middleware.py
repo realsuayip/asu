@@ -20,8 +20,7 @@ class UserActivityMiddleware:
         if user.is_authenticated and user.is_frozen:
             user.reactivate()
 
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
 
 
 class QueryAuthMiddleware:

@@ -18,7 +18,7 @@ from asu.utils.rest import PartialUpdateModelMixin
 from asu.utils.typing import UserRequest
 
 django_stubs_ext.monkeypatch(extra_classes=[viewsets.GenericViewSet])
-MT = TypeVar("MT", bound=models.Model, covariant=True)
+MT_co = TypeVar("MT_co", bound=models.Model, covariant=True)
 
 
 _viewset_mixin_map: dict[str, type[Any]] = {
@@ -32,7 +32,10 @@ _viewset_mixin_map: dict[str, type[Any]] = {
 
 class ViewSetMeta(type):
     def __new__(
-        mcs, name: str, bases: tuple[type[Any], ...], classdict: dict[str, Any]
+        mcs,  # noqa: N804
+        name: str,
+        bases: tuple[type[Any], ...],
+        classdict: dict[str, Any],
     ) -> ViewSetMeta:
         cls_mixins = classdict.get("mixins")
 
@@ -64,7 +67,7 @@ class ViewSetMeta(type):
         return cls
 
 
-class ExtendedViewSet(viewsets.GenericViewSet[MT], metaclass=ViewSetMeta):
+class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
     mixins: Sequence[str] | None = None
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}

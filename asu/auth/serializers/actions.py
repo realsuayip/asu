@@ -217,13 +217,11 @@ class UserBlockedSerializer(UserFollowingSerializer):
 
 
 class TicketSerializer(serializers.Serializer[dict[str, Any]]):
-    scope = serializers.ChoiceField(choices=["websocket"])
     ticket = serializers.CharField(read_only=True)
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         user = self.context["request"].user
-        scope = validated_data["scope"]
-        validated_data["ticket"] = user.create_ticket(ident=scope)
+        validated_data["ticket"] = user.create_websocket_ticket()
         return validated_data
 
 

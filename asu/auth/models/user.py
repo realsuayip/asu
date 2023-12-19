@@ -43,6 +43,11 @@ from asu.utils import mailing, messages
 from asu.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
 from asu.utils.messages import EmailMessage
 
+WEBSOCKET_AUTH_SALT = "websocket.auth"
+"""
+This salt is used while signing WebSocket authentication tickets.
+"""
+
 
 class UsernameValidator(RegexValidator):
     regex = r"^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$"
@@ -61,16 +66,12 @@ class UserManager(DjangoUserManager["User"]):
         """
         return self.exclude(Q(is_active=False) | Q(is_frozen=True))
 
-    def verify_ticket(
-        self, ticket: str, *, ident: str, max_age: int
-    ) -> tuple[int, str]:
-        signer = signing.TimestampSigner()
-        obj = signer.unsign_object(ticket, max_age=max_age)
-        given_ident, value = obj.get("ident"), obj.get("value")
-        if (not ident) or (not value) or ident != given_ident:
-            raise signing.BadSignature
-        pk, uuid = value
-        return pk, uuid
+    def verify_websocket_ticket(self, ticket: str) -> str:
+        """
+        Given ticket, verify it and return associated user ID as string.
+        """
+        signer = signing.TimestampSigner(salt=WEBSOCKET_AUTH_SALT)
+        return signer.unsign(ticket, max_age=3)
 
 
 class User(AbstractUser):  # type: ignore[django-manager-missing]
@@ -265,12 +266,12 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             # requests from strangers.
             return to_user.allows_all_messages
 
-    def create_ticket(self, *, ident: str) -> str:
-        assert ident, "ident might not be empty"
-
-        signer = signing.TimestampSigner()
-        obj = {"ident": ident, "value": (self.pk, self.uuid.hex)}
-        return signer.sign_object(obj)
+    def create_websocket_ticket(self) -> str:
+        """
+        Creates a ticket that can be used for WebSocket authentication.
+        """
+        signer = signing.TimestampSigner(salt=WEBSOCKET_AUTH_SALT)
+        return signer.sign(self.pk)
 
     def set_profile_picture(self, file: File[AnyStr]) -> None:
         if self.profile_picture:

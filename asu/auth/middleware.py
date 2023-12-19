@@ -40,11 +40,7 @@ class QueryAuthMiddleware:
         query = QueryDict(scope["query_string"])
         ticket = query.get("ticket", "")
         try:
-            user_id, uuid = User.objects.verify_ticket(
-                ticket, ident="websocket", max_age=10
-            )
-            scope["user_id"] = user_id
-            scope["user_uuid"] = uuid
+            scope["user_id"] = User.objects.verify_websocket_ticket(ticket)
         except signing.BadSignature:
             denier = WebsocketDenier()
             return await denier(scope, receive, send)

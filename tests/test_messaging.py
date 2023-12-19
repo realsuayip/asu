@@ -823,11 +823,11 @@ class TestMessaging(APITestCase):
     async def test_ws_expired_ticket(self):
         with patch(
             "django.core.signing.TimestampSigner.timestamp",
-            return_value=b62_encode(int(time.time()) - 11),
+            return_value=b62_encode(int(time.time()) - 4),
         ):
-            # This will create a ticket that is 11 seconds old. Tickets
-            # are not valid after 10 seconds of their creation.
-            ticket = self.user1.create_ticket(ident="websocket")
+            # This will create a ticket that is 4 seconds old. Tickets
+            # are not valid after 3 seconds of their creation.
+            ticket = self.user1.create_websocket_ticket()
 
         communicator = self.get_conversation_communicator(ticket)
 
@@ -835,7 +835,7 @@ class TestMessaging(APITestCase):
         self.assertFalse(connected)
 
     async def test_ws_connect(self):
-        ticket = self.user1.create_ticket(ident="websocket")
+        ticket = self.user1.create_websocket_ticket()
         communicator = self.get_conversation_communicator(ticket)
 
         connected, _ = await communicator.connect()
@@ -845,7 +845,7 @@ class TestMessaging(APITestCase):
         await communicator.disconnect()
 
     async def test_ws_discards_incoming(self):
-        ticket = self.user1.create_ticket(ident="websocket")
+        ticket = self.user1.create_websocket_ticket()
         communicator = self.get_conversation_communicator(ticket)
 
         connected, _ = await communicator.connect()
@@ -856,15 +856,13 @@ class TestMessaging(APITestCase):
         await communicator.disconnect()
 
     async def test_ws_connect_scope_correct(self):
-        ticket = self.user1.create_ticket(ident="websocket")
+        ticket = self.user1.create_websocket_ticket()
         communicator = self.get_conversation_communicator(ticket)
 
         connected, _ = await communicator.connect()
         self.assertTrue(connected)
 
-        self.assertEqual(self.user1.id, communicator.scope["user_id"])
-        self.assertEqual(self.user1.uuid.hex, communicator.scope["user_uuid"])
-
+        self.assertEqual(str(self.user1.id), communicator.scope["user_id"])
         await communicator.disconnect()
 
     def _capture_message(self, sender, recipient, message):
@@ -876,8 +874,7 @@ class TestMessaging(APITestCase):
         # Get ticket via API.
         await sync_to_async(self.client.force_login)(self.user1)
         response = await sync_to_async(self.client.post)(
-            reverse("api:auth:user-ticket"),
-            data={"scope": "websocket"},
+            reverse("api:auth:user-ticket")
         )
         ticket = response.data["ticket"]
 

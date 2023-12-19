@@ -136,18 +136,11 @@ class ConsentVerificationManager(VerificationManager[CV]):
         Check consent, if valid, fetch related RegistrationVerification
         object and return it, else return None. 'email' should be normalized.
         """
-        signer = signing.TimestampSigner()
+        signer = signing.TimestampSigner(salt=self.model.salt)
         try:
-            obj = signer.unsign_object(consent, max_age=self.eligible_period)
-            ident, value = obj.get("ident"), obj.get("value")
-            if (not value) or (not ident) or ident != self.model.ident:
-                raise signing.BadSignature
+            value = signer.unsign(consent, max_age=self.eligible_period)
             return self.eligible().get(uuid=value, email=email, **kwargs)
-        except (
-            signing.BadSignature,
-            signing.SignatureExpired,
-            self.model.DoesNotExist,
-        ):
+        except (signing.BadSignature, self.model.DoesNotExist):
             return None
 
 
@@ -205,15 +198,13 @@ class ConsentVerification(Verification):
         return "%s <#%s>" % (self.email, self.pk)
 
     @classproperty
-    def ident(cls) -> str:  # noqa: N805
+    def salt(cls) -> str:  # noqa: N805
         return "consent_" + cls._meta.db_table
 
     def create_consent(self) -> str:
         assert self.is_eligible
-
-        obj = {"ident": self.ident, "value": self.uuid.hex}
-        signer = signing.TimestampSigner()
-        return signer.sign_object(obj)
+        signer = signing.TimestampSigner(salt=self.salt)
+        return signer.sign(self.uuid.hex)
 
     @property
     def is_eligible(self) -> bool:

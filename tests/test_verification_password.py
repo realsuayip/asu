@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
@@ -117,3 +118,39 @@ class TestPasswordReset(APITestCase):
             self.url_send, data={"email": "nonexistent123@example.com"}
         )
         self.assertEqual(201, response.status_code)
+
+    def test_create_with_unusable_password(self):
+        # Users with unusable passwords should not be able to receive email
+        # containing the confirmation code.
+        self.client.force_authenticate(token=first_party_token)
+        user = UserFactory(email="test@example.com")
+        user.set_unusable_password()
+        user.save(update_fields=["password"])
+
+        response = self.client.post(self.url_send, data={"email": user.email})
+
+        self.assertEqual(201, response.status_code)
+        self.assertEqual(0, PasswordResetVerification.objects.count())
+
+    def test_change_with_unusable_password(self):
+        # Users with unusable passwords should not be able to change their
+        # passwords even if they (somehow) acquired a valid consent.
+        user = UserFactory()
+        user.set_unusable_password()
+        user.save(update_fields=["password"])
+
+        verification = PasswordResetVerification.objects.create(
+            user=user,
+            email=user.email,
+            date_verified=timezone.now(),
+            code="123456",
+        )
+        consent = verification.create_consent()
+
+        self.client.force_authenticate(user)
+        response = self.client.patch(
+            self.url_change,
+            data={"email": user.email, "password": "12345678*", "consent": consent},
+        )
+
+        self.assertContains(response, "e-mail could not be verified", status_code=400)

@@ -63,13 +63,16 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        request = self.context["request"]
-        password = validated_data["password"]
-        email = validated_data["email"]
-
+        email, password = validated_data["email"], validated_data["password"]
         try:
             user = User.objects.get(email=email)
-        except User.DoesNotExist:
+            if not user.has_usable_password():
+                # This block should be unreachable in normal circumstances since
+                # this condition is also checked before sending code to email.
+                # However, if the consent is generated somehow this check
+                # ensures the password validation still fails.
+                raise ValueError
+        except (User.DoesNotExist, ValueError):
             self.fail_email()
 
         try:
@@ -90,7 +93,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
 
         user.set_password(password)
         user.save(update_fields=["password", "date_modified"])
-        user.revoke_other_tokens(request.auth)
+        user.revoke_other_tokens(self.context["request"].auth)
 
         send_notice = functools.partial(
             user.send_transactional_mail, message=messages.password_change_notice

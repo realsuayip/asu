@@ -22,10 +22,15 @@ class PasswordResetVerificationSerializer(
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> PasswordResetVerification:
         try:
-            validated_data["user"] = User.objects.get(email=validated_data["email"])
-        except User.DoesNotExist:
+            user = User.objects.get(email=validated_data["email"])
+            if not user.has_usable_password():
+                # Consistent with Django behavior, users with unusable
+                # passwords may not reset their passwords.
+                raise ValueError
+        except (User.DoesNotExist, ValueError):
             return validated_data  # type: ignore[return-value]
 
+        validated_data["user"] = user
         verification = super().create(validated_data)
         transaction.on_commit(verification.send_email)
         return verification

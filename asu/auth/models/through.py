@@ -57,6 +57,12 @@ class UserFollowRequest(UserThrough):
                 name="unique_user_follow_request",
             )
         ]
+        indexes = [
+            models.Index(
+                fields=["status", "from_user", "to_user"],
+                name="follow_request_frequents",
+            ),
+        ]
 
     @property
     def is_approved(self) -> bool:

@@ -6,6 +6,8 @@ services:
     image: postgres:15.2-alpine
     user: postgres
     env_file: ../../conf/dev/postgres.env
+    ports:
+      - "5432:5432"
 
   redis:
     container_name: asu-redis

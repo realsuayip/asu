@@ -54,13 +54,6 @@ OAUTH2_PROVIDER = {
     "CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL": 0.25,
 }
 
-_system_font = """\
--apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,
-sans-serif,"Apple Color Emoji","Segoe UI Emoji"
-"""
-_system_font_mono = """\
-ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace
-"""
 SPECTACULAR_SETTINGS = {
     "VERSION": None,
     "TITLE": "asu API",

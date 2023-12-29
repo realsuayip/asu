@@ -3,7 +3,7 @@ version: '3.7'
 services:
   db:
     container_name: asu-postgres
-    image: postgres:15.2-alpine
+    image: postgres:16.1-alpine
     user: postgres
     env_file: ../../conf/prod/postgres.env
     restart: unless-stopped
@@ -16,7 +16,7 @@ services:
 
   rabbitmq:
     container_name: asu-rabbitmq
-    image: rabbitmq:3.11-alpine
+    image: rabbitmq:3.12-alpine
     restart: unless-stopped
 
   nginx:
@@ -28,9 +28,11 @@ services:
       - "443:443"
     restart: unless-stopped
 
-  web: &django
+  web:
+    extends:
+      file: django/django.yml
+      service: django
     container_name: asu-web
-    image: asu-python
     build:
       context: ../..
       dockerfile: docker/prod/django/Dockerfile
@@ -40,18 +42,16 @@ services:
       --bind 0.0.0.0:8000
       --workers 4
       --access-logfile '-'
-    env_file: &django_env
-      - ../../conf/prod/django.env
-      - ../../conf/prod/postgres.env
     environment:
       DJANGO_CONTEXT: web
     depends_on:
-      - redis
       - db
-    restart: unless-stopped
+      - redis
 
   websocket:
-    <<: *django
+    extends:
+      file: django/django.yml
+      service: django
     container_name: asu-websocket
     command: >
       gunicorn asu.gateways.websocket
@@ -61,20 +61,28 @@ services:
       --access-logfile '-'
     environment:
       DJANGO_CONTEXT: websocket
+    depends_on:
+      - db
+      - redis
 
   celery-worker: &celery
-    image: asu-python
+    extends:
+      file: django/django.yml
+      service: django
     container_name: asu-celery-worker
     command: celery -A asu worker -l info
-    env_file: *django_env
     environment:
       DJANGO_CONTEXT: celery
     depends_on:
-      - web
       - rabbitmq
-    restart: unless-stopped
+      - db
+      - redis
 
   celery-beat:
     <<: *celery
     container_name: asu-celery-beat
     command: celery -A asu beat -l info
+    depends_on:
+      - rabbitmq
+      - db
+      - redis

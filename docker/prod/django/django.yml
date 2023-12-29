@@ -1,0 +1,7 @@
+services:
+  django:
+    image: asu-python
+    env_file:
+      - ../../../conf/prod/django.env
+      - ../../../conf/prod/postgres.env
+    restart: unless-stopped

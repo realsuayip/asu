@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apk add --no-cache build-base libffi-dev python3-dev libpq-dev
 
-ADD deps/prod.txt /code/requirements.txt
+COPY deps/prod.txt /code/requirements.txt
 RUN pip install -r /code/requirements.txt --user --no-warn-script-location --no-cache-dir --no-deps
 
 FROM python:3.11-alpine
@@ -15,12 +15,12 @@ ENV PYTHONUNBUFFERED=1 \
     PATH=/home/django/.local/bin:$PATH
 
 WORKDIR /code
-COPY . /code
 
 RUN apk add --no-cache netcat-openbsd libpq libmagic tini
-COPY --from=builder /root/.local /home/django/.local
+RUN addgroup -S django && adduser -S django -G django --disabled-password
 
-RUN adduser django -S --disabled-password && chown -R django /code
+COPY --chown=django:django . .
+COPY --from=builder --chown=django:django /root/.local /home/django/.local
+
 USER django
-
 ENTRYPOINT ["/sbin/tini", "--", "/code/docker/prod/django/entrypoint.sh"]

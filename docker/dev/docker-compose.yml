@@ -3,7 +3,7 @@ version: '3.7'
 services:
   db:
     container_name: asu-postgres
-    image: postgres:15.2-alpine
+    image: postgres:16.1-alpine
     user: postgres
     env_file: ../../conf/dev/postgres.env
     ports:
@@ -16,7 +16,7 @@ services:
 
   rabbitmq:
     container_name: asu-rabbitmq
-    image: rabbitmq:3.11-alpine
+    image: rabbitmq:3.12-alpine
 
   web:
     container_name: asu-web

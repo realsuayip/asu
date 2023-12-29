@@ -3,6 +3,8 @@ package-lock.json
 venv
 media
 .git
+.gitignore
+.dockerignore
 .env
 .idea
 .vscode
@@ -12,8 +14,12 @@ media
 celerybeat-schedule
 .pre-commit-config.yaml
 Makefile
+README.md
 htmlcov
 .mypy_cache
 .pytest_cache
 .ruff_cache
 tests
+docs
+k8s
+conf

@@ -28,4 +28,4 @@ class AsuConfig(AppConfig):
                 send_default_pii=True,
             )
 
-        asu.celery.app.autodiscover_tasks()
+        asu.celery.app.autodiscover_tasks(force=True)

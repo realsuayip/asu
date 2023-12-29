@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import Iterator
 from pathlib import Path
 
 from django.conf import settings
@@ -11,7 +11,7 @@ if settings.DEBUG:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
     class WatchfilesReloader(autoreload.BaseReloader):
-        def tick(self) -> Generator[None, None, None]:
+        def tick(self) -> Iterator[None]:
             watcher = watchfiles.watch(
                 BASE_DIR,
                 debug=False,
@@ -23,4 +23,4 @@ if settings.DEBUG:
                     self.notify_file_changed(Path(path))
                 yield
 
-    autoreload.get_reloader = lambda: WatchfilesReloader()
+    autoreload.get_reloader = WatchfilesReloader

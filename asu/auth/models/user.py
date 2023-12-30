@@ -113,6 +113,12 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             MimeTypeValidator(allowed_types=["image/png", "image/jpeg"]),
         ],
     )
+    language = models.CharField(
+        _("language"),
+        max_length=8,
+        choices=settings.LANGUAGES,
+        default="en",
+    )
 
     # Messaging
     allows_receipts = models.BooleanField(
@@ -407,4 +413,5 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             title=message.subject,
             content=message.body,
             recipients=[self.email],
+            lang_code=self.language,
         )

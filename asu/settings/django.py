@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from django.utils.translation import gettext_lazy as _
+
 from envanter import env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -114,10 +116,13 @@ SESSION_ENGINE = env.str("SESSION_ENGINE")
 SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")
 SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 
-
+LANGUAGES = [
+    ("en", _("English")),
+    ("tr", _("Turkish")),
+]
 LANGUAGE_CODE = env.str("DJANGO_LANGUAGE_CODE")
+LANGUAGE_COOKIE_NAME = "language"
 TIME_ZONE = env.str("DJANGO_TIME_ZONE")
-
 USE_I18N = True
 USE_TZ = True
 
@@ -155,7 +160,7 @@ if DEBUG:
     # Properly identify internal IP in Docker container
     import socket
 
-    *_, ips = socket.gethostbyname_ex(socket.gethostname())
+    *__, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips]
 
 

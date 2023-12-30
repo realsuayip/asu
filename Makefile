@@ -52,3 +52,7 @@ type:
 					   grep -v 'Metaclass conflict\|Import cycle'"
 docs:
 	make -C docs clean html
+makemessages:
+	$(ex) /bin/sh -c "cd asu && ../manage.py makemessages --all --no-obsolete"
+compilemessages:
+	$(ex) /bin/sh -c "cd asu && ../manage.py compilemessages"

@@ -5,19 +5,9 @@ from typing import Any
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils import translation
+from django.utils.encoding import force_str
 
 from django_stubs_ext import StrOrPromise
-
-
-def determine_language(lang_code: str | None) -> str:
-    current = translation.get_language()
-    if lang_code is None:
-        return current
-
-    try:
-        return translation.get_supported_language_variant(lang_code)
-    except LookupError:
-        return current
 
 
 def send(
@@ -29,7 +19,7 @@ def send(
     context: dict[str, Any] | None = None,
     lang_code: str | None = None,
 ) -> int:
-    language = determine_language(lang_code)
+    language = lang_code or translation.get_language()
 
     context = context or {}
     context.setdefault("title", title)
@@ -39,7 +29,7 @@ def send(
 
     with translation.override(language):
         body = render_to_string(template, context=context)
+        email = EmailMessage(force_str(title), body, to=recipients)
 
-    email = EmailMessage(title, body, to=recipients)
     email.content_subtype = "html"
     return email.send()

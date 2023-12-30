@@ -3,13 +3,16 @@ import unittest
 from unittest.mock import Mock
 
 from django.conf import settings
+from django.core import mail
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import exceptions
 
+from asu.utils import mailing
 from asu.utils.cache import cached_context
 from asu.utils.file import FileSizeValidator, MimeTypeValidator
 from asu.utils.rest import exception_handler
@@ -245,3 +248,34 @@ class TestRestUtils(unittest.TestCase):
         for exception, result in mapping.items():
             response = exception_handler(exception, {})
             self.assertEqual(result, response.data)
+
+
+class TestMailingUtils(TestCase):
+    def test_send_mail(self):
+        mailing.send(
+            "empty",
+            title="Hello World",
+            content="Howdy?",
+            recipients=["someone@example.com"],
+        )
+
+        email = mail.outbox[0]
+
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual("Hello World", email.subject)
+        self.assertEqual("Howdy?", email.body.strip())
+        self.assertEqual(["someone@example.com"], email.recipients())
+        self.assertEqual("html", email.content_subtype)
+
+    def test_send_mail_respects_langauge(self):
+        mailing.send(
+            "empty",
+            title=_("German"),
+            content=_("Swedish"),
+            recipients=["someone@example.com"],
+            lang_code="tr",
+        )
+
+        email = mail.outbox[0]
+        self.assertEqual("Almanca", email.subject)
+        self.assertEqual("İsveççe", email.body.strip())

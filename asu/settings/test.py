@@ -10,3 +10,4 @@ CACHES = {
 }
 INSTALLED_APPS.remove("debug_toolbar")  # noqa: F405
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+CELERY_TASK_ALWAYS_EAGER = True

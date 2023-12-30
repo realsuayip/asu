@@ -273,7 +273,7 @@ class TestMailingUtils(TestCase):
             title=_("German"),
             content=_("Swedish"),
             recipients=["someone@example.com"],
-            lang_code="tr",
+            language="tr",
         )
 
         email = mail.outbox[0]

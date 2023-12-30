@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from django import forms
@@ -9,6 +8,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 from rest_framework import exceptions, pagination, serializers
 from rest_framework.metadata import BaseMetadata
+from rest_framework.mixins import UpdateModelMixin
 from rest_framework.pagination import BasePagination
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -110,24 +110,11 @@ class PartialUpdateModelMixin:
     only allows for partial updates 'PATCH'.
     """
 
-    get_object: Callable[[], Any]
-    get_serializer: Callable[..., serializers.Serializer[Any]]
-
-    def perform_update(self, serializer: serializers.Serializer[Any]) -> None:
-        serializer.save()
+    perform_update = UpdateModelMixin.perform_update
 
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-
-        return Response(serializer.data)
+        kwargs["partial"] = True
+        return UpdateModelMixin.update(self, request, *args, **kwargs)  # type: ignore[arg-type]
 
 
 class EmptyMetadata(BaseMetadata):

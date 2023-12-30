@@ -59,13 +59,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ("email", "date_joined")
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
-        # This method is overriden so that the full_clean could be
+        # This method is overriden so that `validate_constraints` could be
         # called, triggering related database constraints.
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
         try:
-            instance.full_clean()
+            instance.validate_constraints()
         except django.core.exceptions.ValidationError as exc:
             raise serializers.ValidationError(exc.messages)
 
@@ -121,7 +121,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
         user.set_password(password)
 
         try:
-            user.full_clean()
+            user.validate_constraints()
         except django.core.exceptions.ValidationError as exc:
             raise serializers.ValidationError(exc.messages)
 

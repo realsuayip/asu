@@ -49,6 +49,7 @@ class RegistrationTest(APITestCase):
             "username": "janet_52",
             "gender": "female",
             "birth_date": "2000-01-01",
+            "language": "en",
         }
 
         # Fail password validation

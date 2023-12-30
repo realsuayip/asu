@@ -52,6 +52,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             "is_private",
             "description",
             "website",
+            "language",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
@@ -142,6 +143,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             "password",
             "gender",
             "birth_date",
+            "language",
             "consent",
             "auth",
             "url",

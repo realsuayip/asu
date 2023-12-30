@@ -413,5 +413,5 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             title=message.subject,
             content=message.body,
             recipients=[self.email],
-            lang_code=self.language,
+            language=self.language,
         )

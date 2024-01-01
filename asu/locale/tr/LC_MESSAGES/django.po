@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-30 10:08+0000\n"
+"POT-Creation-Date: 2024-01-01 13:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -200,7 +200,7 @@ msgstr ""
 msgid "This e-mail could not be verified."
 msgstr ""
 
-#: auth/serializers/user.py:106
+#: auth/serializers/user.py:107
 msgid ""
 "This e-mail could not be verified. Please provide a validated e-mail address."
 msgstr ""
@@ -346,7 +346,7 @@ msgid ""
 "ignore it."
 msgstr ""
 
-#: templates/mailing/transactional.html:230
+#: templates/mailing/transactional.html:230 templates/two_factor/_base.html:29
 #, python-format
 msgid ""
 "© Copyright 2022 %(brand)s, All Rights Reserved<br> <a href=\"mailto:"
@@ -391,13 +391,6 @@ msgstr ""
 msgid ""
 "<p>Authorization server failed to handle your request. Technical details:</"
 "p> <code><b>%(error)s</b>: %(description)s</code>"
-msgstr ""
-
-#: templates/two_factor/_base.html:30
-#, python-format
-msgid ""
-"© Copyright 2022 %(brand)s, All Rights Reserved<br> <a href=\"mailto:"
-"%(support_mail)s\">%(support_mail)s</a>"
 msgstr ""
 
 #: templates/two_factor/_wizard_actions.html:4
@@ -640,7 +633,7 @@ msgstr ""
 msgid "One or more parameters to your request was invalid."
 msgstr ""
 
-#: utils/rest.py:163
+#: utils/rest.py:150
 msgid "Multiple values may be separated by commas."
 msgstr ""
 

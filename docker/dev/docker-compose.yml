@@ -1,5 +1,8 @@
 version: '3.7'
 
+volumes:
+  pg-data:
+
 services:
   db:
     container_name: asu-postgres
@@ -8,6 +11,8 @@ services:
     env_file: ../../conf/dev/postgres.env
     ports:
       - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
 
   redis:
     container_name: asu-redis

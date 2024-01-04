@@ -1,5 +1,8 @@
 version: '3.7'
 
+volumes:
+  pg-data:
+
 services:
   db:
     container_name: asu-postgres
@@ -7,6 +10,8 @@ services:
     user: postgres
     env_file: ../../conf/prod/postgres.env
     restart: unless-stopped
+    volumes:
+      - pg-data:/var/lib/postgresql/data
 
   redis:
     container_name: asu-redis

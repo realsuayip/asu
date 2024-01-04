@@ -17,8 +17,8 @@ from django.core.validators import (
     RegexValidator,
 )
 from django.db import models, transaction
-from django.db.models import Q, QuerySet
-from django.db.models.functions import Lower
+from django.db.models import F, Q, QuerySet, Value
+from django.db.models.functions import Concat, Lower
 from django.utils import timezone
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
@@ -369,9 +369,10 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         sessions = Session.objects.filter(user=self.pk)
 
         if prefix := getattr(engine, "cache_key_prefix", None):
-            for session in sessions.only("session_key").iterator():
-                key = prefix + session.session_key
-                cache.delete(key)
+            keys = sessions.annotate(
+                session_cache_key=Concat(Value(prefix), F("session_key"))
+            ).values_list("session_cache_key", flat=True)
+            cache.delete_many(keys)
         sessions.delete()
 
     @transaction.atomic

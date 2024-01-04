@@ -1,6 +1,6 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
-from asu.utils import get_error_repr
+from asu.utils.openapi import examples, get_error_repr
 from asu.utils.rest import APIError
 from asu.verification.registration.serializers import (
     RegistrationCheckSerializer,
@@ -46,16 +46,7 @@ consent_examples = [
         response_only=True,
         status_codes=["200"],
     ),
-    OpenApiExample(
-        "combination did not verify",
-        value={
-            "status": 404,
-            "code": "not_found",
-            "message": "Not found.",
-        },
-        response_only=True,
-        status_codes=["404"],
-    ),
+    examples.not_found,
     OpenApiExample(
         "fields have errors",
         value=get_error_repr(

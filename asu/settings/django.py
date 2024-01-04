@@ -126,11 +126,10 @@ TIME_ZONE = env.str("DJANGO_TIME_ZONE")
 USE_I18N = True
 USE_TZ = True
 
-
-# TODO: Switch to 4.2 `STORAGES` setting once all
-#  dependencies support using it.
-DEFAULT_FILE_STORAGE = env.str("DEFAULT_FILE_STORAGE")
-STATICFILES_STORAGE = env.str("STATICFILES_STORAGE")
+STORAGES = {
+    "default": {"BACKEND": env.str("DEFAULT_FILE_STORAGE")},
+    "staticfiles": {"BACKEND": env.str("STATICFILES_STORAGE")},
+}
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]

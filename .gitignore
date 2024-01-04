@@ -39,3 +39,7 @@ venv/
 .venv/
 media/
 staticfiles.json
+.gitsecret/keys/random_seed
+!*.secret
+conf/prod/django.env
+conf/prod/postgres.env

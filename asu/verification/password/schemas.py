@@ -1,6 +1,6 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
-from asu.utils import get_error_repr
+from asu.utils.openapi import get_error_repr
 from asu.utils.rest import APIError
 from asu.verification.password.serializers import (
     PasswordResetVerificationCheckSerializer,

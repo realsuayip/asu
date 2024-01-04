@@ -16,7 +16,7 @@ from asu.auth.serializers.user import (
     UserSerializer,
 )
 from asu.messaging.serializers import MessageComposeSerializer
-from asu.utils import get_error_repr
+from asu.utils.openapi import examples, get_error_repr
 from asu.utils.rest import APIError, EmptySerializer
 
 if TYPE_CHECKING:
@@ -46,21 +46,10 @@ class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
         return {"oauth2": scopes}
 
 
-not_found_example = OpenApiExample(
-    "user was not found",
-    value={
-        "status": 404,
-        "code": "not_found",
-        "message": "Not found.",
-    },
-    response_only=True,
-    status_codes=["404"],
-)
-
 action = functools.partial(
     extend_schema,
     request=EmptySerializer,
-    examples=[not_found_example],
+    examples=[examples.not_found],
     responses={204: None, 404: APIError},
 )
 
@@ -74,19 +63,7 @@ follow = action(
     " or immediately follow the user. Request might fail with 403 if"
     " the user is not allowed to follow the other user (i.e., in case of"
     " blocking relations).",
-    examples=[
-        not_found_example,
-        OpenApiExample(
-            "following is not allowed",
-            value={
-                "status": 403,
-                "code": "permission_denied",
-                "message": "You do not have permission to perform this action.",
-            },
-            response_only=True,
-            status_codes=["403"],
-        ),
-    ],
+    examples=[examples.not_found, examples.permission_denied],
     responses={204: None, 404: APIError, 403: APIError},
 )
 unfollow = action(summary="Unfollow a user")
@@ -134,14 +111,24 @@ create = extend_schema(
 
 retrieve = extend_schema(
     summary="Retrieve a user",
-    examples=[not_found_example],
+    examples=[examples.not_found],
     responses={200: UserPublicReadSerializer, 404: APIError},
 )
 
-user_resp = {200: ManyRelatedUserField, 403: APIError, 404: APIError}
-followers = extend_schema(summary="List followers of a user", responses=user_resp)
-following = extend_schema(summary="List follows of a user", responses=user_resp)
-blocked = extend_schema(summary="List blocked users", responses=user_resp)
+followers = extend_schema(
+    summary="List followers of a user",
+    responses={200: ManyRelatedUserField, 404: APIError},
+    examples=[examples.not_found],
+)
+following = extend_schema(
+    summary="List follows of a user",
+    responses={200: ManyRelatedUserField, 404: APIError},
+    examples=[examples.not_found],
+)
+blocked = extend_schema(
+    summary="List blocked users",
+    responses={200: ManyRelatedUserField},
+)
 
 message = extend_schema(
     summary="Send a message to user",
@@ -150,6 +137,7 @@ message = extend_schema(
         403: APIError,
         404: APIError,
     },
+    examples=[examples.not_found, examples.permission_denied],
 )
 
 get_me = extend_schema(
@@ -185,6 +173,7 @@ me = lambda f: get_me(patch_me(f))  # noqa: E731
 by = extend_schema(
     summary="Retrieve a user by username",
     responses={200: UserPublicReadSerializer, 404: APIError},
+    examples=[examples.not_found],
     filters=True,
 )
 

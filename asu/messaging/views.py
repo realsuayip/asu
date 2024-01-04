@@ -135,7 +135,7 @@ class ConversationViewSet(ExtendedViewSet[Conversation]):
 
     @action(
         detail=True,
-        methods=["post"],
+        methods=["patch"],
         serializer_class=ReadConversationSerializer,
         permission_classes=[RequireUser, RequireFirstParty],
     )

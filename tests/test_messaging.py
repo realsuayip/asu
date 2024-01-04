@@ -534,7 +534,7 @@ class TestMessaging(APITestCase):
         r1 = self._send_message(self.user2, self.user1, "Whats up?")
 
         conversation = r1.data["conversation"]
-        response = self.client.post(
+        response = self.client.patch(
             conversation + "read/",
             data={"until": timezone.now()},
         )
@@ -571,7 +571,7 @@ class TestMessaging(APITestCase):
         # Read the conversation from target user.
         self.client.force_login(self.user2)
         conversation = Conversation.objects.get(holder=self.user2)
-        response = self.client.post(
+        response = self.client.patch(
             reverse(
                 "api:messaging:conversation-read",
                 kwargs={"pk": conversation.pk},
@@ -610,7 +610,7 @@ class TestMessaging(APITestCase):
         Message.objects.filter(pk=m1.data["id"]).update(date_read=one_minute_ago)
 
         conversation = r1.data["conversation"]
-        response = self.client.post(
+        response = self.client.patch(
             conversation + "read/",
             data={"until": timezone.now()},
         )

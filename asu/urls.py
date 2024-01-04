@@ -2,7 +2,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path, re_path
+from django.utils.translation import gettext_lazy as _
 
+from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import SpectacularAPIView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
 from two_factor import views as tf
@@ -25,7 +27,13 @@ api_urls: list[URLResolver | URLPattern] = [
 ]
 
 docs_urls = [
-    path("schema/", SpectacularAPIView.as_view(), name="openapi-schema"),
+    path(
+        "schema/",
+        extend_schema(summary=_("Retrieve OpenAPI schema"))(
+            SpectacularAPIView
+        ).as_view(),
+        name="openapi-schema",
+    ),
     path("", DocsView.as_view(), name="browse"),
 ]
 

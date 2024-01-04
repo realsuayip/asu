@@ -1,4 +1,4 @@
-FROM python:3.11-alpine as builder
+FROM python:3.12-alpine as builder
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -8,7 +8,7 @@ RUN apk add --no-cache build-base libffi-dev python3-dev libpq-dev
 COPY deps/prod.txt /code/requirements.txt
 RUN pip install -r /code/requirements.txt --user --no-warn-script-location --no-cache-dir --no-deps
 
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

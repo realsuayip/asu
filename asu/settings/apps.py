@@ -9,6 +9,8 @@ DEFAULT_RENDERER_CLASSES = ["rest_framework.renderers.JSONRenderer"]
 DEFAULT_AUTHENTICATION_CLASSES = [
     "oauth2_provider.contrib.rest_framework.OAuth2Authentication"
 ]
+URL_FORMAT_OVERRIDE = None
+
 if DEBUG:
     DEFAULT_RENDERER_CLASSES = [
         "rest_framework.renderers.JSONRenderer",
@@ -18,6 +20,7 @@ if DEBUG:
         "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
         "rest_framework.authentication.SessionAuthentication",
     ]
+    URL_FORMAT_OVERRIDE = "format"
 
 
 REST_FRAMEWORK = {
@@ -29,6 +32,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",
     "DEFAULT_METADATA_CLASS": "asu.utils.rest.EmptyMetadata",
     "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
+    "URL_FORMAT_OVERRIDE": URL_FORMAT_OVERRIDE,
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = "account.Application"

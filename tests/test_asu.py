@@ -101,8 +101,8 @@ class TestAPIRoot(TestCase):
         self.assertIn("application/json", response.headers["Content-Type"])
         self.assertEqual(expected_json, response.json())
 
-        # JSON with request content-type
-        response = self.client.get("bad-page", CONTENT_TYPE="application/json")
+        # JSON with request Accept
+        response = self.client.get("bad-page", headers={"Accept": "application/json"})
         self.assertEqual(404, response.status_code)
         self.assertIn("application/json", response.headers["Content-Type"])
         self.assertEqual(expected_json, response.json())
@@ -170,7 +170,7 @@ class TestAPIRoot(TestCase):
         with patch("two_factor.views.LoginView.get", error_view(PermissionDenied)):
             response = self.client.get(
                 reverse("two_factor:login"),
-                headers={"Content-Type": "application/json"},
+                headers={"Accept": "application/json"},
             )
 
         self.assertEqual(403, response.status_code)
@@ -185,6 +185,17 @@ class TestAPIRoot(TestCase):
                 "You do not have permission to perform this action",
                 status_code=403,
             )
+
+    def test_error_unknown_content_type(self):
+        response = self.client.get(
+            "bad-page", headers={"Accept": "application/unknown"}
+        )
+        self.assertContains(
+            response,
+            "requested resource was not found on this server",
+            status_code=404,
+        )
+        self.assertIn("text/html", response.headers["Content-Type"])
 
     def test_docs(self):
         browser = reverse("docs:browse")

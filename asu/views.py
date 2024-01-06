@@ -1,14 +1,20 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any, Callable, cast
 
 from django import urls
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import URLPattern, URLResolver
 from django.views import defaults
 
-from rest_framework.exceptions import APIException, NotFound, PermissionDenied
-from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.exceptions import (
+    APIException,
+    NotAcceptable,
+    NotFound,
+    PermissionDenied,
+)
+from rest_framework.negotiation import DefaultContentNegotiation
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -169,30 +175,32 @@ def as_json(exc: type[APIException]) -> JsonResponse:
 
 
 def should_return_json(request: HttpRequest) -> bool:
-    return (
-        request.path.startswith("/api/") or request.content_type == "application/json"
-    )
+    if request.path.startswith("/api/"):
+        return True
+    negotiator = DefaultContentNegotiation()
+    try:
+        renderer, _ = negotiator.select_renderer(
+            Request(request),
+            renderers=[TemplateHTMLRenderer(), JSONRenderer()],
+        )
+        return isinstance(renderer, JSONRenderer)
+    except NotAcceptable:
+        pass
+    return False
 
 
-def bad_request(request: HttpRequest, exception: Exception) -> HttpResponse:
-    if should_return_json(request):
-        return as_json(GenericBadRequest)
-    return defaults.bad_request(request, exception)
+def negotiate(
+    api: type[APIException], default: Callable[..., HttpResponse]
+) -> Callable[..., HttpResponse]:
+    def handler(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if should_return_json(request):
+            return as_json(api)
+        return default(request, *args, **kwargs)
+
+    return handler
 
 
-def server_error(request: HttpRequest) -> HttpResponse:
-    if should_return_json(request):
-        return as_json(GenericServerError)
-    return defaults.server_error(request)
-
-
-def permission_denied(request: HttpRequest, exception: Exception) -> HttpResponse:
-    if should_return_json(request):
-        return as_json(PermissionDenied)
-    return defaults.permission_denied(request, exception)
-
-
-def page_not_found(request: HttpRequest, exception: Exception) -> HttpResponse:
-    if should_return_json(request):
-        return as_json(NotFound)
-    return defaults.page_not_found(request, exception)
+bad_request = negotiate(GenericBadRequest, defaults.bad_request)
+server_error = negotiate(GenericServerError, defaults.server_error)
+permission_denied = negotiate(PermissionDenied, defaults.permission_denied)
+page_not_found = negotiate(NotFound, defaults.page_not_found)

@@ -7,25 +7,39 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Expose GitHub Runtime
+      uses: crazy-max/ghaction-github-runtime@v2
+
     - name: Build containers
+      run: |
+        docker buildx create --use --driver=docker-container
+        cd docker/dev
+        docker buildx bake -f docker-compose.yml --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
+
+    - name: Spin up services
       run: docker compose -p asu -f docker/dev/docker-compose.yml up -d
+
     - name: Waiting a bit for the containers
       run: sleep 5s
       shell: bash
+
     - name: Run tests
       run: >-
         docker exec -t asu-web
         python manage.py test --settings=asu.settings.test --parallel 4 --shuffle --timing
+
     - name: Run tests with coverage
       run: >-
         docker exec -t asu-web
         /bin/sh -c
         "coverage run ./manage.py test --shuffle --settings=asu.settings.test && coverage xml"
+
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:

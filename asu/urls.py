@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path, re_path
 from django.utils.translation import gettext_lazy as _
+from django.views.generic import RedirectView
 
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import SpectacularAPIView
@@ -61,6 +62,7 @@ websocket_urls = [
 
 
 urlpatterns: list[URLPattern | URLResolver] = [
+    path("", RedirectView.as_view(pattern_name="two_factor:profile"), name="index"),
     path("admin/", admin.site.urls),
     path("account/", include((account_urls, "two_factor"))),
     path("api/", include((api_urls, "api"))),

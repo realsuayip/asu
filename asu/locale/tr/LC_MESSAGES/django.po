@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 13:14+0000\n"
+"POT-Creation-Date: 2024-01-08 16:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -282,27 +282,27 @@ msgstr ""
 msgid "project variables"
 msgstr ""
 
-#: settings/apps.py:38
+#: settings/apps.py:42
 msgid "Retrieve your account, including the private information."
 msgstr ""
 
-#: settings/apps.py:40
+#: settings/apps.py:44
 msgid "Alter your profile and account settings."
 msgstr ""
 
-#: settings/apps.py:41
+#: settings/apps.py:45
 msgid "Display your list of followers and follow requests."
 msgstr ""
 
-#: settings/apps.py:43
+#: settings/apps.py:47
 msgid "Follow and unfollow people on your behalf, send follow requests."
 msgstr ""
 
-#: settings/apps.py:45
+#: settings/apps.py:49
 msgid "Display your list of blocked users"
 msgstr ""
 
-#: settings/apps.py:46
+#: settings/apps.py:50
 msgid "Block and unblock people on your behalf."
 msgstr ""
 
@@ -318,7 +318,7 @@ msgstr ""
 msgid "Permission denied"
 msgstr ""
 
-#: templates/403.html:6
+#: templates/403.html:6 utils/openapi.py:53
 msgid "You do not have permission to perform this action."
 msgstr ""
 
@@ -527,10 +527,7 @@ msgstr ""
 
 #: templates/two_factor/profile/profile.html:14
 #, python-format
-msgid ""
-"\n"
-"                Welcome back, signed in as <b>@%(username)s</b>\n"
-"            "
+msgid "Welcome back, signed in as <b>@%(username)s</b>"
 msgstr ""
 
 #: templates/two_factor/profile/profile.html:26
@@ -564,6 +561,10 @@ msgstr ""
 msgid ""
 "Two-factor authentication is not enabled for your account. Enable two-factor "
 "authentication for enhanced account security."
+msgstr ""
+
+#: urls.py:33
+msgid "Retrieve OpenAPI schema"
 msgstr ""
 
 #: utils/file.py:30
@@ -627,6 +628,10 @@ msgid ""
 "You have now deactivated your account. Your account will be permanently "
 "deleted in 30 days. If you change your mind, you can simply login to "
 "reactivate your account."
+msgstr ""
+
+#: utils/openapi.py:43
+msgid "Not found."
 msgstr ""
 
 #: utils/rest.py:52

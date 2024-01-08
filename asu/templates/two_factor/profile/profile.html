@@ -11,7 +11,7 @@
             {% block title %}{% trans "Account Security" %}{% endblock %}
         </h1>
         <small>
-            {% blocktranslate with username=user.username %}
+            {% blocktranslate trimmed with username=user.username %}
                 Welcome back, signed in as <b>@{{ username }}</b>
             {% endblocktranslate %}
         </small>

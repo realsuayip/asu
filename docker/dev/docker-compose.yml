@@ -47,7 +47,7 @@ services:
   celery-worker: &celery
     image: asu-python
     container_name: asu-celery-worker
-    command: celery -A asu worker -l info
+    command: watchfiles --filter python "celery -A asu worker -l info"
     env_file: *django_env
     environment:
       DJANGO_CONTEXT: celery

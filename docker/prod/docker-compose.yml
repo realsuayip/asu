@@ -46,6 +46,7 @@ services:
       asu.gateways.wsgi
       --bind 0.0.0.0:8000
       --workers 4
+      --threads 8
       --access-logfile '-'
     environment:
       DJANGO_CONTEXT: web

@@ -5,8 +5,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apk add --no-cache build-base libffi-dev python3-dev libpq-dev
 
-COPY deps/prod.txt /code/requirements.txt
-RUN pip install -r /code/requirements.txt --user --no-warn-script-location --no-cache-dir --no-deps
+COPY deps/prod.txt requirements.txt
+RUN pip wheel -r requirements.txt --no-cache-dir --no-deps --wheel-dir /wheels
 
 FROM python:3.12-alpine
 
@@ -20,7 +20,8 @@ RUN apk add --no-cache netcat-openbsd libpq libmagic tini
 RUN addgroup -S django && adduser -S django -G django --disabled-password
 
 COPY --chown=django:django . .
-COPY --from=builder --chown=django:django /root/.local /home/django/.local
+COPY --from=builder /wheels /wheels
+RUN pip install /wheels/* && rm -rf /wheels
 
 USER django
 ENTRYPOINT ["/sbin/tini", "--", "/code/docker/prod/django/entrypoint.sh"]

@@ -42,7 +42,8 @@ shell:
 test:
 	$(dj) test --settings=asu.settings.test --parallel 4 --shuffle --timing --keepdb
 coverage:
-	$(ex) /bin/sh -c "coverage run ./manage.py test --shuffle --settings=asu.settings.test --no-input &&\
+	$(ex) /bin/sh -c "coverage run --concurrency=multiprocessing ./manage.py test --parallel 4 --shuffle --timing --settings=asu.settings.test --no-input &&\
+ 					  coverage combine &&\
  					  coverage html"
 	open htmlcov/index.html
 format:

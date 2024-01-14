@@ -781,10 +781,8 @@ class TestAuth(APITestCase):
         UserDeactivation.objects.create(user=self.user1, date_revoked=timezone.now())
         UserDeactivation.objects.create(user=self.user1)
 
-        try:
+        with self.assertRaises(IntegrityError):
             UserDeactivation.objects.create(user=self.user1)
-        except IntegrityError:
-            pass
 
     def test_user_deactivate(self):
         self.user1.set_password("hello")
@@ -883,12 +881,8 @@ class TestAuth(APITestCase):
         self.assertEqual(1, objs["account.User"])
         self.assertEqual(2, num)  # `d1` & `delete_immediately`
 
-        try:
+        with self.assertRaises(User.DoesNotExist):
             delete_immediately.refresh_from_db()
-        except User.DoesNotExist:
-            pass
-        else:
-            self.fail("user still in database")
 
 
 class TestOAuthPermissions(APITestCase):

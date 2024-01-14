@@ -122,16 +122,13 @@ class TestCacheUtils(TestCase):
         self.assertEqual(257 + 3, cache.get("asu.test.fun2.vary(param=3)"))
 
     def test_cached_context_unknown_arg(self):
-        try:
+        with self.assertRaisesRegex(
+            ValueError, "no parameter named `unknown` was found."
+        ):
 
             @cached_context(key="asu.test.fun3", vary="unknown")
             def fun3(param) -> int:
                 return 257 + param
-
-        except ValueError as exc:
-            self.assertEqual("no parameter named `unknown` was found.", str(exc))
-        else:
-            self.fail("missing exception for unknown parameter")
 
     def test_cached_context_with_attr(self):
         mock = Mock()
@@ -154,30 +151,22 @@ class TestCacheUtils(TestCase):
         self.assertEqual(257 + 3, cache.get("asu.test.fun4.vary(param.attr=3)"))
 
     def test_cached_context_unsupported_var_keyword(self):
-        try:
+        with self.assertRaisesRegex(
+            ValueError, "parameter type VAR_KEYWORD is not supported."
+        ):
 
             @cached_context(key="asu.test.fun5", vary="kwargs")
             def fun5(*args, **kwargs) -> int:
                 return 258
 
-        except ValueError as exc:
-            self.assertEqual("parameter type VAR_KEYWORD is not supported.", str(exc))
-        else:
-            self.fail("missing exception for unsupported parameter")
-
     def test_cached_context_unsupported_var_positional(self):
-        try:
+        with self.assertRaisesRegex(
+            ValueError, "parameter type VAR_POSITIONAL is not supported."
+        ):
 
             @cached_context(key="asu.test.fun6", vary="args")
             def fun6(*args, **kwargs) -> int:
                 return 258
-
-        except ValueError as exc:
-            self.assertEqual(
-                "parameter type VAR_POSITIONAL is not supported.", str(exc)
-            )
-        else:
-            self.fail("missing exception for unsupported parameter")
 
     def test_cached_context_captures_default_argument(self):
         mock = Mock()

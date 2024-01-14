@@ -10,14 +10,12 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-import django_stubs_ext
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema_view
 
 from asu.utils.rest import PartialUpdateModelMixin
 from asu.utils.typing import UserRequest
 
-django_stubs_ext.monkeypatch(extra_classes=[viewsets.GenericViewSet])
 MT_co = TypeVar("MT_co", bound=models.Model, covariant=True)
 
 

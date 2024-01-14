@@ -89,7 +89,7 @@ class GroupAdmin(BaseGroupAdmin):
 
 
 @admin.register(Permission)
-class PermissionAdmin(admin.ModelAdmin):
+class PermissionAdmin(admin.ModelAdmin[Permission]):
     list_display = ("name", "codename", "content_type")
     list_filter = ("content_type",)
     search_fields = ("name", "codename")

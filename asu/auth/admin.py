@@ -1,8 +1,13 @@
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib import admin, auth
+from django.contrib.auth.admin import (
+    GroupAdmin as BaseGroupAdmin,
+    UserAdmin as BaseUserAdmin,
+)
 from django.utils.translation import gettext_lazy as _
 
-from asu.auth.models import User
+from asu.auth.models import Group, Permission, User
+
+admin.site.unregister(auth.models.Group)
 
 
 @admin.register(User)
@@ -76,3 +81,16 @@ class UserAdmin(BaseUserAdmin):
     list_display = ("username", "email", "display_name", "date_joined")
     search_fields = ("username", "email")
     ordering = ("-date_joined",)
+
+
+@admin.register(Group)
+class GroupAdmin(BaseGroupAdmin):
+    ordering = ("-id",)
+
+
+@admin.register(Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    list_display = ("name", "codename", "content_type")
+    list_filter = ("content_type",)
+    search_fields = ("name", "codename")
+    ordering = ("-id",)

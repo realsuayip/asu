@@ -99,7 +99,7 @@ class RegistrationTest(APITestCase):
         self.client.logout()
         # ^ Disable force_authenticate done above (i.e., server token).
         response = self.client.get(
-            reverse("api:auth:user-me"), HTTP_AUTHORIZATION=authorization
+            reverse("api:auth:user-me"), headers={"Authorization": authorization}
         )
         self.assertEqual(200, response.status_code)
         self.assertEqual(register_data["username"], response.data["username"])

@@ -957,7 +957,7 @@ class TestOAuthPermissions(APITestCase):
             response = self.client.post(
                 url,
                 data={"body": "hello"},
-                HTTP_AUTHORIZATION="Bearer %s" % token,
+                headers={"Authorization": "Bearer %s" % token},
             )
             self.assertEqual(
                 status_code,
@@ -976,7 +976,7 @@ class TestOAuthPermissions(APITestCase):
             "third-party-token",
             "third-party-client-credentials",
         ):
-            r = self.client.get(url, HTTP_AUTHORIZATION="Bearer %s" % token)
+            r = self.client.get(url, headers={"Authorization": "Bearer %s" % token})
             self.assertEqual(200, r.status_code, msg="used %s" % token)
 
     def test_require_user(self):
@@ -988,7 +988,7 @@ class TestOAuthPermissions(APITestCase):
             (403, "third-party-client-credentials"),
         ]
         for status_code, token in params:
-            r = self.client.get(url, HTTP_AUTHORIZATION="Bearer %s" % token)
+            r = self.client.get(url, headers={"Authorization": "Bearer %s" % token})
             self.assertEqual(status_code, r.status_code, msg="used %s" % token)
 
     def test_require_scope(self):
@@ -999,14 +999,14 @@ class TestOAuthPermissions(APITestCase):
             r = self.client.patch(
                 url,
                 data={"display_name": "hello"},
-                HTTP_AUTHORIZATION="Bearer %s" % token,
+                headers={"Authorization": "Bearer %s" % token},
             )
             self.assertEqual(status_code, r.status_code, msg="used %s" % token)
 
     def test_properly_responds_with_405_rather_than_403(self):
         r = self.client.post(
             reverse("api:auth:user-me"),
-            HTTP_AUTHORIZATION="Bearer third-party-token",
+            headers={"Authorization": "Bearer third-party-token"},
         )
         self.assertEqual(405, r.status_code)
 

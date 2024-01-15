@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable, cast
 
 from django import urls
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import URLPattern, URLResolver
 from django.views import defaults
@@ -54,7 +55,7 @@ class APIRootView(BaseAPIRootView):
         except ValueError:
             return len(self.namespaces)
 
-    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def get_routes(self) -> dict[str, Any]:
         url_resolver = urls.get_resolver(urls.get_urlconf())
         resolvers = url_resolver.url_patterns
 
@@ -70,15 +71,20 @@ class APIRootView(BaseAPIRootView):
             values = self.visit(resolver, namespace)
             regex = str(resolver.pattern)
             routes[regex] = values
+        return routes
 
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         ip, _ = get_client_ip(request)
         ret = {
             "version": request.version,
             "secure": request.is_secure(),
             "ip": ip,
             "user-agent": request.headers.get("user-agent"),
-            "routes": routes,
+            "docs": request.build_absolute_uri(reverse("docs:browse")),
+            "schema": request.build_absolute_uri(reverse("docs:openapi-schema")),
         }
+        if settings.DEBUG or request.query_params.get("routes") == "1":
+            ret["routes"] = self.get_routes()
         return Response(ret)
 
     def visit(

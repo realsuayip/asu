@@ -75,9 +75,16 @@ class TestAPIRoot(TestCase):
         self.assertEqual(200, response.status_code)
 
         self.assertIn("ip", content)
-        self.assertIn("routes", content)
         self.assertIn("user-agent", content)
         self.assertIn("version", content)
+        self.assertIn("docs", content)
+        self.assertIn("schema", content)
+        self.assertNotIn("routes", content)
+
+        # Include routes.
+        response = self.client.get(url, {"routes": "1"})
+        content = response.json()
+        self.assertIn("routes", content)
 
     def test_not_found(self):
         expected_json = {

@@ -22,16 +22,9 @@ jobs:
         cd docker/dev
         docker buildx bake -f docker-compose.yml --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
 
-    - name: Spin up services
-      run: docker compose -p asu -f docker/dev/docker-compose.yml up -d
-
-    - name: Waiting a bit for the containers
-      run: sleep 5s
-      shell: bash
-
     - name: Run tests
       run: >-
-        docker exec -t asu-web
+        docker compose -f docker/dev/docker-compose.yml run --rm web
         /bin/sh -c
         "coverage run --concurrency=multiprocessing ./manage.py test --parallel 4 --shuffle --timing --settings=asu.settings.test --no-input && coverage combine && coverage xml"
 

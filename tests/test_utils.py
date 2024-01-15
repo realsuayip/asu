@@ -256,7 +256,7 @@ class TestMailingUtils(TestCase):
         self.assertEqual(["someone@example.com"], email.recipients())
         self.assertEqual("html", email.content_subtype)
 
-    def test_send_mail_respects_langauge(self):
+    def test_send_mail_respects_language(self):
         mailing.send(
             "empty",
             title=_("German"),

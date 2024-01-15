@@ -29,7 +29,7 @@ from asu.auth.models import (
 from asu.auth.sessions.cached_db import KEY_PREFIX
 from asu.auth.tasks import delete_users_permanently
 from asu.verification.models import RegistrationVerification
-from tests.factories import UserFactory
+from tests.factories import UserFactory, first_party_token
 
 
 class TestAuth(APITestCase):
@@ -119,7 +119,7 @@ class TestAuth(APITestCase):
         self.assertNotEqual(email, self.user1)
 
     def test_detail(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         response = self.client.get(
             reverse(
@@ -209,7 +209,7 @@ class TestAuth(APITestCase):
         self.assertEqual(404, response.status_code)
 
     def test_detail_excludes_frozen_or_inactive(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         frozen = self.client.get(
             reverse(
@@ -229,7 +229,7 @@ class TestAuth(APITestCase):
     def test_by(self):
         # Since the `test_detail_*` cases uses the common code,
         # only testing the sanity of this endpoint here.
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         response = self.client.get(
             reverse("api:auth:user-lookup"),
@@ -252,7 +252,7 @@ class TestAuth(APITestCase):
         )
 
     def test_by_query_param_required(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
         response = self.client.get(reverse("api:auth:user-lookup"))
 
         self.assertEqual(400, response.status_code)
@@ -262,7 +262,7 @@ class TestAuth(APITestCase):
         )
 
     def test_by_case_not_found(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
         response = self.client.get(
             reverse("api:auth:user-lookup"),
             {"username": self.inactive_user.username},
@@ -270,7 +270,7 @@ class TestAuth(APITestCase):
         self.assertEqual(404, response.status_code)
 
     def test_user_create_invalid_consent_case_1(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         email = "janet@example.com"
         verification = RegistrationVerification.objects.create(
@@ -291,7 +291,7 @@ class TestAuth(APITestCase):
         )
 
     def test_user_create_invalid_consent_case_2(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         response = self.client.post(
             self.url_create,
@@ -584,7 +584,7 @@ class TestAuth(APITestCase):
         self._test_action_yields_404("api:auth:user-unblock")
 
     def _test_get_yields_404(self, url_name):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         response1 = self.client.get(
             reverse(
@@ -626,7 +626,7 @@ class TestAuth(APITestCase):
         self.assertNotContains(response, self.user4.username)
 
     def test_followers(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         self.user2.following.add(self.user1)
         self.user3.following.add(self.user1)
@@ -643,7 +643,7 @@ class TestAuth(APITestCase):
         self._test_through_list_response(response)
 
     def test_following(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         self.user1.following.add(self.user2)
         self.user1.following.add(self.user3)

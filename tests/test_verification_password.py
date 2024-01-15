@@ -99,7 +99,7 @@ class TestPasswordReset(APITestCase):
         self.assertIsNone(v2.nulled_by_id)
 
     def test_reset_invalid_email(self):
-        self.client.force_authenticate(token="UserNotRequired")
+        self.client.force_authenticate(token=first_party_token)
 
         response = self.client.patch(
             self.url_change,

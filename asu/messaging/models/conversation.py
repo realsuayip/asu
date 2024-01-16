@@ -69,6 +69,9 @@ class Conversation(models.Model):
                 name="unique_conversation",
             )
         ]
+        indexes = [
+            models.Index(fields=["date_modified"]),
+        ]
 
     def __str__(self) -> str:
         return str(self.pk)

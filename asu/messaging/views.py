@@ -81,7 +81,8 @@ class ConversationViewSet(ExtendedViewSet[Conversation]):
     schemas = schemas.conversation
 
     def get_queryset(self) -> QuerySet[Conversation]:
-        queryset = Conversation.objects.filter(holder=self.request.user)
+        holder = self.request.user
+        queryset = Conversation.objects.filter(holder=holder)
 
         if self.action not in ("list", "retrieve"):
             # i.e., accept & destroy
@@ -98,14 +99,14 @@ class ConversationViewSet(ExtendedViewSet[Conversation]):
         request_accepted = Exists(
             ConversationRequest.objects.filter(
                 date_accepted__isnull=False,
-                recipient=OuterRef("holder_id"),
+                recipient=holder.id,
                 sender=OuterRef("target_id"),
             )
         )
         request_sent = Exists(
             ConversationRequest.objects.filter(
                 recipient=OuterRef("target_id"),
-                sender=OuterRef("holder_id"),
+                sender=holder.id,
             )
         )
         return queryset.filter(Q(request_sent) | Q(request_accepted))

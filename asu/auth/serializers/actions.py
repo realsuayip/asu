@@ -281,7 +281,7 @@ class DeactivationSerializer(serializers.Serializer[dict[str, Any]]):
     def validate_password(self, password: str) -> str:
         user = self.context["request"].user
         if not user.check_password(password):
-            raise serializers.ValidationError("Your password was not correct.")
+            raise serializers.ValidationError(gettext("Your password was not correct."))
         return password
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:

@@ -132,13 +132,14 @@ class BlockSerializer(UserRelationMixin, serializers.ModelSerializer[UserBlock])
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> UserBlock:
-        # If there is a follow relationship between
-        # users, delete it before blocking.
-        self.get_rels(UserFollow, **validated_data).delete()
-        self.get_rels(UserFollowRequest, **validated_data).update(
-            status=UserFollowRequest.Status.REJECTED
-        )
-        block, _ = UserBlock.objects.get_or_create(**validated_data)
+        block, created = UserBlock.objects.get_or_create(**validated_data)
+        if created:
+            # If there is a follow relationship between
+            # users, delete them during blocking.
+            self.get_rels(UserFollow, **validated_data).delete()
+            self.get_rels(UserFollowRequest, **validated_data).update(
+                status=UserFollowRequest.Status.REJECTED
+            )
         return block
 
 

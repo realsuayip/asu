@@ -277,7 +277,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         Creates a ticket that can be used for WebSocket authentication.
         """
         signer = signing.TimestampSigner(salt=WEBSOCKET_AUTH_SALT)
-        return signer.sign(self.pk)
+        return signer.sign(str(self.pk))
 
     def set_profile_picture(self, file: File[AnyStr]) -> None:
         if self.profile_picture:

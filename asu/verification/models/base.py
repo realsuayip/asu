@@ -11,7 +11,6 @@ from django.db.models import QuerySet
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.functional import classproperty
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from asu.utils import mailing
@@ -108,13 +107,13 @@ class Verification(models.Model):
         queryset.update(nulled_by=self)
 
     def send_email(self) -> int:
-        title = self.MESSAGES.subject
-        content = mark_safe(self.MESSAGES.body % {"code": self.code})
+        title, content = self.MESSAGES.subject, self.MESSAGES.body
         return mailing.send(
-            "transactional",
+            "code",
             title=title,
             content=content,
             recipients=[self.email],
+            context={"code": self.code},
         )
 
 

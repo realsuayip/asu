@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-08 16:54+0000\n"
+"POT-Creation-Date: 2024-01-22 17:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,13 +23,29 @@ msgctxt "app name"
 msgid "asu"
 msgstr ""
 
+#: auth/admin.py:24
+msgid "Personal info"
+msgstr ""
+
+#: auth/admin.py:38
+msgid "Preferences"
+msgstr ""
+
+#: auth/admin.py:50
+msgid "Permissions"
+msgstr ""
+
+#: auth/admin.py:62
+msgid "Important dates"
+msgstr ""
+
 #: auth/apps.py:8
 msgctxt "app name"
 msgid "Auth"
 msgstr ""
 
 #: auth/models/deactivation.py:10 auth/models/session.py:13
-#: auth/models/user.py:175 verification/models/base.py:52
+#: auth/models/user.py:175 verification/models/base.py:51
 #: verification/models/registration.py:25
 msgid "user"
 msgstr ""
@@ -39,15 +55,15 @@ msgid "date revoked"
 msgstr ""
 
 #: auth/models/deactivation.py:19 auth/models/through.py:18
-#: messaging/models/conversation.py:59 messaging/models/conversation.py:127
-#: messaging/models/message.py:63 models.py:60 verification/models/base.py:82
+#: messaging/models/conversation.py:59 messaging/models/conversation.py:130
+#: messaging/models/message.py:63 models.py:60 verification/models/base.py:81
 msgid "date created"
 msgstr ""
 
 #: auth/models/deactivation.py:20 auth/models/through.py:50
 #: auth/models/user.py:167 messaging/models/conversation.py:58
-#: messaging/models/conversation.py:126 messaging/models/message.py:62
-#: models.py:59 verification/models/base.py:81
+#: messaging/models/conversation.py:129 messaging/models/message.py:62
+#: models.py:59 verification/models/base.py:80
 msgid "date modified"
 msgstr ""
 
@@ -200,6 +216,10 @@ msgstr ""
 msgid "This e-mail could not be verified."
 msgstr ""
 
+#: auth/serializers/actions.py:284
+msgid "Your password was not correct."
+msgstr ""
+
 #: auth/serializers/user.py:107
 msgid ""
 "This e-mail could not be verified. Please provide a validated e-mail address."
@@ -230,23 +250,23 @@ msgstr ""
 msgid "conversations"
 msgstr ""
 
-#: messaging/models/conversation.py:112 messaging/models/message.py:50
+#: messaging/models/conversation.py:115 messaging/models/message.py:50
 msgid "sender"
 msgstr ""
 
-#: messaging/models/conversation.py:118 messaging/models/message.py:56
+#: messaging/models/conversation.py:121 messaging/models/message.py:56
 msgid "recipient"
 msgstr ""
 
-#: messaging/models/conversation.py:122
+#: messaging/models/conversation.py:125
 msgid "date_accepted"
 msgstr ""
 
-#: messaging/models/conversation.py:132
+#: messaging/models/conversation.py:135
 msgid "conversation request"
 msgstr ""
 
-#: messaging/models/conversation.py:133
+#: messaging/models/conversation.py:136
 msgid "conversation requests"
 msgstr ""
 
@@ -338,7 +358,7 @@ msgstr ""
 msgid "We could not handle your request. Please try again later."
 msgstr ""
 
-#: templates/mailing/transactional.html:214
+#: templates/mailing/transactional.html:216
 #, python-format
 msgid ""
 "This is a transactional e-mail sent by <a href=\"#\">%(brand)s</a> "
@@ -346,7 +366,7 @@ msgid ""
 "ignore it."
 msgstr ""
 
-#: templates/mailing/transactional.html:230 templates/two_factor/_base.html:29
+#: templates/mailing/transactional.html:232 templates/two_factor/_base.html:29
 #, python-format
 msgid ""
 "© Copyright 2022 %(brand)s, All Rights Reserved<br> <a href=\"mailto:"
@@ -580,50 +600,47 @@ msgid "Verify your email to reset your password"
 msgstr ""
 
 #: utils/messages.py:26
-#, python-format
 msgid ""
 "To continue for the password reset process, you need to enter the following "
-"code into the application:<div class='code'><strong>%(code)s</strong></div>"
+"code into the application:"
 msgstr ""
 
-#: utils/messages.py:33
+#: utils/messages.py:32
 msgid "Your password has been changed"
 msgstr ""
 
-#: utils/messages.py:35
+#: utils/messages.py:34
 msgid ""
 "The password for your account was just changed. If this was you, you can "
 "safely ignore this email. Otherwise, reset your password immediately, or "
 "contact the support team to restore your password."
 msgstr ""
 
-#: utils/messages.py:41
+#: utils/messages.py:40
 msgid "Verify your email for registration"
 msgstr ""
 
-#: utils/messages.py:43
-#, python-format
+#: utils/messages.py:42
 msgid ""
 "To continue for the registration process, you need to enter the following "
-"code into the application:<div class='code'><strong>%(code)s</strong></div>"
+"code into the application:"
 msgstr ""
 
-#: utils/messages.py:50
+#: utils/messages.py:48
 msgid "Verify this email address"
 msgstr ""
 
-#: utils/messages.py:52
-#, python-format
+#: utils/messages.py:50
 msgid ""
 "To change your email, you need to enter the following code into the "
-"application:<div class='code'><strong>%(code)s</strong></div>"
+"application:"
 msgstr ""
 
-#: utils/messages.py:58
+#: utils/messages.py:55
 msgid "Your account has been deactivated"
 msgstr ""
 
-#: utils/messages.py:60
+#: utils/messages.py:57
 msgid ""
 "You have now deactivated your account. Your account will be permanently "
 "deleted in 30 days. If you change your mind, you can simply login to "
@@ -647,31 +664,31 @@ msgctxt "app name"
 msgid "Verification"
 msgstr ""
 
-#: verification/models/base.py:28
+#: verification/models/base.py:27
 msgid "Ensure this field has at least 6 digits."
 msgstr ""
 
-#: verification/models/base.py:31
+#: verification/models/base.py:30
 msgid "Ensure this field contains only digits."
 msgstr ""
 
-#: verification/models/base.py:57 verification/serializers.py:23
+#: verification/models/base.py:56 verification/serializers.py:23
 msgid "email"
 msgstr ""
 
-#: verification/models/base.py:59 verification/serializers.py:25
+#: verification/models/base.py:58 verification/serializers.py:25
 msgid "code"
 msgstr ""
 
-#: verification/models/base.py:72
+#: verification/models/base.py:71
 msgid "nulled by"
 msgstr ""
 
-#: verification/models/base.py:77
+#: verification/models/base.py:76
 msgid "date verified"
 msgstr ""
 
-#: verification/models/base.py:185
+#: verification/models/base.py:184
 msgid "date completed"
 msgstr ""
 

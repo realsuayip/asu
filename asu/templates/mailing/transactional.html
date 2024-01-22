@@ -202,7 +202,9 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        {{ content }}
+                                        {% block content %}
+                                            {{ content }}
+                                        {% endblock %}
                                     </td>
                                 </tr>
                             </table>

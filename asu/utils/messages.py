@@ -26,7 +26,6 @@ password_reset = EmailMessage(
         "To continue for the password reset process,"
         " you need to enter the following code into"
         " the application:"
-        "<div class='code'><strong>%(code)s</strong></div>"
     ),
 )
 password_change_notice = EmailMessage(
@@ -43,7 +42,6 @@ registration = EmailMessage(
         "To continue for the registration process,"
         " you need to enter the following code into"
         " the application:"
-        "<div class='code'><strong>%(code)s</strong></div>"
     ),
 )
 email_verification = EmailMessage(
@@ -51,7 +49,6 @@ email_verification = EmailMessage(
     body=_(
         "To change your email, you need to enter the following"
         " code into the application:"
-        "<div class='code'><strong>%(code)s</strong></div>"
     ),
 )
 account_deactivated = EmailMessage(

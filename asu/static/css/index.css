@@ -191,7 +191,7 @@ main {
     flex-direction: column;
     gap: 2rem;
     border-radius: .4rem;
-    max-width: min(400px, 100vw);
+    width: min(400px, 100vw);
     height: auto;
     padding: 3rem 1.5rem;
 }

@@ -41,6 +41,10 @@ body {
     font-size: 1.4rem;
     background: var(--background);
     color: var(--foreground);
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
 
 hr {
@@ -178,13 +182,6 @@ header small {
     line-height: 1.26;
 }
 
-body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
-
 svg {
     fill: var(--foreground);
 }
@@ -194,14 +191,9 @@ main {
     flex-direction: column;
     gap: 2rem;
     border-radius: .4rem;
-    width: 400px;
+    max-width: min(400px, 100vw);
     height: auto;
-}
-
-@media screen and (max-width: 420px) {
-    main {
-        margin: 0 2rem;
-    }
+    padding: 3rem 1.5rem;
 }
 
 footer {
@@ -316,11 +308,11 @@ a {
 }
 
 .qrcode {
-    width: min-content;
-    min-width: 200px;
-    min-height: 200px;
+    width: 100%;
     margin: 0 auto;
     background: white;
+    border-radius: .75rem;
+    border: 1px solid var(--border-accent);
 }
 
 .banner {
@@ -343,6 +335,10 @@ a {
     color: rgba(248, 81, 73);
 }
 
+.text-overflow {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
 
 .figure {
     display: flex;

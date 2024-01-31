@@ -16,6 +16,11 @@ jobs:
     - name: Expose GitHub Runtime
       uses: crazy-max/ghaction-github-runtime@v2
 
+    - name: Setup docker (missing on MacOS)
+      run: |
+        brew install docker
+        colima start        
+
     - name: Build containers
       run: |
         docker buildx create --use --driver=docker-container

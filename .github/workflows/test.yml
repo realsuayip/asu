@@ -18,7 +18,7 @@ jobs:
 
     - name: Setup docker (missing on MacOS)
       run: |
-        brew install docker
+        brew install docker colima
         colima start        
 
     - name: Build containers

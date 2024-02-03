@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # First party apps
     "asu",
+    "asu.utils",
     "asu.auth",
     "asu.verification",
     "asu.messaging",

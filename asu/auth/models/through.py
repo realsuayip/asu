@@ -26,6 +26,9 @@ class UserThrough(models.Model):
         ]
         abstract = True
 
+    def __str__(self) -> str:
+        return "from=%s, to=%s" % (self.from_user_id, self.to_user_id)
+
 
 class UserFollow(UserThrough):
     pass

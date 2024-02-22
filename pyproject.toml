@@ -61,13 +61,14 @@ prod = [
     "websockets ~= 12.0",
 ]
 
-[tool.black]
-line-length = 88
-
 [tool.ruff]
 fix = true
-fixable = ["I"]
 show-fixes = true
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+fixable = ["I"]
 select = [
     "E", # pycodestyle errors
     "W", # pycodestyle warnings
@@ -92,11 +93,9 @@ select = [
     "PL", # pylint
     "PERF", # perflint
 ]
-target-version = "py311"
-line-length = 88
 ignore = ["B904", "RUF012", "SIM105", "PTH123", "PLR2004", "PLR0913", "PLR0911"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 combine-as-imports = true
 section-order = [
     "future",
@@ -108,14 +107,14 @@ section-order = [
     "local-folder",
 ]
 
-[tool.ruff.isort.sections]
+[tool.ruff.lint.isort.sections]
 django = ["django"]
 rest_framework = ["rest_framework"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 20
 
-[tool.ruff.extend-per-file-ignores]
+[tool.ruff.lint.extend-per-file-ignores]
 "*/migrations/*" = ["E501"]
 
 [tool.mypy]

@@ -52,8 +52,8 @@ docs:
     make -C docs clean html
 
 # Run pre-commit
-format:
-    pre-commit run
+format *args:
+    pre-commit run {{ args }}
 
 # Follow logs for given container.
 logs container='asu-web':

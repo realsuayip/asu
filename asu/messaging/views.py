@@ -1,4 +1,5 @@
 from django.db.models import Exists, OuterRef, Q, QuerySet
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from rest_framework.decorators import action
@@ -32,14 +33,12 @@ class MessageViewSet(ExtendedViewSet[Message]):
     schemas = schemas.message
 
     def get_queryset(self) -> QuerySet[Message]:
-        user, conversation_id = (
-            self.request.user,
-            self.kwargs["conversation_pk"],
+        conversation = get_object_or_404(
+            Conversation.objects.only("id"),
+            holder=self.request.user,
+            pk=self.kwargs["conversation_pk"],
         )
-        return Message.objects.filter(
-            Q(sender=user) | Q(recipient=user),
-            conversations__id=conversation_id,
-        )
+        return Message.objects.filter(conversations=conversation)
 
     def perform_destroy(self, instance: Message) -> None:
         conversation = instance.conversations.get(holder=self.request.user)

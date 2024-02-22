@@ -660,6 +660,34 @@ class TestMessaging(APITestCase):
         for result in results:
             self.assertEqual("received", result["source"])
 
+    def test_message_list_unauthorized_conversation(self):
+        self._send_message(self.user1, self.user2, "Howdy")
+        (pk,) = Conversation.objects.filter(holder=self.user2).values_list(
+            "pk", flat=True
+        )
+
+        response = self.client.get(
+            reverse(
+                "api:messaging:message-list",
+                kwargs={"conversation_pk": pk},
+            )
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_message_detail_unauthorized_conversation(self):
+        msg = self._send_message(self.user1, self.user2, "Howdy")
+        (pk,) = Conversation.objects.filter(holder=self.user2).values_list(
+            "pk", flat=True
+        )
+
+        response = self.client.get(
+            reverse(
+                "api:messaging:message-detail",
+                kwargs={"conversation_pk": pk, "pk": msg.data["id"]},
+            )
+        )
+        self.assertEqual(404, response.status_code)
+
     def test_message_detail(self):
         r1 = self._send_message(self.user1, self.user2, "Howdy")
         message_id = r1.data["id"]
@@ -776,29 +804,44 @@ class TestMessaging(APITestCase):
     def test_can_only_see_own_messages(self):
         # Send independent messages to two conversations and make sure
         # only the participants can access those messages.
-        msg_1 = self._send_message(
-            self.user1, self.user2, "user1 and user2 message"
-        ).json()
-        msg_1_url = msg_1["url"]
+        self._send_message(self.user1, self.user2, "user1 and user2 message")
+        self._send_message(self.user3, self.user4, "user3 and user4 message")
+        c1, c2, c3, c4 = (
+            Conversation.objects.get(holder=self.user1.pk),
+            Conversation.objects.get(holder=self.user2.pk),
+            Conversation.objects.get(holder=self.user3.pk),
+            Conversation.objects.get(holder=self.user4.pk),
+        )
 
-        msg_2 = self._send_message(
-            self.user3, self.user4, "user3 and user4 message"
-        ).json()
-        msg_2_url = msg_2["url"]
+        name = "api:messaging:message-list"
+        msg_1to2_url_for_1 = reverse(name, kwargs={"conversation_pk": c1.pk})
+        msg_1to2_url_for_2 = reverse(name, kwargs={"conversation_pk": c2.pk})
+        msg_3to4_url_for_3 = reverse(name, kwargs={"conversation_pk": c3.pk})
+        msg_3to4_url_for_4 = reverse(name, kwargs={"conversation_pk": c4.pk})
 
         # at this point, authenticated user is 'user3'. Both user3 and
         # user4 should not be able to see messages of user1 and user2
-        r1 = self.client.get(msg_1_url)
-        r2 = self.client.get(msg_2_url)
-        self.assertEqual(404, r1.status_code)
-        self.assertEqual(200, r2.status_code)
+        r1 = self.client.get(msg_1to2_url_for_1)
+        r2 = self.client.get(msg_1to2_url_for_2)
+        r3 = self.client.get(msg_3to4_url_for_3)
+        r4 = self.client.get(msg_3to4_url_for_4)
 
-        # try for user4
-        self.client.force_login(self.user4)
-        r1_alt = self.client.get(msg_1_url)
-        r2_alt = self.client.get(msg_2_url)
-        self.assertEqual(404, r1_alt.status_code)
-        self.assertEqual(200, r2_alt.status_code)
+        self.assertEqual(404, r1.status_code)
+        self.assertEqual(404, r2.status_code)
+        self.assertEqual(200, r3.status_code)
+        self.assertEqual(404, r4.status_code)
+
+        # try for user1
+        self.client.force_login(self.user1)
+        r1 = self.client.get(msg_1to2_url_for_1)
+        r2 = self.client.get(msg_1to2_url_for_2)
+        r3 = self.client.get(msg_3to4_url_for_3)
+        r4 = self.client.get(msg_3to4_url_for_4)
+
+        self.assertEqual(200, r1.status_code)
+        self.assertEqual(404, r2.status_code)
+        self.assertEqual(404, r3.status_code)
+        self.assertEqual(404, r4.status_code)
 
     # Websocket related
 

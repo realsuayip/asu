@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import parsers, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -94,16 +95,31 @@ class UserViewSet(ExtendedViewSet[User]):
     }
 
     def get_queryset(self) -> QuerySet[User]:
-        queryset = User.objects.active()
-        if self.request.user and self.request.user.is_authenticated:
-            queryset = queryset.exclude(blocked__in=[self.request.user])
-        return queryset
+        return User.objects.active()
 
     def get_object(self) -> User:
-        pk, user = self.kwargs["pk"], self.request.user
-        if (user is not None) and user.is_authenticated and (str(user.pk) == pk):
+        as_user = self.request.user and self.request.user.is_authenticated
+        if as_user and (str(self.request.user.pk) == self.kwargs["pk"]):
+            # If the user is displaying their own object, don't
+            # bother making additional database queries.
             return self.request.user
-        return super().get_object()
+        user = super().get_object()
+        if (
+            as_user
+            and self.action not in {"retrieve", "block", "unblock"}
+            and self.request.user.has_block_rel(user)
+        ):
+            # If displayed user has blocking relations with the authenticated
+            # user, make sure actions with `detail=True` are not available. For
+            # example, people cannot follow or message users if they have been
+            # blocked (or if they block).
+
+            # Exceptions are made for 'retrieving', 'blocking' and 'unblocking'
+            # actions. In that, people can block or unblock the person that
+            # blocks them. To do that, they should be able to visit user detail
+            # page, so retrieving is also allowed.
+            raise PermissionDenied
+        return user
 
     @action(
         detail=False,

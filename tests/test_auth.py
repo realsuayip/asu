@@ -23,6 +23,7 @@ from asu.auth.models import (
     Application,
     Session,
     User,
+    UserBlock,
     UserDeactivation,
     UserFollowRequest,
 )
@@ -196,7 +197,7 @@ class TestAuth(APITestCase):
         )
         self.assertEqual(200, response.status_code)
 
-    def test_detail_returns_404_when_blocked_by(self):
+    def test_detail_returns_200_when_blocked_by(self):
         self.user1.blocked.add(self.user2)
         self.client.force_login(self.user2)
 
@@ -206,7 +207,7 @@ class TestAuth(APITestCase):
                 kwargs={"pk": self.user1.pk},
             )
         )
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(200, response.status_code)
 
     def test_detail_excludes_frozen_or_inactive(self):
         self.client.force_authenticate(token=first_party_token)
@@ -445,7 +446,7 @@ class TestAuth(APITestCase):
 
     def test_follow_fails_if_blocked_by(self):
         response = self._test_follows_fails_if(self.user2, self.user1)
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(403, response.status_code)
 
     def test_self_follow_not_allowed(self):
         self.client.force_login(self.user1)
@@ -546,6 +547,35 @@ class TestAuth(APITestCase):
             )
         )
         self.assertEqual(403, response.status_code)
+
+    def test_block_allowed_while_being_blocked(self):
+        self.client.force_login(self.user1)
+        self.client.post(
+            reverse(
+                "api:auth:user-block",
+                kwargs={"pk": self.user2.pk},
+            )
+        )
+
+        self.client.force_login(self.user2)
+        response = self.client.post(
+            reverse(
+                "api:auth:user-block",
+                kwargs={"pk": self.user1.pk},
+            )
+        )
+
+        self.assertEqual(204, response.status_code)
+        self.assertEqual(2, UserBlock.objects.count())
+
+        response = self.client.post(
+            reverse(
+                "api:auth:user-unblock",
+                kwargs={"pk": self.user1.pk},
+            )
+        )
+        self.assertEqual(204, response.status_code)
+        self.assertEqual(1, UserBlock.objects.count())
 
     def _test_action_yields_404(self, url_name):
         self.client.force_login(self.user1)

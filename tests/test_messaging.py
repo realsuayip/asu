@@ -71,7 +71,7 @@ class TestMessaging(APITestCase):
     def test_message_fails_if_blocked_by(self):
         self.user2.blocked.add(self.user1)
         response = self._send_message(self.user1, self.user2, "Hi")
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(403, response.status_code)
 
     def test_self_message_fails(self):
         response = self._send_message(self.user1, self.user1, "Hi myself")
@@ -126,7 +126,7 @@ class TestMessaging(APITestCase):
         self.user2.blocked.add(self.user1)
 
         response = self._send_message(self.user1, self.user2, "Hi again")
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(403, response.status_code)
 
     def test_message_ok_on_deletion_interruption(self):
         self._send_message(self.user1, self.user2, "Hi")

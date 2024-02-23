@@ -150,14 +150,11 @@ class FollowSerializer(
         model = UserFollow
 
     def create(self, validated_data: dict[str, Any]) -> UserFollow | UserFollowRequest:
+        # At this point, we are certain that no blocking relations exist
+        # since `get_object()` checks for that and returns 403. So, we can
+        # safely proceed to creating follow relations.
         from_user: User = validated_data["from_user"]
         to_user: User = validated_data["to_user"]
-
-        # If users block each other in any
-        # direction, following is not allowed.
-        blocks = self.get_rels(UserBlock, **validated_data)
-        if blocks.exists():
-            raise PermissionDenied
 
         if to_user.is_private:
             follow_request, _ = from_user.send_follow_request(to_user=to_user)

@@ -73,6 +73,15 @@ class TestMessaging(APITestCase):
         response = self._send_message(self.user1, self.user2, "Hi")
         self.assertEqual(403, response.status_code)
 
+    def test_message_check_fails_with_blocks(self):
+        # Make sure block relations are checked independently in
+        # `can_send_message` method since related views check
+        # blocking beforehand.
+        self.user1.blocked.add(self.user2)
+
+        self.assertFalse(self.user1.can_send_message(self.user2))
+        self.assertFalse(self.user2.can_send_message(self.user1))
+
     def test_self_message_fails(self):
         response = self._send_message(self.user1, self.user1, "Hi myself")
         self.assertEqual(403, response.status_code)

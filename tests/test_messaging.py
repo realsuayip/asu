@@ -767,10 +767,13 @@ class TestMessaging(APITestCase):
             "api:messaging:message-detail",
             kwargs={"conversation_pk": c2.pk, "pk": message_id},
         )
-        self.client.delete(message_url_1)
-        self.client.force_login(self.user2)
-        self.client.delete(message_url_2)
 
+        self.client.delete(message_url_1)
+        self.assertTrue(Message.objects.filter(pk=message_id).exists())
+
+        self.client.force_login(self.user2)
+
+        self.client.delete(message_url_2)
         self.assertFalse(Message.objects.filter(pk=message_id).exists())
 
     def test_delete_conversation(self):
@@ -793,6 +796,8 @@ class TestMessaging(APITestCase):
     def test_conversation_delete_both_cascades_message(self):
         self._send_message(self.user1, self.user2, "Hi")
         self._send_message(self.user1, self.user2, "Hello")
+        self._send_message(self.user1, self.user2, "Hello again")
+
         c1 = Conversation.objects.get(holder=self.user1)
         c2 = Conversation.objects.get(holder=self.user2)
 
@@ -804,10 +809,12 @@ class TestMessaging(APITestCase):
         )
 
         self.client.delete(conversation_url_1)
-        self.client.force_login(self.user2)
-        self.client.delete(conversation_url_2)
+        self.assertEqual(3, Message.objects.count())
 
-        self.assertFalse(Message.objects.all().exists())
+        self.client.force_login(self.user2)
+
+        self.client.delete(conversation_url_2)
+        self.assertEqual(0, Message.objects.count())
         self.assertEqual(1, ConversationRequest.objects.all().count())
 
     def test_can_only_see_own_messages(self):

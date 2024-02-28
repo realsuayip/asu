@@ -9,8 +9,17 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 
 from asu.auth.models import User
+from asu.auth.models.user import USERNAME_CONSTRAINTS
 from asu.utils.rest import DynamicFieldsMixin
 from asu.verification.models import RegistrationVerification
+
+
+def validate_username_constraints(instance: User) -> None:
+    for constraint in USERNAME_CONSTRAINTS:
+        try:
+            constraint.validate(User, instance)  # type: ignore[attr-defined]
+        except django.core.exceptions.ValidationError as err:
+            raise serializers.ValidationError({"username": err.messages})
 
 
 class UserPublicReadSerializer(
@@ -59,16 +68,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ("email", "date_joined")
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
-        # This method is overriden so that `validate_constraints` could be
-        # called, triggering related database constraints.
+        # This method is overridden so that `validate_username_constraints`
+        # could be called, triggering related database constraints.
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
-        try:
-            instance.validate_constraints()
-        except django.core.exceptions.ValidationError as exc:
-            raise serializers.ValidationError(exc.messages)
-
+        validate_username_constraints(instance)
         instance.save(update_fields=validated_data.keys())
         return instance
 
@@ -112,6 +116,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
 
         password = validated_data.pop("password")
         user = User(**validated_data)
+        validate_username_constraints(user)
 
         try:
             validate_password(password, user=user)
@@ -119,12 +124,6 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
             raise serializers.ValidationError({"password": err.messages})
 
         user.set_password(password)
-
-        try:
-            user.validate_constraints()
-        except django.core.exceptions.ValidationError as exc:
-            raise serializers.ValidationError(exc.messages)
-
         user.save()
         verification.user = user
         verification.date_completed = timezone.now()

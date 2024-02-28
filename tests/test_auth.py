@@ -106,10 +106,10 @@ class TestAuth(APITestCase):
             data={"username": "Suzie"},
         )
 
-        self.assertContains(
-            response,
-            "username you specified is already in use",
-            status_code=400,
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(
+            {"username": ["The username you specified is already in use."]},
+            response.json()["errors"],
         )
 
     def test_me_update_disallow_email(self):

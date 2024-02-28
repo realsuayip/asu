@@ -58,6 +58,20 @@ class UsernameValidator(RegexValidator):
     )
 
 
+USERNAME_CONSTRAINTS = [
+    models.UniqueConstraint(
+        Lower("username"),
+        name="unique_lower_username",
+        violation_error_message=_("The username you specified is already in use."),
+    ),
+    models.CheckConstraint(
+        check=Q(username__regex=UsernameValidator.regex),
+        name="regex_valid_username",
+        violation_error_message=UsernameValidator.message,
+    ),
+]
+
+
 class UserManager(DjangoUserManager["User"]):
     def active(self) -> QuerySet[User]:
         """
@@ -174,20 +188,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
-        constraints = [
-            models.UniqueConstraint(
-                Lower("username"),
-                name="unique_lower_username",
-                violation_error_message=_(
-                    "The username you specified is already in use."
-                ),
-            ),
-            models.CheckConstraint(
-                check=Q(username__regex=UsernameValidator.regex),
-                name="regex_valid_username",
-                violation_error_message=UsernameValidator.message,
-            ),
-        ]
+        constraints = [*USERNAME_CONSTRAINTS]
 
     def __str__(self) -> str:
         return self.username

@@ -68,10 +68,11 @@ class RegistrationTest(APITestCase):
                 "password": "very_secret",
             },
         )
-        self.assertContains(
-            fail_response,
-            "username you specified is already in use",
-            status_code=400,
+
+        self.assertEqual(400, fail_response.status_code)
+        self.assertEqual(
+            {"username": ["The username you specified is already in use."]},
+            fail_response.json()["errors"],
         )
 
         # Create the actual user

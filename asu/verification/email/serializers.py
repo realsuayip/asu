@@ -6,6 +6,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
+from asu.utils import messages
 from asu.verification.models import EmailVerification
 from asu.verification.serializers import BaseCheckSerializer, EmailMixin
 
@@ -35,7 +36,7 @@ class EmailCheckSerializer(BaseCheckSerializer):
                 user=user, **validated_data
             )
         except EmailVerification.DoesNotExist:
-            raise NotFound
+            raise NotFound(messages.BAD_VERIFICATION_CODE)
 
         verification.date_verified = timezone.now()
         verification.save(update_fields=["date_verified", "date_modified"])

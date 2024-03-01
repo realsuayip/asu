@@ -16,6 +16,12 @@ EmailMessage = namedtuple("EmailMessage", ["subject", "body"])
 
 
 GENERIC_ERROR = _("We could not handle your request. Please try again later.")
+BAD_VERIFICATION_CODE = _(
+    "We couldn't verify your code. Please make sure you've"
+    " entered the correct code that was sent to your email. If the"
+    " problem persists, please request a new verification code or"
+    " contact support for assistance."
+)
 
 
 # Email messages

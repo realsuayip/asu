@@ -9,6 +9,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
 from asu.auth.models import User
+from asu.utils import messages
 from asu.verification.models.base import ConsentVerification, code_validator
 
 
@@ -36,7 +37,7 @@ class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str,
         try:
             verification = self.model.objects.verifiable().get(**validated_data)
         except self.model.DoesNotExist:
-            raise NotFound
+            raise NotFound(messages.BAD_VERIFICATION_CODE)
 
         verification.date_verified = timezone.now()
         verification.save(update_fields=["date_verified", "date_modified"])

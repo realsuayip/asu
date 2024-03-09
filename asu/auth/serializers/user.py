@@ -48,6 +48,8 @@ class UserPublicReadSerializer(
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    profile_picture = serializers.ImageField(source="get_profile_picture")
+
     class Meta:
         model = User
         fields = (
@@ -66,7 +68,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
-        read_only_fields = ("email", "date_joined")
+        read_only_fields = ("profile_picture", "email", "date_joined")
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
         # This method is overridden so that `validate_username_constraints`

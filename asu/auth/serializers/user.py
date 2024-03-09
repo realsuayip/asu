@@ -55,6 +55,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             "email",
             "display_name",
             "username",
+            "profile_picture",
             "gender",
             "birth_date",
             "date_joined",

@@ -74,7 +74,7 @@ class TestAuth(APITestCase):
         self._compare_instance_to_dict(
             self.user1,
             detail,
-            exclude=["url", "date_joined"],
+            exclude=["profile_picture", "url", "date_joined"],
         )
 
     def test_me_update(self):
@@ -94,7 +94,7 @@ class TestAuth(APITestCase):
         self._compare_instance_to_dict(
             self.user2,
             detail,
-            exclude=["url", "date_joined", "birth_date"],
+            exclude=["profile_picture", "url", "date_joined", "birth_date"],
         )
 
     def test_me_update_username_taken(self):

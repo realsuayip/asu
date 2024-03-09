@@ -303,7 +303,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)
         self.save(update_fields=["profile_picture", "date_modified"])
 
-    def get_profile_picture(self, size: tuple[int, int] = (72, 72)) -> str | None:
+    def get_profile_picture(self, size: tuple[int, int] = (150, 150)) -> str | None:
         if not self.profile_picture:
             return None
 

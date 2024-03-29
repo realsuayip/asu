@@ -54,17 +54,19 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = (
             "id",
-            "email",
             "display_name",
             "username",
+            "email",
+            "description",
+            "website",
             "profile_picture",
             "gender",
+            "language",
             "birth_date",
             "date_joined",
             "is_private",
-            "description",
-            "website",
-            "language",
+            "allows_receipts",
+            "allows_all_messages",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}

@@ -26,6 +26,7 @@ class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str,
         label=_("code"),
         max_length=6,
         validators=[code_validator],
+        write_only=True,
     )
     consent: serializers.CharField | None = serializers.CharField(
         read_only=True,

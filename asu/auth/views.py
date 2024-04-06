@@ -64,8 +64,10 @@ class UserLookupFilter(filters.FilterSet):
 class UserViewSet(ExtendedViewSet[User]):
     mixins = ("retrieve", "create")
     permission_classes = [RequireToken]
-    # ^ Allow everyone for mixins listed above, for actions, each
-    # have their permission classes set separately.
+    """
+    Allow everyone for mixins listed above, for actions, each have their
+    permission classes set separately.
+    """
     sensitive_actions = {"followers", "following"}
     """
     These actions may reveal sensitive information about the user. If the user

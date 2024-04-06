@@ -689,6 +689,51 @@ class TestAuth(APITestCase):
         )
         self._test_through_list_response(response)
 
+    def test_followers_respect_privacy(self):
+        self.client.force_login(self.user1)
+        url = reverse(
+            "api:auth:user-followers",
+            kwargs={"pk": self.private_user.pk},
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(403, response.status_code)
+
+        self.user1.add_following(to_user=self.private_user)
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+
+    def test_following_respect_privacy(self):
+        self.client.force_login(self.user1)
+        url = reverse(
+            "api:auth:user-following",
+            kwargs={"pk": self.private_user.pk},
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(403, response.status_code)
+
+        self.user1.add_following(to_user=self.private_user)
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+
+    def test_follow_stats_respect_privacy_case_no_user(self):
+        self.client.force_authenticate(token=first_party_token)
+        followers = self.client.get(
+            reverse(
+                "api:auth:user-followers",
+                kwargs={"pk": self.private_user.pk},
+            )
+        )
+        following = self.client.get(
+            reverse(
+                "api:auth:user-followers",
+                kwargs={"pk": self.private_user.pk},
+            )
+        )
+        self.assertEqual(403, followers.status_code)
+        self.assertEqual(403, following.status_code)
+
     def test_blocked(self):
         self.client.force_login(self.user1)
 

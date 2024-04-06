@@ -66,6 +66,12 @@ class UserViewSet(ExtendedViewSet[User]):
     permission_classes = [RequireToken]
     # ^ Allow everyone for mixins listed above, for actions, each
     # have their permission classes set separately.
+    sensitive_actions = {"followers", "following"}
+    """
+    These actions may reveal sensitive information about the user. If the user
+    marked their account private, these will be inaccessible to users that
+    do not follow the user. This check is enforced in `get_object()` method.
+    """
     serializer_classes = {
         "create": UserCreateSerializer,
         "me": UserSerializer,
@@ -98,7 +104,7 @@ class UserViewSet(ExtendedViewSet[User]):
         return User.objects.active()
 
     def get_object(self) -> User:
-        as_user = self.request.user and self.request.user.is_authenticated
+        as_user = bool(self.request.user and self.request.user.is_authenticated)
         if as_user and (str(self.request.user.pk) == self.kwargs["pk"]):
             # If the user is displaying their own object, don't
             # bother making additional database queries.
@@ -118,6 +124,14 @@ class UserViewSet(ExtendedViewSet[User]):
             # actions. In that, people can block or unblock the person that
             # blocks them. To do that, they should be able to visit user detail
             # page, so retrieving is also allowed.
+            raise PermissionDenied
+        if (
+            self.action in self.sensitive_actions
+            and user.is_private
+            and not (as_user and self.request.user.is_following(user))
+        ):
+            # If displayed user account is private, make sure sensitive actions
+            # are only available to their followers.
             raise PermissionDenied
         return user
 

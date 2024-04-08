@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any
 
 import django.core.exceptions
@@ -31,7 +32,7 @@ class UserPublicReadSerializer(
 
     class Meta:
         model = User
-        fields = (
+        fields: Sequence[str] = (
             "id",
             "display_name",
             "username",

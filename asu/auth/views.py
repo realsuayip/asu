@@ -213,10 +213,8 @@ class UserViewSet(ExtendedViewSet[User]):
     def unfollow(self, request: Request, pk: int) -> Response:
         return self.delete_through(pk, model=UserFollow)
 
-    def list_follow_through(
-        self, queryset: QuerySet[UserFollow | UserBlock]
-    ) -> Response:
-        page = self.paginate_queryset(queryset)  # type: ignore[arg-type]
+    def list_follow_through(self, queryset: QuerySet[User]) -> Response:
+        page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 

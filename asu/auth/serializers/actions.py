@@ -37,12 +37,6 @@ RelatedUserField = UserPublicReadSerializer(
     fields=user_fields,
     ref_name="RelatedUser",
 )
-ManyRelatedUserField = UserPublicReadSerializer(
-    many=True,
-    read_only=True,
-    fields=user_fields,
-    ref_name="ManyRelatedUser",
-)
 
 
 class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):

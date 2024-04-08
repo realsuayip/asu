@@ -6,9 +6,9 @@ from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
 from asu.auth.serializers.actions import (
-    ManyRelatedUserField,
     PasswordResetSerializer,
     RelationSerializer,
+    UserConnectionSerializer,
 )
 from asu.auth.serializers.user import (
     UserCreateSerializer,
@@ -117,17 +117,17 @@ retrieve = extend_schema(
 
 followers = extend_schema(
     summary="List followers of a user",
-    responses={200: ManyRelatedUserField, 404: APIError},
+    responses={200: UserConnectionSerializer(many=True), 404: APIError},
     examples=[examples.not_found],
 )
 following = extend_schema(
     summary="List follows of a user",
-    responses={200: ManyRelatedUserField, 404: APIError},
+    responses={200: UserConnectionSerializer(many=True), 404: APIError},
     examples=[examples.not_found],
 )
 blocked = extend_schema(
     summary="List blocked users",
-    responses={200: ManyRelatedUserField},
+    responses={200: UserConnectionSerializer(many=True)},
 )
 
 message = extend_schema(

@@ -644,16 +644,13 @@ class TestAuth(APITestCase):
     def test_following_yields_404(self):
         self._test_get_yields_404("api:auth:user-following")
 
-    def _test_through_list_response(self, response):
-        results = response.data["results"]
-
-        self.assertEqual(3, len(results))
-        self.assertContains(response, self.user2.username)
-        self.assertContains(response, self.user3.username)
-        self.assertContains(response, self.private_user.username)
-        self.assertNotContains(response, self.inactive_user.username)
-        self.assertNotContains(response, self.frozen_user.username)
-        self.assertNotContains(response, self.user4.username)
+    def _assert_valid_user_connections_response(self, response):
+        # Should not contain inactive or frozen users. Order is
+        # important; latest follows/blocks should appear fist.
+        self.assertEqual(
+            [self.private_user.id, self.user3.id, self.user2.id],
+            [result["id"] for result in response.data["results"]],
+        )
 
     def test_followers(self):
         self.client.force_authenticate(token=first_party_token)
@@ -670,7 +667,7 @@ class TestAuth(APITestCase):
                 kwargs={"pk": self.user1.pk},
             )
         )
-        self._test_through_list_response(response)
+        self._assert_valid_user_connections_response(response)
 
     def test_following(self):
         self.client.force_authenticate(token=first_party_token)
@@ -687,7 +684,7 @@ class TestAuth(APITestCase):
                 kwargs={"pk": self.user1.pk},
             )
         )
-        self._test_through_list_response(response)
+        self._assert_valid_user_connections_response(response)
 
     def test_followers_respect_privacy(self):
         self.client.force_login(self.user1)
@@ -744,7 +741,7 @@ class TestAuth(APITestCase):
         self.user1.blocked.add(self.frozen_user)
 
         response = self.client.get(reverse("api:auth:user-blocked"))
-        self._test_through_list_response(response)
+        self._assert_valid_user_connections_response(response)
 
     def test_upload_delete_profile_picture(self):
         file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"

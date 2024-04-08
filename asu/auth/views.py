@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from django.db.models import Exists, OuterRef, QuerySet
+from django.db.models import Exists, F, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
 
@@ -32,9 +32,7 @@ from asu.auth.serializers.actions import (
     ProfilePictureEditSerializer,
     RelationSerializer,
     TicketSerializer,
-    UserBlockedSerializer,
-    UserFollowersSerializer,
-    UserFollowingSerializer,
+    UserConnectionSerializer,
 )
 from asu.auth.serializers.user import (
     UserCreateSerializer,
@@ -49,8 +47,7 @@ from asu.utils.views import ExtendedViewSet
 if TYPE_CHECKING:
     from rest_framework.decorators import ViewSetAction
 
-
-F = TypeVar("F", bound=Callable[..., Any])
+_CallableT = TypeVar("_CallableT", bound=Callable[..., Any])
 
 
 class RelationFilter(filters.FilterSet):
@@ -82,9 +79,9 @@ class UserViewSet(ExtendedViewSet[User]):
         "unblock": BlockSerializer,
         "follow": FollowSerializer,
         "unfollow": FollowSerializer,
-        "followers": UserFollowersSerializer,
-        "following": UserFollowingSerializer,
-        "blocked": UserBlockedSerializer,
+        "followers": UserConnectionSerializer,
+        "following": UserConnectionSerializer,
+        "blocked": UserConnectionSerializer,
         "reset_password": PasswordResetSerializer,
         "message": MessageComposeSerializer,
         "ticket": TicketSerializer,
@@ -193,7 +190,7 @@ class UserViewSet(ExtendedViewSet[User]):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def through_action(method: F) -> ViewSetAction[F]:
+    def through_action(method: _CallableT) -> ViewSetAction[_CallableT]:
         return action(
             detail=True,
             methods=["post"],
@@ -226,48 +223,48 @@ class UserViewSet(ExtendedViewSet[User]):
     @action(
         detail=True,
         methods=["get"],
-        serializer_class=UserFollowersSerializer,
-        pagination_class=get_paginator("cursor", ordering="-date_created"),
+        serializer_class=UserConnectionSerializer,
+        pagination_class=get_paginator("cursor", ordering="-created"),
         permission_classes=[RequireToken],
     )
     def followers(self, request: Request, pk: int) -> Response:
         user = self.get_object()
-        queryset = UserFollow.objects.filter(
-            to_user=user,
-            from_user__is_active=True,
-            from_user__is_frozen=False,
-        ).select_related("from_user")
+        queryset = (
+            User.objects.active()
+            .filter(from_userfollows__to_user=user)
+            .alias(created=F("from_userfollows__date_created"))
+        )
         return self.list_follow_through(queryset)
 
     @action(
         detail=True,
         methods=["get"],
-        serializer_class=UserFollowingSerializer,
-        pagination_class=get_paginator("cursor", ordering="-date_created"),
+        serializer_class=UserConnectionSerializer,
+        pagination_class=get_paginator("cursor", ordering="-created"),
         permission_classes=[RequireToken],
     )
     def following(self, request: Request, pk: int) -> Response:
         user = self.get_object()
-        queryset = UserFollow.objects.filter(
-            from_user=user,
-            to_user__is_active=True,
-            to_user__is_frozen=False,
-        ).select_related("to_user")
+        queryset = (
+            User.objects.active()
+            .filter(to_userfollows__from_user=user)
+            .alias(created=F("to_userfollows__date_created"))
+        )
         return self.list_follow_through(queryset)
 
     @action(
         detail=False,
         methods=["get"],
-        pagination_class=get_paginator("cursor", ordering="-date_created"),
+        serializer_class=UserConnectionSerializer,
+        pagination_class=get_paginator("cursor", ordering="-created"),
         permission_classes=[RequireUser, RequireScope],
-        serializer_class=UserBlockedSerializer,
     )
     def blocked(self, request: UserRequest) -> Response:
-        queryset = UserBlock.objects.filter(
-            from_user=request.user,
-            to_user__is_active=True,
-            to_user__is_frozen=False,
-        ).select_related("to_user")
+        queryset = (
+            User.objects.active()
+            .filter(to_userblocks__from_user=request.user)
+            .alias(created=F("to_userblocks__date_created"))
+        )
         return self.list_follow_through(queryset)
 
     @action(

@@ -78,7 +78,7 @@ class UserManager(DjangoUserManager["User"]):
         Users who are publicly available and can
         perform actions on the application.
         """
-        return self.exclude(Q(is_active=False) | Q(is_frozen=True))
+        return self.filter(is_active=True, is_frozen=False)
 
     def verify_websocket_ticket(self, ticket: str) -> str:
         """

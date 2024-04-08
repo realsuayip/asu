@@ -8,12 +8,12 @@ class UserThrough(models.Model):
     from_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="+",
+        related_name="from_%(class)ss",
     )
     to_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="+",
+        related_name="to_%(class)ss",
     )
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 

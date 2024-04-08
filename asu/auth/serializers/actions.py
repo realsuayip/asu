@@ -189,32 +189,17 @@ class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):
         return instance
 
 
-class UserFollowersSerializer(serializers.ModelSerializer[UserFollow]):
-    from_user = RelatedUserField
-
-    class Meta:
-        model = UserFollow
-        fields = ("from_user",)
-
-    def to_representation(self, instance: UserFollow) -> Any:
-        return super().to_representation(instance).pop("from_user")
-
-
-class UserFollowingSerializer(serializers.ModelSerializer[UserFollow]):
-    to_user = RelatedUserField
-
-    class Meta:
-        model = UserFollow
-        fields = ("to_user",)
-
-    def to_representation(self, instance: UserFollow) -> Any:
-        return super().to_representation(instance).pop("to_user")
-
-
-class UserBlockedSerializer(UserFollowingSerializer):
-    class Meta:
-        model = UserBlock
-        fields = ("to_user",)
+class UserConnectionSerializer(UserPublicReadSerializer):
+    class Meta(UserPublicReadSerializer.Meta):
+        fields = (
+            "id",
+            "display_name",
+            "username",
+            "profile_picture",
+            "description",
+            "is_private",
+            "url",
+        )
 
 
 class TicketSerializer(serializers.Serializer[dict[str, Any]]):

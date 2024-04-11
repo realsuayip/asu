@@ -109,6 +109,11 @@ class UserRelationMixin:
             raise PermissionDenied
         return attrs
 
+    def get_unique_together_constraints(self, model: Any) -> Any:
+        # Disable constraints for `from_user` and `to_user` so that
+        # subsequent requests to related views still return OK status.
+        yield from ()
+
     def get_rels(
         self, model: type[T], *, from_user: User, to_user: User
     ) -> QuerySet[T]:

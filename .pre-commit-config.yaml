@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
       - id: mixed-line-ending
@@ -13,7 +13,7 @@ repos:
       - id: check-yaml
         args: ['--allow-multiple-documents']
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.2.2'
+    rev: 'v0.3.6'
     hooks:
       - id: ruff
       - id: ruff-format

@@ -58,8 +58,6 @@ def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | Non
             for key, value in detail.items():
                 if isinstance(value, str):
                     detail[key] = [value]
-                else:
-                    detail[key] = value
             detail = detail or non_field_errors
 
         if detail:

@@ -33,16 +33,17 @@ class MessageViewSet(ExtendedViewSet[Message]):
     schemas = schemas.message
 
     def get_queryset(self) -> QuerySet[Message]:
-        conversation = get_object_or_404(
+        self.conversation = get_object_or_404(
             Conversation.objects.only("id"),
             holder=self.request.user,
             pk=self.kwargs["conversation_pk"],
         )
-        return Message.objects.filter(conversations=conversation)
+        return Message.objects.filter(conversations=self.conversation)
 
     def perform_destroy(self, instance: Message) -> None:
-        conversation = instance.conversations.get(holder=self.request.user)
-        conversation.messages.remove(instance)
+        Conversation.messages.through.objects.filter(
+            message=instance, conversation=self.conversation
+        ).delete()
 
 
 class ConversationFilterSet(filters.FilterSet):

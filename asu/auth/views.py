@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -14,6 +15,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from django_filters import rest_framework as filters
+from oauth2_provider.models import AccessToken
 
 from asu.auth import schemas
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
@@ -40,6 +42,7 @@ from asu.auth.serializers.user import (
     UserSerializer,
 )
 from asu.messaging.serializers import MessageComposeSerializer
+from asu.settings import OAUTH2_USER_FIELDS
 from asu.utils.rest import IDFilter, get_paginator
 from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
@@ -134,20 +137,37 @@ class UserViewSet(ExtendedViewSet[User]):
             raise PermissionDenied
         return user
 
+    def get_profile_attrs(self, token: AccessToken | None) -> dict[str, Any]:
+        if not token:
+            # Probably using browsable API or used `force_login` in tests
+            # so, allow all fields. In production environment, token will
+            # always be present.
+            return {}
+        granted_scopes = token.scope.split()
+        fields = itertools.chain.from_iterable(
+            fields
+            for scope, fields in OAUTH2_USER_FIELDS.items()
+            if scope in granted_scopes
+        )
+        return {"fields": fields, "ref_name": "User"}
+
     @action(
         detail=False,
         methods=["get", "patch"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=UserSerializer,
     )
-    def me(self, request: Request) -> Response:
+    def me(self, request: UserRequest) -> Response:
+        user, token = request.user, request.auth
         if request.method == "PATCH":
-            serializer = self.get_serializer(
-                self.request.user, data=self.request.data, partial=True
-            )
+            if not RequireFirstParty().has_permission(request, self):
+                # Only first-party applications might update the
+                # user information.
+                raise PermissionDenied
+            serializer = self.get_serializer(user, data=request.data, partial=True)
             return self.get_action_save_response(self.request, serializer)
 
-        serializer = self.get_serializer(self.request.user)
+        serializer = self.get_serializer(user, **self.get_profile_attrs(token))
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(

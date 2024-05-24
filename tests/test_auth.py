@@ -972,13 +972,6 @@ class TestOAuthPermissions(APITestCase):
             name="First party app",
             is_first_party=True,
         )
-        AccessToken.objects.create(
-            user=user,
-            scope="user.profile:read user.profile:write",
-            expires=timezone.now() + timedelta(days=1),
-            token="first-party-token",  # <----
-            application=first_party,
-        )
 
         # THIRD party application with authorization code flow
         third_party = Application.objects.create(
@@ -990,13 +983,6 @@ class TestOAuthPermissions(APITestCase):
             name="Third party app",
             is_first_party=False,
         )
-        AccessToken.objects.create(
-            user=user,
-            scope="user.profile:read",
-            expires=timezone.now() + timedelta(days=1),
-            token="third-party-token",  # <----
-            application=third_party,
-        )
 
         # THIRD party application with client credentials flow
         third_party_client_credentials = Application.objects.create(
@@ -1007,11 +993,70 @@ class TestOAuthPermissions(APITestCase):
             name="Third party app with client credentials",
             is_first_party=False,
         )
-        AccessToken.objects.create(
-            expires=timezone.now() + timedelta(days=1),
-            scope="user.profile:read",
-            token="third-party-client-credentials",  # <----
-            application=third_party_client_credentials,
+
+        AccessToken.objects.bulk_create(
+            [
+                # FIRST PARTY TOKENS
+                AccessToken(
+                    user=user,
+                    scope="user.profile:read user.profile:write",
+                    expires=timezone.now() + timedelta(days=1),
+                    token="first-party-token",  # <----
+                    application=first_party,
+                ),
+                AccessToken(
+                    user=user,
+                    scope="user.profile:read",
+                    expires=timezone.now() + timedelta(days=1),
+                    token="first-party-token-without-write",  # <----
+                    application=first_party,
+                ),
+                # THIRD PARTY TOKENS
+                AccessToken(
+                    user=user,
+                    scope="user.profile:read",
+                    expires=timezone.now() + timedelta(days=1),
+                    token="third-party-token",  # <----
+                    application=third_party,
+                ),
+                AccessToken(
+                    user=user,
+                    scope="user.profile:read user.profile.email:read",
+                    expires=timezone.now() + timedelta(days=1),
+                    token="third-party-token-with-email",  # <----
+                    application=third_party,
+                ),
+                AccessToken(
+                    user=user,
+                    scope="user.profile:read user.profile.email:read"
+                    " user.profile.private:read",
+                    expires=timezone.now() + timedelta(days=1),
+                    token="third-party-token-with-private",  # <----
+                    application=third_party,
+                ),
+                AccessToken(
+                    user=user,
+                    scope="user.profile:read user.profile.private:read",
+                    expires=timezone.now() + timedelta(days=1),
+                    token="third-party-token-with-private-no-email",  # <----
+                    application=third_party,
+                ),
+                AccessToken(
+                    user=user,
+                    scope="user.profile:read user.profile.email:read"
+                    " user.profile.private:read user.profile:write",
+                    expires=timezone.now() + timedelta(days=1),
+                    token="third-party-token-with-write",  # <----
+                    application=third_party,
+                ),
+                # THIRD PARTY CLIENT CREDENTIAL FLOW TOKENS
+                AccessToken(
+                    expires=timezone.now() + timedelta(days=1),
+                    scope="user.profile:read",
+                    token="third-party-client-credentials",  # <----
+                    application=third_party_client_credentials,
+                ),
+            ]
         )
 
     def test_require_first_party(self):
@@ -1066,7 +1111,12 @@ class TestOAuthPermissions(APITestCase):
     def test_require_scope(self):
         url = reverse("api:auth:user-me")
 
-        params = [(200, "first-party-token"), (403, "third-party-token")]
+        params = [
+            (200, "first-party-token"),
+            (403, "first-party-token-without-write"),
+            (403, "third-party-token"),
+            (403, "third-party-token-with-write"),
+        ]
         for status_code, token in params:
             r = self.client.patch(
                 url,
@@ -1081,6 +1131,74 @@ class TestOAuthPermissions(APITestCase):
             headers={"Authorization": "Bearer third-party-token"},
         )
         self.assertEqual(405, r.status_code)
+
+    def test_user_me_limited_scopes_changes_fields(self):
+        cases = {
+            "third-party-token": [
+                "id",
+                "display_name",
+                "username",
+                "description",
+                "website",
+                "profile_picture",
+                "date_joined",
+                "is_private",
+                "url",
+            ],
+            "third-party-token-with-email": [
+                "id",
+                "display_name",
+                "username",
+                "email",  # <--- here should it be!
+                "description",
+                "website",
+                "profile_picture",
+                "date_joined",
+                "is_private",
+                "url",
+            ],
+            "third-party-token-with-private": [
+                "id",
+                "display_name",
+                "username",
+                "email",  # <---
+                "description",
+                "website",
+                "profile_picture",
+                "gender",  # <---
+                "language",  # <---
+                "birth_date",  # <---
+                "date_joined",
+                "is_private",
+                "allows_receipts",  # <---
+                "allows_all_messages",  # <---
+                "url",
+            ],
+            "third-party-token-with-private-no-email": [
+                "id",
+                "display_name",
+                "username",
+                # <missing email here>
+                "description",
+                "website",
+                "profile_picture",
+                "gender",
+                "language",
+                "birth_date",
+                "date_joined",
+                "is_private",
+                "allows_receipts",
+                "allows_all_messages",
+                "url",
+            ],
+        }
+        for token, fields in cases.items():
+            response = self.client.get(
+                reverse("api:auth:user-me"),
+                headers={"Authorization": "Bearer %s" % token},
+            )
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(fields, list(response.data.keys()))
 
 
 class TestSession(TestCase):

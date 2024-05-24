@@ -38,10 +38,15 @@ REST_FRAMEWORK = {
 OAUTH2_PROVIDER_APPLICATION_MODEL = "account.Application"
 OAUTH2_PROVIDER = {
     "SCOPES": {
-        "user.profile:read": _(
-            "Retrieve your account, including the private information."
+        "user.profile:read": _("Retrieve your account, with your public information."),
+        "user.profile.email:read": _("Retrieve your email address."),
+        "user.profile.private:read": _(
+            "Retrieve your private information, including your personal preferences."
         ),
-        "user.profile:write": _("Alter your profile and account settings."),
+        "user.profile:write": _(
+            "Alter your profile and account settings,"
+            " including your personal preferences."
+        ),
         "user.follow:read": _("Display your list of followers and follow requests."),
         "user.follow:write": _(
             "Follow and unfollow people on your behalf, send follow requests."
@@ -57,6 +62,31 @@ OAUTH2_PROVIDER = {
     "CLEAR_EXPIRED_TOKENS_BATCH_SIZE": 1000,
     "CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL": 0.25,
 }
+OAUTH2_USER_FIELDS = {
+    "user.profile:read": {
+        "id",
+        "display_name",
+        "username",
+        "description",
+        "website",
+        "profile_picture",
+        "date_joined",
+        "is_private",
+        "url",
+    },
+    "user.profile.email:read": {"email"},
+    "user.profile.private:read": {
+        "gender",
+        "language",
+        "birth_date",
+        "allows_receipts",
+        "allows_all_messages",
+    },
+}
+"""
+A custom mapping that defines which scopes are required to display certain
+user fields. This allows fine-grained access to user information.
+"""
 
 SPECTACULAR_SETTINGS = {
     "VERSION": None,

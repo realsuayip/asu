@@ -48,7 +48,7 @@ class UserPublicReadSerializer(
         extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(DynamicFieldsMixin, serializers.HyperlinkedModelSerializer):
     profile_picture = serializers.ImageField(source="get_profile_picture")
 
     class Meta:

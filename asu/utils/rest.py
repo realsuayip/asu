@@ -7,6 +7,7 @@ from django.http import Http404
 from django.utils.translation import gettext, gettext_lazy as _
 
 from rest_framework import exceptions, pagination, serializers
+from rest_framework.fields import Field
 from rest_framework.metadata import BaseMetadata
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.pagination import BasePagination
@@ -16,6 +17,7 @@ from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
 
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
 if TYPE_CHECKING:
@@ -157,3 +159,13 @@ class IDFilter(filters.Filter):
         super().__init__(*args, **kwargs)
 
     field_class = SimpleArrayField
+
+
+@extend_schema_field(OpenApiTypes.ANY)
+class HiddenField(Field):  # type: ignore[type-arg]
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs["write_only"] = True
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data: Any) -> Any:
+        return data

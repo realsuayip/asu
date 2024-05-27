@@ -318,7 +318,8 @@ class TestAuth(APITestCase):
                 kwargs={"pk": self.user2.pk},
             )
         )
-        self.assertEqual(204, response.status_code)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("following", response.data["status"])
         self.assertTrue(self.user1.following.filter(pk=self.user2.pk).exists())
 
         # Unfollow
@@ -330,6 +331,25 @@ class TestAuth(APITestCase):
         )
         self.assertEqual(204, response2.status_code)
         self.assertFalse(self.user1.following.filter(pk=self.user2.pk).exists())
+
+    def test_follow_private(self):
+        self.client.force_login(self.user1)
+
+        response = self.client.post(
+            reverse(
+                "api:auth:user-follow",
+                kwargs={"pk": self.private_user.pk},
+            )
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("follow_request_sent", response.data["status"])
+        self.assertFalse(self.user1.following.filter(pk=self.private_user.pk).exists())
+        self.assertEqual(
+            1,
+            UserFollowRequest.objects.filter(
+                from_user=self.user1, to_user=self.private_user
+            ).count(),
+        )
 
     def _test_follow_subsequent_ok(self, user1, user2):
         self.client.force_login(user2)
@@ -346,8 +366,8 @@ class TestAuth(APITestCase):
                 kwargs={"pk": user1.pk},
             )
         )
-        self.assertEqual(204, response1.status_code)
-        self.assertEqual(204, response2.status_code)
+        self.assertEqual(200, response1.status_code)
+        self.assertEqual(200, response2.status_code)
 
     def test_follow_subsequent_ok(self):
         self._test_follow_subsequent_ok(self.user1, self.user2)
@@ -357,6 +377,16 @@ class TestAuth(APITestCase):
         self._test_follow_subsequent_ok(self.private_user, self.user2)
         self.assertEqual(
             1,
+            UserFollowRequest.objects.filter(
+                from_user=self.user2, to_user=self.private_user
+            ).count(),
+        )
+
+    def test_follow_subsequent_ok_private_case_already_following(self):
+        self.user2.add_following(to_user=self.private_user)
+        self._test_follow_subsequent_ok(self.private_user, self.user2)
+        self.assertEqual(
+            0,
             UserFollowRequest.objects.filter(
                 from_user=self.user2, to_user=self.private_user
             ).count(),

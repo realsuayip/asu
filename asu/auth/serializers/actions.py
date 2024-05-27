@@ -19,6 +19,7 @@ from drf_spectacular.utils import extend_schema_field
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.utils import messages
+from asu.utils.rest import HiddenField
 from asu.verification.models import PasswordResetVerification
 
 T = TypeVar("T", bound=models.Model)
@@ -96,24 +97,17 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         return validated_data
 
 
-class UserRelationMixin:
-    class Meta:
-        fields = ("from_user", "to_user")
-        extra_kwargs = {
-            "from_user": {"write_only": True},
-            "to_user": {"write_only": True},
-        }
+class CreateRelationSerializer(serializers.Serializer[dict[str, Any]]):
+    from_user = HiddenField(default=serializers.CurrentUserDefault())
+    to_user = HiddenField()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if attrs["from_user"] == attrs["to_user"]:
             raise PermissionDenied
         return attrs
 
-    def get_unique_together_constraints(self, model: Any) -> Any:
-        # Disable constraints for `from_user` and `to_user` so that
-        # subsequent requests to related views still return OK status.
-        yield from ()
 
+class BlockSerializer(CreateRelationSerializer):
     def get_rels(
         self, model: type[T], *, from_user: User, to_user: User
     ) -> QuerySet[T]:
@@ -124,13 +118,8 @@ class UserRelationMixin:
             | (Q(to_user=from_user) & Q(from_user=to_user))
         )
 
-
-class BlockSerializer(UserRelationMixin, serializers.ModelSerializer[UserBlock]):
-    class Meta(UserRelationMixin.Meta):
-        model = UserBlock
-
     @transaction.atomic
-    def create(self, validated_data: dict[str, Any]) -> UserBlock:
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         block, created = UserBlock.objects.get_or_create(**validated_data)
         if created:
             # If there is a follow relationship between
@@ -139,28 +128,33 @@ class BlockSerializer(UserRelationMixin, serializers.ModelSerializer[UserBlock])
             self.get_rels(UserFollowRequest, **validated_data).update(
                 status=UserFollowRequest.Status.REJECTED
             )
-        return block
+        return validated_data
 
 
-class FollowSerializer(
-    UserRelationMixin, serializers.ModelSerializer[UserFollow | UserFollowRequest]
-):
-    class Meta(UserRelationMixin.Meta):
-        model = UserFollow
+class FollowStatus(models.TextChoices):
+    FOLLOWING = "following", "Following"
+    REQUEST_SENT = "follow_request_sent", "Follow Request Sent"
 
-    def create(self, validated_data: dict[str, Any]) -> UserFollow | UserFollowRequest:
+
+class FollowSerializer(CreateRelationSerializer):
+    status = serializers.ChoiceField(choices=FollowStatus.choices, read_only=True)
+
+    def create_relations(self, from_user: User, to_user: User) -> FollowStatus:
+        if to_user.is_private:
+            if from_user.is_following(to_user):
+                return FollowStatus.FOLLOWING
+
+            from_user.send_follow_request(to_user=to_user)
+            return FollowStatus.REQUEST_SENT
+
+        from_user.add_following(to_user=to_user)
+        return FollowStatus.FOLLOWING
+
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         # At this point, we are certain that no blocking relations exist
         # since `get_object()` checks for that and returns 403. So, we can
         # safely proceed to creating follow relations.
-        from_user: User = validated_data["from_user"]
-        to_user: User = validated_data["to_user"]
-
-        if to_user.is_private:
-            follow_request, _ = from_user.send_follow_request(to_user=to_user)
-            return follow_request
-
-        follow, _ = from_user.add_following(to_user=to_user)
-        return follow
+        return {"status": self.create_relations(**validated_data)}
 
 
 class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):

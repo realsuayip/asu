@@ -195,15 +195,12 @@ class UserViewSet(ExtendedViewSet[User]):
     def reset_password(self, request: Request) -> Response:
         return self.get_action_save_response(request)
 
-    def save_through(self, pk: int) -> Response:
+    def save_through(self) -> Response:
         # Common save method for user blocking and following.
-        to_user = self.get_object()
-        serializer = self.get_serializer(
-            data={"from_user": self.request.user.pk, "to_user": to_user.pk}
-        )
-        return self.get_action_save_response(self.request, serializer, status_code=204)
+        serializer = self.get_serializer(data={"to_user": self.get_object()})
+        return self.get_action_save_response(self.request, serializer)
 
-    def delete_through(self, pk: int, model: type[UserFollow | UserBlock]) -> Response:
+    def delete_through(self, model: type[UserFollow | UserBlock]) -> Response:
         # Common delete method for user blocking and following.
         to_user = self.get_object()
         model.objects.filter(from_user=self.request.user, to_user=to_user).delete()
@@ -219,19 +216,19 @@ class UserViewSet(ExtendedViewSet[User]):
 
     @through_action
     def block(self, request: Request, pk: int) -> Response:
-        return self.save_through(pk)
+        return self.save_through()
 
     @through_action
     def unblock(self, request: Request, pk: int) -> Response:
-        return self.delete_through(pk, model=UserBlock)
+        return self.delete_through(model=UserBlock)
 
     @through_action
     def follow(self, request: Request, pk: int) -> Response:
-        return self.save_through(pk)
+        return self.save_through()
 
     @through_action
     def unfollow(self, request: Request, pk: int) -> Response:
-        return self.delete_through(pk, model=UserFollow)
+        return self.delete_through(model=UserFollow)
 
     def list_follow_through(self, queryset: QuerySet[User]) -> Response:
         page = self.paginate_queryset(queryset)

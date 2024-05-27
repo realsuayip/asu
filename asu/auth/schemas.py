@@ -6,6 +6,7 @@ from drf_spectacular.utils import OpenApiExample, extend_schema
 
 from asu.auth.permissions import OAuthPermission
 from asu.auth.serializers.actions import (
+    FollowSerializer,
     PasswordResetSerializer,
     RelationSerializer,
     UserConnectionSerializer,
@@ -64,7 +65,7 @@ follow = action(
     " the user is not allowed to follow the other user (i.e., in case of"
     " blocking relations).",
     examples=[examples.not_found, examples.permission_denied],
-    responses={204: None, 404: APIError, 403: APIError},
+    responses={200: FollowSerializer, 404: APIError, 403: APIError},
 )
 unfollow = action(summary="Unfollow a user")
 

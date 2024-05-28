@@ -549,7 +549,9 @@ class TestAuth(APITestCase):
     def _test_block_rejects_follow_request(self, a, b):
         self.client.force_login(self.user1)
 
-        a.send_follow_request(to_user=b)
+        request = UserFollowRequest.objects.create(
+            from_user=a, to_user=b, status=UserFollowRequest.Status.PENDING
+        )
         response = self.client.post(
             reverse(
                 "api:auth:user-block",
@@ -559,7 +561,7 @@ class TestAuth(APITestCase):
 
         self.assertEqual(204, response.status_code)
 
-        request = UserFollowRequest.objects.get(from_user=a, to_user=b)
+        request.refresh_from_db()
         self.assertEqual(UserFollowRequest.Status.REJECTED, request.status)
 
     def test_block_rejects_received_follow_request(self):
@@ -567,6 +569,16 @@ class TestAuth(APITestCase):
 
     def test_block_rejects_sent_follow_request(self):
         self._test_block_rejects_follow_request(self.user2, self.user1)
+
+    def test_block_rejects_only_pending_follow_request(self):
+        request = UserFollowRequest.objects.create(
+            from_user=self.user2,
+            to_user=self.user1,
+            status=UserFollowRequest.Status.APPROVED,
+        )
+        self._test_block_rejects_follow_request(self.user2, self.user1)
+        request.refresh_from_db()
+        self.assertEqual(UserFollowRequest.Status.APPROVED, request.status)
 
     def test_self_block_not_allowed(self):
         self.client.force_login(self.user1)

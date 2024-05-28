@@ -125,9 +125,9 @@ class BlockSerializer(CreateRelationSerializer):
             # If there is a follow relationship between
             # users, delete them during blocking.
             self.get_rels(UserFollow, **validated_data).delete()
-            self.get_rels(UserFollowRequest, **validated_data).update(
-                status=UserFollowRequest.Status.REJECTED
-            )
+            self.get_rels(UserFollowRequest, **validated_data).filter(
+                status=UserFollowRequest.Status.PENDING
+            ).update(status=UserFollowRequest.Status.REJECTED)
         return validated_data
 
 

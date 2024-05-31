@@ -52,11 +52,16 @@ class TestEmailVerification(APITestCase):
 
         self.client.force_login(user)
         response = self.client.post(self.url_send, data={"email": taken})
-        self.assertContains(
-            response,
-            "e-mail is already in use",
-            status_code=400,
+        self.assertContains(response, "e-mail is already in use", status_code=400)
+
+    def test_send_case_exists_case_insensitive(self):
+        user = UserFactory(email="Hello.World@example.com")
+        self.client.force_login(user)
+
+        response = self.client.post(
+            self.url_send, data={"email": "hello.world@example.com"}
         )
+        self.assertContains(response, "e-mail is already in use", status_code=400)
 
     def test_check_case_expired(self):
         self.client.force_login(UserFactory(email="old@exmaple.com"))

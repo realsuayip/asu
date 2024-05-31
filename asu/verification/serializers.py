@@ -49,7 +49,7 @@ class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str,
 class EmailMixin:
     def validate_email(self, email: str) -> str:
         email = User.objects.normalize_email(email)
-        user = User.objects.filter(email=email)
+        user = User.objects.filter(email__iexact=email)
 
         if user.exists():
             raise serializers.ValidationError(gettext("This e-mail is already in use."))

@@ -145,8 +145,7 @@ class APIError(serializers.Serializer[dict[str, Any]]):
 
 
 @extend_schema_field(
-    serializers.ListField(
-        child=serializers.IntegerField(min_value=1),
+    serializers.CharField(
         help_text=_("Multiple values may be separated by commas."),
     )
 )

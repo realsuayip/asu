@@ -4,6 +4,7 @@ import itertools
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
+from django import forms
 from django.db.models import Exists, F, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
@@ -54,7 +55,11 @@ _CallableT = TypeVar("_CallableT", bound=Callable[..., Any])
 
 
 class RelationFilter(filters.FilterSet):
-    ids = IDFilter(required=True)
+    usernames = IDFilter(
+        field_name="username",
+        base_field=forms.CharField(max_length=16),
+        required=True,
+    )
 
 
 class UserLookupFilter(filters.FilterSet):
@@ -340,7 +345,7 @@ class UserViewSet(ExtendedViewSet[User]):
     )
     def relations(self, request: UserRequest) -> Response:
         user = request.user
-        queryset = User.objects.active().only("id", "username", "display_name")
+        queryset = User.objects.active().only("id", "username")
         queryset = queryset.annotate(
             rels=JSONObject(
                 following=Exists(
@@ -383,7 +388,7 @@ class UserViewSet(ExtendedViewSet[User]):
                 ),
             ),
         )
-        queryset = self.filter_queryset(queryset)
+        queryset = self.filter_queryset(queryset)[:50]
         serializer = self.get_serializer({"results": queryset})
         return Response(serializer.data)
 

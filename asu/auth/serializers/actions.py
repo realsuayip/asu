@@ -231,7 +231,7 @@ class UserWithRelationSerializer(serializers.ModelSerializer[User]):
 
     class Meta:
         model = User
-        fields = ("id", "username", "display_name", "relations")
+        fields = ("id", "username", "relations")
 
     @extend_schema_field(
         serializers.ListField(

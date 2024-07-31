@@ -156,18 +156,6 @@ if DEBUG:
     # Django debug toolbar related configuration
     INSTALLED_APPS.append("debug_toolbar")
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
-    INTERNAL_IPS = []
-
-    # Properly identify internal IP in Docker container
-    import socket
-
-    try:
-        INTERNAL_IPS.append(
-            ".".join(socket.gethostbyname("host.docker.internal").rsplit(".")[:-1])
-            + ".1"
-        )
-    except socket.gaierror:
-        pass
 
 
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")

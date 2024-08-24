@@ -25,13 +25,14 @@ from django.utils.translation import gettext_lazy as _
 
 import oauthlib.common
 import sorl.thumbnail
-from oauth2_provider.models import AccessToken, RefreshToken
 from oauth2_provider.settings import oauth2_settings
 from PIL import Image
 from sorl.thumbnail import get_thumbnail
 
 from asu.auth.models import (
+    AccessToken,
     Application,
+    RefreshToken,
     Session,
     UserBlock,
     UserDeactivation,

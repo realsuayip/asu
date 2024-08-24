@@ -16,10 +16,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from django_filters import rest_framework as filters
-from oauth2_provider.models import AccessToken
 
 from asu.auth import schemas
-from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
+from asu.auth.models import AccessToken, User, UserBlock, UserFollow, UserFollowRequest
 from asu.auth.permissions import (
     RequireFirstParty,
     RequireScope,

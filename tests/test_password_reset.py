@@ -6,9 +6,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from oauth2_provider.models import AccessToken
-
-from asu.auth.models import User
+from asu.auth.models import AccessToken, User
 from asu.verification.models import PasswordResetVerification
 from tests.factories import UserFactory
 

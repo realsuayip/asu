@@ -1,6 +1,6 @@
 from rest_framework.request import Request
 
-from asu.auth.models import User
+from asu.auth.models import AccessToken, User
 
 
 class UserRequest(Request):
@@ -12,3 +12,4 @@ class UserRequest(Request):
     """
 
     user: User
+    auth: AccessToken | None

@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from oauth2_provider.contrib.rest_framework.permissions import TokenHasScope
-from oauth2_provider.models import AccessToken
+
+from asu.auth.models import AccessToken
 
 
 class OAuthPermission(BasePermission):

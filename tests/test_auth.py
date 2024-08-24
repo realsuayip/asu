@@ -16,11 +16,12 @@ from django.utils import timezone
 
 from rest_framework.test import APITestCase
 
-from oauth2_provider.models import AccessToken, RefreshToken
 from PIL import Image
 
 from asu.auth.models import (
+    AccessToken,
     Application,
+    RefreshToken,
     Session,
     User,
     UserBlock,

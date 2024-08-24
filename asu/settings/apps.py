@@ -54,7 +54,7 @@ OAUTH2_PROVIDER = {
         "user.block:read": _("Display your list of blocked users"),
         "user.block:write": _("Block and unblock people on your behalf."),
     },
-    "ERROR_RESPONSE_WITH_SCOPES": True,
+    "ERROR_RESPONSE_WITH_SCOPES": False,
     "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,  # an hour
     "REFRESH_TOKEN_EXPIRE_SECONDS": 86400 * 180,  # 6 months
     "ROTATE_REFRESH_TOKEN": True,

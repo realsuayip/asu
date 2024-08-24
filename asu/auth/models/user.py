@@ -407,8 +407,6 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
 
         :param message: Specify an `EmailMessage` instance which will
         determine subject and body.
-        :param email: Optionally override email that is going to receive
-        the message.
         """
         return mailing.send(
             "transactional",

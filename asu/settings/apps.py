@@ -82,6 +82,7 @@ OAUTH2_USER_FIELDS = {
         "birth_date",
         "allows_receipts",
         "allows_all_messages",
+        "two_factor_enabled",
     },
 }
 """

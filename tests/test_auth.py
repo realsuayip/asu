@@ -1215,6 +1215,7 @@ class TestOAuthPermissions(APITestCase):
                 "is_private",
                 "allows_receipts",  # <---
                 "allows_all_messages",  # <---
+                "two_factor_enabled",  # <---
                 "url",
             ],
             "third-party-token-with-private-no-email": [
@@ -1232,6 +1233,7 @@ class TestOAuthPermissions(APITestCase):
                 "is_private",
                 "allows_receipts",
                 "allows_all_messages",
+                "two_factor_enabled",
                 "url",
             ],
         }

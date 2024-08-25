@@ -250,7 +250,7 @@ class UserViewSet(ExtendedViewSet[User]):
         user = self.get_object()
         queryset = (
             User.objects.active()
-            .filter(from_userfollows__to_user=user)
+            .filter(following=user)
             .alias(created=F("from_userfollows__date_created"))
         )
         return self.list_follow_through(queryset)
@@ -266,7 +266,7 @@ class UserViewSet(ExtendedViewSet[User]):
         user = self.get_object()
         queryset = (
             User.objects.active()
-            .filter(to_userfollows__from_user=user)
+            .filter(followed_by=user)
             .alias(created=F("to_userfollows__date_created"))
         )
         return self.list_follow_through(queryset)
@@ -281,7 +281,7 @@ class UserViewSet(ExtendedViewSet[User]):
     def blocked(self, request: UserRequest) -> Response:
         queryset = (
             User.objects.active()
-            .filter(to_userblocks__from_user=request.user)
+            .filter(blocked_by=request.user)
             .alias(created=F("to_userblocks__date_created"))
         )
         return self.list_follow_through(queryset)

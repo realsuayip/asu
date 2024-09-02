@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from functools import partial
 from typing import TYPE_CHECKING, Literal, TypedDict
 
 from django.db import models, transaction
@@ -8,11 +7,14 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from rest_framework import serializers
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from asu.messaging.models.conversation import Conversation
 from asu.messaging.models.message import Message
+from asu.messaging.models.participation import Participation
 from asu.messaging.models.request import ConversationRequest
 
 if TYPE_CHECKING:
@@ -22,7 +24,7 @@ if TYPE_CHECKING:
 channel_layer = get_channel_layer()
 
 
-class MessageEvent(TypedDict):
+class WebsocketEvent(TypedDict):
     id: int
     conversation_id: int
     type: Literal["conversation.message"]
@@ -81,8 +83,7 @@ class EventManager(models.Manager["Event"]):
         )
         # Relay events via WebSocket.
         for event in events:
-            relay = partial(event.websocket_send, target.pk)
-            transaction.on_commit(relay)
+            transaction.on_commit(event.websocket_send)
         return instance
 
 
@@ -135,16 +136,38 @@ class Event(models.Model):
     def __str__(self) -> str:
         return str(self.pk)
 
-    def websocket_send(self, target_conversation_id: int) -> None:
-        send = async_to_sync(channel_layer.group_send)
-        if self.conversation.is_group:
-            pass
-        else:
-            group = "conversations_%s" % self.conversation.target_id
-            event = MessageEvent(
-                id=self.pk,
-                conversation_id=target_conversation_id,
-                type="conversation.message",
-                timestamp=self.date_created.isoformat()[:-6] + "Z",
+    def timestamp(self) -> str:
+        return serializers.DateTimeField().to_representation(self.date_created)
+
+    def as_websocket_event(self) -> WebsocketEvent:
+        # todo this will change depending on content type
+        return WebsocketEvent(
+            id=self.pk,
+            conversation_id=self.conversation_id,
+            type="conversation.message",
+            timestamp=self.timestamp(),
+        )
+
+    @staticmethod
+    def get_group(user_id: int) -> str:
+        return "conversations_%s" % user_id
+
+    def websocket_send(self) -> None:
+        # todo testme
+        send, event, conversation = (
+            async_to_sync(channel_layer.group_send),
+            self.as_websocket_event(),
+            self.conversation,
+        )
+        if conversation.is_group:
+            # todo: might get more complicated than that
+            recipients = (
+                Participation.objects.filter(conversation=conversation)
+                .values_list("user_id", flat=True)
+                .iterator()
             )
-            send(group, event)
+            for recipient in recipients:
+                send(self.get_group(recipient), event)
+        else:
+            assert conversation.holder_id
+            send(self.get_group(conversation.holder_id), event)

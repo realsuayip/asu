@@ -12,11 +12,12 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from asu.messaging.models.conversation import Conversation
+from asu.messaging.models.message import Message
 from asu.messaging.models.request import ConversationRequest
 
 if TYPE_CHECKING:
     from asu.auth.models import User
-    from asu.messaging.models.message import Message
+
 
 channel_layer = get_channel_layer()
 
@@ -29,7 +30,9 @@ class MessageEvent(TypedDict):
 
 
 class EventManager(models.Manager["Event"]):
-    def dispatch(self, message: Message, recipient: User) -> Event:
+    def dispatch(
+        self, message: Message, recipient: User, reply_to_id: int | None
+    ) -> Event:
         sender = message.sender
 
         # If conversation objects between these two people are not created,
@@ -42,11 +45,25 @@ class EventManager(models.Manager["Event"]):
         # automatically accepted in case recipient follows the sender.
         request, _ = ConversationRequest.objects.compose(sender, recipient)
 
+        # Set `reply_to` field, making sure it is a reply to a valid message
+        # in the conversation.
+        updates = set()
+        if reply_to_id is not None:
+            valid_reply_to = Message.objects.filter(
+                pk=reply_to_id, events__conversation__in=(holder, target)
+            ).exists()
+            if valid_reply_to:
+                message.reply_to_id = reply_to_id
+                updates.add("reply_to_id")
+
         if (not request.is_accepted) and message.has_receipt:
             # Disable read receipts (regardless of user preference) in case
             # the conversation is yet to be accepted.
             message.has_receipt = False
-            message.save(update_fields=["has_receipt"])
+            updates.add("has_receipt")
+
+        if updates:
+            message.save(update_fields=updates)
 
         attrs = {
             "message": message,
@@ -59,7 +76,7 @@ class EventManager(models.Manager["Event"]):
         )
         # Update modification timestamps for related conversations so that when
         # ordering by modified, conversations with recent activity rise to top.
-        Conversation.objects.filter(pk__in=[holder.pk, target.pk]).update(
+        Conversation.objects.filter(pk__in=(holder.pk, target.pk)).update(
             date_modified=timezone.now()
         )
         # Relay events via WebSocket.

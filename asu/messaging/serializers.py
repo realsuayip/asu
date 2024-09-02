@@ -18,7 +18,7 @@ class MessageSerializer(serializers.ModelSerializer[Message]):
 
     class Meta:
         model = Message
-        fields = ("body", "source", "reply_to_id", "date_created")
+        fields = ("id", "body", "source", "reply_to_id")
 
     @extend_schema_field(serializers.ChoiceField(choices=["sent", "received"]))
     def get_source(self, message: Message) -> str:
@@ -33,8 +33,11 @@ class MessageComposeSerializer(serializers.ModelSerializer[Event]):
     url = serializers.SerializerMethodField()
     # todo make this polymorphic, cases: groupmsg, privmsg, groupjoin
     # todo: make a reusable helper that resolves polymorphic serialization
+    # todo: polymorphic though event modelmethod
     content = MessageSerializer(read_only=True, source="message")
+
     body = serializers.CharField(write_only=True)
+    reply_to_id = serializers.IntegerField(min_value=1, required=False, write_only=True)
 
     class Meta:
         model = Event
@@ -43,6 +46,7 @@ class MessageComposeSerializer(serializers.ModelSerializer[Event]):
             "type",
             "content",
             "body",
+            "reply_to_id",
             "conversation",
             "date_created",
             "url",
@@ -58,23 +62,25 @@ class MessageComposeSerializer(serializers.ModelSerializer[Event]):
         )
 
     def create(self, validated_data: dict[str, Any]) -> Event:
-        sender, recipient, body = (
+        sender, recipient, body, reply_to_id = (
             self.context["request"].user,
             self.context["recipient"],
             validated_data["body"],
+            validated_data.get("reply_to_id"),
         )
-        event = Message.objects.compose(sender, recipient, body)
+        event = Message.objects.compose(sender, recipient, body, reply_to_id)
         if event is None:
             raise exceptions.PermissionDenied
         return event
 
 
-class MessageEventSerializer(serializers.ModelSerializer[Event]):
-    message = MessageSerializer()
+class EventSerializer(serializers.ModelSerializer[Event]):
+    content = MessageSerializer(source="message")  # todo polymorphic
+    # interactions field here
 
     class Meta:
         model = Event
-        fields = ("id", "type", "message", "date_created")
+        fields = ("id", "type", "content", "date_created")
 
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation]):

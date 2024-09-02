@@ -7,10 +7,10 @@ from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
 from asu.messaging.models.conversation import Conversation
-from asu.messaging.models.event import Event
 
 if TYPE_CHECKING:
     from asu.auth.models import User
+    from asu.messaging.models.event import Event
 
 
 class MessageManager(models.Manager["Message"]):
@@ -20,7 +20,10 @@ class MessageManager(models.Manager["Message"]):
         sender: User,
         recipient: User | Conversation,
         body: str,
+        reply_to_id: int | None = None,
     ) -> Event | None:
+        from asu.messaging.models import Event
+
         if isinstance(recipient, Conversation):
             # todo
             return None
@@ -30,7 +33,7 @@ class MessageManager(models.Manager["Message"]):
 
         has_receipt = sender.allows_receipts and recipient.allows_receipts
         message = self.create(sender=sender, body=body, has_receipt=has_receipt)
-        return Event.objects.dispatch(message, recipient)
+        return Event.objects.dispatch(message, recipient, reply_to_id)
 
 
 class Message(models.Model):

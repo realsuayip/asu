@@ -2,7 +2,7 @@ from typing import Any
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from asu.messaging.models.message import MessageEvent
+from asu.messaging.models.conversation import MessageEvent
 
 
 class ConversationConsumer(AsyncJsonWebsocketConsumer):

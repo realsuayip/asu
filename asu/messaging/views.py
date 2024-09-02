@@ -12,11 +12,11 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.messaging import schemas
-from asu.messaging.models import Conversation, ConversationRequest, Message
+from asu.messaging.models import Conversation, ConversationRequest, Event, Message
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
     ConversationSerializer,
-    MessageSerializer,
+    MessageEventSerializer,
     ReadConversationSerializer,
 )
 from asu.utils.rest import EmptySerializer, get_paginator
@@ -31,8 +31,8 @@ class MessageViewSet(
     mixins.DestroyModelMixin,
     ExtendedViewSet[Message],
 ):
-    queryset = Message.objects.none()
-    serializer_class = MessageSerializer
+    queryset = Event.objects.none()
+    serializer_class = MessageEventSerializer
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_created")
     schemas = schemas.message
@@ -43,12 +43,9 @@ class MessageViewSet(
             holder=self.request.user,
             pk=self.kwargs["conversation_pk"],
         )
-        return Message.objects.filter(conversations=self.conversation)
-
-    def perform_destroy(self, instance: Message) -> None:
-        Conversation.messages.through.objects.filter(
-            message=instance, conversation=self.conversation
-        ).delete()
+        return Event.objects.select_related("message", "message__sender").filter(
+            type="message", conversation=self.conversation
+        )
 
 
 class ConversationFilterSet(filters.FilterSet):

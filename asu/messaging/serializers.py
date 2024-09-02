@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 from typing import Any
 
 from django.utils import timezone
@@ -11,67 +10,71 @@ from rest_framework.reverse import reverse
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.serializers.user import UserPublicReadSerializer
-from asu.messaging.models import Conversation, ConversationRequest, Message
-
-
-class MessageComposeSerializer(serializers.ModelSerializer[Message]):
-    conversation = serializers.HyperlinkedRelatedField(  # type: ignore[var-annotated]
-        read_only=True,
-        view_name="api:messaging:conversation-detail",
-        source="sender_conversation",
-    )
-    url = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Message
-        fields = (
-            "id",
-            "body",
-            "conversation",
-            "date_created",
-            "url",
-        )
-
-    @extend_schema_field(serializers.URLField)
-    def get_url(self, obj: Message) -> str:
-        return reverse(
-            "api:messaging:message-detail",
-            kwargs={
-                "pk": obj.pk,
-                "conversation_pk": obj.sender_conversation.pk,
-            },
-            request=self.context["request"],
-        )
-
-    def create(self, validated_data: dict[str, Any]) -> Message:
-        sender = self.context["request"].user
-        recipient = self.context["recipient"]
-        body = validated_data["body"]
-
-        message = Message.objects.compose(sender, recipient, body)
-
-        if message is None:
-            raise exceptions.PermissionDenied
-
-        return message
+from asu.messaging.models import Conversation, ConversationRequest, Event, Message
 
 
 class MessageSerializer(serializers.ModelSerializer[Message]):
-    date_read = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()  # type: ignore[assignment]
 
     class Meta:
         model = Message
-        fields = ("id", "body", "source", "date_created", "date_read")
-
-    @extend_schema_field(serializers.DateTimeField(allow_null=True))
-    def get_date_read(self, message: Message) -> datetime.datetime | None:
-        return message.date_read if message.has_receipt else None
+        fields = ("body", "source", "reply_to_id", "date_created")
 
     @extend_schema_field(serializers.ChoiceField(choices=["sent", "received"]))
     def get_source(self, message: Message) -> str:
         user = self.context["request"].user
         return "sent" if message.sender_id == user.pk else "received"
+
+
+class MessageComposeSerializer(serializers.ModelSerializer[Event]):
+    conversation = serializers.HyperlinkedRelatedField(  # type: ignore[var-annotated]
+        read_only=True, view_name="api:messaging:conversation-detail"
+    )
+    url = serializers.SerializerMethodField()
+    # todo make this polymorphic, cases: groupmsg, privmsg, groupjoin
+    # todo: make a reusable helper that resolves polymorphic serialization
+    content = MessageSerializer(read_only=True, source="message")
+    body = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Event
+        fields = (
+            "id",
+            "type",
+            "content",
+            "body",
+            "conversation",
+            "date_created",
+            "url",
+        )
+        extra_kwargs = {"type": {"read_only": True}}
+
+    @extend_schema_field(serializers.URLField)
+    def get_url(self, obj: Event) -> str:
+        return reverse(
+            "api:messaging:message-detail",
+            kwargs={"pk": obj.pk, "conversation_pk": obj.conversation_id},
+            request=self.context["request"],
+        )
+
+    def create(self, validated_data: dict[str, Any]) -> Event:
+        sender, recipient, body = (
+            self.context["request"].user,
+            self.context["recipient"],
+            validated_data["body"],
+        )
+        event = Message.objects.compose(sender, recipient, body)
+        if event is None:
+            raise exceptions.PermissionDenied
+        return event
+
+
+class MessageEventSerializer(serializers.ModelSerializer[Event]):
+    message = MessageSerializer()
+
+    class Meta:
+        model = Event
+        fields = ("id", "type", "message", "date_created")
 
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation]):

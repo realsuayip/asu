@@ -12,7 +12,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.messaging import schemas
-from asu.messaging.models import Conversation, ConversationRequest, Event, Message
+from asu.messaging.models import Conversation, ConversationRequest, Event
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
     ConversationSerializer,
@@ -37,7 +37,7 @@ class MessageViewSet(
     pagination_class = get_paginator("cursor", ordering="-date_created")
     schemas = schemas.message
 
-    def get_queryset(self) -> QuerySet[Message]:
+    def get_queryset(self) -> QuerySet[Event]:
         self.conversation = get_object_or_404(
             Conversation.objects.only("id"),
             holder=self.request.user,

@@ -6,7 +6,8 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
-from asu.messaging.models import Conversation, Event
+from asu.messaging.models.conversation import Conversation
+from asu.messaging.models.event import Event
 
 if TYPE_CHECKING:
     from asu.auth.models import User

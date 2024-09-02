@@ -42,7 +42,7 @@ from asu.auth.models import (
     UserFollow,
     UserFollowRequest,
 )
-from asu.messaging.models import ConversationRequest
+from asu.messaging.models.request import ConversationRequest
 from asu.utils import mailing, messages
 from asu.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
 from asu.utils.messages import EmailMessage

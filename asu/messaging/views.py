@@ -15,7 +15,7 @@ from asu.messaging.models import Conversation, ConversationRequest, Event
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
     ConversationSerializer,
-    MessageEventSerializer,
+    EventSerializer,
     ReadConversationSerializer,
 )
 from asu.utils.rest import EmptySerializer, get_paginator
@@ -27,7 +27,7 @@ from asu.utils.views import ExtendedViewSet
 class MessageViewSet(ExtendedViewSet[Event]):
     mixins = ("list", "retrieve", "destroy")
     queryset = Event.objects.none()
-    serializer_class = MessageEventSerializer
+    serializer_class = EventSerializer
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_created")
     schemas = schemas.message

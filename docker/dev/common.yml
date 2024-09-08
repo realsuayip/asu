@@ -1,0 +1,17 @@
+services:
+  python:
+    image: asu-python
+    build:
+      context: ../..
+      dockerfile: docker/dev/dev.Dockerfile
+    env_file:
+      - ../../conf/dev/django.env
+      - ../../conf/dev/postgres.env
+    restart: on-failure
+    develop:
+      watch:
+        - action: sync
+          path: ../..
+          target: /app
+          ignore:
+            - .venv/

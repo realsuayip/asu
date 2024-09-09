@@ -1,9 +1,6 @@
 services:
   python:
     image: asu-python
-    build:
-      context: ../..
-      dockerfile: docker/dev/dev.Dockerfile
     env_file:
       - ../../conf/dev/django.env
       - ../../conf/dev/postgres.env

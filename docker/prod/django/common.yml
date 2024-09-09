@@ -1,10 +1,10 @@
 services:
   python:
     image: asu-python
-    build:
-      context: ../../..
-      dockerfile: docker/prod/django/prod.Dockerfile
     env_file:
       - ../../../conf/prod/django.env
       - ../../../conf/prod/postgres.env
     restart: unless-stopped
+    depends_on:
+      - db
+      - redis

@@ -5,6 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "asu"
 version = "0.1.0"
+requires-python = "==3.12.*"
 dependencies = [
     "django ~= 4.2",
     "djangorestframework ~= 3.15",
@@ -13,13 +14,13 @@ dependencies = [
     "channels-redis ~= 4.2",
     "drf-spectacular",
     "drf-nested-routers ~= 0.94",
-    "django-filter ~= 24.2",
+    "django-filter ~= 24.3",
     "django-cors-headers ~= 4.4",
-    "django-oauth-toolkit ~= 2.4",
-    "django-two-factor-auth ~= 1.16",
+    "django-oauth-toolkit ~= 3.0",
+    "django-two-factor-auth ~= 1.17",
     "django-storages ~= 1.14",
     "django-ipware ~= 7.0",
-    "django-celery-beat ~= 2.6",
+    "django-celery-beat ~= 2.7",
     "django-stubs-ext ~= 4.2",
     "django-widget-tweaks ~= 1.5",
     "sorl-thumbnail ~= 12.10",
@@ -29,9 +30,9 @@ dependencies = [
     "hiredis ~= 3.0",
     "Pillow ~= 10.4",
     "python-magic ~= 0.4",
-    "boto3 ~= 1.34.151",
+    "boto3 ~= 1.35",
     "phonenumbers ~= 8.13",
-    "sentry-sdk ~= 2.12",
+    "sentry-sdk ~= 2.14",
     "envanter ~= 1.2",
 ]
 
@@ -55,11 +56,11 @@ dev = [
     "watchfiles",
 ]
 prod = [
-    "gunicorn ~= 21.2",
-    "uvicorn ~= 0.24",
-    "uvloop ~= 0.19",
+    "gunicorn ~= 23.0",
+    "uvicorn ~= 0.30",
+    "uvloop ~= 0.20",
     "httptools ~= 0.6",
-    "websockets ~= 12.0",
+    "websockets ~= 13.0",
 ]
 
 [tool.ruff]

@@ -1,10 +1,10 @@
 node_modules
 package-lock.json
 venv
+.venv
 media
 .git
 .gitignore
-.dockerignore
 .env
 .idea
 .vscode
@@ -20,7 +20,12 @@ htmlcov
 .mypy_cache
 .pytest_cache
 .ruff_cache
-tests
 docs
 k8s
 conf
+docker
+**/*.pyc
+**/__pycache__
+**/media
+**/fixtures
+tests

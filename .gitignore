@@ -36,5 +36,6 @@ celerybeat-schedule
 node_modules
 datadump.json
 venv/
+.venv/
 media/
 staticfiles.json

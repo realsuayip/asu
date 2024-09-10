@@ -1,7 +1,10 @@
 services:
-  django:
+  python:
     image: asu-python
     env_file:
       - ../../../conf/prod/django.env
       - ../../../conf/prod/postgres.env
     restart: unless-stopped
+    depends_on:
+      - db
+      - redis

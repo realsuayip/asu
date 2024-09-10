@@ -20,7 +20,7 @@ jobs:
       run: |
         docker buildx create --use --driver=docker-container
         cd docker/dev
-        docker buildx bake -f docker-compose.yml --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
+        docker buildx bake -f docker-compose.yml web --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
 
     - name: Run tests
       run: >-

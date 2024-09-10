@@ -41,6 +41,9 @@ coverage: (exec '/bin/sh -c \
 # Check type hints
 type: (exec 'mypy asu/ --no-incremental')
 
+# Expose uv interface
+uv *args: (exec 'uv' args)
+
 # Create or update translation files
 makemessages: (exec '/bin/sh -c "cd asu && ../manage.py makemessages --all --no-obsolete"')
 

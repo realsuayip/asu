@@ -133,6 +133,7 @@ omit = [
     "asu/gateways/*",
     "asu/utils/workers.py",
 ]
+branch = true
 
 [tool.coverage.report]
 exclude_also = [
@@ -144,7 +145,3 @@ exclude_also = [
     'def __str__',
     'def __repr__',
 ]
-
-[tool.coverage.html]
-skip_empty = true
-skip_covered = true

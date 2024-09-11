@@ -23,6 +23,7 @@ from asu.auth.models import (
     Application,
     RefreshToken,
     Session,
+    TOTPDevice,
     User,
     UserBlock,
     UserDeactivation,
@@ -999,6 +1000,13 @@ class TestAuth(APITestCase):
         with self.assertRaises(User.DoesNotExist):
             delete_immediately.refresh_from_db()
 
+    def test_user_two_factor_enabled_attribute(self):
+        self.assertFalse(self.user1.two_factor_enabled)
+        del self.user1.two_factor_enabled
+
+        TOTPDevice.objects.create(user=self.user1, confirmed=True)
+        self.assertTrue(self.user1.two_factor_enabled)
+
 
 class TestOAuthPermissions(APITestCase):
     @classmethod
@@ -1215,6 +1223,7 @@ class TestOAuthPermissions(APITestCase):
                 "is_private",
                 "allows_receipts",  # <---
                 "allows_all_messages",  # <---
+                "two_factor_enabled",  # <---
                 "url",
             ],
             "third-party-token-with-private-no-email": [
@@ -1232,6 +1241,7 @@ class TestOAuthPermissions(APITestCase):
                 "is_private",
                 "allows_receipts",
                 "allows_all_messages",
+                "two_factor_enabled",
                 "url",
             ],
         }

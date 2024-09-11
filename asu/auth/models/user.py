@@ -20,6 +20,7 @@ from django.db import models, transaction
 from django.db.models import F, Q, QuerySet, Value
 from django.db.models.functions import Concat, Lower
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 
@@ -34,6 +35,8 @@ from asu.auth.models import (
     Application,
     RefreshToken,
     Session,
+    StaticDevice,
+    TOTPDevice,
     UserBlock,
     UserDeactivation,
     UserFollow,
@@ -203,6 +206,17 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     @property
     def is_accessible(self) -> bool:
         return self.is_active and (not self.is_frozen)
+
+    @cached_property
+    def two_factor_enabled(self) -> bool:
+        try:
+            # Check if the attribute is set via `OTPMiddleware`
+            return self.is_verified()  # type: ignore
+        except AttributeError:
+            for model in (TOTPDevice, StaticDevice):
+                if model.objects.filter(user=self, confirmed=True).exists():
+                    return True
+        return False
 
     def add_following(self, *, to_user: User) -> tuple[UserFollow, bool]:
         return UserFollow.objects.get_or_create(from_user=self, to_user=to_user)

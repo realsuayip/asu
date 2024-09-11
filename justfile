@@ -36,7 +36,7 @@ coverage: (exec '/bin/sh -c \
     --settings=asu.settings.test \
     --no-input && \
     coverage combine && \
-    coverage html"')
+    coverage html --show-contexts"')
 
 # Check type hints
 type: (exec 'mypy asu/ --no-incremental')

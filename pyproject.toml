@@ -131,9 +131,12 @@ django_settings_module = "asu.settings"
 source = ["asu"]
 omit = [
     "asu/gateways/*",
+    "asu/settings/*",
     "asu/utils/workers.py",
+    "*/migrations/*",
 ]
 branch = true
+dynamic_context = "test_function"
 
 [tool.coverage.report]
 exclude_also = [

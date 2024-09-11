@@ -214,7 +214,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             return self.is_verified()  # type: ignore
         except AttributeError:
             for model in (TOTPDevice, StaticDevice):
-                if model.objects.filter(user=self, confirmed=True):
+                if model.objects.filter(user=self, confirmed=True).exists():
                     return True
         return False
 

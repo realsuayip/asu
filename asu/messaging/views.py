@@ -24,20 +24,23 @@ from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
 
 
+# todo add some sort of mechanism for replied message discovery
 @extend_schema(parameters=[OpenApiParameter("conversation_id", int, "path")])
-class MessageViewSet(
+class EventViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
-    ExtendedViewSet[Message],
+    ExtendedViewSet[Event],
 ):
     queryset = Event.objects.none()
     serializer_class = EventSerializer
     permission_classes = [RequireUser, RequireFirstParty]
-    pagination_class = get_paginator("cursor", ordering="-date_created")
-    schemas = schemas.message
+    pagination_class = get_paginator("cursor", page_size=25, ordering="-date_created")
+    schemas = schemas.event
 
     def get_queryset(self) -> QuerySet[Event]:
+        # todo none of the mixins will work properly in
+        # group context
         self.conversation = get_object_or_404(
             Conversation.objects.only("id"),
             holder=self.request.user,
@@ -87,6 +90,7 @@ class ConversationViewSet(
     schemas = schemas.conversation
 
     def get_queryset(self) -> QuerySet[Conversation]:
+        # todo needs group refinement
         holder = self.request.user
         queryset = Conversation.objects.filter(holder=holder)
 
@@ -124,6 +128,7 @@ class ConversationViewSet(
         permission_classes=[RequireUser, RequireFirstParty],
     )
     def accept(self, request: Request, pk: int) -> Response:
+        # todo only applicable to private
         conversation = self.get_object()
 
         try:
@@ -147,6 +152,7 @@ class ConversationViewSet(
         permission_classes=[RequireUser, RequireFirstParty],
     )
     def read(self, request: UserRequest, pk: int) -> Response:
+        # todo requires event, both group and private
         context = self.get_serializer_context()
         context["conversation"] = self.get_object()
         serializer = self.get_serializer(data=request.data, context=context)

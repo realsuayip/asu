@@ -96,10 +96,6 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
         ref_name="ConversationUserTarget",
     )
     last_message = serializers.SerializerMethodField()
-    messages = serializers.SerializerMethodField(
-        method_name="get_messages_url",
-        help_text="URL from which messages belonging to this chat can be retrieved.",
-    )
 
     class Meta:
         model = Conversation
@@ -109,7 +105,6 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
             "last_message",
             "date_created",
             "date_modified",
-            "messages",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
@@ -122,14 +117,6 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
         message = Message(**msg)
         serializer = MessageSerializer(message, context=self.context)
         return serializer.data
-
-    @extend_schema_field(serializers.URLField)
-    def get_messages_url(self, obj: Conversation) -> str:
-        return reverse(
-            "api:messaging:message-list",
-            kwargs={"conversation_pk": obj.pk},
-            request=self.context["request"],
-        )
 
 
 class ConversationDetailSerializer(ConversationSerializer):
@@ -144,7 +131,6 @@ class ConversationDetailSerializer(ConversationSerializer):
             "last_message",
             "date_created",
             "date_modified",
-            "messages",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}

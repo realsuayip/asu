@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 class Interaction(models.Model):
     # todo add jsonfield to hold additional data related to event
+    # todo save read events for each individual message
     class Kind(models.TextChoices):
         READ = "read", _("read")
         REACT = "react", _("react")
@@ -32,6 +33,7 @@ class Interaction(models.Model):
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 
     class Meta:
+        # todo some kind of idx(user,event,type)
         verbose_name = _("interaction")
         verbose_name_plural = _("interactions")
 

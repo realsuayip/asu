@@ -152,7 +152,7 @@ class ConversationViewSet(
         permission_classes=[RequireUser, RequireFirstParty],
     )
     def read(self, request: UserRequest, pk: int) -> Response:
-        # todo requires event, both group and private
+        # todo requires interaction, both group and private
         context = self.get_serializer_context()
         context["conversation"] = self.get_object()
         serializer = self.get_serializer(data=request.data, context=context)

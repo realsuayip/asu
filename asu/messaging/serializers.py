@@ -5,7 +5,6 @@ from typing import Any
 from django.utils import timezone
 
 from rest_framework import exceptions, serializers
-from rest_framework.reverse import reverse
 
 from drf_spectacular.utils import extend_schema_field
 
@@ -27,10 +26,6 @@ class MessageSerializer(serializers.ModelSerializer[Message]):
 
 
 class MessageComposeSerializer(serializers.ModelSerializer[Event]):
-    conversation = serializers.HyperlinkedRelatedField(  # type: ignore[var-annotated]
-        read_only=True, view_name="api:messaging:conversation-detail"
-    )
-    url = serializers.SerializerMethodField()
     # todo make this polymorphic, cases: groupmsg, privmsg, groupjoin
     # todo: make a reusable helper that resolves polymorphic serialization
     # todo: polymorphic though event modelmethod
@@ -47,19 +42,10 @@ class MessageComposeSerializer(serializers.ModelSerializer[Event]):
             "content",
             "body",
             "reply_to_id",
-            "conversation",
+            "conversation_id",
             "date_created",
-            "url",
         )
         extra_kwargs = {"type": {"read_only": True}}
-
-    @extend_schema_field(serializers.URLField)
-    def get_url(self, obj: Event) -> str:
-        return reverse(
-            "api:messaging:message-detail",
-            kwargs={"pk": obj.pk, "conversation_pk": obj.conversation_id},
-            request=self.context["request"],
-        )
 
     def create(self, validated_data: dict[str, Any]) -> Event:
         sender, recipient, body, reply_to_id = (

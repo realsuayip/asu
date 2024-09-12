@@ -487,41 +487,53 @@ class TestMessaging(APITestCase):
 
     def test_conversation_last_message(self):
         r1 = self._send_message(self.user1, self.user2, "Gary says hello")
-        conversation_1 = r1.data["conversation"]
-        r2 = self.client.get(conversation_1)
+        r2 = self.client.get(
+            reverse(
+                "api:messaging:conversation-detail",
+                kwargs={"pk": r1.data["conversation_id"]},
+            )
+        )
         self.assertEqual("Gary says hello", r2.data["last_message"]["body"])
 
         self._accept_conversation(self.user1, self.user2)
         r3 = self._send_message(self.user2, self.user1, "Gary who?")
 
-        conversation_2 = r3.data["conversation"]
-        r4 = self.client.get(conversation_2)
+        r4 = self.client.get(
+            reverse(
+                "api:messaging:conversation-detail",
+                kwargs={"pk": r3.data["conversation_id"]},
+            )
+        )
         self.assertEqual("Gary who?", r4.data["last_message"]["body"])
 
         self.client.force_login(self.user1)
-        r5 = self.client.get(conversation_1)
-        self.assertEqual("Gary who?", r5.data["last_message"]["body"])
-
-    def test_conversation_messages_url(self):
-        r1 = self._send_message(self.user1, self.user2, "Hello")
-        conversation = r1.data["conversation"]
-        r2 = self.client.get(conversation)
-
-        pk = r2.data["id"]
-        self.assertTrue(
-            r2.data["messages"].endswith(
-                reverse("api:messaging:message-list", kwargs={"conversation_pk": pk})
+        r5 = self.client.get(
+            reverse(
+                "api:messaging:conversation-detail",
+                kwargs={"pk": r1.data["conversation_id"]},
             )
         )
+        self.assertEqual("Gary who?", r5.data["last_message"]["body"])
 
     def test_conversation_last_message_case_deletion(self):
         r1 = self._send_message(self.user1, self.user2, "Gary says hello")
-        conversation = r1.data["conversation"]
+        conversation = r1.data["conversation_id"]
 
-        message = conversation + "messages/%s/" % r1.data["id"]
-        self.client.delete(message)
+        event = reverse(
+            "api:messaging:event-detail",
+            kwargs={
+                "conversation_pk": conversation,
+                "pk": r1.data["id"],
+            },
+        )
+        self.client.delete(event)
 
-        r2 = self.client.get(conversation)
+        r2 = self.client.get(
+            reverse(
+                "api:messaging:conversation-detail",
+                kwargs={"pk": conversation},
+            )
+        )
         self.assertIsNone(r2.data["last_message"])
 
         # Target should still have the deleted message.
@@ -640,8 +652,12 @@ class TestMessaging(APITestCase):
     def test_message_list(self):
         self._send_message(self.user1, self.user2, "Howdy")
         r1 = self._send_message(self.user1, self.user2, "World is great!")
-        conversation = r1.data["conversation"]
-        r2 = self.client.get(conversation + "messages/")
+        r2 = self.client.get(
+            reverse(
+                "api:messaging:event-list",
+                kwargs={"conversation_pk": r1.data["conversation_id"]},
+            )
+        )
         results = r2.data["results"]
 
         self.assertEqual(200, r2.status_code)
@@ -651,23 +667,22 @@ class TestMessaging(APITestCase):
         self.assertContains(r2, "World")
 
         for result in results:
-            self.assertEqual("sent", result["source"])
+            self.assertEqual("sent", result["content"]["source"])
 
         # Target perspective
         self.client.force_login(self.user2)
         conversation = Conversation.objects.get(holder=self.user2)
         target_messages = self.client.get(
             reverse(
-                "api:messaging:conversation-detail",
-                kwargs={"pk": conversation.pk},
+                "api:messaging:event-list",
+                kwargs={"conversation_pk": conversation.pk},
             )
-            + "messages/"
         )
         results = target_messages.data["results"]
         self.assertEqual(2, len(results))
 
         for result in results:
-            self.assertEqual("received", result["source"])
+            self.assertEqual("received", result["content"]["source"])
 
     def test_message_list_unauthorized_conversation(self):
         self._send_message(self.user1, self.user2, "Howdy")
@@ -677,7 +692,7 @@ class TestMessaging(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:messaging:message-list",
+                "api:messaging:event-list",
                 kwargs={"conversation_pk": pk},
             )
         )
@@ -691,7 +706,7 @@ class TestMessaging(APITestCase):
 
         response = self.client.get(
             reverse(
-                "api:messaging:message-detail",
+                "api:messaging:event-detail",
                 kwargs={"conversation_pk": pk, "pk": msg.data["id"]},
             )
         )
@@ -699,10 +714,15 @@ class TestMessaging(APITestCase):
 
     def test_message_detail(self):
         r1 = self._send_message(self.user1, self.user2, "Howdy")
-        message_id = r1.data["id"]
-        conversation = r1.data["conversation"]
+        event_id = r1.data["id"]
+        conversation = r1.data["conversation_id"]
 
-        r2 = self.client.get(conversation + f"messages/{message_id}/")
+        r2 = self.client.get(
+            reverse(
+                "api:messaging:event-detail",
+                kwargs={"conversation_pk": conversation, "pk": event_id},
+            )
+        )
 
         self.assertEqual(200, r2.status_code)
         self.assertContains(r2, "Howdy")
@@ -760,11 +780,11 @@ class TestMessaging(APITestCase):
         c2 = Conversation.objects.get(holder=self.user2)
 
         message_url_1 = reverse(
-            "api:messaging:message-detail",
+            "api:messaging:event-detail",
             kwargs={"conversation_pk": c1.pk, "pk": message_id},
         )
         message_url_2 = reverse(
-            "api:messaging:message-detail",
+            "api:messaging:event-detail",
             kwargs={"conversation_pk": c2.pk, "pk": message_id},
         )
 
@@ -778,7 +798,10 @@ class TestMessaging(APITestCase):
 
     def test_delete_conversation(self):
         r1 = self._send_message(self.user1, self.user2, "Hi")
-        conversation_url = r1.data["conversation"]
+        conversation_url = reverse(
+            "api:messaging:conversation-detail",
+            kwargs={"pk": r1.data["conversation_id"]},
+        )
 
         detail = self.client.get(conversation_url)
         self.assertEqual(200, detail.status_code)
@@ -829,7 +852,7 @@ class TestMessaging(APITestCase):
             Conversation.objects.get(holder=self.user4.pk),
         )
 
-        name = "api:messaging:message-list"
+        name = "api:messaging:event-list"
         msg_1to2_url_for_1 = reverse(name, kwargs={"conversation_pk": c1.pk})
         msg_1to2_url_for_2 = reverse(name, kwargs={"conversation_pk": c2.pk})
         msg_3to4_url_for_3 = reverse(name, kwargs={"conversation_pk": c3.pk})

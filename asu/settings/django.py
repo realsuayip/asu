@@ -111,6 +111,10 @@ password_validators = [
     "django.contrib.auth.password_validation.NumericPasswordValidator",
 ]
 AUTH_PASSWORD_VALIDATORS = [{"NAME": validator} for validator in password_validators]
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+]
 AUTH_USER_MODEL = "account.User"
 SESSION_ENGINE = env.str("SESSION_ENGINE")
 SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")

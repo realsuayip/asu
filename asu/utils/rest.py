@@ -43,27 +43,20 @@ def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | Non
 
     template = {
         "status": exc.status_code,
-        "code": exc.default_code,
+        "code": getattr(exc.detail, "code", exc.default_code),
         "message": exc.detail,
     }
 
     if isinstance(exc, exceptions.ValidationError):
         # ValidationError's raised in serializer methods like create() and
         # update() should behave as if they were raised in validate().
+        details = exc.get_full_details()
+        if isinstance(details, list):
+            details = {api_settings.NON_FIELD_ERRORS_KEY: details}
         template["message"] = gettext(
             "One or more parameters to your request was invalid."
         )
-        detail: Any = exc.detail
-
-        if isinstance(detail, dict):
-            non_field_errors = detail.pop(api_settings.NON_FIELD_ERRORS_KEY, None)
-            for key, value in detail.items():
-                if isinstance(value, str):
-                    detail[key] = [value]
-            detail = detail or non_field_errors
-
-        if detail:
-            template["errors"] = detail
+        template["errors"] = details
 
     response.data = template
     return response

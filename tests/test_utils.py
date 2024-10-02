@@ -11,6 +11,7 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import exceptions
+from rest_framework.exceptions import ErrorDetail
 
 from asu.utils import mailing
 from asu.utils.cache import cached_context
@@ -206,17 +207,62 @@ class TestRestUtils(unittest.TestCase):
                 "code": "not_found",
                 "message": exceptions.NotFound.default_detail,
             },
+            exceptions.PermissionDenied(): {
+                "status": 403,
+                "code": "permission_denied",
+                "message": exceptions.PermissionDenied.default_detail,
+            },
+            exceptions.PermissionDenied(code="otp_required"): {
+                "status": 403,
+                "code": "otp_required",
+                "message": exceptions.PermissionDenied.default_detail,
+            },
             exceptions.ValidationError("some message"): {
                 "status": 400,
                 "code": "invalid",
                 "message": "One or more parameters to your request was invalid.",
-                "errors": ["some message"],
+                "errors": {
+                    "non_field_errors": [
+                        {"message": "some message", "code": "invalid"},
+                    ]
+                },
+            },
+            exceptions.ValidationError("some message", code="custom"): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {
+                    "non_field_errors": [
+                        {"message": "some message", "code": "custom"},
+                    ]
+                },
             },
             exceptions.ValidationError(["multi", "messages"]): {
                 "status": 400,
                 "code": "invalid",
                 "message": "One or more parameters to your request was invalid.",
-                "errors": ["multi", "messages"],
+                "errors": {
+                    "non_field_errors": [
+                        {"message": "multi", "code": "invalid"},
+                        {"message": "messages", "code": "invalid"},
+                    ]
+                },
+            },
+            exceptions.ValidationError({"key": "value"}): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {
+                    "key": [{"message": "value", "code": "invalid"}],
+                },
+            },
+            exceptions.ValidationError({"key": "value"}, code="custom"): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {
+                    "key": [{"message": "value", "code": "custom"}],
+                },
             },
             exceptions.ValidationError(
                 {"key": "value", "key2": ["value1", "value2"]}
@@ -224,13 +270,92 @@ class TestRestUtils(unittest.TestCase):
                 "status": 400,
                 "code": "invalid",
                 "message": "One or more parameters to your request was invalid.",
-                "errors": {"key": ["value"], "key2": ["value1", "value2"]},
+                "errors": {
+                    "key": [
+                        {"message": "value", "code": "invalid"},
+                    ],
+                    "key2": [
+                        {"message": "value1", "code": "invalid"},
+                        {"message": "value2", "code": "invalid"},
+                    ],
+                },
             },
             exceptions.ValidationError({"non_field_errors": ["hey you"]}): {
                 "status": 400,
                 "code": "invalid",
                 "message": "One or more parameters to your request was invalid.",
-                "errors": ["hey you"],
+                "errors": {
+                    "non_field_errors": [{"message": "hey you", "code": "invalid"}]
+                },
+            },
+            exceptions.ValidationError(
+                {
+                    "key": {"value": "heyy"},
+                }
+            ): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {
+                    "key": {
+                        "value": [
+                            {
+                                "message": "heyy",
+                                "code": "invalid",
+                            }
+                        ]
+                    }
+                },
+            },
+            exceptions.ValidationError(
+                [
+                    ErrorDetail("msg1", code="code1"),
+                    ErrorDetail("msg2", code="code2"),
+                ]
+            ): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {
+                    "non_field_errors": [
+                        {"message": "msg1", "code": "code1"},
+                        {"message": "msg2", "code": "code2"},
+                    ]
+                },
+            },
+            exceptions.ValidationError(
+                {"key1": ErrorDetail("msg1", code="code1")},
+            ): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {
+                    "key1": [
+                        {"message": "msg1", "code": "code1"},
+                    ]
+                },
+            },
+            exceptions.ValidationError(
+                {
+                    "key1": ErrorDetail("msg1", code="code1"),
+                    "key2": [
+                        ErrorDetail("msg2", code="code2"),
+                        ErrorDetail("msg3", code="code3"),
+                    ],
+                },
+            ): {
+                "status": 400,
+                "code": "invalid",
+                "message": "One or more parameters to your request was invalid.",
+                "errors": {
+                    "key1": [
+                        {"message": "msg1", "code": "code1"},
+                    ],
+                    "key2": [
+                        {"message": "msg2", "code": "code2"},
+                        {"message": "msg3", "code": "code3"},
+                    ],
+                },
             },
         }
 

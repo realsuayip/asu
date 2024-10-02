@@ -24,6 +24,22 @@ if TYPE_CHECKING:
     from rest_framework.views import APIView
 
 
+def to_errors(
+    detail: list[Any] | dict[str, Any],
+) -> list[Any] | dict[str, Any]:
+    # Converts `ValidationError` instances to `errors` format, displayed in
+    # API errors. This is quite similar to `exc.get_full_details()` except it
+    # always ensures errors are in a list.
+    if isinstance(detail, list):
+        return [to_errors(item) for item in detail]
+    if isinstance(detail, dict):
+        return {
+            key: to_errors([value] if isinstance(value, str) else value)
+            for key, value in detail.items()
+        }
+    return {"message": detail, "code": detail.code}
+
+
 def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
     """
     Replaces the default exception handler with a more structured one.
@@ -43,27 +59,20 @@ def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | Non
 
     template = {
         "status": exc.status_code,
-        "code": exc.default_code,
+        "code": getattr(exc.detail, "code", exc.default_code),
         "message": exc.detail,
     }
 
     if isinstance(exc, exceptions.ValidationError):
         # ValidationError's raised in serializer methods like create() and
         # update() should behave as if they were raised in validate().
+        details = to_errors(exc.detail)
+        if isinstance(details, list):
+            details = {api_settings.NON_FIELD_ERRORS_KEY: details}
         template["message"] = gettext(
             "One or more parameters to your request was invalid."
         )
-        detail: Any = exc.detail
-
-        if isinstance(detail, dict):
-            non_field_errors = detail.pop(api_settings.NON_FIELD_ERRORS_KEY, None)
-            for key, value in detail.items():
-                if isinstance(value, str):
-                    detail[key] = [value]
-            detail = detail or non_field_errors
-
-        if detail:
-            template["errors"] = detail
+        template["errors"] = details
 
     response.data = template
     return response
@@ -128,6 +137,26 @@ class EmptySerializer(serializers.Serializer[None]):
     pass
 
 
+class ErrorDetail(serializers.Serializer[dict[str, Any]]):
+    message = serializers.CharField()
+    code = serializers.CharField()
+
+
+class Errors(serializers.Serializer[dict[str, Any]]):
+    non_field_errors = ErrorDetail(
+        many=True,
+        required=False,
+        help_text="If errors are not related to specific parameters, this"
+        " key might be present to contain other kinds of errors.",
+    )
+    field_name = ErrorDetail(  # type: ignore[assignment]
+        many=True,
+        required=False,
+        help_text="Contains errors related to `field_name` parameter."
+        " Number of such keys might vary.",
+    )
+
+
 class APIError(serializers.Serializer[dict[str, Any]]):
     # Generic error serializer for documentation rendering.
     status = serializers.IntegerField(
@@ -137,10 +166,9 @@ class APIError(serializers.Serializer[dict[str, Any]]):
     )
     code = serializers.CharField(help_text="A code identifying the class of the error.")
     message = serializers.CharField(help_text="Human readable summary of the error.")
-    errors = serializers.JSONField(  # type: ignore[assignment]
+    errors = Errors(  # type: ignore[assignment]
         required=False,
-        help_text="This could be a list of errors, or a mapping with the"
-        " keys referencing the given parameters.",
+        help_text="A mapping with the keys referencing the given parameters.",
     )
 
 

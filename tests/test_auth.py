@@ -110,7 +110,14 @@ class TestAuth(APITestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
-            {"username": ["The username you specified is already in use."]},
+            {
+                "username": [
+                    {
+                        "code": "invalid",
+                        "message": "The username you specified is already in use.",
+                    }
+                ]
+            },
             response.json()["errors"],
         )
 
@@ -260,7 +267,7 @@ class TestAuth(APITestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(
-            {"username": ["This field is required."]},
+            {"username": [{"code": "required", "message": "This field is required."}]},
             response.json()["errors"],
         )
 

@@ -71,7 +71,14 @@ class RegistrationTest(APITestCase):
 
         self.assertEqual(400, fail_response.status_code)
         self.assertEqual(
-            {"username": ["The username you specified is already in use."]},
+            {
+                "username": [
+                    {
+                        "code": "invalid",
+                        "message": "The username you specified is already in use.",
+                    }
+                ]
+            },
             fail_response.json()["errors"],
         )
 

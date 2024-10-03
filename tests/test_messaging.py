@@ -329,8 +329,8 @@ class TestMessaging(APITestCase):
         m1 = self._send_message(self.user1, self.user2, "Hi")
         m2 = self._send_message(self.user1, self.user2, "Hello?")
 
-        m1 = Message.objects.get(pk=m1.data["id"])
-        m2 = Message.objects.get(pk=m2.data["id"])
+        m1 = Message.objects.get(pk=m1.data["content"]["id"])
+        m2 = Message.objects.get(pk=m2.data["content"]["id"])
         self.assertFalse(m1.has_receipt)
         self.assertFalse(m2.has_receipt)
 
@@ -339,7 +339,7 @@ class TestMessaging(APITestCase):
         self._accept_conversation(self.user1, self.user2)
 
         m3 = self._send_message(self.user1, self.user2, "Finally, you accepted!")
-        m3 = Message.objects.get(pk=m3.data["id"])
+        m3 = Message.objects.get(pk=m3.data["content"]["id"])
         self.assertTrue(m3.has_receipt)
 
     def test_receipt_registry(self):
@@ -358,10 +358,10 @@ class TestMessaging(APITestCase):
         no_no = self._send_message(self.user4, self.user5, "Hi")
         yes_yes = self._send_message(self.user1, self.user2, "Hi")
 
-        yes_no = Message.objects.get(pk=yes_no.data["id"])
-        no_yes = Message.objects.get(pk=no_yes.data["id"])
-        no_no = Message.objects.get(pk=no_no.data["id"])
-        yes_yes = Message.objects.get(pk=yes_yes.data["id"])
+        yes_no = Message.objects.get(pk=yes_no.data["content"]["id"])
+        no_yes = Message.objects.get(pk=no_yes.data["content"]["id"])
+        no_no = Message.objects.get(pk=no_no.data["content"]["id"])
+        yes_yes = Message.objects.get(pk=yes_yes.data["content"]["id"])
 
         self.assertFalse(yes_no.has_receipt)
         self.assertFalse(no_yes.has_receipt)
@@ -753,47 +753,67 @@ class TestMessaging(APITestCase):
 
     def test_message_delete(self):
         self._send_message(self.user1, self.user2, "Hi")
-        r1 = self._send_message(self.user1, self.user2, "Hi again")
-        message_id = r1.data["id"]
-        message_url = r1.data["url"]
+        response = self._send_message(self.user1, self.user2, "Hi again")
 
-        detail = self.client.get(message_url)
+        event_id = response.data["id"]
+        event_url = reverse(
+            "api:messaging:event-detail",
+            kwargs={
+                "pk": event_id,
+                "conversation_pk": response.data["conversation_id"],
+            },
+        )
+        message_id = response.data["content"]["id"]
+
+        detail = self.client.get(event_url)
         self.assertEqual(200, detail.status_code)
 
-        removed = self.client.delete(message_url)
+        removed = self.client.delete(event_url)
         self.assertEqual(204, removed.status_code)
 
-        detail = self.client.get(message_url)
+        detail = self.client.get(event_url)
         self.assertEqual(404, detail.status_code)
 
         self.assertTrue(Message.objects.filter(pk=message_id).exists())
 
         conversation = Conversation.objects.get(holder=self.user1)
         other_conversation = Conversation.objects.get(holder=self.user2)
-        self.assertFalse(conversation.messages.filter(pk=message_id).exists())
-        self.assertTrue(other_conversation.messages.filter(pk=message_id).exists())
+
+        self.assertFalse(conversation.events.filter(message_id=message_id).exists())
+        self.assertTrue(
+            other_conversation.events.filter(message_id=message_id).exists()
+        )
 
     def test_message_delete_both_cascades(self):
-        r1 = self._send_message(self.user1, self.user2, "Hi")
-        message_id = r1.data["id"]
-        c1 = Conversation.objects.get(holder=self.user1)
-        c2 = Conversation.objects.get(holder=self.user2)
+        response = self._send_message(self.user1, self.user2, "Hi")
 
-        message_url_1 = reverse(
-            "api:messaging:event-detail",
-            kwargs={"conversation_pk": c1.pk, "pk": message_id},
-        )
-        message_url_2 = reverse(
-            "api:messaging:event-detail",
-            kwargs={"conversation_pk": c2.pk, "pk": message_id},
+        conversation = Conversation.objects.get(holder=self.user1)
+        target_conversation = Conversation.objects.get(holder=self.user2)
+
+        message_id = response.data["content"]["id"]
+        event_id = response.data["id"]
+        target_event_id = (
+            target_conversation.events.only("id").get(message_id=message_id).pk
         )
 
-        self.client.delete(message_url_1)
+        event_url_1 = reverse(
+            "api:messaging:event-detail",
+            kwargs={"conversation_pk": conversation.pk, "pk": event_id},
+        )
+        event_url_2 = reverse(
+            "api:messaging:event-detail",
+            kwargs={
+                "conversation_pk": target_conversation.pk,
+                "pk": target_event_id,
+            },
+        )
+
+        self.client.delete(event_url_1)
         self.assertTrue(Message.objects.filter(pk=message_id).exists())
 
         self.client.force_login(self.user2)
 
-        self.client.delete(message_url_2)
+        self.client.delete(event_url_2)
         self.assertFalse(Message.objects.filter(pk=message_id).exists())
 
     def test_delete_conversation(self):

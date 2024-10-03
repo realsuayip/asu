@@ -1,6 +1,7 @@
-from django.db.models import Exists, OuterRef, Q, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -11,11 +12,11 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.messaging import schemas
-from asu.messaging.models import Conversation, ConversationRequest, Message
+from asu.messaging.models import Conversation, ConversationRequest, Event, Interaction
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
     ConversationSerializer,
-    MessageSerializer,
+    EventSerializer,
     ReadConversationSerializer,
 )
 from asu.utils.rest import EmptySerializer, get_paginator
@@ -23,27 +24,45 @@ from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
 
 
+# todo add some sort of mechanism for replied message discovery
 @extend_schema(parameters=[OpenApiParameter("conversation_id", int, "path")])
-class MessageViewSet(ExtendedViewSet[Message]):
+class EventViewSet(ExtendedViewSet[Event]):
     mixins = ("list", "retrieve", "destroy")
-    queryset = Message.objects.none()
-    serializer_class = MessageSerializer
+    queryset = Event.objects.none()
+    serializer_class = EventSerializer
     permission_classes = [RequireUser, RequireFirstParty]
-    pagination_class = get_paginator("cursor", ordering="-date_created")
-    schemas = schemas.message
+    pagination_class = get_paginator("cursor", page_size=25, ordering="-date_created")
+    schemas = schemas.event
 
-    def get_queryset(self) -> QuerySet[Message]:
-        self.conversation = get_object_or_404(
-            Conversation.objects.only("id"),
+    @cached_property
+    def conversation(self):
+        # todo none of the mixins will work properly in
+        # group context
+        return get_object_or_404(
+            Conversation.objects.only("id", "is_group"),
             holder=self.request.user,
             pk=self.kwargs["conversation_pk"],
         )
-        return Message.objects.filter(conversations=self.conversation)
 
-    def perform_destroy(self, instance: Message) -> None:
-        Conversation.messages.through.objects.filter(
-            message=instance, conversation=self.conversation
-        ).delete()
+    def get_queryset(self) -> QuerySet[Event]:
+        # Interactions should not include `read` types in the context of groups
+        # since that could possibly result in loading a lot of objects. Also,
+        # read interactions should only be visible to message sender. Senders
+        # may display who viewed their messages via a separate API.
+        interactions = Interaction.objects.all()
+        if self.conversation.is_group:
+            interactions = interactions.exclude(type="read")
+        return (
+            Event.objects.select_related("message", "message__sender")
+            .prefetch_related(
+                Prefetch(
+                    "message__interactions",
+                    queryset=interactions,
+                    to_attr="narrowed_interactions",
+                )
+            )
+            .filter(conversation=self.conversation)
+        )
 
 
 class ConversationFilterSet(filters.FilterSet):
@@ -81,6 +100,7 @@ class ConversationViewSet(ExtendedViewSet[Conversation]):
     schemas = schemas.conversation
 
     def get_queryset(self) -> QuerySet[Conversation]:
+        # todo needs group refinement
         holder = self.request.user
         queryset = Conversation.objects.filter(holder=holder)
 
@@ -118,6 +138,7 @@ class ConversationViewSet(ExtendedViewSet[Conversation]):
         permission_classes=[RequireUser, RequireFirstParty],
     )
     def accept(self, request: Request, pk: int) -> Response:
+        # todo only applicable to private
         conversation = self.get_object()
 
         try:
@@ -141,6 +162,7 @@ class ConversationViewSet(ExtendedViewSet[Conversation]):
         permission_classes=[RequireUser, RequireFirstParty],
     )
     def read(self, request: UserRequest, pk: int) -> Response:
+        # todo requires interaction, both group and private
         context = self.get_serializer_context()
         context["conversation"] = self.get_object()
         serializer = self.get_serializer(data=request.data, context=context)

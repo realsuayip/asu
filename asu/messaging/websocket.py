@@ -2,12 +2,12 @@ from typing import Any
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from asu.messaging.models.message import MessageEvent
+from asu.messaging.models.event import Event, WebsocketEvent
 
 
 class ConversationConsumer(AsyncJsonWebsocketConsumer):
     def get_group(self) -> str:
-        return "conversations_%s" % self.scope["user_id"]
+        return Event.get_group(self.scope["user_id"])
 
     async def connect(self) -> None:
         await self.channel_layer.group_add(self.get_group(), self.channel_name)
@@ -16,7 +16,7 @@ class ConversationConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, code: int) -> None:
         await self.channel_layer.group_discard(self.get_group(), self.channel_name)
 
-    async def conversation_message(self, event: MessageEvent) -> None:
+    async def conversation_message(self, event: WebsocketEvent) -> None:
         await self.send_json(event)
 
     async def websocket_receive(self, message: dict[str, Any]) -> None:

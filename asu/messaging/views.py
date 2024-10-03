@@ -1,6 +1,7 @@
-from django.db.models import Exists, OuterRef, Q, QuerySet
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -12,7 +13,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.messaging import schemas
-from asu.messaging.models import Conversation, ConversationRequest, Event
+from asu.messaging.models import Conversation, ConversationRequest, Event, Interaction
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
     ConversationSerializer,
@@ -38,16 +39,34 @@ class EventViewSet(
     pagination_class = get_paginator("cursor", page_size=25, ordering="-date_created")
     schemas = schemas.event
 
-    def get_queryset(self) -> QuerySet[Event]:
+    @cached_property
+    def conversation(self):
         # todo none of the mixins will work properly in
         # group context
-        self.conversation = get_object_or_404(
-            Conversation.objects.only("id"),
+        return get_object_or_404(
+            Conversation.objects.only("id", "is_group"),
             holder=self.request.user,
             pk=self.kwargs["conversation_pk"],
         )
-        return Event.objects.select_related("message", "message__sender").filter(
-            type="message", conversation=self.conversation
+
+    def get_queryset(self) -> QuerySet[Event]:
+        # Interactions should not include `read` types in the context of groups
+        # since that could possibly result in loading a lot of objects. Also,
+        # read interactions should only be visible to message sender. Senders
+        # may display who viewed their messages via a separate API.
+        interactions = Interaction.objects.all()
+        if self.conversation.is_group:
+            interactions = interactions.exclude(type="read")
+        return (
+            Event.objects.select_related("message", "message__sender")
+            .prefetch_related(
+                Prefetch(
+                    "message__interactions",
+                    queryset=interactions,
+                    to_attr="narrowed_interactions",
+                )
+            )
+            .filter(conversation=self.conversation)
         )
 
 

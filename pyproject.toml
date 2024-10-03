@@ -30,6 +30,9 @@ dependencies = [
     "phonenumbers ~= 8.13",
     "sentry-sdk ~= 2.18",
     "envanter ~= 1.2",
+    "pytest>=8.3.3",
+    "pytest-django>=4.9.0",
+    "pytest-sugar>=1.0.0",
 ]
 
 [project.optional-dependencies]

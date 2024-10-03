@@ -2,27 +2,52 @@ from __future__ import annotations
 
 from typing import Any
 
-from django.utils import timezone
-
 from rest_framework import exceptions, serializers
 
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.serializers.user import UserPublicReadSerializer
-from asu.messaging.models import Conversation, ConversationRequest, Event, Message
+from asu.messaging.models import (
+    Conversation,
+    ConversationRequest,
+    Event,
+    Interaction,
+    Message,
+)
+
+
+class InteractionSerializer(serializers.ModelSerializer[Interaction]):
+    class Meta:
+        model = Interaction
+        fields = ("user_id", "type", "date_created")
 
 
 class MessageSerializer(serializers.ModelSerializer[Message]):
     source = serializers.SerializerMethodField()  # type: ignore[assignment]
+    interactions = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
-        fields = ("id", "body", "source", "reply_to_id")
+        fields = (
+            "id",
+            "body",
+            "source",
+            "reply_to_id",
+            "interactions",
+        )
 
     @extend_schema_field(serializers.ChoiceField(choices=["sent", "received"]))
     def get_source(self, message: Message) -> str:
         user = self.context["request"].user
         return "sent" if message.sender_id == user.pk else "received"
+
+    def get_interactions(self, message: Message) -> dict[str, Any]:
+        # todo: do not use getattr here
+        #  by separating compose & display serializers with common base. only
+        #  display should prefetch and include interactions
+        interactions = getattr(message, "narrowed_interactions", [])
+        serializer = InteractionSerializer(interactions, many=True)
+        return serializer.data
 
 
 class MessageComposeSerializer(serializers.ModelSerializer[Event]):
@@ -62,7 +87,6 @@ class MessageComposeSerializer(serializers.ModelSerializer[Event]):
 
 class EventSerializer(serializers.ModelSerializer[Event]):
     content = MessageSerializer(source="message")  # todo polymorphic
-    # interactions field here
 
     class Meta:
         model = Event
@@ -130,17 +154,28 @@ class ConversationDetailSerializer(ConversationSerializer):
 
 
 class ReadConversationSerializer(serializers.Serializer[dict[str, Any]]):
-    until = serializers.DateTimeField()
-    affected = serializers.IntegerField(read_only=True, min_value=0)
+    start = serializers.DateTimeField(write_only=True)
+    end = serializers.DateTimeField(write_only=True)
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        conversation = self.context["conversation"]
-        read_by = self.context["request"].user
+        conversation, read_by = (
+            self.context["conversation"],
+            self.context["request"].user,
+        )
+        start, end = validated_data.pop("start"), validated_data.pop("end")
 
-        until = validated_data["until"]
-        affected = conversation.messages.filter(
-            recipient=read_by,
-            date_read__isnull=True,
-            date_created__lte=until,
-        ).update(date_read=timezone.now())
-        return {"until": until, "affected": affected}
+        messages = (
+            Message.objects.filter(
+                events__conversation=conversation,
+                date_created__gte=start,
+                date_created__lte=end,
+            )
+            .exclude(sender_id=read_by.pk)
+            .values_list("id", flat=True)
+        )
+        interactions = [
+            Interaction(user=read_by, message_id=message_id, type=Interaction.Kind.READ)
+            for message_id in messages
+        ]
+        Interaction.objects.bulk_create(interactions, ignore_conflicts=True)
+        return validated_data

@@ -127,7 +127,7 @@ class PasswordChangeSerializer(serializers.ModelSerializer[User]):
         try:
             validate_password(new, user=instance)
         except django.core.exceptions.ValidationError as err:
-            raise serializers.ValidationError({"password": err.messages})
+            raise serializers.ValidationError({"new_password": err.messages})
 
         instance.set_password(new)
         instance.save(update_fields=["password", "date_modified"])

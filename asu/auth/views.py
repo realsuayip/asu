@@ -30,6 +30,7 @@ from asu.auth.serializers.actions import (
     DeactivationSerializer,
     FollowRequestSerializer,
     FollowSerializer,
+    PasswordChangeSerializer,
     PasswordResetSerializer,
     ProfilePictureEditSerializer,
     RelationSerializer,
@@ -198,6 +199,17 @@ class UserViewSet(ExtendedViewSet[User]):
     )
     def reset_password(self, request: Request) -> Response:
         return self.get_action_save_response(request)
+
+    @action(
+        detail=False,
+        methods=["patch"],
+        permission_classes=[RequireUser, RequireFirstParty],
+        serializer_class=PasswordChangeSerializer,
+        url_path="password-change",
+    )
+    def change_password(self, request: UserRequest) -> Response:
+        serializer = self.get_serializer(instance=request.user, data=request.data)
+        return self.get_action_save_response(request, serializer)
 
     def save_through(self) -> Response:
         # Common save method for user blocking and following.

@@ -7,6 +7,7 @@ from drf_spectacular.utils import OpenApiExample, extend_schema
 from asu.auth.permissions import OAuthPermission
 from asu.auth.serializers.actions import (
     FollowSerializer,
+    PasswordChangeSerializer,
     PasswordResetSerializer,
     RelationSerializer,
     UserConnectionSerializer,
@@ -202,6 +203,11 @@ reset_password = extend_schema(
         )
     ],
 )
+change_password = extend_schema(
+    summary="Change password",
+    responses={204: PasswordChangeSerializer, 400: APIError},
+)
+
 
 put_profile_picture = extend_schema(
     summary="Upload new profile picture",
@@ -264,6 +270,7 @@ user = {
     "me": me,
     "by": by,
     "reset_password": reset_password,
+    "change_password": change_password,
     "followers": followers,
     "following": following,
     "blocked": blocked,

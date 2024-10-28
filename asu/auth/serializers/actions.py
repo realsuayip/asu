@@ -97,6 +97,49 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         return validated_data
 
 
+class PasswordChangeSerializer(serializers.ModelSerializer[User]):
+    new_password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+    )
+
+    class Meta:
+        model = User
+        fields = ("password", "new_password")
+        extra_kwargs = {
+            "password": {
+                "max_length": None,
+                "write_only": True,
+                "style": {"input_type": "password"},
+            },
+        }
+
+    @transaction.atomic
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
+        request = self.context["request"]
+        current, new = validated_data["password"], validated_data["new_password"]
+
+        if not instance.check_password(current):
+            raise serializers.ValidationError(
+                {"password": gettext("Your password was not correct.")}
+            )
+
+        try:
+            validate_password(new, user=instance)
+        except django.core.exceptions.ValidationError as err:
+            raise serializers.ValidationError({"password": err.messages})
+
+        instance.set_password(new)
+        instance.save(update_fields=["password", "date_modified"])
+        instance.revoke_other_tokens(request.auth)
+
+        send_notice = functools.partial(
+            instance.send_transactional_mail, message=messages.password_change_notice
+        )
+        transaction.on_commit(send_notice)
+        return instance
+
+
 class CreateRelationSerializer(serializers.Serializer[dict[str, Any]]):
     from_user = HiddenField(default=serializers.CurrentUserDefault())
     to_user = HiddenField()

@@ -1014,6 +1014,62 @@ class TestAuth(APITestCase):
         TOTPDevice.objects.create(user=self.user1, confirmed=True)
         self.assertTrue(self.user1.two_factor_enabled)
 
+    def test_user_reset_password_case_bad_current_password(self):
+        self.user1.set_password("dummy_z8KPHXqS9DND")
+        self.user1.save(update_fields=["password"])
+        self.client.force_login(self.user1)
+
+        response = self.client.patch(
+            reverse("api:auth:user-change-password"),
+            data={
+                "password": "not_secret",
+                "new_password": "new_secret",
+            },
+        )
+        self.assertContains(response, "password was not correct", status_code=400)
+
+    def test_user_reset_password_case_bad_new_password(self):
+        current = "dummy_z8KPHXqS9DND"
+        self.user1.set_password(current)
+        self.user1.save(update_fields=["password"])
+        self.client.force_login(self.user1)
+
+        response = self.client.patch(
+            reverse("api:auth:user-change-password"),
+            data={"password": current, "new_password": "123"},
+        )
+        self.assertContains(response, "too common", status_code=400)
+
+    def test_user_reset_password(self):
+        current = "dummy_z8KPHXqS9DND"
+        self.user1.set_password(current)
+        self.user1.save(update_fields=["password"])
+
+        other_token = self.user1.issue_token()["access_token"]
+        current_token = self.user1.issue_token()["access_token"]
+
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self.client.patch(
+                reverse("api:auth:user-change-password"),
+                headers={"Authorization": "Bearer %s" % current_token},
+                data={"password": current, "new_password": "Very_Secret_123"},
+            )
+
+        self.user1.refresh_from_db()
+
+        # Password is changed for real
+        self.assertEqual(204, response.status_code)
+        self.assertTrue(self.user1.check_password("Very_Secret_123"))
+
+        # Mail is sent to notify the user
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual(1, len(callbacks))
+        self.assertIn("Your password has been changed", mail.outbox[0].body)
+
+        # Other tokens are invalidated
+        self.assertFalse(AccessToken.objects.filter(token=other_token).exists())
+        self.assertTrue(AccessToken.objects.filter(token=current_token).exists())
+
 
 class TestOAuthPermissions(APITestCase):
     @classmethod

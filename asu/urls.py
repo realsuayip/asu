@@ -2,7 +2,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path, re_path
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import RedirectView
 
 from drf_spectacular.utils import extend_schema
@@ -30,9 +29,7 @@ api_urls: list[URLResolver | URLPattern] = [
 docs_urls = [
     path(
         "schema/",
-        extend_schema(summary=_("Retrieve OpenAPI schema"))(
-            SpectacularAPIView
-        ).as_view(),
+        extend_schema(exclude=True)(SpectacularAPIView).as_view(),
         name="openapi-schema",
     ),
     path("", DocsView.as_view(), name="browse"),

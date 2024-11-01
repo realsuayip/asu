@@ -1,6 +1,6 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
-from asu.utils.openapi import examples, get_error_repr
+from asu.utils.openapi import Tag, examples, get_error_repr
 from asu.utils.rest import APIError
 from asu.verification.registration.serializers import (
     RegistrationCheckSerializer,
@@ -12,6 +12,7 @@ __all__ = ["email"]
 
 email_create = extend_schema(
     summary="Send email verification",
+    tags=[Tag.USER_EMAIL_CHANGE],
     description="Used to change the e-mail of currently authenticated user."
     " Given that provided email that is not already taken,"
     " sends an e-mail containing a six-digit that could"
@@ -38,6 +39,7 @@ email_create = extend_schema(
 
 email_check = extend_schema(
     summary="Check email verification",
+    tags=[Tag.USER_EMAIL_CHANGE],
     description="Given an e-mail (one that received verification"
     " e-mail via related endpoint) and code, check if the pairs make"
     " a valid combination. <strong>If they do, e-mail of the currently"

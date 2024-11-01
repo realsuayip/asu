@@ -1,6 +1,6 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
-from asu.utils.openapi import get_error_repr
+from asu.utils.openapi import Tag, get_error_repr
 from asu.utils.rest import APIError
 from asu.verification.password.serializers import (
     PasswordResetVerificationCheckSerializer,
@@ -13,6 +13,7 @@ __all__ = ["password_reset"]
 
 password_reset_create = extend_schema(
     summary="Send password reset verification",
+    tags=[Tag.USER_PASSWORD_RESET],
     description="The provided email will receive a code to verify the"
     " user. The consent for password resetting process is"
     " obtained with this code and email pair.",
@@ -32,6 +33,7 @@ password_reset_create = extend_schema(
 
 password_reset_check = extend_schema(
     summary="Check password reset verification",
+    tags=[Tag.USER_PASSWORD_RESET],
     description="Given an e-mail (one that received verification"
     " e-mail via related endpoint) and code, check if the pairs make"
     " a valid combination. The returned consent is required to actually"

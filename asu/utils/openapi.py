@@ -1,3 +1,4 @@
+import enum
 import types
 from typing import Any
 
@@ -8,6 +9,19 @@ from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import Direction, OpenApiExample
 
 from asu.utils.rest import DynamicFieldsMixin
+
+
+class Tag(enum.StrEnum):
+    USER_REGISTRATION = "User Registration"
+    USER_PASSWORD_RESET = "User Password Reset"
+    USER_EMAIL_CHANGE = "User Email Change"
+    USER_FOLLOW_OPERATIONS = "User Follow Operations"
+    USER_BLOCK_OPERATIONS = "User Block Operations"
+    USER_SETTINGS = "User Settings"
+    USER_RETRIEVAL = "User Retrieval"
+    USER_AUTHENTICATION = "User Authentication"
+
+    MESSAGING = "Messaging"
 
 
 class DynamicFieldsModelSerializerExtension(OpenApiSerializerExtension):

@@ -15,6 +15,11 @@ class UserDeactivation(models.Model):
         null=True,
         blank=True,
     )
+    for_deletion = models.BooleanField(
+        _("for deletion"),
+        help_text=_("Marks this user's account for permanent deletion."),
+        default=False,
+    )
 
     date_created = models.DateTimeField(_("date created"), auto_now_add=True)
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)

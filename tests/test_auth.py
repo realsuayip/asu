@@ -924,6 +924,41 @@ class TestAuth(APITestCase):
 
         self.assertEqual(204, response.status_code)
         self.assertIsNone(response.data)
+        self.assertEqual(0, len(mail.outbox))
+        self.assertEqual(0, len(callbacks))
+
+        self.user1.refresh_from_db()
+        deactivation = UserDeactivation.objects.get(user=self.user1)
+
+        self.assertTrue(self.user1.is_frozen)
+        self.assertIsNone(deactivation.date_revoked)
+        self.assertFalse(deactivation.for_deletion)
+        self.assertFalse(Session.objects.filter(user=self.user1.pk).exists())
+        self.assertFalse(AccessToken.objects.exists())
+        self.assertFalse(
+            RefreshToken.objects.filter(
+                user=self.user1,
+                revoked__isnull=True,
+            ).exists()
+        )
+
+    def test_user_deactivate_for_deletion(self):
+        self.user1.set_password("hello")
+        self.user1.save(update_fields=["password"])
+        token = self.user1.issue_token()
+        authorization = f"{token['token_type']} {token['access_token']}"
+
+        url = reverse("api:auth:user-deactivate")
+
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self.client.post(
+                url,
+                data={"password": "hello", "for_deletion": True},
+                headers={"Authorization": authorization},
+            )
+
+        self.assertEqual(204, response.status_code)
+        self.assertIsNone(response.data)
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(1, len(callbacks))
         self.assertIn("account has been deactivated", mail.outbox[0].body)
@@ -933,6 +968,7 @@ class TestAuth(APITestCase):
 
         self.assertTrue(self.user1.is_frozen)
         self.assertIsNone(deactivation.date_revoked)
+        self.assertTrue(deactivation.for_deletion)
         self.assertFalse(Session.objects.filter(user=self.user1.pk).exists())
         self.assertFalse(AccessToken.objects.exists())
         self.assertFalse(
@@ -980,22 +1016,26 @@ class TestAuth(APITestCase):
         )
 
     def test_task_delete_users_permanently(self):
-        delete_immediately, to_be_deleted_later, deletion_cancelled = (
-            UserFactory(),
-            UserFactory(),
-            UserFactory(),
-        )
-        UserFactory()  # unrelated user obj, should not be affected.
+        (
+            delete_immediately,
+            to_be_deleted_later,
+            deletion_cancelled,
+            not_for_deletion,
+            unrelated,
+        ) = UserFactory.create_batch(5)
 
         now = datetime.datetime(2022, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC"))
 
         # This deactivation will be triggered immediately.
         with mock.patch("django.utils.timezone.now", return_value=now):
-            UserDeactivation.objects.create(user=delete_immediately)
-            UserDeactivation.objects.create(user=deletion_cancelled, date_revoked=now)
+            UserDeactivation.objects.create(user=delete_immediately, for_deletion=True)
+            UserDeactivation.objects.create(user=not_for_deletion, for_deletion=False)
+            UserDeactivation.objects.create(
+                user=deletion_cancelled, date_revoked=now, for_deletion=True
+            )
 
         # This one should not trigger.
-        UserDeactivation.objects.create(user=to_be_deleted_later)
+        UserDeactivation.objects.create(user=to_be_deleted_later, for_deletion=True)
 
         future = now + datetime.timedelta(days=30)
         with mock.patch("django.utils.timezone.now", return_value=future):

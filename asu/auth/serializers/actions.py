@@ -16,7 +16,13 @@ from rest_framework.exceptions import PermissionDenied
 from django_stubs_ext import WithAnnotations
 from drf_spectacular.utils import extend_schema_field
 
-from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
+from asu.auth.models import (
+    User,
+    UserBlock,
+    UserDeactivation,
+    UserFollow,
+    UserFollowRequest,
+)
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.utils import messages
 from asu.utils.rest import HiddenField
@@ -290,19 +296,26 @@ class RelationSerializer(serializers.Serializer[dict[str, Any]]):
     results = UserWithRelationSerializer(many=True)
 
 
-class DeactivationSerializer(serializers.Serializer[dict[str, Any]]):
+class UserDeactivationSerializer(serializers.ModelSerializer[UserDeactivation]):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     password = serializers.CharField(
         write_only=True,
         style={"input_type": "password"},
     )
 
-    def validate_password(self, password: str) -> str:
-        user = self.context["request"].user
-        if not user.check_password(password):
-            raise serializers.ValidationError(gettext("Your password was not correct."))
-        return password
+    class Meta:
+        model = UserDeactivation
+        fields = ("user", "password", "for_deletion")
+        extra_kwargs = {"for_deletion": {"write_only": True}}
 
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        user = self.context["request"].user
-        user.deactivate()
-        return validated_data
+    def create(self, validated_data: dict[str, Any]) -> UserDeactivation:
+        user, password, for_deletion = (
+            validated_data["user"],
+            validated_data["password"],
+            validated_data["for_deletion"],
+        )
+        if not user.check_password(password):
+            raise serializers.ValidationError(
+                {"password": gettext("Your password was not correct.")}
+            )
+        return user.deactivate(for_deletion=for_deletion)

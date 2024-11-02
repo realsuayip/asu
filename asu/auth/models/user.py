@@ -392,19 +392,19 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         sessions.delete()
 
     @transaction.atomic
-    def deactivate(self) -> None:
+    def deactivate(self, *, for_deletion: bool = False) -> UserDeactivation:
         self.is_frozen = True
         self.save(update_fields=["is_frozen", "date_modified"])
-
-        UserDeactivation.objects.create(user=self)
 
         self.revoke_other_tokens()
         self.revoke_all_sessions()
 
-        send_notice = functools.partial(
-            self.send_transactional_mail, message=messages.account_deactivated
-        )
-        transaction.on_commit(send_notice)
+        if for_deletion:
+            send_notice = functools.partial(
+                self.send_transactional_mail, message=messages.account_deactivated
+            )
+            transaction.on_commit(send_notice)
+        return UserDeactivation.objects.create(user=self, for_deletion=for_deletion)
 
     @transaction.atomic
     def reactivate(self) -> None:

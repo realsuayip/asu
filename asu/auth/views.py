@@ -27,7 +27,6 @@ from asu.auth.permissions import (
 )
 from asu.auth.serializers.actions import (
     BlockSerializer,
-    DeactivationSerializer,
     FollowRequestSerializer,
     FollowSerializer,
     PasswordChangeSerializer,
@@ -36,6 +35,7 @@ from asu.auth.serializers.actions import (
     RelationSerializer,
     TicketSerializer,
     UserConnectionSerializer,
+    UserDeactivationSerializer,
 )
 from asu.auth.serializers.user import (
     UserCreateSerializer,
@@ -407,7 +407,7 @@ class UserViewSet(ExtendedViewSet[User]):
         detail=False,
         methods=["post"],
         permission_classes=[RequireUser, RequireFirstParty],
-        serializer_class=DeactivationSerializer,
+        serializer_class=UserDeactivationSerializer,
     )
     def deactivate(self, request: UserRequest) -> Response:
         return self.get_action_save_response(

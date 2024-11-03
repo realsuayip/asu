@@ -306,7 +306,9 @@ class UserDeactivationSerializer(serializers.ModelSerializer[UserDeactivation]):
     class Meta:
         model = UserDeactivation
         fields = ("user", "password", "for_deletion")
-        extra_kwargs = {"for_deletion": {"write_only": True}}
+        extra_kwargs = {
+            "for_deletion": {"write_only": True, "default": False},
+        }
 
     def create(self, validated_data: dict[str, Any]) -> UserDeactivation:
         user, password, for_deletion = (

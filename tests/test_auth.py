@@ -920,6 +920,7 @@ class TestAuth(APITestCase):
                 url,
                 data={"password": "hello"},
                 headers={"Authorization": authorization},
+                format="json",
             )
 
         self.assertEqual(204, response.status_code)

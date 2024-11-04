@@ -19,7 +19,7 @@ from asu.auth.serializers.user import (
 )
 from asu.messaging.serializers import MessageComposeSerializer
 from asu.utils.openapi import Tag, examples, get_error_repr
-from asu.utils.rest import APIError, EmptySerializer
+from asu.utils.rest import APIError
 
 if TYPE_CHECKING:
     from drf_spectacular.openapi import AutoSchema
@@ -50,7 +50,6 @@ class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
 
 action = functools.partial(
     extend_schema,
-    request=EmptySerializer,
     examples=[examples.not_found],
     responses={204: None, 404: APIError},
 )

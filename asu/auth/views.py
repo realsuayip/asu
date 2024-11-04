@@ -213,7 +213,9 @@ class UserViewSet(ExtendedViewSet[User]):
 
     def save_through(self) -> Response:
         # Common save method for user blocking and following.
-        serializer = self.get_serializer(data={"to_user": self.get_object()})
+        context = self.get_serializer_context()
+        context["to_user"] = self.get_object()
+        serializer = self.get_serializer(data=self.request.data, context=context)
         return self.get_action_save_response(self.request, serializer)
 
     def delete_through(self, model: type[UserFollow | UserBlock]) -> Response:

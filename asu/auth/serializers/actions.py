@@ -25,7 +25,7 @@ from asu.auth.models import (
 )
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.utils import messages
-from asu.utils.rest import HiddenField
+from asu.utils.rest import ContextDefault
 from asu.verification.models import PasswordResetVerification
 
 T = TypeVar("T", bound=models.Model)
@@ -147,8 +147,8 @@ class PasswordChangeSerializer(serializers.ModelSerializer[User]):
 
 
 class CreateRelationSerializer(serializers.Serializer[dict[str, Any]]):
-    from_user = HiddenField(default=serializers.CurrentUserDefault())
-    to_user = HiddenField()
+    from_user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    to_user = serializers.HiddenField(default=ContextDefault("to_user"))
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if attrs["from_user"] == attrs["to_user"]:

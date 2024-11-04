@@ -17,7 +17,6 @@ from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
 
 from django_filters import rest_framework as filters
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
 if TYPE_CHECKING:
@@ -188,11 +187,18 @@ class IDFilter(filters.Filter):
     field_class = SimpleArrayField
 
 
-@extend_schema_field(OpenApiTypes.ANY)
-class HiddenField(Field):  # type: ignore[type-arg]
-    def __init__(self, **kwargs: Any) -> None:
-        kwargs["write_only"] = True
-        super().__init__(**kwargs)
+class ContextDefault:
+    """
+    Get default value from serializer context.
+    """
 
-    def to_internal_value(self, data: Any) -> Any:
-        return data
+    requires_context = True
+
+    def __init__(self, key: str) -> None:
+        self.key = key
+
+    def __call__(self, serializer_field: Field) -> Any:  # type: ignore[type-arg]
+        return serializer_field.context[self.key]
+
+    def __repr__(self) -> str:
+        return "%s(key=%s)" % (self.__class__.__name__, self.key)

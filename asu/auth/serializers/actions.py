@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Any, NoReturn, TypeVar
+from typing import Any, NoReturn, TypeVar, cast
 
 import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
@@ -312,7 +312,7 @@ class UserDeactivationSerializer(serializers.ModelSerializer[UserDeactivation]):
 
     def create(self, validated_data: dict[str, Any]) -> UserDeactivation:
         user, password, for_deletion = (
-            validated_data["user"],
+            cast(User, validated_data["user"]),
             validated_data["password"],
             validated_data["for_deletion"],
         )

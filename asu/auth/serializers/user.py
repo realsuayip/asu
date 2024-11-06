@@ -24,7 +24,7 @@ def validate_username_constraints(instance: User) -> None:
 
 
 class UserPublicReadSerializer(
-    DynamicFieldsMixin, serializers.HyperlinkedModelSerializer
+    DynamicFieldsMixin, serializers.HyperlinkedModelSerializer[User]
 ):
     following_count = serializers.IntegerField()
     follower_count = serializers.IntegerField()
@@ -48,7 +48,7 @@ class UserPublicReadSerializer(
         extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
 
 
-class UserSerializer(DynamicFieldsMixin, serializers.HyperlinkedModelSerializer):
+class UserSerializer(DynamicFieldsMixin, serializers.HyperlinkedModelSerializer[User]):
     profile_picture = serializers.ImageField(source="get_profile_picture")
     two_factor_enabled = serializers.BooleanField()
 
@@ -98,7 +98,7 @@ class AuthSerializer(serializers.Serializer[dict[str, Any]]):
     scope = serializers.CharField()
 
 
-class UserCreateSerializer(serializers.HyperlinkedModelSerializer):
+class UserCreateSerializer(serializers.HyperlinkedModelSerializer[User]):
     consent = serializers.CharField(write_only=True)
     password = serializers.CharField(
         max_length=256,

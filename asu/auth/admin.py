@@ -36,7 +36,7 @@ admin.site.unregister(totp_models.TOTPDevice)
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(BaseUserAdmin[User]):
     readonly_fields = (
         "is_frozen",
         "last_login",

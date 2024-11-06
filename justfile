@@ -39,7 +39,7 @@ coverage: (exec '/bin/sh -c \
     coverage html --show-contexts"')
 
 # Check type hints
-type: (exec 'mypy asu/ --no-incremental')
+type: (exec 'mypy asu/')
 
 # Expose uv interface
 uv *args: (exec 'uv' args)

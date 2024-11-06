@@ -13,7 +13,6 @@ from django.utils.translation import gettext
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from django_stubs_ext import WithAnnotations
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.models import (
@@ -288,8 +287,8 @@ class UserWithRelationSerializer(serializers.ModelSerializer[User]):
             help_text="May contain multiple relations.",
         )
     )
-    def get_relations(self, obj: WithAnnotations[User]) -> list[str]:
-        return [name for name, exists in obj.rels.items() if exists]
+    def get_relations(self, obj: User) -> list[str]:
+        return [name for name, exists in obj.rels.items() if exists]  # type: ignore[attr-defined]
 
 
 class RelationSerializer(serializers.Serializer[dict[str, Any]]):

@@ -8,7 +8,6 @@ from django.utils import timezone
 from rest_framework import exceptions, serializers
 from rest_framework.reverse import reverse
 
-from django_stubs_ext import WithAnnotations
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.serializers.user import UserPublicReadSerializer
@@ -75,7 +74,7 @@ class MessageSerializer(serializers.ModelSerializer[Message]):
         return "sent" if message.sender_id == user.pk else "received"
 
 
-class ConversationSerializer(serializers.HyperlinkedModelSerializer):
+class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation]):
     target = UserPublicReadSerializer(
         fields=(
             "id",
@@ -107,13 +106,11 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
 
     @extend_schema_field(MessageSerializer(allow_null=True))
-    def get_last_message(
-        self, obj: WithAnnotations[Conversation]
-    ) -> dict[str, Any] | None:
-        if obj.last_message is None:
+    def get_last_message(self, obj: Conversation) -> dict[str, Any] | None:
+        if (msg := obj.last_message) is None:  # type: ignore[attr-defined]
             return None
 
-        message = Message(**obj.last_message)
+        message = Message(**msg)
         serializer = MessageSerializer(message, context=self.context)
         return serializer.data
 

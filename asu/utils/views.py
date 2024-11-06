@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 from collections.abc import Sequence
 from typing import Any, TypeVar
 
@@ -28,7 +29,7 @@ _viewset_mixin_map: dict[str, type[Any]] = {
 }
 
 
-class ViewSetMeta(type):
+class ViewSetMeta(abc.ABCMeta):
     def __new__(
         mcs,  # noqa: N804
         name: str,

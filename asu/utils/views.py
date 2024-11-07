@@ -44,9 +44,7 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
     def get_action_save_response(
         self,
         request: Request,
-        serializer: serializers.BaseSerializer[Any]
-        | type[serializers.BaseSerializer[Any]]
-        | None = None,
+        serializer: serializers.BaseSerializer[Any] | None = None,
         status_code: int = status.HTTP_200_OK,
     ) -> Response:
         # Similar functionality from mixins.CreateModelMixin
@@ -55,10 +53,7 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
 
         if serializer is None:
             serializer = self.get_serializer(data=request.data)
-        elif not isinstance(serializer, serializers.BaseSerializer):
-            serializer = serializer(
-                data=request.data, context=self.get_serializer_context()
-            )
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

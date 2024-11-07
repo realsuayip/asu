@@ -28,6 +28,7 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSION": env.str("API_DEFAULT_VERSION"),
     "ALLOWED_VERSIONS": env.list("API_ALLOWED_VERSIONS"),
     "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,
+    "DEFAULT_PERMISSION_CLASSES": ["asu.utils.denier.DenyAny"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "asu.utils.rest.exception_handler",
     "DEFAULT_METADATA_CLASS": "asu.utils.rest.EmptyMetadata",

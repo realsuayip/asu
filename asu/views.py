@@ -15,6 +15,7 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.negotiation import DefaultContentNegotiation
+from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -34,6 +35,7 @@ from asu.utils.rest import exception_handler
 
 class APIRootView(BaseAPIRootView):
     namespaces = ("docs", "api", "oauth2_provider", "two_factor")
+    permission_classes = [AllowAny]
 
     def resolve_url(self, namespace: str, url: URLPattern) -> str | None:
         try:

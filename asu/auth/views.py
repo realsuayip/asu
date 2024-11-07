@@ -9,7 +9,7 @@ from django.db.models import Exists, F, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
 
-from rest_framework import parsers, status
+from rest_framework import mixins, parsers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
@@ -44,7 +44,7 @@ from asu.auth.serializers.user import (
 )
 from asu.messaging.serializers import MessageComposeSerializer
 from asu.settings import OAUTH2_USER_FIELDS
-from asu.utils.rest import IDFilter, get_paginator
+from asu.utils.rest import IDFilter, PartialUpdateModelMixin, get_paginator
 from asu.utils.typing import UserRequest
 from asu.utils.views import ExtendedViewSet
 
@@ -66,8 +66,11 @@ class UserLookupFilter(filters.FilterSet):
     username = filters.CharFilter(required=True, lookup_expr="iexact")
 
 
-class UserViewSet(ExtendedViewSet[User]):
-    mixins = ("retrieve", "create")
+class UserViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    ExtendedViewSet[User],
+):
     permission_classes = [RequireToken]
     """
     Allow everyone for mixins listed above, for actions, each have their
@@ -417,8 +420,11 @@ class UserViewSet(ExtendedViewSet[User]):
         )
 
 
-class FollowRequestViewSet(ExtendedViewSet[UserFollowRequest]):
-    mixins = ("list", "partial_update")
+class FollowRequestViewSet(
+    mixins.ListModelMixin,
+    PartialUpdateModelMixin,
+    ExtendedViewSet[UserFollowRequest],
+):
     permission_classes = [RequireUser, RequireScope]
     queryset = UserFollowRequest.objects.none()
     serializer_class = FollowRequestSerializer

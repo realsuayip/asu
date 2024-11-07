@@ -1,3 +1,4 @@
+from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -12,7 +13,9 @@ from asu.verification.registration.serializers import (
 )
 
 
-class RegistrationViewSet(ExtendedViewSet[RegistrationVerification]):
+class RegistrationViewSet(
+    mixins.CreateModelMixin, ExtendedViewSet[RegistrationVerification]
+):
     """
     This ViewSet is partly responsible for registration flow. The
     flow entails three steps:
@@ -34,7 +37,6 @@ class RegistrationViewSet(ExtendedViewSet[RegistrationVerification]):
     given. If emails do match, the user is saved to the database.
     """
 
-    mixins = ("create",)
     serializer_class = RegistrationSerializer
     permission_classes = [RequireFirstParty]
     schemas = schemas.registration

@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import abc
-from collections.abc import Sequence
 from typing import Any, TypeVar
 
 from django.db import models
 
-from rest_framework import mixins, serializers, status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -14,19 +13,9 @@ from rest_framework.response import Response
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema_view
 
-from asu.utils.rest import PartialUpdateModelMixin
 from asu.utils.typing import UserRequest
 
 MT_co = TypeVar("MT_co", bound=models.Model, covariant=True)
-
-
-_viewset_mixin_map: dict[str, type[Any]] = {
-    "list": mixins.ListModelMixin,
-    "create": mixins.CreateModelMixin,
-    "retrieve": mixins.RetrieveModelMixin,
-    "partial_update": PartialUpdateModelMixin,
-    "destroy": mixins.DestroyModelMixin,
-}
 
 
 class ViewSetMeta(abc.ABCMeta):
@@ -36,29 +25,8 @@ class ViewSetMeta(abc.ABCMeta):
         bases: tuple[type[Any], ...],
         classdict: dict[str, Any],
     ) -> ViewSetMeta:
-        cls_mixins = classdict.get("mixins")
-
-        if cls_mixins is not None:
-            for label in cls_mixins:
-                try:
-                    mixin = _viewset_mixin_map[label]
-                except KeyError:
-                    raise ValueError(
-                        "%s is not a valid mixin name, use one of these: %s"
-                        % (label, tuple(_viewset_mixin_map))
-                    )
-
-                if mixin in bases:
-                    raise TypeError(
-                        "mixins.%s already exists or duplicated in '%s'"
-                        % (mixin.__name__, name)
-                    )
-
-                bases += (mixin,)
-
         cls = super().__new__(mcs, name, bases, classdict)
         schemas = classdict.get("schemas")
-
         if schemas is not None:
             # Get related action and decorate
             # it with extension e.g. extend_schema.
@@ -67,7 +35,6 @@ class ViewSetMeta(abc.ABCMeta):
 
 
 class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
-    mixins: Sequence[str] | None = None
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}
     filterset_classes: dict[str, type[filters.FilterSet]] = {}

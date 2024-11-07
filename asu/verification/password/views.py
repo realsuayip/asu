@@ -1,3 +1,4 @@
+from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -12,7 +13,9 @@ from asu.verification.password.serializers import (
 )
 
 
-class PasswordResetViewSet(ExtendedViewSet[PasswordResetVerification]):
+class PasswordResetViewSet(
+    mixins.CreateModelMixin, ExtendedViewSet[PasswordResetVerification]
+):
     """
     This ViewSet is partly responsible for password *reset* flow, in
     other words, account recovery, in case the user forgets their
@@ -30,7 +33,6 @@ class PasswordResetViewSet(ExtendedViewSet[PasswordResetVerification]):
     action of 'UserViewSet'.
     """
 
-    mixins = ("create",)
     serializer_class = PasswordResetVerificationSerializer
     schemas = schemas.password_reset
     permission_classes = [RequireFirstParty]

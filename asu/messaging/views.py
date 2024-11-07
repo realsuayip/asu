@@ -2,6 +2,7 @@ from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -24,8 +25,12 @@ from asu.utils.views import ExtendedViewSet
 
 
 @extend_schema(parameters=[OpenApiParameter("conversation_id", int, "path")])
-class MessageViewSet(ExtendedViewSet[Message]):
-    mixins = ("list", "retrieve", "destroy")
+class MessageViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    ExtendedViewSet[Message],
+):
     queryset = Message.objects.none()
     serializer_class = MessageSerializer
     permission_classes = [RequireUser, RequireFirstParty]
@@ -69,8 +74,12 @@ class ConversationFilterSet(filters.FilterSet):
         return queryset  # pragma: no cover
 
 
-class ConversationViewSet(ExtendedViewSet[Conversation]):
-    mixins = ("list", "retrieve", "destroy")
+class ConversationViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    ExtendedViewSet[Conversation],
+):
     queryset = Conversation.objects.none()
     serializer_class = ConversationSerializer
     serializer_classes = {"retrieve": ConversationDetailSerializer}

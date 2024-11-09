@@ -101,7 +101,6 @@ class AuthSerializer(serializers.Serializer[dict[str, Any]]):
 class UserCreateSerializer(serializers.HyperlinkedModelSerializer[User]):
     consent = serializers.CharField(write_only=True)
     password = serializers.CharField(
-        max_length=256,
         write_only=True,
         style={"input_type": "password"},
     )

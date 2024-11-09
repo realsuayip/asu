@@ -4,11 +4,13 @@ from typing import Any
 
 from django.utils.translation import gettext_lazy as _
 
+from rest_framework import serializers
+
 from drf_spectacular.extensions import OpenApiSerializerExtension
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import Direction, OpenApiExample
 
-from asu.utils.rest import DynamicFieldsMixin
+from asu.utils.rest import DynamicFieldsMixin, exception_handler
 
 
 class Tag(enum.StrEnum):
@@ -40,12 +42,8 @@ class DynamicFieldsModelSerializerExtension(OpenApiSerializerExtension):
 def get_error_repr(errors: Any) -> dict[str, Any]:
     # Create an error response representation from given
     # errors. Used in OpenAPI examples.
-    return {
-        "status": 400,
-        "code": "invalid",
-        "message": "One or more parameters to your request was invalid.",
-        "errors": errors,
-    }
+    response = exception_handler(serializers.ValidationError(errors), {})
+    return response.data
 
 
 examples = types.SimpleNamespace(

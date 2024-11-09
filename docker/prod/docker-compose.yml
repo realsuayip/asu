@@ -23,6 +23,7 @@ services:
     restart: unless-stopped
 
   nginx:
+    image: asu-nginx
     container_name: asu-nginx
     build:
       context: ../..

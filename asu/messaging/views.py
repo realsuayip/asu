@@ -57,6 +57,11 @@ class EventViewSet(
         interactions = Interaction.objects.all()
         if self.conversation.is_group:
             interactions = interactions.exclude(type="read")
+        else:
+            interactions = interactions.exclude(
+                message__has_receipt=False,
+                type="read",
+            )
         return (
             Event.objects.select_related("message", "message__sender")
             .prefetch_related(

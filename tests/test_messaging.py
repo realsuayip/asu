@@ -14,7 +14,7 @@ from channels.testing import WebsocketCommunicator
 
 from asu.auth.models import UserFollow
 from asu.gateways.dev import websocket
-from asu.messaging.models import Conversation, ConversationRequest, Message
+from asu.messaging.models import Conversation, ConversationRequest, Interaction, Message
 from tests.factories import UserFactory
 
 
@@ -554,28 +554,21 @@ class TestMessaging(APITestCase):
         self._accept_conversation(self.user1, self.user2)
         r1 = self._send_message(self.user2, self.user1, "Whats up?")
 
-        conversation = r1.data["conversation"]
-        response = self.client.patch(
-            conversation + "read/",
-            data={"until": timezone.now()},
-        )
+        conversation_id = r1.data["conversation_id"]
+        message_id = r1.data["content"]["id"]
+        now = timezone.now()
 
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(3, response.data["affected"])
-        self.assertEqual(
-            3,
-            Message.objects.filter(
-                date_read__isnull=False,
-                sender=self.user1,
-            ).count(),
+        response = self.client.patch(
+            reverse("api:messaging:conversation-read", kwargs={"pk": conversation_id}),
+            data={"start": now - datetime.timedelta(hours=1), "end": now},
         )
-        self.assertEqual(
-            1,
-            Message.objects.filter(
-                date_read__isnull=True,
-                sender=self.user2,
-            ).count(),
+        self.assertEqual(204, response.status_code)
+
+        interactions = Interaction.objects.filter(
+            user=self.user2, type=Interaction.Kind.READ
         )
+        self.assertEqual(3, len(interactions))
+        self.assertNotIn(message_id, {i.message_id for i in interactions})
 
     def test_conversation_read_case_partial_update(self):
         self._send_message(self.user1, self.user2, "Howdy")

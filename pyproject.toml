@@ -154,4 +154,4 @@ exclude_also = [
 
 
 [tool.pytest.ini_options]
-addopts = "--tb=short --ds=asu.settings.test"
+addopts = "--tb=short --ds=asu.settings.test -p no:warnings"

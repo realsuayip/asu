@@ -232,10 +232,12 @@ delete_profile_picture = extend_schema(
 )
 profile_picture = lambda f: put_profile_picture(delete_profile_picture(f))  # noqa: E731
 
-ticket = extend_schema("Create authentication ticket", tags=[Tag.USER_AUTHENTICATION])
+ticket = extend_schema(
+    summary="Create authentication ticket", tags=[Tag.USER_AUTHENTICATION]
+)
 
 relations = extend_schema(
-    "List relations with given users",
+    summary="List relations with given users",
     tags=[Tag.USER_FOLLOW_OPERATIONS, Tag.USER_BLOCK_OPERATIONS],
     responses={
         200: RelationSerializer,
@@ -261,7 +263,7 @@ relations = extend_schema(
 )
 
 deactivate = extend_schema(
-    "Deactivate authenticated user",
+    summary="Deactivate authenticated user",
     tags=[Tag.USER_SETTINGS],
     responses={204: None, 400: APIError},
     examples=[

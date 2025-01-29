@@ -1,0 +1,22 @@
+---
+- name: Clone the Django project repository
+  ansible.builtin.git:
+    repo: "{{ project_repo }}"
+    dest: "{{ project_root }}"
+    version: "{{ project_branch }}"
+    force: true
+  tags:
+    - git
+
+- name: Copy secrets
+  ansible.builtin.import_tasks: secrets.yml
+
+- name: Deploy Docker containers with Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ project_root }}/docker/prod"
+    project_name: asu
+    build: always
+    state: present
+  become: true
+  tags:
+    - docker-build

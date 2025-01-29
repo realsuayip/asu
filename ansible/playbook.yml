@@ -1,0 +1,9 @@
+---
+- name: Deploy Django Project
+  hosts: all
+  roles:
+    - role: geerlingguy.docker
+      tags:
+        - docker-setup
+      become: true
+    - deploy

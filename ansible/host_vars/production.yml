@@ -1,0 +1,4 @@
+---
+project_root: "/home/{{ ansible_user }}/asu"
+project_repo: "https://github.com/realsuayip/asu.git"
+project_branch: "prod"

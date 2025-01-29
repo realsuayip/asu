@@ -77,7 +77,17 @@ class S3StaticStorage(BaseS3StaticStorage):
     location = "static"
     default_acl = "public-read"
 
+    def __init__(self, **settings: Any) -> None:
+        settings["bucket_name"] = "asu-static"
+        settings["custom_domain"] = "staticasu.suayip.dev"
+        super().__init__(**settings)
+
 
 class S3MediaStorage(S3Boto3Storage):
     location = "media"
     default_acl = "private"
+
+    def __init__(self, **settings: Any) -> None:
+        settings["bucket_name"] = "asu-media"
+        settings["signature_version"] = "s3v4"
+        super().__init__(**settings)

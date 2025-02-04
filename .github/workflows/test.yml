@@ -18,9 +18,15 @@ jobs:
 
     - name: Build containers
       run: |
-        docker buildx create --use --driver=docker-container
         cd docker/dev
-        docker buildx bake --allow=fs.read=../.. -f docker-compose.yml web --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
+        docker build \
+          --file docker-compose.yml \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          --cache-from=type=gha \
+          --cache-to=type=gha,mode=min \
+          --load \
+          -t web \
+          ../..
 
     - name: Run tests
       run: >-

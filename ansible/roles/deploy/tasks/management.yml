@@ -1,0 +1,17 @@
+---
+- name: Wait for the Django container
+  community.docker.docker_container_info:
+    name: asu-web
+  register: web
+  retries: 5
+  delay: 5
+  until: web.container.State.Running
+  tags:
+    - django-migrate
+
+- name: Apply Django migrations
+  community.docker.docker_container_exec:
+    container: asu-web
+    command: "python manage.py migrate --no-input"
+  tags:
+    - django-migrate

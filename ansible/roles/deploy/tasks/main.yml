@@ -20,3 +20,6 @@
   become: true
   tags:
     - docker-build
+
+- name: Management
+  ansible.builtin.import_tasks: management.yml

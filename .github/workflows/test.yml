@@ -23,7 +23,6 @@ jobs:
           --file docker-compose.yml \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           --cache-from=type=gha \
-          --cache-to=type=gha,mode=min \
           -t web \
           ../..
 

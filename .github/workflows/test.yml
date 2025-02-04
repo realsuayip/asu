@@ -19,7 +19,7 @@ jobs:
     - name: Build containers
       run: |
         cd docker/dev
-        docker build \
+        DOCKER_BUILDKIT=1 docker build \
           --file docker-compose.yml \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           --cache-from=type=gha \

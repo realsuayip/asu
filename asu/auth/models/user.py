@@ -42,10 +42,10 @@ from asu.auth.models import (
     UserFollow,
     UserFollowRequest,
 )
+from asu.core.utils import mailing, messages
+from asu.core.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
+from asu.core.utils.messages import EmailMessage
 from asu.messaging.models import ConversationRequest
-from asu.utils import mailing, messages
-from asu.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
-from asu.utils.messages import EmailMessage
 
 WEBSOCKET_AUTH_SALT = "websocket.auth"
 """

@@ -6,8 +6,8 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.test import TestCase
 from django.urls import reverse
 
-from asu.models import ProjectVariable
-from asu.utils.cache import build_vary_key
+from asu.core.models import ProjectVariable
+from asu.core.utils.cache import build_vary_key
 
 
 def error_view(exc: type[Exception]) -> Callable[..., NoReturn]:
@@ -121,7 +121,7 @@ class TestAPIRoot(TestCase):
             "message": "We could not handle your request. Please try again later.",
         }
 
-        with patch("asu.views.APIRootView.get", error_view(SuspiciousOperation)):
+        with patch("asu.core.views.APIRootView.get", error_view(SuspiciousOperation)):
             response = self.client.get(reverse("api:api-root"))
 
         self.assertEqual(400, response.status_code)
@@ -147,7 +147,7 @@ class TestAPIRoot(TestCase):
             "message": "We could not handle your request. Please try again later.",
         }
 
-        with patch("asu.views.APIRootView.get", error_view(ZeroDivisionError)):
+        with patch("asu.core.views.APIRootView.get", error_view(ZeroDivisionError)):
             response = client.get(
                 reverse("api:api-root"), raise_request_exception=False
             )

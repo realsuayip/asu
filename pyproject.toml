@@ -125,7 +125,7 @@ ignore_missing_imports = true
 allow_subclassing_any = true
 
 [tool.django-stubs]
-django_settings_module = "asu.settings"
+django_settings_module = "asu.core.settings"
 
 [tool.coverage.run]
 source = ["asu"]

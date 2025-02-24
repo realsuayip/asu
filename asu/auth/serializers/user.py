@@ -11,7 +11,7 @@ from rest_framework import serializers
 
 from asu.auth.models import User
 from asu.auth.models.user import USERNAME_CONSTRAINTS
-from asu.utils.rest import DynamicFieldsMixin
+from asu.core.utils.rest import DynamicFieldsMixin
 from asu.verification.models import RegistrationVerification
 
 

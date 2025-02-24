@@ -11,6 +11,9 @@ from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
+from asu.core.utils.rest import EmptySerializer, get_paginator
+from asu.core.utils.typing import UserRequest
+from asu.core.utils.views import ExtendedViewSet
 from asu.messaging import schemas
 from asu.messaging.models import Conversation, ConversationRequest, Message
 from asu.messaging.serializers import (
@@ -19,9 +22,6 @@ from asu.messaging.serializers import (
     MessageSerializer,
     ReadConversationSerializer,
 )
-from asu.utils.rest import EmptySerializer, get_paginator
-from asu.utils.typing import UserRequest
-from asu.utils.views import ExtendedViewSet
 
 
 @extend_schema(parameters=[OpenApiParameter("conversation_id", int, "path")])

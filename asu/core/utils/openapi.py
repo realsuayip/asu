@@ -10,7 +10,7 @@ from drf_spectacular.extensions import OpenApiSerializerExtension
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import Direction, OpenApiExample
 
-from asu.utils.rest import DynamicFieldsMixin, exception_handler
+from asu.core.utils.rest import DynamicFieldsMixin, exception_handler
 
 
 class Tag(enum.StrEnum):

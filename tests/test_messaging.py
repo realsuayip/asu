@@ -13,7 +13,7 @@ from asgiref.sync import sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from asu.auth.models import UserFollow
-from asu.gateways.dev import websocket
+from asu.core.gateways.dev import websocket
 from asu.messaging.models import Conversation, ConversationRequest, Message
 from tests.factories import UserFactory
 

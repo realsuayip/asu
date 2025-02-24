@@ -9,7 +9,7 @@ from django.utils.encoding import force_str
 
 from django_stubs_ext import StrOrPromise
 
-from asu.celery import app
+from asu.core.celery import app
 
 __all__ = ["send"]
 
@@ -37,7 +37,7 @@ def _send_sync(
     return email.send()
 
 
-@app.task(name="asu.utils.tasks.send_mail")
+@app.task(name="asu.core.utils.tasks.send_mail")
 def _send_async(*args: Any, **kwargs: Any) -> int:
     return _send_sync(*args, **kwargs)
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from asu.models import ProjectVariable
+from asu.core.models import ProjectVariable
 
 
 @admin.register(ProjectVariable)

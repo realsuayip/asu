@@ -9,7 +9,7 @@ django_asgi_app = get_asgi_application()
 
 
 from asu.auth.middleware import QueryAuthMiddleware  # noqa: E402
-from asu.urls import websocket_urls  # noqa: E402
+from asu.core.urls import websocket_urls  # noqa: E402
 
 websocket = QueryAuthMiddleware(AllowedHostsOriginValidator(URLRouter(websocket_urls)))
 application = ProtocolTypeRouter({"http": django_asgi_app, "websocket": websocket})

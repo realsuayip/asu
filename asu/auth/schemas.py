@@ -17,9 +17,9 @@ from asu.auth.serializers.user import (
     UserPublicReadSerializer,
     UserSerializer,
 )
+from asu.core.utils.openapi import Tag, examples, get_error_repr
+from asu.core.utils.rest import APIError
 from asu.messaging.serializers import MessageComposeSerializer
-from asu.utils.openapi import Tag, examples, get_error_repr
-from asu.utils.rest import APIError
 
 if TYPE_CHECKING:
     from drf_spectacular.openapi import AutoSchema

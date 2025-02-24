@@ -9,7 +9,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
 from asu.auth.models import User
-from asu.utils import messages
+from asu.core.utils import messages
 from asu.verification.models.base import ConsentVerification, code_validator
 
 

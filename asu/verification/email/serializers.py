@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from asu.utils import messages
+from asu.core.utils import messages
 from asu.verification.models import EmailVerification
 from asu.verification.serializers import BaseCheckSerializer, EmailMixin
 

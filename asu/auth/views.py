@@ -5,6 +5,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
 from django import forms
+from django.conf import settings
 from django.db.models import Exists, F, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
@@ -42,11 +43,10 @@ from asu.auth.serializers.user import (
     UserPublicReadSerializer,
     UserSerializer,
 )
+from asu.core.utils.rest import IDFilter, PartialUpdateModelMixin, get_paginator
+from asu.core.utils.typing import UserRequest
+from asu.core.utils.views import ExtendedViewSet
 from asu.messaging.serializers import MessageComposeSerializer
-from asu.settings import OAUTH2_USER_FIELDS
-from asu.utils.rest import IDFilter, PartialUpdateModelMixin, get_paginator
-from asu.utils.typing import UserRequest
-from asu.utils.views import ExtendedViewSet
 
 if TYPE_CHECKING:
     from rest_framework.decorators import ViewSetAction
@@ -154,7 +154,7 @@ class UserViewSet(
         granted_scopes = token.scope.split()
         fields = itertools.chain.from_iterable(
             fields
-            for scope, fields in OAUTH2_USER_FIELDS.items()
+            for scope, fields in settings.OAUTH2_USER_FIELDS.items()
             if scope in granted_scopes
         )
         return {"fields": fields, "ref_name": "User"}

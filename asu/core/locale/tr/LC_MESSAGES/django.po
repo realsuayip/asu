@@ -1,0 +1,747 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-24 20:37+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: asu/auth/admin.py:49
+msgid "Personal info"
+msgstr ""
+
+#: asu/auth/admin.py:63
+msgid "Preferences"
+msgstr ""
+
+#: asu/auth/admin.py:75
+msgid "Permissions"
+msgstr ""
+
+#: asu/auth/admin.py:87
+msgid "Important dates"
+msgstr ""
+
+#: asu/auth/apps.py:8
+msgctxt "app name"
+msgid "Auth"
+msgstr ""
+
+#: asu/auth/models/deactivation.py:10 asu/auth/models/session.py:13
+#: asu/auth/models/user.py:193 asu/verification/models/base.py:51
+#: asu/verification/models/registration.py:25
+msgid "user"
+msgstr ""
+
+#: asu/auth/models/deactivation.py:14
+msgid "date revoked"
+msgstr ""
+
+#: asu/auth/models/deactivation.py:19
+msgid "for deletion"
+msgstr ""
+
+#: asu/auth/models/deactivation.py:20
+msgid "Marks this user's account for permanent deletion."
+msgstr ""
+
+#: asu/auth/models/deactivation.py:24 asu/auth/models/through.py:18
+#: asu/messaging/models/conversation.py:59
+#: asu/messaging/models/conversation.py:130 asu/messaging/models/message.py:63
+#: asu/verification/models/base.py:81 asu/core/models.py:60
+msgid "date created"
+msgstr ""
+
+#: asu/auth/models/deactivation.py:25 asu/auth/models/through.py:53
+#: asu/auth/models/user.py:185 asu/messaging/models/conversation.py:58
+#: asu/messaging/models/conversation.py:129 asu/messaging/models/message.py:62
+#: asu/verification/models/base.py:80 asu/core/models.py:59
+msgid "date modified"
+msgstr ""
+
+#: asu/auth/models/deactivation.py:28
+msgid "account deactivation"
+msgstr ""
+
+#: asu/auth/models/deactivation.py:29
+msgid "account deactivations"
+msgstr ""
+
+#: asu/auth/models/oauth.py:32
+msgid "First party application"
+msgstr ""
+
+#: asu/auth/models/oauth.py:34
+msgid ""
+"When activated, marks this application as first party, which exposes access "
+"to various internal APIs. ONLY use for trusted applications."
+msgstr ""
+
+#: asu/auth/models/oauth.py:44
+msgid "application"
+msgstr ""
+
+#: asu/auth/models/oauth.py:45
+msgid "applications"
+msgstr ""
+
+#: asu/auth/models/session.py:14
+msgid "user agent"
+msgstr ""
+
+#: asu/auth/models/session.py:15
+msgid "ip address"
+msgstr ""
+
+#: asu/auth/models/through.py:43
+msgid "pending"
+msgstr ""
+
+#: asu/auth/models/through.py:44
+msgid "approved"
+msgstr ""
+
+#: asu/auth/models/through.py:45
+msgid "rejected"
+msgstr ""
+
+#: asu/auth/models/through.py:48
+msgid "status"
+msgstr ""
+
+#: asu/auth/models/user.py:59
+msgid ""
+"Usernames can only contain latin letters, numerals and underscores. "
+"Trailing, leading or consecutive underscores are not allowed."
+msgstr ""
+
+#: asu/auth/models/user.py:69
+msgid "The username you specified is already in use."
+msgstr ""
+
+#: asu/auth/models/user.py:97
+msgid "Male"
+msgstr ""
+
+#: asu/auth/models/user.py:98
+msgid "Female"
+msgstr ""
+
+#: asu/auth/models/user.py:99
+msgid "Other"
+msgstr ""
+
+#: asu/auth/models/user.py:100
+msgid "Unspecified"
+msgstr ""
+
+#: asu/auth/models/user.py:106
+msgid "username"
+msgstr ""
+
+#: asu/auth/models/user.py:110
+msgid "display name"
+msgstr ""
+
+#: asu/auth/models/user.py:112
+msgid "description"
+msgstr ""
+
+#: asu/auth/models/user.py:116
+msgid "website"
+msgstr ""
+
+#: asu/auth/models/user.py:117
+msgid "e-mail"
+msgstr ""
+
+#: asu/auth/models/user.py:119
+msgid "gender"
+msgstr ""
+
+#: asu/auth/models/user.py:124
+msgid "birth date"
+msgstr ""
+
+#: asu/auth/models/user.py:126
+msgid "profile picture"
+msgstr ""
+
+#: asu/auth/models/user.py:135
+msgid "language"
+msgstr ""
+
+#: asu/auth/models/user.py:143
+msgid "allows message receipts"
+msgstr ""
+
+#: asu/auth/models/user.py:147
+msgid "allows all incoming messages"
+msgstr ""
+
+#: asu/auth/models/user.py:150
+msgid ""
+"Users that are not followed by this user can send message requests to them."
+msgstr ""
+
+#: asu/auth/models/user.py:157
+msgid "frozen"
+msgstr ""
+
+#: asu/auth/models/user.py:158
+msgid "Designates whether this user has frozen their account."
+msgstr ""
+
+#: asu/auth/models/user.py:162
+msgid "private"
+msgstr ""
+
+#: asu/auth/models/user.py:164
+msgid "Users with private accounts has the privilege of hiding their identity."
+msgstr ""
+
+#: asu/auth/models/user.py:194
+msgid "users"
+msgstr ""
+
+#: asu/auth/serializers/actions.py:61
+msgid "This e-mail could not be verified."
+msgstr ""
+
+#: asu/auth/serializers/actions.py:129 asu/auth/serializers/actions.py:320
+msgid "Your password was not correct."
+msgstr ""
+
+#: asu/auth/serializers/user.py:123
+msgid ""
+"This e-mail could not be verified. Please provide a validated e-mail address."
+msgstr ""
+
+#: asu/messaging/apps.py:7
+msgctxt "app name"
+msgid "Messaging"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:45
+msgid "holder"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:51
+msgid "target"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:55 asu/messaging/models/message.py:69
+msgid "messages"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:64
+msgid "conversation"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:65
+msgid "conversations"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:115 asu/messaging/models/message.py:50
+msgid "sender"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:121 asu/messaging/models/message.py:56
+msgid "recipient"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:125
+msgid "date_accepted"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:135
+msgid "conversation request"
+msgstr ""
+
+#: asu/messaging/models/conversation.py:136
+msgid "conversation requests"
+msgstr ""
+
+#: asu/messaging/models/message.py:45
+msgid "body"
+msgstr ""
+
+#: asu/messaging/models/message.py:59
+msgid "has receipt"
+msgstr ""
+
+#: asu/messaging/models/message.py:61
+msgid "date read"
+msgstr ""
+
+#: asu/messaging/models/message.py:68
+msgid "message"
+msgstr ""
+
+#: asu/verification/apps.py:7
+msgctxt "app name"
+msgid "Verification"
+msgstr ""
+
+#: asu/verification/models/base.py:27
+msgid "Ensure this field has at least 6 digits."
+msgstr ""
+
+#: asu/verification/models/base.py:30
+msgid "Ensure this field contains only digits."
+msgstr ""
+
+#: asu/verification/models/base.py:56 asu/verification/serializers.py:24
+msgid "email"
+msgstr ""
+
+#: asu/verification/models/base.py:58 asu/verification/serializers.py:26
+msgid "code"
+msgstr ""
+
+#: asu/verification/models/base.py:71
+msgid "nulled by"
+msgstr ""
+
+#: asu/verification/models/base.py:76
+msgid "date verified"
+msgstr ""
+
+#: asu/verification/models/base.py:184
+msgid "date completed"
+msgstr ""
+
+#: asu/verification/models/email.py:20
+msgid "email verification"
+msgstr ""
+
+#: asu/verification/models/email.py:21
+msgid "email verifications"
+msgstr ""
+
+#: asu/verification/models/password.py:22
+msgid "password reset verification"
+msgstr ""
+
+#: asu/verification/models/password.py:23
+msgid "password reset verifications"
+msgstr ""
+
+#: asu/verification/models/registration.py:37
+msgid "registration verification"
+msgstr ""
+
+#: asu/verification/models/registration.py:38
+msgid "registration verifications"
+msgstr ""
+
+#: asu/verification/serializers.py:55
+msgid "This e-mail is already in use."
+msgstr ""
+
+#: tests/test_utils.py:387
+msgid "German"
+msgstr ""
+
+#: tests/test_utils.py:388
+msgid "Swedish"
+msgstr ""
+
+#: asu/core/apps.py:17
+msgctxt "app name"
+msgid "asu"
+msgstr ""
+
+#: asu/core/models.py:56
+msgid "name"
+msgstr ""
+
+#: asu/core/models.py:57
+msgid "value"
+msgstr ""
+
+#: asu/core/models.py:65
+msgid "project variable"
+msgstr ""
+
+#: asu/core/models.py:66
+msgid "project variables"
+msgstr ""
+
+#: asu/core/settings/apps.py:42
+msgid "Retrieve your account, with your public information."
+msgstr ""
+
+#: asu/core/settings/apps.py:43
+msgid "Retrieve your email address."
+msgstr ""
+
+#: asu/core/settings/apps.py:45
+msgid "Retrieve your private information, including your personal preferences."
+msgstr ""
+
+#: asu/core/settings/apps.py:48
+msgid ""
+"Alter your profile and account settings, including your personal preferences."
+msgstr ""
+
+#: asu/core/settings/apps.py:51
+msgid "Display your list of followers and follow requests."
+msgstr ""
+
+#: asu/core/settings/apps.py:53
+msgid "Follow and unfollow people on your behalf, send follow requests."
+msgstr ""
+
+#: asu/core/settings/apps.py:55
+msgid "Display your list of blocked users"
+msgstr ""
+
+#: asu/core/settings/apps.py:56
+msgid "Block and unblock people on your behalf."
+msgstr ""
+
+#: asu/core/settings/django.py:122
+msgid "English"
+msgstr ""
+
+#: asu/core/settings/django.py:123
+msgid "Turkish"
+msgstr ""
+
+#: asu/core/templates/403.html:5
+msgid "Permission denied"
+msgstr ""
+
+#: asu/core/templates/403.html:6 asu/core/utils/openapi.py:65
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: asu/core/templates/404.html:5
+msgid "Page not found"
+msgstr ""
+
+#: asu/core/templates/404.html:6
+msgid "The requested resource was not found on this server."
+msgstr ""
+
+#: asu/core/templates/500.html:11 asu/core/templates/500.html:18
+msgid "Something went wrong..."
+msgstr ""
+
+#: asu/core/templates/500.html:19 asu/core/utils/messages.py:18
+msgid "We could not handle your request. Please try again later."
+msgstr ""
+
+#: asu/core/templates/mailing/transactional.html:219
+msgid "If you didn't make the request to receive this mail, you may ignore it."
+msgstr ""
+
+#: asu/core/templates/mailing/transactional.html:224
+#: asu/core/templates/two_factor/_base.html:29
+#, python-format
+msgid ""
+"© Copyright 2022 %(brand)s, All Rights Reserved<br> <a href=\"mailto:"
+"%(support_email)s\">%(support_email)s</a>"
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:13
+msgid "Consent for authorization"
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:16
+#, python-format
+msgid ""
+"Make sure you trust <strong>\"%(app)s\"</strong> before allowing it to "
+"access your account. You might be sharing sensitive information."
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:33
+#, python-format
+msgid "<strong>\"%(app)s\"</strong> wants access to your account."
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:39
+msgid "This application requires the following permissions:"
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:50
+#: asu/core/templates/two_factor/_wizard_actions.html:14
+msgid "Cancel"
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:51
+msgid "Authorize"
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:61
+msgid "Authorization failed"
+msgstr ""
+
+#: asu/core/templates/oauth2_provider/authorize.html:65
+#, python-format
+msgid ""
+"<p>Authorization server failed to handle your request. Technical details:</"
+"p> <code><b>%(error)s</b>: %(description)s</code>"
+msgstr ""
+
+#: asu/core/templates/two_factor/_wizard_actions.html:4
+msgid "Continue"
+msgstr ""
+
+#: asu/core/templates/two_factor/_wizard_actions.html:10
+msgid "Back"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/backup_tokens.html:11
+#: asu/core/templates/two_factor/profile/profile.html:30
+msgid "Backup Tokens"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/backup_tokens.html:17
+msgid ""
+"Backup tokens can be used when your primary and backup phone numbers aren't "
+"available. The backup tokens below can be used for login verification. If "
+"you've used up all your backup tokens, you can generate a new set of backup "
+"tokens. Only the backup tokens shown below will be valid."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/backup_tokens.html:32
+msgid "Print these tokens and keep them somewhere safe."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/backup_tokens.html:38
+msgid "You don't have any backup codes yet."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/backup_tokens.html:47
+msgid "Generate Tokens"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/backup_tokens.html:49
+#: asu/core/templates/two_factor/profile/disable.html:34
+msgid "Back to Account Security"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:13
+msgid "Sign in"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:20
+#, python-format
+msgid ""
+"You are already signed in as <b>@%(username)s</b>, if you would like to sign "
+"in with a different account, you may use the form below. Alternatively, you "
+"may navigate to <a href=\"%(url)s\">your account</a>."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:26
+msgid "To continue, please enter your credentials."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:30
+msgid "To continue, enter the code generated by your authenticator."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:33
+msgid ""
+"Use this form for entering backup tokens for logging in. These tokens have "
+"been generated for you to print and keep safe. Please enter one of these "
+"backup tokens to login to your account."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:56
+msgid "Email address"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:66
+msgid "Password"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:91
+msgid "Create a new account"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/login.html:101
+msgid "Use Backup Token"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/setup.html:8
+#: asu/core/templates/two_factor/profile/profile.html:70
+msgid "Enable Two-Factor Authentication"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/setup.html:21
+msgid ""
+"You are about to take your account security to the next level. Follow the "
+"steps in this wizard to enable two-factor authentication."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/setup.html:29
+msgid ""
+"To start using a token generator, please use your smartphone to scan the QR "
+"code below. For example, use Google Authenticator."
+msgstr ""
+
+#: asu/core/templates/two_factor/core/setup.html:39
+msgid ""
+"Alternatively you can use the following secret to setup your authenticator "
+"or password manager manually:"
+msgstr ""
+
+#: asu/core/templates/two_factor/core/setup.html:53
+msgid "Now, enter the token generated by the app:"
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/disable.html:12
+#: asu/core/templates/two_factor/profile/profile.html:49
+#: asu/core/templates/two_factor/profile/profile.html:58
+msgid "Disable Two-Factor Authentication"
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/disable.html:17
+msgid ""
+"You are about to disable two-factor authentication. This weakens your "
+"account security, are you sure?"
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/disable.html:29
+msgid "Yes, I am sure."
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/disable.html:32
+msgid "Disable"
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/profile.html:11
+msgid "Account Security"
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/profile.html:14
+#, python-format
+msgid "Welcome back, signed in as <b>@%(username)s</b>"
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/profile.html:26
+msgid "Two factor authentication is enabled."
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/profile.html:33
+msgid ""
+"If you don't have any device with you, you can access your account using "
+"backup tokens."
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/profile.html:38
+#, python-format
+msgid "You have only <b>one</b> backup token remaining."
+msgid_plural "You have <b>%(counter)s</b> backup tokens remaining."
+msgstr[0] ""
+msgstr[1] ""
+
+#: asu/core/templates/two_factor/profile/profile.html:44
+msgid "Show Codes"
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/profile.html:52
+msgid ""
+"However we strongly discourage you to do so, you can also disable two-factor "
+"authentication for your account."
+msgstr ""
+
+#: asu/core/templates/two_factor/profile/profile.html:64
+msgid ""
+"Two-factor authentication is not enabled for your account. Enable two-factor "
+"authentication for enhanced account security."
+msgstr ""
+
+#: asu/core/utils/file.py:30
+msgid "The file you uploaded did not have the valid mime type."
+msgstr ""
+
+#: asu/core/utils/file.py:51
+msgid "The size of the file you uploaded exceeded the maximum limit."
+msgstr ""
+
+#: asu/core/utils/messages.py:20
+msgid ""
+"We couldn't verify your code. Please make sure you've entered the correct "
+"code that was sent to your email. If the problem persists, please request a "
+"new verification code or contact support for assistance."
+msgstr ""
+
+#: asu/core/utils/messages.py:30
+msgid "Verify your email to reset your password"
+msgstr ""
+
+#: asu/core/utils/messages.py:32
+msgid ""
+"To continue for the password reset process, you need to enter the following "
+"code into the application:"
+msgstr ""
+
+#: asu/core/utils/messages.py:38
+msgid "Your password has been changed"
+msgstr ""
+
+#: asu/core/utils/messages.py:40
+msgid ""
+"The password for your account was just changed. If this was you, you can "
+"safely ignore this email. Otherwise, reset your password immediately, or "
+"contact the support team to restore your password."
+msgstr ""
+
+#: asu/core/utils/messages.py:46
+msgid "Verify your email for registration"
+msgstr ""
+
+#: asu/core/utils/messages.py:48
+msgid ""
+"To continue for the registration process, you need to enter the following "
+"code into the application:"
+msgstr ""
+
+#: asu/core/utils/messages.py:54
+msgid "Verify this email address"
+msgstr ""
+
+#: asu/core/utils/messages.py:56
+msgid ""
+"To change your email, you need to enter the following code into the "
+"application:"
+msgstr ""
+
+#: asu/core/utils/messages.py:61
+msgid "Your account has been deactivated"
+msgstr ""
+
+#: asu/core/utils/messages.py:63
+msgid ""
+"You have now deactivated your account. Your account will be permanently "
+"deleted in 30 days. If you change your mind, you can simply login to "
+"reactivate your account."
+msgstr ""
+
+#: asu/core/utils/openapi.py:55
+msgid "Not found."
+msgstr ""
+
+#: asu/core/utils/rest.py:72
+msgid "One or more parameters to your request was invalid."
+msgstr ""
+
+#: asu/core/utils/rest.py:176
+msgid "Multiple values may be separated by commas."
+msgstr ""

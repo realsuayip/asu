@@ -29,8 +29,8 @@ from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import AUTHENTICATION_CLASSES
 from ipware import get_client_ip
 
-from asu.utils import messages
-from asu.utils.rest import exception_handler
+from asu.core.utils import messages
+from asu.core.utils.rest import exception_handler
 
 
 class APIRootView(BaseAPIRootView):

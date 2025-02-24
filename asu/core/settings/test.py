@@ -1,4 +1,4 @@
-from asu.settings import *  # noqa: F403
+from asu.core.settings import *  # noqa: F403
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",

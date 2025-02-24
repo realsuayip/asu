@@ -1,7 +1,7 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
-from asu.utils.openapi import Tag, examples, get_error_repr
-from asu.utils.rest import APIError
+from asu.core.utils.openapi import Tag, examples, get_error_repr
+from asu.core.utils.rest import APIError
 from asu.verification.registration.serializers import (
     RegistrationCheckSerializer,
     RegistrationSerializer,

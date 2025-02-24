@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
-from asu.utils.views import ExtendedViewSet
+from asu.core.utils.views import ExtendedViewSet
 from asu.verification.email import schemas
 from asu.verification.email.serializers import EmailCheckSerializer, EmailSerializer
 from asu.verification.models import EmailVerification

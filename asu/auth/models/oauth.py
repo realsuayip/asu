@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from oauth2_provider.models import AbstractApplication
 
-from asu.models import ProjectVariable
+from asu.core.models import ProjectVariable
 
 
 class ApplicationManager(models.Manager["Application"]):

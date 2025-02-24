@@ -9,8 +9,7 @@ from drf_spectacular.views import SpectacularAPIView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
 from two_factor import views as tf
 
-from asu.messaging.websocket import ConversationConsumer
-from asu.views import (
+from asu.core.views import (
     APIRootView,
     DocsView,
     bad_request,
@@ -18,6 +17,7 @@ from asu.views import (
     permission_denied,
     server_error,
 )
+from asu.messaging.websocket import ConversationConsumer
 
 api_urls: list[URLResolver | URLPattern] = [
     path("", APIRootView.as_view(), name="api-root"),

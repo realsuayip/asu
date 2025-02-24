@@ -5,7 +5,7 @@ from django.utils import timezone
 from oauth2_provider.models import clear_expired
 
 from asu.auth.models import User, UserDeactivation
-from asu.celery import app
+from asu.core.celery import app
 
 
 @app.task

@@ -2,7 +2,7 @@ from typing import Any
 
 from django import template
 
-from asu.models import ProjectVariable
+from asu.core.models import ProjectVariable
 
 register = template.Library()
 

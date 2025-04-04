@@ -72,6 +72,9 @@ shell: (run 'shell')
 # Run tests
 test: (run 'test --settings=asu.settings.test --parallel 4 --shuffle --timing --keepdb')
 
+tt *args:
+    docker exec -it asu-web pytest {{ args }}
+
 alias mypy := type
 alias f := format
 alias t := test

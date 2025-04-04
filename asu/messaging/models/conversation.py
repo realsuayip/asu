@@ -1,17 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from django.apps import apps
 from django.conf import settings
 from django.db import models
-from django.db.models import OuterRef, Q, QuerySet
+from django.db.models import Case, OuterRef, Q, QuerySet, When
 from django.db.models.functions import JSONObject
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-if TYPE_CHECKING:
-    from asu.auth.models import User
 
 
 class ConversationManager(models.Manager["Conversation"]):
@@ -23,15 +17,17 @@ class ConversationManager(models.Manager["Conversation"]):
             "body",
             "sender_id",
             "has_receipt",
-            "date_read",
+            "reply_to_id",
             "date_created",
         )
         mapping = dict(zip(fields, fields, strict=True))
 
+        # todo requires optimization and possibly different serializer.
+        # maybe we'll just append last event instead?
         messages = (
             apps.get_model("messaging.Message")
-            .objects.filter(conversations=OuterRef("pk"))
-            .order_by("-date_created")
+            .objects.filter(events__conversation=OuterRef("pk"))
+            .order_by("-events__date_created")
             .values(data=JSONObject(**mapping))
         )
         return queryset.annotate(last_message=messages[:1])
@@ -40,19 +36,32 @@ class ConversationManager(models.Manager["Conversation"]):
 class Conversation(models.Model):
     holder = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         related_name="conversations",
         verbose_name=_("holder"),
+        help_text=_(
+            "In private conversations, this field holds one of the participants."
+            " In group conversations, this field holds the creator of the conversation."
+        ),
     )
     target = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         related_name="targeted_conversations",
         verbose_name=_("target"),
     )
+    is_group = models.BooleanField(_("group"), default=False)
 
-    messages = models.ManyToManyField(
-        "messaging.Message", related_name="conversations", verbose_name=_("messages")
+    # Group-exclusive fields
+    name = models.CharField(_("name"), max_length=100, blank=True)
+    description = models.TextField(_("description"), blank=True)
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("participants"),
+        through="messaging.Participation",
+        blank=True,
     )
 
     date_modified = models.DateTimeField(_("date modified"), auto_now=True)
@@ -66,8 +75,30 @@ class Conversation(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["holder", "target"],
-                name="unique_conversation",
-            )
+                condition=Q(is_group=False),
+                name="unique_private_conversation",
+            ),
+            # todo separate these
+            models.CheckConstraint(
+                check=Case(
+                    When(
+                        is_group=False,
+                        then=Q(holder__isnull=False) & Q(target__isnull=False),
+                    ),
+                    When(
+                        is_group=True,
+                        then=Q(holder__isnull=False) & Q(target__isnull=True),
+                    ),
+                    default=False,
+                    output_field=models.BooleanField(),
+                ),
+                name="valid_private_conversation",
+                violation_error_message=_(
+                    "Private conversations must have valid holder and target fields."
+                ),
+            ),
+            #         "Group conversations must have a valid name and holder,"
+            #         " and the target must be null."
         ]
         indexes = [
             models.Index(fields=["date_modified"]),
@@ -75,75 +106,3 @@ class Conversation(models.Model):
 
     def __str__(self) -> str:
         return str(self.pk)
-
-
-class ConversationRequestManager(models.Manager["ConversationRequest"]):
-    def compose(
-        self, sender: User, recipient: User
-    ) -> tuple[ConversationRequest, bool]:
-        try:
-            obj = self.get(
-                Q(sender=sender, recipient=recipient)
-                | Q(sender=recipient, recipient=sender)
-            )
-        except self.model.DoesNotExist:
-            obj = None
-
-        is_following = recipient.is_following(sender)
-
-        if obj is not None:
-            # A follow relation has been formed since the request
-            # first created; automatically accept the request.
-            if is_following and (obj.date_accepted is None):
-                obj.date_accepted = timezone.now()
-                obj.save(update_fields=["date_accepted", "date_modified"])
-            return obj, False
-
-        kwargs = {"sender": sender, "recipient": recipient}
-        defaults = None
-
-        if is_following:
-            defaults = {"date_accepted": timezone.now()}
-        return self.get_or_create(**kwargs, defaults=defaults)
-
-
-class ConversationRequest(models.Model):
-    sender = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="+",
-        verbose_name=_("sender"),
-    )
-    recipient = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="+",
-        verbose_name=_("recipient"),
-    )
-
-    date_accepted = models.DateTimeField(
-        _("date_accepted"),
-        null=True,
-        blank=True,
-    )
-    date_modified = models.DateTimeField(_("date modified"), auto_now=True)
-    date_created = models.DateTimeField(_("date created"), auto_now_add=True)
-
-    objects = ConversationRequestManager()
-
-    class Meta:
-        verbose_name = _("conversation request")
-        verbose_name_plural = _("conversation requests")
-        constraints = [
-            models.UniqueConstraint(
-                fields=["sender", "recipient"],
-                name="unique_conversation_request",
-            )
-        ]
-
-    def __str__(self) -> str:
-        return str(self.pk)
-
-    @property
-    def is_accepted(self) -> bool:
-        return self.date_accepted is not None

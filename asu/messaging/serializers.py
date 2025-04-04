@@ -1,77 +1,96 @@
 from __future__ import annotations
 
-import datetime
 from typing import Any
 
-from django.utils import timezone
-
 from rest_framework import exceptions, serializers
-from rest_framework.reverse import reverse
 
 from drf_spectacular.utils import extend_schema_field
 
 from asu.auth.serializers.user import UserPublicReadSerializer
-from asu.messaging.models import Conversation, ConversationRequest, Message
+from asu.messaging.models import (
+    Conversation,
+    ConversationRequest,
+    Event,
+    Interaction,
+    Message,
+)
 
 
-class MessageComposeSerializer(serializers.ModelSerializer[Message]):
-    conversation = serializers.HyperlinkedRelatedField(  # type: ignore[var-annotated]
-        read_only=True,
-        view_name="api:messaging:conversation-detail",
-        source="sender_conversation",
-    )
-    url = serializers.SerializerMethodField()
+class InteractionSerializer(serializers.ModelSerializer[Interaction]):
+    class Meta:
+        model = Interaction
+        fields = ("user_id", "type", "date_created")
+
+
+class MessageSerializer(serializers.ModelSerializer[Message]):
+    source = serializers.SerializerMethodField()  # type: ignore[assignment]
+    interactions = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
         fields = (
             "id",
             "body",
-            "conversation",
-            "date_created",
-            "url",
+            "source",
+            "reply_to_id",
+            "interactions",
         )
-
-    @extend_schema_field(serializers.URLField)
-    def get_url(self, obj: Message) -> str:
-        return reverse(
-            "api:messaging:message-detail",
-            kwargs={
-                "pk": obj.pk,
-                "conversation_pk": obj.sender_conversation.pk,
-            },
-            request=self.context["request"],
-        )
-
-    def create(self, validated_data: dict[str, Any]) -> Message:
-        sender = self.context["request"].user
-        recipient = self.context["recipient"]
-        body = validated_data["body"]
-
-        message = Message.objects.compose(sender, recipient, body)
-
-        if message is None:
-            raise exceptions.PermissionDenied
-
-        return message
-
-
-class MessageSerializer(serializers.ModelSerializer[Message]):
-    date_read = serializers.SerializerMethodField()
-    source = serializers.SerializerMethodField()  # type: ignore[assignment]
-
-    class Meta:
-        model = Message
-        fields = ("id", "body", "source", "date_created", "date_read")
-
-    @extend_schema_field(serializers.DateTimeField(allow_null=True))
-    def get_date_read(self, message: Message) -> datetime.datetime | None:
-        return message.date_read if message.has_receipt else None
 
     @extend_schema_field(serializers.ChoiceField(choices=["sent", "received"]))
     def get_source(self, message: Message) -> str:
         user = self.context["request"].user
         return "sent" if message.sender_id == user.pk else "received"
+
+    def get_interactions(self, message: Message) -> dict[str, Any]:
+        # todo: do not use getattr here
+        #  by separating compose & display serializers with common base. only
+        #  display should prefetch and include interactions
+        interactions = getattr(message, "narrowed_interactions", [])
+        serializer = InteractionSerializer(interactions, many=True)
+        return serializer.data
+
+
+class MessageComposeSerializer(serializers.ModelSerializer[Event]):
+    # todo make this polymorphic, cases: groupmsg, privmsg, groupjoin
+    # todo: make a reusable helper that resolves polymorphic serialization
+    # todo: polymorphic though event modelmethod
+    content = MessageSerializer(read_only=True, source="message")
+
+    body = serializers.CharField(write_only=True)
+    reply_to_id = serializers.IntegerField(min_value=1, required=False, write_only=True)
+
+    class Meta:
+        model = Event
+        fields = (
+            "id",
+            "type",
+            "content",
+            "body",
+            "reply_to_id",
+            "conversation_id",
+            "date_created",
+        )
+        extra_kwargs = {"type": {"read_only": True}}
+
+    def create(self, validated_data: dict[str, Any]) -> Event:
+        sender, recipient, body, reply_to_id = (
+            self.context["request"].user,
+            self.context["recipient"],
+            validated_data["body"],
+            validated_data.get("reply_to_id"),
+        )
+        event = Message.objects.compose(sender, recipient, body, reply_to_id)
+        if event is None:
+            raise exceptions.PermissionDenied
+        return event
+
+
+class EventSerializer(serializers.ModelSerializer[Event]):
+    content = MessageSerializer(source="message")  # todo polymorphic
+
+    class Meta:
+        model = Event
+        fields = ("id", "type", "content", "date_created")
 
 
 class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation]):
@@ -87,10 +106,6 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
         ref_name="ConversationUserTarget",
     )
     last_message = serializers.SerializerMethodField()
-    messages = serializers.SerializerMethodField(
-        method_name="get_messages_url",
-        help_text="URL from which messages belonging to this chat can be retrieved.",
-    )
 
     class Meta:
         model = Conversation
@@ -100,7 +115,6 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
             "last_message",
             "date_created",
             "date_modified",
-            "messages",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
@@ -113,14 +127,6 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
         message = Message(**msg)
         serializer = MessageSerializer(message, context=self.context)
         return serializer.data
-
-    @extend_schema_field(serializers.URLField)
-    def get_messages_url(self, obj: Conversation) -> str:
-        return reverse(
-            "api:messaging:message-list",
-            kwargs={"conversation_pk": obj.pk},
-            request=self.context["request"],
-        )
 
 
 class ConversationDetailSerializer(ConversationSerializer):
@@ -135,7 +141,6 @@ class ConversationDetailSerializer(ConversationSerializer):
             "last_message",
             "date_created",
             "date_modified",
-            "messages",
             "url",
         )
         extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
@@ -149,17 +154,28 @@ class ConversationDetailSerializer(ConversationSerializer):
 
 
 class ReadConversationSerializer(serializers.Serializer[dict[str, Any]]):
-    until = serializers.DateTimeField()
-    affected = serializers.IntegerField(read_only=True, min_value=0)
+    start = serializers.DateTimeField(write_only=True)
+    end = serializers.DateTimeField(write_only=True)
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        conversation = self.context["conversation"]
-        read_by = self.context["request"].user
+        conversation, read_by = (
+            self.context["conversation"],
+            self.context["request"].user,
+        )
+        start, end = validated_data.pop("start"), validated_data.pop("end")
 
-        until = validated_data["until"]
-        affected = conversation.messages.filter(
-            recipient=read_by,
-            date_read__isnull=True,
-            date_created__lte=until,
-        ).update(date_read=timezone.now())
-        return {"until": until, "affected": affected}
+        messages = (
+            Message.objects.filter(
+                events__conversation=conversation,
+                date_created__gte=start,
+                date_created__lte=end,
+            )
+            .exclude(sender_id=read_by.pk)
+            .values_list("id", flat=True)
+        )
+        interactions = [
+            Interaction(user=read_by, message_id=message_id, type=Interaction.Kind.READ)
+            for message_id in messages
+        ]
+        Interaction.objects.bulk_create(interactions, ignore_conflicts=True)
+        return validated_data

@@ -2,29 +2,30 @@ from drf_spectacular.utils import extend_schema
 
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
-    MessageSerializer,
+    EventSerializer,
     ReadConversationSerializer,
 )
 from asu.utils.openapi import Tag, examples
 from asu.utils.rest import APIError
 
-__all__ = ["message", "conversation"]
+__all__ = ["event", "conversation"]
 
-message = {
+
+event = {
     "list": extend_schema(
-        summary="List messages",
+        summary="List conversation events",
         tags=[Tag.MESSAGING],
-        responses={200: MessageSerializer, 404: APIError},
+        responses={200: EventSerializer, 404: APIError},
         examples=[examples.not_found],
     ),
     "retrieve": extend_schema(
-        summary="Retrieve a message",
+        summary="Retrieve a conversation event",
         tags=[Tag.MESSAGING],
-        responses={200: MessageSerializer, 404: APIError},
+        responses={200: EventSerializer, 404: APIError},
         examples=[examples.not_found],
     ),
     "destroy": extend_schema(
-        summary="Delete a message",
+        summary="Delete a conversation event",
         tags=[Tag.MESSAGING],
         responses={204: None, 404: APIError},
         examples=[examples.not_found],
@@ -33,7 +34,7 @@ message = {
 
 
 conversation = {
-    "list": extend_schema(summary="List conversations", tags=[Tag.MESSAGING]),
+    "list": extend_schema(summary="List conversations"),
     "retrieve": extend_schema(
         summary="Retrieve a conversation",
         tags=[Tag.MESSAGING],

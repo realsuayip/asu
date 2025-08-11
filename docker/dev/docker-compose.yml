@@ -35,7 +35,7 @@ services:
 
   celery-worker: &celery
     container_name: asu-celery-worker
-    command: watchfiles --filter python "celery -A asu worker -l info"
+    command: watchfiles --filter python "celery worker -l info"
     depends_on:
       - db
       - redis
@@ -47,4 +47,4 @@ services:
   celery-beat:
     <<: *celery
     container_name: asu-celery-beat
-    command: celery -A asu beat -l info
+    command: celery beat -l info

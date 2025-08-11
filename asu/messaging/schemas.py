@@ -1,12 +1,12 @@
 from drf_spectacular.utils import extend_schema
 
+from asu.core.utils.openapi import Tag, examples
+from asu.core.utils.rest import APIError
 from asu.messaging.serializers import (
     ConversationDetailSerializer,
     MessageSerializer,
     ReadConversationSerializer,
 )
-from asu.utils.openapi import Tag, examples
-from asu.utils.rest import APIError
 
 __all__ = ["message", "conversation"]
 

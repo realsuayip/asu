@@ -4,12 +4,11 @@ from django.utils.translation import gettext_lazy as _
 
 from envanter import env
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parents[3]
 
-
-ROOT_URLCONF = "asu.urls"
-ASGI_APPLICATION = "asu.gateways.dev.application"
-WSGI_APPLICATION = "asu.gateways.wsgi.application"
+ROOT_URLCONF = "asu.core.urls"
+ASGI_APPLICATION = "asu.core.gateways.dev.application"
+WSGI_APPLICATION = "asu.core.gateways.wsgi.application"
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG")
@@ -24,8 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # First party apps
-    "asu",
-    "asu.utils",
+    "asu.core",
     "asu.auth",
     "asu.verification",
     "asu.messaging",
@@ -97,7 +95,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
-            "libraries": {"asu": "asu.utils.templatetags"},
+            "libraries": {"asu": "asu.core.utils.templatetags"},
         },
     },
 ]
@@ -119,6 +117,7 @@ SESSION_ENGINE = env.str("SESSION_ENGINE")
 SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")
 SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 
+LOCALE_PATHS = [BASE_DIR / "asu/core/locale"]
 LANGUAGES = [
     ("en", _("English")),
     ("tr", _("Turkish")),
@@ -135,10 +134,9 @@ STORAGES = {
 }
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = "/code/asu/media"
+MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

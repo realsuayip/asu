@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from asu.auth.permissions import RequireFirstParty
-from asu.utils.views import ExtendedViewSet
+from asu.core.utils.views import ExtendedViewSet
 from asu.verification.models import RegistrationVerification
 from asu.verification.registration import schemas
 from asu.verification.registration.serializers import (

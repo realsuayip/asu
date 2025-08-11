@@ -53,7 +53,7 @@ services:
       gunicorn asu.gateways.websocket
       --bind 0.0.0.0:7000
       --workers 4
-      --worker-class asu.utils.workers.UvicornWorker
+      --worker-class asu.core.utils.workers.UvicornWorker
       --access-logfile '-'
     extends:
       file: django/common.yml
@@ -61,7 +61,7 @@ services:
 
   celery-worker: &celery
     container_name: asu-celery-worker
-    command: celery -A asu worker -l info
+    command: celery worker -l info
     depends_on:
       - rabbitmq
       - db
@@ -73,4 +73,4 @@ services:
   celery-beat:
     <<: *celery
     container_name: asu-celery-beat
-    command: celery -A asu beat -l info
+    command: celery beat -l info

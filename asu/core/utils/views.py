@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema_view
 
-from asu.utils.typing import UserRequest
+from asu.core.utils.typing import UserRequest
 
 MT_co = TypeVar("MT_co", bound=models.Model, covariant=True)
 

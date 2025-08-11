@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import asu.auth.models.user
-import asu.utils.file
+import asu.core.utils.file
 
 
 class Migration(migrations.Migration):
@@ -142,12 +142,12 @@ class Migration(migrations.Migration):
                     "profile_picture",
                     models.ImageField(
                         blank=True,
-                        upload_to=asu.utils.file.UserContentPath(
+                        upload_to=asu.core.utils.file.UserContentPath(
                             "{instance.pk}/profile_picture/{uuid}{ext}"
                         ),
                         validators=[
-                            asu.utils.file.FileSizeValidator(max_size=2097152),
-                            asu.utils.file.MimeTypeValidator(
+                            asu.core.utils.file.FileSizeValidator(max_size=2097152),
+                            asu.core.utils.file.MimeTypeValidator(
                                 allowed_types=["image/png", "image/jpeg"]
                             ),
                         ],

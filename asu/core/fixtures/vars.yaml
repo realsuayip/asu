@@ -1,4 +1,4 @@
-- model: asu.projectvariable
+- model: core.projectvariable
   pk: 1
   fields:
     name: DEFAULT_OAUTH_CLIENT

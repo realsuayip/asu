@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from asu.utils.cache import build_vary_key, cached_context
+from asu.core.utils.cache import build_vary_key, cached_context
 
 
 class ProjectVariableManager(models.Manager["ProjectVariable"]):

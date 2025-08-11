@@ -23,8 +23,8 @@ from asu.auth.models import (
     UserFollowRequest,
 )
 from asu.auth.serializers.user import UserPublicReadSerializer
-from asu.utils import messages
-from asu.utils.rest import ContextDefault
+from asu.core.utils import messages
+from asu.core.utils.rest import ContextDefault
 from asu.verification.models import PasswordResetVerification
 
 T = TypeVar("T", bound=models.Model)

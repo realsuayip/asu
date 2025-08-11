@@ -13,16 +13,16 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions
 from rest_framework.exceptions import ErrorDetail
 
-from asu.utils import mailing
-from asu.utils.cache import cached_context
-from asu.utils.file import FileSizeValidator, MimeTypeValidator
-from asu.utils.rest import exception_handler
+from asu.core.utils import mailing
+from asu.core.utils.cache import cached_context
+from asu.core.utils.file import FileSizeValidator, MimeTypeValidator
+from asu.core.utils.rest import exception_handler
 
 
 class TestFileUtils(TestCase):
     @classmethod
     def setUpClass(cls):
-        file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
+        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
         cls.image = open(file_path, "rb")  # noqa: SIM115
 
     @classmethod

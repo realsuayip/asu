@@ -795,7 +795,7 @@ class TestAuth(APITestCase):
         self._assert_valid_user_connections_response(response)
 
     def test_upload_delete_profile_picture(self):
-        file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
+        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
 
         self.assertFalse(self.user1.profile_picture.name)
         self.client.force_login(self.user1)
@@ -820,7 +820,7 @@ class TestAuth(APITestCase):
     def test_change_profile_picture(self):
         self.client.force_login(self.user1)
 
-        file_path = settings.BASE_DIR.parent / "tests/files/asli.jpeg"
+        file_path = settings.BASE_DIR / "tests/files/asli.jpeg"
 
         with open(file_path, "rb") as file:
             r1 = self.client.put(

@@ -33,7 +33,7 @@ coverage: (exec '/bin/sh -c \
     --parallel 4 \
     --shuffle \
     --timing \
-    --settings=asu.settings.test \
+    --settings=asu.core.settings.test \
     --no-input && \
     coverage combine && \
     coverage html --show-contexts"')
@@ -45,10 +45,10 @@ type: (exec 'mypy asu/')
 uv *args: (exec 'uv' args)
 
 # Create or update translation files
-makemessages: (exec '/bin/sh -c "cd asu && ../manage.py makemessages --all --no-obsolete"')
+makemessages: (exec '/bin/sh -c "./manage.py makemessages --all --no-obsolete"')
 
 # Compile translation files
-compilemessages: (exec '/bin/sh -c "cd asu && ../manage.py compilemessages"')
+compilemessages: (exec '/bin/sh -c "./manage.py compilemessages --ignore .venv"')
 
 # Compile documentation
 docs:
@@ -70,7 +70,7 @@ run *args:
 shell: (run 'shell')
 
 # Run tests
-test: (run 'test --settings=asu.settings.test --parallel 4 --shuffle --timing --keepdb')
+test: (run 'test --settings=asu.core.settings.test --parallel 4 --shuffle --timing --keepdb')
 
 alias mypy := type
 alias f := format

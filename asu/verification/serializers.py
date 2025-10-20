@@ -34,6 +34,9 @@ class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str,
         " related action. It will expire after some time.",
     )
 
+    def validate_email(self, email: str) -> str:
+        return User.objects.normalize_email(email)
+
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         try:
             verification = self.model.objects.verifiable().get(**validated_data)

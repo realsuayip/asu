@@ -6,22 +6,25 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
+from asu.auth.models import User
 from asu.core.utils import messages
 from asu.verification.models import EmailVerification
-from asu.verification.serializers import BaseCheckSerializer, EmailMixin
+from asu.verification.serializers import BaseCheckSerializer
+from asu.verification.tasks import send_email_change_email
 
 
-class EmailSerializer(EmailMixin, serializers.ModelSerializer[EmailVerification]):
-    class Meta:
-        model = EmailVerification
-        fields = ("email",)
+class EmailSerializer(serializers.Serializer[dict[str, Any]]):
+    email = serializers.EmailField()
 
-    @transaction.atomic
-    def create(self, validated_data: dict[str, Any]) -> EmailVerification:
-        validated_data["user"] = self.context["request"].user
-        verification = super().create(validated_data)
-        transaction.on_commit(verification.send_email)
-        return verification
+    def validate_email(self, email: str) -> str:
+        return User.objects.normalize_email(email)
+
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        send_email_change_email.delay(
+            user_id=self.context["request"].user.pk,
+            email=validated_data["email"],
+        )
+        return validated_data
 
 
 class EmailCheckSerializer(BaseCheckSerializer):

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from django.utils import timezone
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
@@ -47,14 +47,3 @@ class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str,
         verification.save(update_fields=["date_verified", "date_modified"])
         validated_data["consent"] = verification.create_consent()
         return validated_data
-
-
-class EmailMixin:
-    def validate_email(self, email: str) -> str:
-        email = User.objects.normalize_email(email)
-        user = User.objects.filter(email__iexact=email)
-
-        if user.exists():
-            raise serializers.ValidationError(gettext("This e-mail is already in use."))
-
-        return email

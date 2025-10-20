@@ -52,7 +52,8 @@ class TestRegistrationVerification(APITestCase):
         UserFactory(email=email_taken)
 
         response = self.client.post(self.url_send, data={"email": email_taken})
-        self.assertContains(response, "e-mail is already in use", status_code=400)
+        self.assertEqual(0, RegistrationVerification.objects.count())
+        self.assertEqual(201, response.status_code)
 
     def test_send_case_exists_case_insensitive(self):
         self.client.force_authenticate(token=first_party_token)
@@ -62,7 +63,8 @@ class TestRegistrationVerification(APITestCase):
         response = self.client.post(
             self.url_send, data={"email": "hello.world@example.com"}
         )
-        self.assertContains(response, "e-mail is already in use", status_code=400)
+        self.assertEqual(0, RegistrationVerification.objects.count())
+        self.assertEqual(201, response.status_code)
 
     def test_check(self):
         self.client.force_authenticate(token=first_party_token)

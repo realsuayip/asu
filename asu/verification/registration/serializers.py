@@ -1,30 +1,26 @@
 from typing import Any
 
-from django.db import transaction
-
 from rest_framework import serializers
 
+from asu.auth.models import User
 from asu.verification.models.registration import RegistrationVerification
-from asu.verification.serializers import BaseCheckSerializer, EmailMixin
+from asu.verification.serializers import BaseCheckSerializer
+from asu.verification.tasks import send_registration_email
 
 
-class RegistrationSerializer(
-    EmailMixin, serializers.ModelSerializer[RegistrationVerification]
-):
+class RegistrationSerializer(serializers.Serializer[dict[str, Any]]):
     """
-    Create registration verification object and
-    send the email containing code.
+    Create registration verification object and send the email containing code.
     """
 
-    class Meta:
-        model = RegistrationVerification
-        fields = ("email",)
+    email = serializers.EmailField()
 
-    @transaction.atomic
-    def create(self, validated_data: dict[str, Any]) -> RegistrationVerification:
-        verification = super().create(validated_data)
-        transaction.on_commit(verification.send_email)
-        return verification
+    def validate_email(self, email: str) -> str:
+        return User.objects.normalize_email(email)
+
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        send_registration_email.delay(email=validated_data["email"])
+        return validated_data
 
 
 class RegistrationCheckSerializer(BaseCheckSerializer):

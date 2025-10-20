@@ -18,12 +18,6 @@ registration_create = extend_schema(
     " be used to verify the e-mail.",
     examples=[
         OpenApiExample(
-            "e-mail taken",
-            value=get_error_repr({"email": ["This e-mail is already in use."]}),
-            response_only=True,
-            status_codes=["400"],
-        ),
-        OpenApiExample(
             "e-mail is invalid",
             value=get_error_repr({"email": ["Enter a valid email address."]}),
             response_only=True,

@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.core.signing import b62_encode
 from django.db.models import F
+from django.test import TransactionTestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -859,7 +860,12 @@ class TestMessaging(APITestCase):
         self.assertEqual(404, r3.status_code)
         self.assertEqual(404, r4.status_code)
 
-    # Websocket related
+
+class TestMessagingWebsocket(TransactionTestCase):
+    @classmethod
+    def setUp(cls):
+        cls.user1 = UserFactory()
+        cls.user2 = UserFactory()
 
     def get_conversation_communicator(self, ticket: str = ""):
         path = "/conversations/"
@@ -924,10 +930,12 @@ class TestMessaging(APITestCase):
         self.assertEqual(str(self.user1.id), communicator.scope["user_id"])
         await communicator.disconnect()
 
-    def _capture_message(self, sender, recipient, message):
-        with self.captureOnCommitCallbacks(execute=True) as callbacks:
-            response = self._send_message(sender, recipient, message)
-            return response, callbacks
+    def _send_message(self, sender, recipient, message):
+        self.client.force_login(sender)
+        return self.client.post(
+            reverse("api:auth:user-message", kwargs={"pk": recipient.pk}),
+            data={"body": message},
+        )
 
     async def test_ws_sends_message(self):
         # Get ticket via API.
@@ -942,7 +950,7 @@ class TestMessaging(APITestCase):
         self.assertTrue(connected)
 
         # Send message while connected to conversation ws
-        api_result, callbacks = await sync_to_async(self._capture_message)(
+        api_result = await sync_to_async(self._send_message)(
             self.user2, self.user1, "Hi"
         )
         ws_result = await communicator.receive_json_from()
@@ -953,7 +961,6 @@ class TestMessaging(APITestCase):
             holder=self.user1
         )
 
-        self.assertEqual(1, len(callbacks))
         self.assertEqual(ws_result["type"], "conversation.message")
         self.assertEqual(ws_result["conversation_id"], target_conversation.id)
         self.assertEqual(ws_result["message_id"], message_id)

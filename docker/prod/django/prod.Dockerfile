@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.5.27-python3.12-alpine AS builder
+FROM ghcr.io/astral-sh/uv:0.9.5-python3.13-alpine AS builder
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY . .
 
-FROM python:3.12-alpine
+FROM python:3.13-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

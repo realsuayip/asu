@@ -35,6 +35,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     # Testing
+    "pytest",
+    "pytest-django",
+    "pytest-mock",
+    "pytest-sugar",
+    "pytest-xdist",
     "factory-boy",
     "coverage",
     # Typing
@@ -92,7 +97,7 @@ select = [
     "PL", # pylint
     "PERF", # perflint
 ]
-ignore = ["B904", "RUF012", "SIM105", "PTH123", "PLR2004", "PLR0913", "PLR0911"]
+ignore = ["ERA001", "B904", "RUF012", "SIM105", "PTH123", "PLR2004", "PLR0913", "PLR0911"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
@@ -149,3 +154,8 @@ exclude_also = [
     'def __str__',
     'def __repr__',
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "--ds=asu.core.settings.test"

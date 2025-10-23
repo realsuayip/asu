@@ -7,8 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from envanter import env
 
 BASE_DIR = Path(__file__).resolve().parents[3]
-TESTING = "test" in sys.argv
-
+TESTING = "pytest" in sys.argv[0]
 
 ROOT_URLCONF = "asu.core.urls"
 ASGI_APPLICATION = "asu.core.gateways.dev.application"
@@ -181,7 +180,7 @@ DEFAULT_AUTHENTICATION_CLASSES = [
 URL_FORMAT_OVERRIDE = None
 
 
-if DEBUG or TESTING:
+if DEBUG and not TESTING:
     DEFAULT_RENDERER_CLASSES = [
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",

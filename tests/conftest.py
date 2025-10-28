@@ -45,6 +45,7 @@ class OAuthClient(APIClient):
     def set_user(
         self,
         user: User,
+        /,
         *,
         scope: str | None = None,
         app: Application | None = None,

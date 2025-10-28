@@ -1,16 +1,14 @@
 import datetime
-from datetime import timedelta
 from typing import Any
 from unittest.mock import ANY
 
 from django.urls import reverse
-from django.utils import timezone
 
 import pytest
 from pytest_django import DjangoAssertNumQueries
 from pytest_mock import MockerFixture
 
-from asu.auth.models import AccessToken, Application, User
+from asu.auth.models import Application, User
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
 
@@ -65,27 +63,17 @@ def test_user_me_requires_authentication() -> None:
 
 
 @pytest.mark.django_db
-def test_user_me_requires_user_authentication(
-    client: OAuthClient,
-    client_credentials_app: Application,
-) -> None:
-    access = AccessToken.objects.create(
-        scope="",
-        expires=timezone.now() + timedelta(minutes=15),
-        token="some-client-token",
-        application=client_credentials_app,
-    )
-    client.set_token(access.token)
-
-    response = client.get(reverse("api:auth:user-me"))
+def test_user_me_requires_user_authentication(app_client: OAuthClient) -> None:
+    response = app_client.get(reverse("api:auth:user-me"))
     assert response.status_code == 403
 
 
 @pytest.mark.django_db
-def test_user_me_update(user: User, client: OAuthClient) -> None:
-    client.set_user(user)
-
-    response = client.patch(
+def test_user_me_update(
+    user: User,
+    user_client: OAuthClient,
+) -> None:
+    response = user_client.patch(
         reverse("api:auth:user-me"),
         data={
             "display_name": "__Potato__",
@@ -102,11 +90,10 @@ def test_user_me_update(user: User, client: OAuthClient) -> None:
 
 
 @pytest.mark.django_db
-def test_user_me_update_username_taken(user: User, client: OAuthClient) -> None:
+def test_user_me_update_username_taken(user_client: OAuthClient) -> None:
     UserFactory.create(username="suzie")
 
-    client.set_user(user)
-    response = client.patch(
+    response = user_client.patch(
         reverse("api:auth:user-me"),
         data={"username": "Suzie"},
     )
@@ -122,11 +109,12 @@ def test_user_me_update_username_taken(user: User, client: OAuthClient) -> None:
 
 
 @pytest.mark.django_db
-def test_user_me_update_disallow_email(user: User, client: OAuthClient) -> None:
-    client.set_user(user)
-
+def test_user_me_update_disallow_email(
+    user: User,
+    user_client: OAuthClient,
+) -> None:
     email = "hello@example.com"
-    response = client.patch(reverse("api:auth:user-me"), data={"email": email})
+    response = user_client.patch(reverse("api:auth:user-me"), data={"email": email})
     assert response.status_code == 200
 
     user.refresh_from_db()
@@ -224,14 +212,11 @@ def test_user_me_third_party_token(
         date_joined=datetime.date(2025, 1, 1),
         birth_date=datetime.date(2000, 1, 1),
     )
-    access = AccessToken.objects.create(
-        user=user,
+    client.set_user(
+        user,
         scope=scope,
-        expires=timezone.now() + timedelta(minutes=15),
-        token="third-party-token",
-        application=authorization_code_third_party_app,
+        app=authorization_code_third_party_app,
     )
-    client.set_token(access.token)
     response = client.get(reverse("api:auth:user-me"))
     assert response.status_code == 200
     assert response.json() == detail
@@ -253,14 +238,11 @@ def test_user_me_third_party_token_case_bad_scope(
     authorization_code_third_party_app: Application,
     scope: str,
 ) -> None:
-    access = AccessToken.objects.create(
-        user=user,
+    client.set_user(
+        user,
         scope=scope,
-        expires=timezone.now() + timedelta(minutes=15),
-        token="third-party-token",
-        application=authorization_code_third_party_app,
+        app=authorization_code_third_party_app,
     )
-    client.set_token(access.token)
     response = client.get(reverse("api:auth:user-me"))
     assert response.status_code == 403
 
@@ -271,17 +253,14 @@ def test_user_me_third_party_token_update_not_allowed(
     client: OAuthClient,
     authorization_code_third_party_app: Application,
 ) -> None:
-    access = AccessToken.objects.create(
-        user=user,
+    client.set_user(
+        user,
         scope="user:profile:read"
         " user.profile:write"
         " user.profile.email:read"
         " user.profile.private:read",
-        expires=timezone.now() + timedelta(minutes=15),
-        token="third-party-token",
-        application=authorization_code_third_party_app,
+        app=authorization_code_third_party_app,
     )
-    client.set_token(access.token)
     response = client.patch(
         reverse("api:auth:user-me"),
         data={"display_name": "Helen"},

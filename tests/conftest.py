@@ -1,16 +1,71 @@
+from __future__ import annotations
+
+from datetime import timedelta
+from functools import cached_property
+
+from django.utils import timezone
+
 from rest_framework.test import APIClient
 
 import pytest
+from oauth2_provider.settings import oauth2_settings
 
-from asu.auth.models import Application, User
+from asu.auth.models import AccessToken, Application, User
 from asu.core.models import ProjectVariable
 from tests.factories import UserFactory
 
 
 class OAuthClient(APIClient):
-    def set_user(self, user: User) -> None:
-        token = user.issue_token()["access_token"]
-        self.set_token(token=token)
+    @cached_property
+    def _default_application(self) -> Application:
+        app = Application.objects.create(
+            client_id="default_client",
+            is_first_party=True,
+            skip_authorization=True,
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+        )
+        ProjectVariable.objects.create(name="DEFAULT_OAUTH_CLIENT", value=app.client_id)
+        return app
+
+    def _create_access_token(
+        self,
+        user: User,
+        scope: str,
+        application: Application | None = None,
+    ) -> AccessToken:
+        return AccessToken.objects.create(
+            user=user,
+            scope=scope,
+            expires=timezone.now() + timedelta(minutes=15),
+            token=f"some-token-{user.pk}",
+            application=application,
+        )
+
+    def set_user(
+        self,
+        user: User,
+        *,
+        scope: str | None = None,
+        app: Application | None = None,
+    ) -> None:
+        if scope is None:
+            scope = " ".join(oauth2_settings.SCOPES.keys())
+        if app is None:
+            app = self._default_application
+        oauth = getattr(self, "_oauth", {})
+        try:
+            access = oauth[user.pk]
+        except KeyError:
+            access = self._create_access_token(user, scope, app)
+        else:
+            access.scope = scope
+            access.user = user
+            access.application = app
+            access.save(update_fields=["scope", "user", "application"])
+        oauth[user.pk] = access
+        self._oauth = oauth
+        self.set_token(access.token)
 
     def set_token(self, token: str) -> None:
         self.credentials(**{"Authorization": f"Bearer {token}"})
@@ -18,14 +73,6 @@ class OAuthClient(APIClient):
 
 @pytest.fixture
 def client() -> OAuthClient:
-    app = Application.objects.create(
-        client_id="default_client",
-        is_first_party=True,
-        skip_authorization=True,
-        client_type=Application.CLIENT_PUBLIC,
-        authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
-    )
-    ProjectVariable.objects.create(name="DEFAULT_OAUTH_CLIENT", value=app.client_id)
     return OAuthClient()
 
 
@@ -38,11 +85,22 @@ def user() -> User:
 
 
 @pytest.fixture
-def user_client(
-    client: OAuthClient,
-    user: User,
-) -> OAuthClient:
+def user_client(user: User) -> OAuthClient:
+    client = OAuthClient()
     client.set_user(user)
+    return client
+
+
+@pytest.fixture
+def app_client(client_credentials_app: Application) -> OAuthClient:
+    access = AccessToken.objects.create(
+        scope="",
+        expires=timezone.now() + timedelta(minutes=15),
+        token="some-client-token",
+        application=client_credentials_app,
+    )
+    client = OAuthClient()
+    client.set_token(access.token)
     return client
 
 

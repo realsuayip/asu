@@ -69,7 +69,7 @@ USERNAME_CONSTRAINTS = [
         violation_error_message=_("The username you specified is already in use."),
     ),
     models.CheckConstraint(
-        check=Q(username__regex=UsernameValidator.regex),
+        condition=Q(username__regex=UsernameValidator.regex),
         name="regex_valid_username",
         violation_error_message=UsernameValidator.message,
     ),

@@ -158,4 +158,4 @@ exclude_also = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
-addopts = "--ds=asu.core.settings.test"
+addopts = "--ds=asu.core.settings.test --tb=short"

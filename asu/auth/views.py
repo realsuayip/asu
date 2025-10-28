@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from django import forms
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Exists, F, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
@@ -43,7 +44,12 @@ from asu.auth.serializers.user import (
     UserPublicReadSerializer,
     UserSerializer,
 )
-from asu.core.utils.rest import IDFilter, PartialUpdateModelMixin, get_paginator
+from asu.core.utils.rest import (
+    EmptySerializer,
+    IDFilter,
+    PartialUpdateModelMixin,
+    get_paginator,
+)
 from asu.core.utils.typing import UserRequest
 from asu.core.utils.views import ExtendedViewSet
 from asu.messaging.serializers import MessageComposeSerializer
@@ -224,6 +230,10 @@ class UserViewSet(
     def delete_through(self, model: type[UserFollow | UserBlock]) -> Response:
         # Common delete method for user blocking and following.
         to_user = self.get_object()
+        context = self.get_serializer_context()
+        context["to_user"] = to_user
+        serializer = self.get_serializer(data={}, context=context)
+        serializer.is_valid(raise_exception=True)
         model.objects.filter(from_user=self.request.user, to_user=to_user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -430,9 +440,38 @@ class FollowRequestViewSet(
     serializer_class = FollowRequestSerializer
     pagination_class = get_paginator("cursor", ordering="-date_created")
     schemas = schemas.follow_request
-    scopes = {"list": "user.follow", "partial_update": "user.follow"}
+    scopes = {
+        "list": "user.follow",
+        "accept": "user.follow",
+        "reject": "user.follow",
+    }
 
     def get_queryset(self) -> QuerySet[UserFollowRequest]:
-        return self.request.user.get_pending_follow_requests().select_related(
-            "from_user"
-        )
+        queryset = self.request.user.get_pending_follow_requests()
+        if self.action in ("accept", "reject"):
+            return queryset.select_for_update()
+        return queryset.select_related("from_user")
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[RequireUser, RequireScope],
+        serializer_class=EmptySerializer,
+    )
+    def accept(self, request: UserRequest, pk: int) -> Response:
+        with transaction.atomic():
+            instance = self.get_object()
+            instance.accept()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[RequireUser, RequireScope],
+        serializer_class=EmptySerializer,
+    )
+    def reject(self, request: UserRequest, pk: int) -> Response:
+        with transaction.atomic():
+            instance = self.get_object()
+            instance.reject()
+        return Response(status=status.HTTP_204_NO_CONTENT)

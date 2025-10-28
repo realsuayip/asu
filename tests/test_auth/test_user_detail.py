@@ -16,11 +16,11 @@ from tests.factories import UserFactory
 @pytest.mark.django_db
 def test_user_detail(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     mocker: MockerFixture,
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
-    oauth_client.set_user(user)
+    client.set_user(user)
     profile = UserFactory.create(
         display_name="Helen",
         username="helen",
@@ -37,7 +37,7 @@ def test_user_detail(
         + 1  # fetch profile
         + 2  # fetch follower count + following count
     ):
-        response = oauth_client.get(
+        response = client.get(
             reverse(
                 "api:auth:user-detail",
                 kwargs={"pk": profile.pk},
@@ -62,7 +62,7 @@ def test_user_detail(
 
 @pytest.mark.django_db
 def test_user_detail_client_credentials(
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     user: User,
     client_credentials_app: Application,
 ) -> None:
@@ -72,9 +72,9 @@ def test_user_detail_client_credentials(
         token="some-client-token",
         application=client_credentials_app,
     )
-    oauth_client.set_token(access.token)
+    client.set_token(access.token)
 
-    response = oauth_client.get(
+    response = client.get(
         reverse(
             "api:auth:user-detail",
             kwargs={"pk": user.pk},
@@ -97,15 +97,15 @@ def test_user_detail_requires_authentication() -> None:
 @pytest.mark.django_db
 def test_user_detail_self(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
-    oauth_client.set_user(user)
+    client.set_user(user)
     with django_assert_num_queries(
         1  # fetch current user
         + 2  # fetch follower count + following count
     ):
-        response = oauth_client.get(
+        response = client.get(
             reverse(
                 "api:auth:user-detail",
                 kwargs={"pk": user.pk},
@@ -119,9 +119,9 @@ def test_user_detail_self(
 @pytest.mark.django_db
 def test_user_detail_follow_counts(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
-    oauth_client.set_user(user)
+    client.set_user(user)
     profile, user2 = UserFactory.create_batch(size=2)
 
     # 2 followers and 1 following
@@ -129,7 +129,7 @@ def test_user_detail_follow_counts(
     user2.add_following(to_user=profile)
     profile.add_following(to_user=user2)
 
-    response = oauth_client.get(
+    response = client.get(
         reverse(
             "api:auth:user-detail",
             kwargs={"pk": profile.pk},
@@ -144,13 +144,13 @@ def test_user_detail_follow_counts(
 @pytest.mark.django_db
 def test_user_detail_returns_ok_while_blocking(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
-    oauth_client.set_user(user)
+    client.set_user(user)
     profile = UserFactory.create()
 
     UserBlock.objects.create(from_user=user, to_user=profile)
-    response = oauth_client.get(
+    response = client.get(
         reverse(
             "api:auth:user-detail",
             kwargs={"pk": profile.pk},
@@ -162,13 +162,13 @@ def test_user_detail_returns_ok_while_blocking(
 @pytest.mark.django_db
 def test_user_detail_returns_ok_while_being_blocked(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
-    oauth_client.set_user(user)
+    client.set_user(user)
     profile = UserFactory.create()
 
     UserBlock.objects.create(from_user=profile, to_user=user)
-    response = oauth_client.get(
+    response = client.get(
         reverse(
             "api:auth:user-detail",
             kwargs={"pk": profile.pk},
@@ -180,11 +180,11 @@ def test_user_detail_returns_ok_while_being_blocked(
 @pytest.mark.django_db
 def test_user_detail_frozen_user(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
-    oauth_client.set_user(user)
+    client.set_user(user)
     frozen_profile = UserFactory.create(is_frozen=True)
-    response = oauth_client.get(
+    response = client.get(
         reverse(
             "api:auth:user-detail",
             kwargs={"pk": frozen_profile.pk},
@@ -196,11 +196,11 @@ def test_user_detail_frozen_user(
 @pytest.mark.django_db
 def test_user_detail_inactive_user(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
-    oauth_client.set_user(user)
+    client.set_user(user)
     frozen_profile = UserFactory.create(is_active=False)
-    response = oauth_client.get(
+    response = client.get(
         reverse(
             "api:auth:user-detail",
             kwargs={"pk": frozen_profile.pk},

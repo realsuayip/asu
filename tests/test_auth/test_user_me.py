@@ -17,7 +17,7 @@ from tests.factories import UserFactory
 
 @pytest.mark.django_db
 def test_user_me(
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     mocker: MockerFixture,
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
@@ -31,12 +31,12 @@ def test_user_me(
         birth_date=datetime.date(2000, 1, 1),
         date_joined=datetime.date(2025, 1, 1),
     )
-    oauth_client.set_user(user)
+    client.set_user(user)
     with django_assert_num_queries(
         1  # fetch user
         + 2  # fetch otp devices (totp, static)
     ):
-        response = oauth_client.get(reverse("api:auth:user-me"))
+        response = client.get(reverse("api:auth:user-me"))
     assert response.status_code == 200
     assert response.json() == {
         "id": mocker.ANY,
@@ -66,7 +66,7 @@ def test_user_me_requires_authentication() -> None:
 
 @pytest.mark.django_db
 def test_user_me_requires_user_authentication(
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     client_credentials_app: Application,
 ) -> None:
     access = AccessToken.objects.create(
@@ -75,17 +75,17 @@ def test_user_me_requires_user_authentication(
         token="some-client-token",
         application=client_credentials_app,
     )
-    oauth_client.set_token(access.token)
+    client.set_token(access.token)
 
-    response = oauth_client.get(reverse("api:auth:user-me"))
+    response = client.get(reverse("api:auth:user-me"))
     assert response.status_code == 403
 
 
 @pytest.mark.django_db
-def test_user_me_update(user: User, oauth_client: OAuthClient) -> None:
-    oauth_client.set_user(user)
+def test_user_me_update(user: User, client: OAuthClient) -> None:
+    client.set_user(user)
 
-    response = oauth_client.patch(
+    response = client.patch(
         reverse("api:auth:user-me"),
         data={
             "display_name": "__Potato__",
@@ -102,11 +102,11 @@ def test_user_me_update(user: User, oauth_client: OAuthClient) -> None:
 
 
 @pytest.mark.django_db
-def test_user_me_update_username_taken(user: User, oauth_client: OAuthClient) -> None:
+def test_user_me_update_username_taken(user: User, client: OAuthClient) -> None:
     UserFactory.create(username="suzie")
 
-    oauth_client.set_user(user)
-    response = oauth_client.patch(
+    client.set_user(user)
+    response = client.patch(
         reverse("api:auth:user-me"),
         data={"username": "Suzie"},
     )
@@ -122,11 +122,11 @@ def test_user_me_update_username_taken(user: User, oauth_client: OAuthClient) ->
 
 
 @pytest.mark.django_db
-def test_user_me_update_disallow_email(user: User, oauth_client: OAuthClient) -> None:
-    oauth_client.set_user(user)
+def test_user_me_update_disallow_email(user: User, client: OAuthClient) -> None:
+    client.set_user(user)
 
     email = "hello@example.com"
-    response = oauth_client.patch(reverse("api:auth:user-me"), data={"email": email})
+    response = client.patch(reverse("api:auth:user-me"), data={"email": email})
     assert response.status_code == 200
 
     user.refresh_from_db()
@@ -210,7 +210,7 @@ def test_user_me_update_disallow_email(user: User, oauth_client: OAuthClient) ->
     ),
 )
 def test_user_me_third_party_token(
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     authorization_code_third_party_app: Application,
     scope: str,
     detail: dict[str, Any],
@@ -231,8 +231,8 @@ def test_user_me_third_party_token(
         token="third-party-token",
         application=authorization_code_third_party_app,
     )
-    oauth_client.set_token(access.token)
-    response = oauth_client.get(reverse("api:auth:user-me"))
+    client.set_token(access.token)
+    response = client.get(reverse("api:auth:user-me"))
     assert response.status_code == 200
     assert response.json() == detail
 
@@ -249,7 +249,7 @@ def test_user_me_third_party_token(
 )
 def test_user_me_third_party_token_case_bad_scope(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     authorization_code_third_party_app: Application,
     scope: str,
 ) -> None:
@@ -260,15 +260,15 @@ def test_user_me_third_party_token_case_bad_scope(
         token="third-party-token",
         application=authorization_code_third_party_app,
     )
-    oauth_client.set_token(access.token)
-    response = oauth_client.get(reverse("api:auth:user-me"))
+    client.set_token(access.token)
+    response = client.get(reverse("api:auth:user-me"))
     assert response.status_code == 403
 
 
 @pytest.mark.django_db
 def test_user_me_third_party_token_update_not_allowed(
     user: User,
-    oauth_client: OAuthClient,
+    client: OAuthClient,
     authorization_code_third_party_app: Application,
 ) -> None:
     access = AccessToken.objects.create(
@@ -281,8 +281,8 @@ def test_user_me_third_party_token_update_not_allowed(
         token="third-party-token",
         application=authorization_code_third_party_app,
     )
-    oauth_client.set_token(access.token)
-    response = oauth_client.patch(
+    client.set_token(access.token)
+    response = client.patch(
         reverse("api:auth:user-me"),
         data={"display_name": "Helen"},
     )

@@ -17,7 +17,7 @@ class OAuthClient(APIClient):
 
 
 @pytest.fixture
-def oauth_client() -> OAuthClient:
+def client() -> OAuthClient:
     app = Application.objects.create(
         client_id="default_client",
         is_first_party=True,
@@ -35,6 +35,15 @@ def user() -> User:
         username="test_user",
         email="test_user@example.org",
     )
+
+
+@pytest.fixture
+def user_client(
+    client: OAuthClient,
+    user: User,
+) -> OAuthClient:
+    client.set_user(user)
+    return client
 
 
 @pytest.fixture

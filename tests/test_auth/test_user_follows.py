@@ -11,10 +11,11 @@ from tests.factories import UserFactory
 @pytest.mark.django_db
 def test_user_follow(
     user: User,
-    user_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
+    client.set_user(user, scope="user.follow:write")
     profile = UserFactory.create()
-    response = user_client.post(
+    response = client.post(
         reverse(
             "api:auth:user-follow",
             kwargs={"pk": profile.pk},
@@ -45,11 +46,12 @@ def test_user_follow_subsequent_ok(
 @pytest.mark.django_db
 def test_user_unfollow(
     user: User,
-    user_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
+    client.set_user(user, scope="user.follow:write")
     profile = UserFactory.create()
     follow = UserFollow.objects.create(from_user=user, to_user=profile)
-    response = user_client.post(
+    response = client.post(
         reverse(
             "api:auth:user-unfollow",
             kwargs={"pk": profile.pk},
@@ -314,16 +316,17 @@ def test_user_follow_private_already_following(
 @pytest.mark.django_db
 def test_user_follow_request_list(
     user: User,
-    user_client: OAuthClient,
+    client: OAuthClient,
     mocker: MockerFixture,
 ) -> None:
+    client.set_user(user, scope="user.follow:read")
     profile = UserFactory.create()
     UserFollowRequest.objects.create(
         from_user=profile,
         to_user=user,
         status=UserFollowRequest.Status.PENDING,
     )
-    response = user_client.get(
+    response = client.get(
         reverse(
             "api:auth:follow-request-list",
         )
@@ -384,15 +387,16 @@ def test_user_follow_request_list_requires_scope(
 @pytest.mark.django_db
 def test_user_follow_request_accept(
     user: User,
-    user_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
+    client.set_user(user, scope="user.follow:write")
     profile = UserFactory.create(is_private=True)
     request = UserFollowRequest.objects.create(
         from_user=profile,
         to_user=user,
         status=UserFollowRequest.Status.PENDING,
     )
-    response = user_client.post(
+    response = client.post(
         reverse(
             "api:auth:follow-request-accept",
             kwargs={"pk": request.pk},
@@ -407,15 +411,16 @@ def test_user_follow_request_accept(
 @pytest.mark.django_db
 def test_user_follow_request_reject(
     user: User,
-    user_client: OAuthClient,
+    client: OAuthClient,
 ) -> None:
+    client.set_user(user, scope="user.follow:write")
     profile = UserFactory.create(is_private=True)
     request = UserFollowRequest.objects.create(
         from_user=profile,
         to_user=user,
         status=UserFollowRequest.Status.PENDING,
     )
-    response = user_client.post(
+    response = client.post(
         reverse(
             "api:auth:follow-request-reject",
             kwargs={"pk": request.pk},

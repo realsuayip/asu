@@ -372,7 +372,7 @@ class UserViewSet(
     )
     def relations(self, request: UserRequest) -> Response:
         user = request.user
-        queryset = User.objects.active().only("id", "username")
+        queryset = User.objects.active().only("id", "username").order_by("-id")
         queryset = queryset.annotate(
             rels=JSONObject(
                 following=Exists(

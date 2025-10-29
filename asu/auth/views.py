@@ -111,6 +111,7 @@ class UserViewSet(
         "me": "user.profile",
         "block": "user.block",
         "unblock": "user.block",
+        "blocked": "user.block",
         "follow": "user.follow",
         "unfollow": "user.follow",
         "relations": "user.profile",

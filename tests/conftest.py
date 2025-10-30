@@ -15,18 +15,22 @@ from asu.core.models import ProjectVariable
 from tests.factories import UserFactory
 
 
+def create_default_application() -> Application:
+    app = Application.objects.create(
+        client_id="default_client",
+        is_first_party=True,
+        skip_authorization=True,
+        client_type=Application.CLIENT_PUBLIC,
+        authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+    )
+    ProjectVariable.objects.create(name="DEFAULT_OAUTH_CLIENT", value=app.client_id)
+    return app
+
+
 class OAuthClient(APIClient):
     @cached_property
     def _default_application(self) -> Application:
-        app = Application.objects.create(
-            client_id="default_client",
-            is_first_party=True,
-            skip_authorization=True,
-            client_type=Application.CLIENT_PUBLIC,
-            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
-        )
-        ProjectVariable.objects.create(name="DEFAULT_OAUTH_CLIENT", value=app.client_id)
-        return app
+        return create_default_application()
 
     def _create_access_token(
         self,

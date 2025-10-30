@@ -39,6 +39,7 @@ dev = [
     "pytest-django",
     "pytest-mock",
     "pytest-sugar",
+    "pytest-randomly",
     "pytest-xdist",
     "factory-boy",
     "coverage",
@@ -158,4 +159,8 @@ exclude_also = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
-addopts = "--ds=asu.core.settings.test --tb=short"
+addopts = [
+    "--import-mode=importlib",
+    "--ds=asu.core.settings.test",
+    "--tb=short",
+]

@@ -72,6 +72,8 @@ shell: (run 'shell')
 # Run tests
 test: (run 'test --settings=asu.core.settings.test --parallel 4 --shuffle --timing --keepdb')
 
+tt *args: (exec 'pytest --reuse-db --no-migrations' args)
+
 alias mypy := type
 alias f := format
 alias t := test

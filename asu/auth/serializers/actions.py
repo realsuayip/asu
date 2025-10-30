@@ -207,27 +207,11 @@ class FollowSerializer(CreateRelationSerializer):
 
 class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):
     from_user = RelatedUserField
-    status = serializers.ChoiceField(
-        choices=[
-            UserFollowRequest.Status.REJECTED,
-            UserFollowRequest.Status.APPROVED,
-        ],
-        write_only=True,
-    )
 
     class Meta:
         model = UserFollowRequest
-        fields = ("id", "from_user", "status", "url")
+        fields = ("id", "from_user", "url")
         extra_kwargs = {"url": {"view_name": "api:auth:follow-request-detail"}}
-
-    @transaction.atomic
-    def update(
-        self, instance: UserFollowRequest, validated_data: dict[str, Any]
-    ) -> UserFollowRequest:
-        instance = super().update(instance, validated_data)
-        if instance.is_approved:
-            instance.bond()
-        return instance
 
 
 class UserConnectionSerializer(UserPublicReadSerializer):

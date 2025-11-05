@@ -138,7 +138,7 @@ class ConsentVerificationManager(VerificationManager[CV]):
         signer = signing.TimestampSigner(salt=self.model.salt)
         try:
             value = signer.unsign(consent, max_age=self.eligible_period)
-            return self.eligible().get(uuid=value, email=email, **kwargs)
+            return self.eligible().get(uuid=value, email__iexact=email, **kwargs)
         except (signing.BadSignature, self.model.DoesNotExist):
             return None
 

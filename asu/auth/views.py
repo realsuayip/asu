@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any, TypeVar
 
 from django import forms
@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import mixins, parsers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -77,11 +78,6 @@ class UserViewSet(
     mixins.CreateModelMixin,
     ExtendedViewSet[User],
 ):
-    permission_classes = [RequireToken]
-    """
-    Allow everyone for mixins listed above, for actions, each have their
-    permission classes set separately.
-    """
     sensitive_actions = {"followers", "following"}
     """
     These actions may reveal sensitive information about the user. If the user
@@ -116,6 +112,15 @@ class UserViewSet(
         "unfollow": "user.follow",
         "relations": "user.profile",
     }
+
+    def get_permissions(self) -> Sequence[BasePermission]:
+        # todo: use ExtendedViewSet?
+        permission_classes = self.permission_classes
+        if self.action == "retrieve":
+            permission_classes = [RequireToken]
+        elif self.action == "create":
+            permission_classes = [RequireFirstParty]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self) -> QuerySet[User]:
         return User.objects.active()

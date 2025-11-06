@@ -266,3 +266,14 @@ def test_user_me_third_party_token_update_not_allowed(
         data={"display_name": "Helen"},
     )
     assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_user_me_properly_responds_with_405_rather_than_403(
+    user: User,
+    client: OAuthClient,
+    authorization_code_third_party_app: Application,
+):
+    client.set_user(user, app=authorization_code_third_party_app)
+    response = client.post(reverse("api:auth:user-me"))
+    assert response.status_code == 405

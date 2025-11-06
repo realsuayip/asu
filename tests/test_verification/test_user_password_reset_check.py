@@ -7,18 +7,23 @@ from django.utils import timezone
 import pytest
 from pytest_mock import MockerFixture
 
-from asu.verification.models import RegistrationVerification
+from asu.verification.models import PasswordResetVerification
 from tests.conftest import OAuthClient
+from tests.factories import UserFactory
 
 
 @pytest.mark.django_db
-def test_verification_registration_check(
+def test_user_password_reset_check(
     first_party_app_client: OAuthClient,
     mocker: MockerFixture,
 ) -> None:
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
+    user = UserFactory(email="helen@example.com")
+    verification = PasswordResetVerification.objects.create(
+        email="helen@example.com",
+        user=user,
+    )
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-check"),
+        reverse("api:verification:password-reset-check"),
         data={
             "email": verification.email,
             "code": verification.code,
@@ -36,13 +41,20 @@ def test_verification_registration_check(
 
 
 @pytest.mark.django_db
-def test_verification_registration_check_expires_code_after_use(
+def test_user_password_reset_check_expires_code_after_use(
     first_party_app_client: OAuthClient,
 ) -> None:
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
+    user = UserFactory(email="helen@example.com")
+    verification = PasswordResetVerification.objects.create(
+        email="helen@example.com",
+        user=user,
+    )
     url, payload = (
-        reverse("api:verification:registration-verification-check"),
-        {"email": verification.email, "code": verification.code},
+        reverse("api:verification:password-reset-check"),
+        {
+            "email": verification.email,
+            "code": verification.code,
+        },
     )
     r1 = first_party_app_client.post(url, data=payload)
     r2 = first_party_app_client.post(url, data=payload)
@@ -51,14 +63,18 @@ def test_verification_registration_check_expires_code_after_use(
 
 
 @pytest.mark.django_db
-def test_verification_registration_check_bad_code(
+def test_user_password_reset_check_bad_code(
     first_party_app_client: OAuthClient,
 ) -> None:
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
+    user = UserFactory(email="helen@example.com")
+    verification = PasswordResetVerification.objects.create(
+        email="helen@example.com",
+        user=user,
+    )
     verification.code = "123456"
     verification.save(update_fields=["code"])
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-check"),
+        reverse("api:verification:password-reset-check"),
         data={
             "email": verification.email,
             "code": "987654",
@@ -68,17 +84,21 @@ def test_verification_registration_check_bad_code(
 
 
 @pytest.mark.django_db
-def test_verification_registration_check_expired_code(
+def test_user_password_reset_check_expired_code(
     first_party_app_client: OAuthClient,
     mocker: MockerFixture,
 ) -> None:
-    past = timezone.now() - timedelta(seconds=settings.REGISTRATION_VERIFY_PERIOD + 10)
+    past = timezone.now() - timedelta(seconds=settings.PASSWORD_VERIFY_PERIOD + 10)
     mocker.patch("django.utils.timezone.now", return_value=past)
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
+    user = UserFactory(email="helen@example.com")
+    verification = PasswordResetVerification.objects.create(
+        email="helen@example.com",
+        user=user,
+    )
     mocker.stopall()
 
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-check"),
+        reverse("api:verification:password-reset-check"),
         data={
             "email": verification.email,
             "code": verification.code,

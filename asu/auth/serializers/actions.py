@@ -58,7 +58,12 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
 
     def fail_email(self) -> NoReturn:
         raise serializers.ValidationError(
-            {"email": gettext("This e-mail could not be verified.")}
+            {
+                "email": gettext(
+                    "This e-mail could not be verified. Please provide"
+                    " a validated e-mail address."
+                )
+            }
         )
 
     @transaction.atomic
@@ -168,7 +173,7 @@ class BlockSerializer(CreateRelationSerializer):
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        block, created = UserBlock.objects.get_or_create(**validated_data)
+        _, created = UserBlock.objects.get_or_create(**validated_data)
         if created:
             # If there is a follow relationship between
             # users, delete them during blocking.

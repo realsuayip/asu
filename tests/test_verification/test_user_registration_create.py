@@ -287,6 +287,45 @@ def test_user_registration_create_requires_requires_first_party_app(
 
 
 @pytest.mark.django_db
+def test_user_registration_nullifies_other_verifications(
+    first_party_app_client: OAuthClient,
+) -> None:
+    create_default_application()
+    v1, v2 = RegistrationVerification.objects.bulk_create(
+        [
+            RegistrationVerification(
+                email="helen@example.com",
+                date_verified=timezone.now(),
+                code="111111",
+            ),
+            RegistrationVerification(
+                email="helen@example.com",
+                date_verified=timezone.now(),
+                code="111112",
+            ),
+        ]
+    )
+    consent = v1.create_consent()
+    response = first_party_app_client.post(
+        reverse("api:auth:user-list"),
+        data={
+            "email": "helen@example.com",
+            "consent": consent,
+            "display_name": "Helen",
+            "password": "Hln_1900",
+            "username": "helen",
+        },
+    )
+    assert response.status_code == 201
+
+    v1.refresh_from_db()
+    v2.refresh_from_db()
+
+    assert v1.date_completed is not None
+    assert v2.nulled_by == v1
+
+
+@pytest.mark.django_db
 def test_user_registration_flow(
     client: OAuthClient,
     first_party_app_client: OAuthClient,

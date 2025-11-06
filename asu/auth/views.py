@@ -208,7 +208,7 @@ class UserViewSet(
     @action(
         detail=False,
         methods=["patch"],
-        permission_classes=[RequireToken],
+        permission_classes=[RequireFirstParty],
         serializer_class=PasswordResetSerializer,
         url_path="password-reset",
     )

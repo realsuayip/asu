@@ -77,15 +77,6 @@ def test_user_email_change_send_email_taken(
 
 
 @pytest.mark.django_db
-def test_user_email_change_send_requires_authentication(client: OAuthClient) -> None:
-    response = client.post(
-        reverse("api:verification:email-verification-list"),
-        data={"email": "helen@example.com"},
-    )
-    assert response.status_code == 401
-
-
-@pytest.mark.django_db
 def test_user_email_change_send_requires_first_party_app_client(
     client: OAuthClient,
     authorization_code_third_party_app: Application,

@@ -111,13 +111,13 @@ def app_client(client_credentials_app: Application) -> OAuthClient:
 
 @pytest.fixture
 def first_party_app_client(
-    client_credentials_first_pary_app: Application,
+    client_credentials_first_party_app: Application,
 ) -> OAuthClient:
     access = AccessToken.objects.create(
         scope="",
         expires=timezone.now() + timedelta(minutes=15),
         token="some-client-token",
-        application=client_credentials_first_pary_app,
+        application=client_credentials_first_party_app,
     )
     client = OAuthClient()
     client.set_token(access.token)
@@ -136,7 +136,7 @@ def client_credentials_app() -> Application:
 
 
 @pytest.fixture
-def client_credentials_first_pary_app() -> Application:
+def client_credentials_first_party_app() -> Application:
     return Application.objects.create(
         client_id="first_party_client",
         is_first_party=True,

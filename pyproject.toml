@@ -98,7 +98,7 @@ select = [
     "PL", # pylint
     "PERF", # perflint
 ]
-ignore = ["ERA001", "B904", "RUF012", "SIM105", "PTH123", "PLR2004", "PLR0913", "PLR0911"]
+ignore = ["B904", "RUF012", "SIM105", "PTH123", "PLR2004", "PLR0913", "PLR0911"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

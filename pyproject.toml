@@ -41,8 +41,8 @@ dev = [
     "pytest-sugar",
     "pytest-randomly",
     "pytest-xdist",
+    "pytest-cov",
     "factory-boy",
-    "coverage",
     # Typing
     "mypy",
     "django-stubs",
@@ -137,18 +137,20 @@ django_settings_module = "asu.core.settings"
 [tool.coverage.run]
 source = ["asu"]
 omit = [
-    "asu/gateways/*",
-    "asu/settings/*",
-    "asu/utils/workers.py",
+    "asu/core/gateways/*",
+    "asu/core/settings/*",
+    "asu/messaging/*",
+    "asu/core/utils/workers.py",
     "*/migrations/*",
 ]
 branch = true
-dynamic_context = "test_function"
 
 [tool.coverage.report]
 exclude_also = [
     "if TYPE_CHECKING:",
     'if settings.DEBUG',
+    'if DEBUG',
+    'if TESTING',
     'if getattr\(self, "swagger_fake_view", False\):',
     'raise NotImplementedError',
     'raise AssertionError',

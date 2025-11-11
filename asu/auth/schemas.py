@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from drf_spectacular.openapi import AutoSchema
 
 
-__all__ = ["user", "follow_request"]
+__all__ = ["follow_request", "user"]
 
 
 class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
@@ -301,11 +301,15 @@ user = {
 list_follow_requests = extend_schema(
     summary="List follow requests", tags=[Tag.USER_FOLLOW_OPERATIONS]
 )
-update_follow_request = extend_schema(
-    summary="Respond to a follow request", tags=[Tag.USER_FOLLOW_OPERATIONS]
+accept_follow_request = action(
+    summary="Accept a follow request", tags=[Tag.USER_FOLLOW_OPERATIONS]
+)
+reject_follow_request = action(
+    summary="Reject a follow request", tags=[Tag.USER_FOLLOW_OPERATIONS]
 )
 
 follow_request = {
     "list": list_follow_requests,
-    "partial_update": update_follow_request,
+    "accept": accept_follow_request,
+    "reject": reject_follow_request,
 }

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
@@ -68,10 +68,17 @@ class UserFollowRequest(UserThrough):
         ]
 
     @property
-    def is_approved(self) -> bool:
-        return self.status == self.Status.APPROVED
+    def is_pending(self) -> bool:
+        return self.status == UserFollowRequest.Status.PENDING
 
-    def bond(self) -> None:
-        # Create the actual following relationship.
-        assert self.is_approved, "Attempt to bond unapproved instance"
+    @transaction.atomic
+    def accept(self) -> None:
+        assert self.is_pending
+        self.status = self.Status.APPROVED
+        self.save(update_fields=["status", "date_modified"])
         self.from_user.add_following(to_user=self.to_user)
+
+    def reject(self) -> None:
+        assert self.is_pending
+        self.status = self.Status.REJECTED
+        self.save(update_fields=["status", "date_modified"])

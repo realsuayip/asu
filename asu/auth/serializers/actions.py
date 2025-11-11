@@ -58,7 +58,12 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
 
     def fail_email(self) -> NoReturn:
         raise serializers.ValidationError(
-            {"email": gettext("This e-mail could not be verified.")}
+            {
+                "email": gettext(
+                    "This e-mail could not be verified. Please provide"
+                    " a validated e-mail address."
+                )
+            }
         )
 
     @transaction.atomic
@@ -168,7 +173,7 @@ class BlockSerializer(CreateRelationSerializer):
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        block, created = UserBlock.objects.get_or_create(**validated_data)
+        _, created = UserBlock.objects.get_or_create(**validated_data)
         if created:
             # If there is a follow relationship between
             # users, delete them during blocking.
@@ -207,27 +212,10 @@ class FollowSerializer(CreateRelationSerializer):
 
 class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):
     from_user = RelatedUserField
-    status = serializers.ChoiceField(
-        choices=[
-            UserFollowRequest.Status.REJECTED,
-            UserFollowRequest.Status.APPROVED,
-        ],
-        write_only=True,
-    )
 
     class Meta:
         model = UserFollowRequest
-        fields = ("id", "from_user", "status", "url")
-        extra_kwargs = {"url": {"view_name": "api:auth:follow-request-detail"}}
-
-    @transaction.atomic
-    def update(
-        self, instance: UserFollowRequest, validated_data: dict[str, Any]
-    ) -> UserFollowRequest:
-        instance = super().update(instance, validated_data)
-        if instance.is_approved:
-            instance.bond()
-        return instance
+        fields = ("id", "from_user")
 
 
 class UserConnectionSerializer(UserPublicReadSerializer):

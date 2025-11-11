@@ -112,7 +112,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer[User]):
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> User:
         consent = validated_data.pop("consent")
-        email = validated_data["email"]
+        email = validated_data.pop("email")
 
         verification = RegistrationVerification.objects.get_with_consent(email, consent)
 
@@ -127,7 +127,7 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer[User]):
             )
 
         password = validated_data.pop("password")
-        user = User(**validated_data)
+        user = User(email=verification.email, **validated_data)
         validate_username_constraints(user)
 
         try:

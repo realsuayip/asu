@@ -35,6 +35,12 @@ dependencies = [
 [dependency-groups]
 dev = [
     # Testing
+    "pytest",
+    "pytest-django",
+    "pytest-mock",
+    "pytest-sugar",
+    "pytest-randomly",
+    "pytest-xdist",
     "factory-boy",
     "coverage",
     # Typing
@@ -148,4 +154,13 @@ exclude_also = [
     'raise AssertionError',
     'def __str__',
     'def __repr__',
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = [
+    "--import-mode=importlib",
+    "--ds=asu.core.settings.test",
+    "--tb=short",
 ]

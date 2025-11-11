@@ -215,8 +215,7 @@ class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):
 
     class Meta:
         model = UserFollowRequest
-        fields = ("id", "from_user", "url")
-        extra_kwargs = {"url": {"view_name": "api:auth:follow-request-detail"}}
+        fields = ("id", "from_user")
 
 
 class UserConnectionSerializer(UserPublicReadSerializer):

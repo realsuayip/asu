@@ -48,7 +48,6 @@ from asu.auth.serializers.user import (
 from asu.core.utils.rest import (
     EmptySerializer,
     IDFilter,
-    PartialUpdateModelMixin,
     get_paginator,
 )
 from asu.core.utils.typing import UserRequest
@@ -438,7 +437,6 @@ class UserViewSet(
 
 class FollowRequestViewSet(
     mixins.ListModelMixin,
-    PartialUpdateModelMixin,
     ExtendedViewSet[UserFollowRequest],
 ):
     permission_classes = [RequireUser, RequireScope]

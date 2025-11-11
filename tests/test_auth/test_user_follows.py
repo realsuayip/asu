@@ -381,7 +381,6 @@ def test_user_follow_request_list(
                     "description": "",
                     "url": mocker.ANY,
                 },
-                "url": mocker.ANY,
             }
         ],
     }

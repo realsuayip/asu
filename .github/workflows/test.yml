@@ -26,7 +26,7 @@ jobs:
       run: >-
         docker compose -f docker/dev/docker-compose.yml run --rm web
         /bin/sh -c
-        "coverage run --concurrency=multiprocessing ./manage.py test --parallel 4 --shuffle --timing --settings=asu.core.settings.test --no-input && coverage combine && coverage xml"
+        "pytest -n2 --no-migrations --cov --cov-report=xml"
 
     - name: Upload coverage
       uses: codecov/codecov-action@v3

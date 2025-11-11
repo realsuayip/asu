@@ -71,13 +71,6 @@ class UserFollowRequest(UserThrough):
     def is_pending(self) -> bool:
         return self.status == UserFollowRequest.Status.PENDING
 
-    @property
-    def is_approved(self) -> bool:
-        return self.status == self.Status.APPROVED
-
-    def is_rejected(self) -> bool:
-        return self.status == self.Status.REJECTED
-
     @transaction.atomic
     def accept(self) -> None:
         assert self.is_pending

@@ -184,7 +184,7 @@ class UserViewSet(
                 # user information.
                 raise PermissionDenied
             serializer = self.get_serializer(user, data=request.data, partial=True)
-            return self.get_action_save_response(self.request, serializer)
+            return self.perform_action(serializer)
 
         serializer = self.get_serializer(user, **self.get_profile_attrs(token))
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -212,7 +212,7 @@ class UserViewSet(
         url_path="password-reset",
     )
     def reset_password(self, request: Request) -> Response:
-        return self.get_action_save_response(request)
+        return self.perform_action()
 
     @action(
         detail=False,
@@ -223,14 +223,14 @@ class UserViewSet(
     )
     def change_password(self, request: UserRequest) -> Response:
         serializer = self.get_serializer(instance=request.user, data=request.data)
-        return self.get_action_save_response(request, serializer)
+        return self.perform_action(serializer)
 
     def save_through(self) -> Response:
         # Common save method for user blocking and following.
         context = self.get_serializer_context()
         context["to_user"] = self.get_object()
         serializer = self.get_serializer(data=self.request.data, context=context)
-        return self.get_action_save_response(self.request, serializer)
+        return self.perform_action(serializer)
 
     def delete_through(self, model: type[UserFollow | UserBlock]) -> Response:
         # Common delete method for user blocking and following.
@@ -328,8 +328,7 @@ class UserViewSet(
         context = self.get_serializer_context()
         context["recipient"] = self.get_object()
         serializer = self.get_serializer(data=request.data, context=context)
-        return self.get_action_save_response(
-            request,
+        return self.perform_action(
             serializer,
             status_code=status.HTTP_201_CREATED,
         )
@@ -347,9 +346,7 @@ class UserViewSet(
         authentication token in case conventional methods are not
         possible e.g., through WebSocket protocol.
         """
-        return self.get_action_save_response(
-            request, status_code=status.HTTP_201_CREATED
-        )
+        return self.perform_action(status_code=status.HTTP_201_CREATED)
 
     @action(
         detail=False,
@@ -365,7 +362,7 @@ class UserViewSet(
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         serializer = self.get_serializer(self.request.user, data=request.data)
-        return self.get_action_save_response(request, serializer)
+        return self.perform_action(serializer)
 
     @action(
         detail=False,
@@ -430,9 +427,7 @@ class UserViewSet(
         serializer_class=UserDeactivationSerializer,
     )
     def deactivate(self, request: UserRequest) -> Response:
-        return self.get_action_save_response(
-            request, status_code=status.HTTP_204_NO_CONTENT
-        )
+        return self.perform_action(status_code=status.HTTP_204_NO_CONTENT)
 
 
 class FollowRequestViewSet(

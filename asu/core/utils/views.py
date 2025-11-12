@@ -7,7 +7,6 @@ from django.db import models
 
 from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from django_filters import rest_framework as filters
@@ -41,10 +40,10 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
     scopes: dict[str, list[str] | str] = {}
     request: UserRequest
 
-    def get_action_save_response(
+    def perform_action(
         self,
-        request: Request,
         serializer: serializers.BaseSerializer[Any] | None = None,
+        *,
         status_code: int = status.HTTP_200_OK,
     ) -> Response:
         # Similar functionality from mixins.CreateModelMixin
@@ -52,7 +51,7 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
         assert status.is_success(status_code)
 
         if serializer is None:
-            serializer = self.get_serializer(data=request.data)
+            serializer = self.get_serializer(data=self.request.data)
 
         serializer.is_valid(raise_exception=True)
         serializer.save()

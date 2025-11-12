@@ -44,4 +44,4 @@ class PasswordResetViewSet(
         permission_classes=[RequireFirstParty],
     )
     def check(self, request: Request) -> Response:
-        return self.get_action_save_response(request)
+        return self.perform_action()

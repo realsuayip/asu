@@ -153,4 +153,4 @@ class ConversationViewSet(
         context = self.get_serializer_context()
         context["conversation"] = self.get_object()
         serializer = self.get_serializer(data=request.data, context=context)
-        return self.get_action_save_response(request, serializer)
+        return self.perform_action(serializer)

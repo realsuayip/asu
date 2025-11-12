@@ -69,7 +69,6 @@ prod = [
 [tool.ruff]
 fix = true
 show-fixes = true
-target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]

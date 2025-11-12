@@ -248,14 +248,14 @@ class ProfilePictureEditSerializer(serializers.ModelSerializer[User]):
         return instance
 
 
-rels = {
+rels = (
     "following",
     "followed_by",
     "follow_request_sent",
     "follow_request_received",
     "blocking",
     "blocked_by",
-}
+)
 
 
 class UserWithRelationSerializer(serializers.ModelSerializer[User]):

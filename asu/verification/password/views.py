@@ -33,9 +33,9 @@ class PasswordResetViewSet(
     action of 'UserViewSet'.
     """
 
-    serializer_class = PasswordResetVerificationSerializer
-    schemas = schemas.password_reset
+    serializer_classes = {"create": PasswordResetVerificationSerializer}
     permission_classes = [RequireFirstParty]
+    schemas = schemas.password_reset
 
     @action(
         detail=False,

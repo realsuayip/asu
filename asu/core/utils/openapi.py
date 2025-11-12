@@ -1,10 +1,11 @@
 import enum
 import types
-from typing import Any
+from typing import Any, cast
 
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
+from rest_framework.response import Response
 
 from drf_spectacular.extensions import OpenApiSerializerExtension
 from drf_spectacular.openapi import AutoSchema
@@ -42,8 +43,11 @@ class DynamicFieldsModelSerializerExtension(OpenApiSerializerExtension):
 def get_error_repr(errors: Any) -> dict[str, Any]:
     # Create an error response representation from given
     # errors. Used in OpenAPI examples.
-    response = exception_handler(serializers.ValidationError(errors), {})
-    return response.data
+    response = cast(
+        "Response",
+        exception_handler(serializers.ValidationError(errors), {}),
+    )
+    return cast("dict[str, Any]", response.data)
 
 
 examples = types.SimpleNamespace(

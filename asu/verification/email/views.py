@@ -23,7 +23,7 @@ class EmailViewSet(mixins.CreateModelMixin, ExtendedViewSet[EmailVerification]):
     password reset, we ask for new password.
     """
 
-    serializer_class = EmailSerializer
+    serializer_classes = {"create": EmailSerializer}
     permission_classes = [RequireUser, RequireFirstParty]
     schemas = schemas.email
 

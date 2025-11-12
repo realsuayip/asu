@@ -37,7 +37,7 @@ class RegistrationViewSet(
     given. If emails do match, the user is saved to the database.
     """
 
-    serializer_class = RegistrationSerializer
+    serializer_classes = {"create": RegistrationSerializer}
     permission_classes = [RequireFirstParty]
     schemas = schemas.registration
 

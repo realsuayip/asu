@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.9.5-python3.13-alpine
+FROM ghcr.io/astral-sh/uv:0.9.8-python3.14-alpine@sha256:a834e872777374c695d49ef33aef1b65debda73509f72a825562955bbbdb6099
 
 WORKDIR /app
 

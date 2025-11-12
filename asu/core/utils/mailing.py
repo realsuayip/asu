@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any
 
 from django.core.mail import EmailMessage

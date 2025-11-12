@@ -8,11 +8,17 @@ b) Reused throughout the application, such as
 generic error messages.
 """
 
-from collections import namedtuple
+import typing
 
 from django.utils.translation import gettext_lazy as _
 
-EmailMessage = namedtuple("EmailMessage", ["subject", "body"])
+if typing.TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
+
+
+class EmailMessage(typing.NamedTuple):
+    subject: StrOrPromise
+    body: StrOrPromise
 
 
 GENERIC_ERROR = _("We could not handle your request. Please try again later.")

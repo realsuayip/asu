@@ -32,7 +32,7 @@ class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
     priority = 1
 
     def get_security_requirement(
-        self, auto_schema: "AutoSchema"
+        self, auto_schema: AutoSchema
     ) -> dict[str, list[Any]] | list[dict[str, list[Any]]]:
         view = auto_schema.view
         permissions = view.get_permissions()

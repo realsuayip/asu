@@ -23,7 +23,7 @@ class SessionStore(DBStore):
 
     def create_model_instance(self, data: dict[str, Any]) -> Session:
         try:
-            user = int(cast(str, data.get("_auth_user_id")))
+            user = int(cast("str", data.get("_auth_user_id")))
         except (ValueError, TypeError):
             user = None
 

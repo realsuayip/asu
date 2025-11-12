@@ -297,7 +297,7 @@ class UserDeactivationSerializer(serializers.ModelSerializer[UserDeactivation]):
 
     def create(self, validated_data: dict[str, Any]) -> UserDeactivation:
         user, password, for_deletion = (
-            cast(User, validated_data["user"]),
+            cast("User", validated_data["user"]),
             validated_data["password"],
             validated_data["for_deletion"],
         )

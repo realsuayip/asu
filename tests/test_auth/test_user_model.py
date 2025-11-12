@@ -29,7 +29,10 @@ def test_user_revoke_other_tokens(user: User) -> None:
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "cls",
-    [TOTPDevice, StaticDevice],
+    (
+        TOTPDevice,
+        StaticDevice,
+    ),
 )
 def test_user_two_factor_enabled(
     user: User,

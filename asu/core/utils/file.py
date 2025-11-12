@@ -3,7 +3,7 @@ from __future__ import annotations
 import mimetypes
 import uuid
 from pathlib import Path
-from typing import Any, AnyStr
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -17,7 +17,7 @@ from storages.backends.s3boto3 import (
 )
 
 
-def get_mime_type(file: File[AnyStr]) -> str:
+def get_mime_type(file: File[Any]) -> str:
     initial_pos = file.tell()
     file.seek(0)
     mime_type = magic.from_buffer(file.read(2048), mime=True)
@@ -32,7 +32,7 @@ class MimeTypeValidator:
     def __init__(self, allowed_types: list[str]) -> None:
         self.allowed_types = allowed_types
 
-    def __call__(self, file: File[AnyStr]) -> None:
+    def __call__(self, file: File[Any]) -> None:
         # First, guess the mimetype, if it doesn't match,
         # don't bother invoking magic.
         name = file.name or ""
@@ -53,7 +53,7 @@ class FileSizeValidator:
     def __init__(self, max_size: int):
         self.max_size = max_size
 
-    def __call__(self, file: File[AnyStr]) -> None:
+    def __call__(self, file: File[Any]) -> None:
         if file.size > self.max_size:
             raise ValidationError(self.message)
 

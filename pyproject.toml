@@ -66,61 +66,6 @@ prod = [
     "websockets ~= 13.1",
 ]
 
-[tool.ruff]
-fix = true
-show-fixes = true
-line-length = 88
-
-[tool.ruff.lint]
-fixable = ["I"]
-select = [
-    "E", # pycodestyle errors
-    "W", # pycodestyle warnings
-    "F", # pyflakes
-    "C", # flake8-comprehensions
-    "B", # flake8-bugbear
-    "RUF", # Ruff-specific
-    "C4", # flake8-comprehensions
-    "C90", # mccabe
-    "I", # isort
-    "N", # pep8-naming,
-    "BLE", # flake8-blind-except
-    "DTZ", # flake8-datetimez
-    "DJ", # flake8-django
-    "FA", # flake8-future-annotations
-    "G", # flake8-logging-format
-    "T20", # flake8-print
-    "RET", # flake8-return
-    "SIM", # flake8-simplify
-    "PTH", # flake8-use-pathlib
-    "ERA", # eradicate
-    "PL", # pylint
-    "PERF", # perflint
-]
-ignore = ["B904", "RUF012", "SIM105", "PTH123", "PLR2004", "PLR0913", "PLR0911"]
-
-[tool.ruff.lint.isort]
-combine-as-imports = true
-section-order = [
-    "future",
-    "standard-library",
-    "django",
-    "rest_framework",
-    "third-party",
-    "first-party",
-    "local-folder",
-]
-
-[tool.ruff.lint.isort.sections]
-django = ["django"]
-rest_framework = ["rest_framework"]
-
-[tool.ruff.lint.mccabe]
-max-complexity = 20
-
-[tool.ruff.lint.extend-per-file-ignores]
-"*/migrations/*" = ["E501"]
-
 [tool.mypy]
 plugins = [
     "mypy_django_plugin.main",
@@ -132,6 +77,15 @@ allow_subclassing_any = true
 
 [tool.django-stubs]
 django_settings_module = "asu.core.settings"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = [
+    "--import-mode=importlib",
+    "--ds=asu.core.settings.test",
+    "--tb=short",
+]
 
 [tool.coverage.run]
 source = ["asu"]
@@ -157,11 +111,78 @@ exclude_also = [
     'def __repr__',
 ]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-addopts = [
-    "--import-mode=importlib",
-    "--ds=asu.core.settings.test",
-    "--tb=short",
+
+[tool.ruff]
+fix = true
+show-fixes = true
+line-length = 88
+
+[tool.ruff.lint]
+fixable = ["I"]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+    "RUF", # ruff-specific
+    "C4", # flake8-comprehensions
+    "C90", # mccabe
+    "I", # isort
+    "N", # pep8-naming
+    "BLE", # flake8-blind-except
+    "DTZ", # flake8-datetimez
+    "DJ", # flake8-django
+    "FA", # flake8-future-annotations
+    "G", # flake8-logging-format
+    "T20", # flake8-print
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "PTH", # flake8-use-pathlib
+    "ERA", # eradicate
+    "PL", # pylint
+    "PERF", # perflint
+    "PIE", # flake8-pie
+    "PYI", # flake8-pyi
+    "PT", # flake8-pytest-style
+    "TC", # flake8-type-checking
+    "UP", # pyupgrade
+    "FURB", # refurb
 ]
+ignore = [
+    "B904",
+    "RUF012",
+    "SIM105",
+    "PTH123",
+    "PLR2004",
+    "PLR0913",
+    "PLR0911",
+    "TC001",
+    "TC002",
+    "TC003",
+    "UP031",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+section-order = [
+    "future",
+    "standard-library",
+    "django",
+    "rest_framework",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+[tool.ruff.lint.isort.sections]
+django = ["django"]
+rest_framework = ["rest_framework"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"*/migrations/*" = ["E501"]
+
+[tool.ruff.lint.flake8-pytest-style]
+parametrize-values-type = "tuple"
+parametrize-values-row-type = "tuple"
+parametrize-names-type = "csv"

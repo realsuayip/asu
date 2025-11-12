@@ -38,7 +38,7 @@ class RequireFirstParty(OAuthPermission):
     """
 
     def has_oauth_permission(self, request: Request, view: APIView) -> bool:
-        token = cast(AccessToken, request.auth)
+        token = cast("AccessToken", request.auth)
         return bool(token and token.application.is_first_party)
 
 

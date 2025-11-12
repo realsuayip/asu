@@ -126,7 +126,7 @@ class PartialUpdateModelMixin:
 
 
 class EmptyMetadata(BaseMetadata):
-    def determine_metadata(self, request: Request, view: "APIView") -> None:
+    def determine_metadata(self, request: Request, view: APIView) -> None:
         return None
 
 

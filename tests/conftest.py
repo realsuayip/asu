@@ -73,7 +73,7 @@ class OAuthClient(APIClient):
         self.set_token(access.token)
 
     def set_token(self, token: str) -> None:
-        self.credentials(**{"Authorization": f"Bearer {token}"})
+        self.credentials(Authorization=f"Bearer {token}")
 
 
 @pytest.fixture

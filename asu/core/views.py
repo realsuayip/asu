@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Callable, cast
+from collections.abc import Callable
+from typing import Any, cast
 
 from django import urls
 from django.conf import settings
@@ -104,7 +105,7 @@ class APIRootView(BaseAPIRootView):
                     namespaces[sub] = self.visit(entry, ns)
                 else:
                     patterns = self.visit(entry, namespace)
-                    patterns = cast(list[dict[str, Any]], patterns)
+                    patterns = cast("list[dict[str, Any]]", patterns)
                     values.extend(patterns)
             else:
                 # This is a plain URLPattern, just append it to
@@ -174,7 +175,7 @@ def as_json(exc: type[APIException]) -> JsonResponse:
     # class must be a subclass of APIException.
     assert issubclass(exc, APIException)
 
-    response = cast(Response, exception_handler(exc(), {}))
+    response = cast("Response", exception_handler(exc(), {}))
     return JsonResponse(
         response.data,
         status=response.status_code,

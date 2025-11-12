@@ -422,7 +422,6 @@ def test_user_blocked_list(
                 "id": mocker.ANY,
                 "is_private": True,
                 "profile_picture": None,
-                "url": mocker.ANY,
                 "username": mocker.ANY,
             },
             {
@@ -431,7 +430,6 @@ def test_user_blocked_list(
                 "id": mocker.ANY,
                 "is_private": False,
                 "profile_picture": None,
-                "url": mocker.ANY,
                 "username": mocker.ANY,
             },
         ],

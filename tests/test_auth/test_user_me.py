@@ -52,7 +52,6 @@ def test_user_me(
         "allows_receipts": True,
         "allows_all_messages": True,
         "two_factor_enabled": False,
-        "url": mocker.ANY,
     }
 
 
@@ -136,7 +135,6 @@ def test_user_me_update_disallow_email(
                 "profile_picture": None,
                 "date_joined": "2025-01-01T00:00:00Z",
                 "is_private": False,
-                "url": ANY,
             },
         ),
         (
@@ -156,7 +154,6 @@ def test_user_me_update_disallow_email(
                 "gender": "unspecified",
                 "language": "en",
                 "two_factor_enabled": False,
-                "url": ANY,
             },
         ),
         (
@@ -171,7 +168,6 @@ def test_user_me_update_disallow_email(
                 "profile_picture": None,
                 "date_joined": "2025-01-01T00:00:00Z",
                 "is_private": False,
-                "url": ANY,
             },
         ),
         (
@@ -192,7 +188,6 @@ def test_user_me_update_disallow_email(
                 "gender": "unspecified",
                 "language": "en",
                 "two_factor_enabled": False,
-                "url": ANY,
             },
         ),
     ),

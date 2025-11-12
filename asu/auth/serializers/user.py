@@ -23,9 +23,7 @@ def validate_username_constraints(instance: User) -> None:
             raise serializers.ValidationError({"username": err.messages})
 
 
-class UserPublicReadSerializer(
-    DynamicFieldsMixin, serializers.HyperlinkedModelSerializer[User]
-):
+class UserPublicReadSerializer(DynamicFieldsMixin, serializers.ModelSerializer[User]):
     following_count = serializers.IntegerField()
     follower_count = serializers.IntegerField()
     profile_picture = serializers.ImageField(source="get_profile_picture")
@@ -43,12 +41,10 @@ class UserPublicReadSerializer(
             "website",
             "following_count",
             "follower_count",
-            "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
 
 
-class UserSerializer(DynamicFieldsMixin, serializers.HyperlinkedModelSerializer[User]):
+class UserSerializer(DynamicFieldsMixin, serializers.ModelSerializer[User]):
     profile_picture = serializers.ImageField(source="get_profile_picture")
     two_factor_enabled = serializers.BooleanField()
 
@@ -70,9 +66,7 @@ class UserSerializer(DynamicFieldsMixin, serializers.HyperlinkedModelSerializer[
             "allows_receipts",
             "allows_all_messages",
             "two_factor_enabled",
-            "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}
         read_only_fields = (
             "profile_picture",
             "email",
@@ -98,7 +92,7 @@ class AuthSerializer(serializers.Serializer[dict[str, Any]]):
     scope = serializers.CharField()
 
 
-class UserCreateSerializer(serializers.HyperlinkedModelSerializer[User]):
+class UserCreateSerializer(serializers.ModelSerializer[User]):
     consent = serializers.CharField(write_only=True)
     password = serializers.CharField(
         write_only=True,
@@ -157,6 +151,4 @@ class UserCreateSerializer(serializers.HyperlinkedModelSerializer[User]):
             "language",
             "consent",
             "auth",
-            "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:auth:user-detail"}}

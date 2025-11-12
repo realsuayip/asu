@@ -246,7 +246,6 @@ OAUTH2_USER_FIELDS = {
         "profile_picture",
         "date_joined",
         "is_private",
-        "url",
     },
     "user.profile.email:read": {"email"},
     "user.profile.private:read": {

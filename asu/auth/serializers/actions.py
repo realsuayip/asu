@@ -36,7 +36,6 @@ user_fields = (
     "profile_picture",
     "description",
     "is_private",
-    "url",
 )
 RelatedUserField = UserPublicReadSerializer(
     read_only=True,
@@ -227,7 +226,6 @@ class UserConnectionSerializer(UserPublicReadSerializer):
             "profile_picture",
             "description",
             "is_private",
-            "url",
         )
 
 

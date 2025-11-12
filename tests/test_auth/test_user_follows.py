@@ -379,7 +379,6 @@ def test_user_follow_request_list(
                     "profile_picture": None,
                     "is_private": False,
                     "description": "",
-                    "url": mocker.ANY,
                 },
             }
         ],
@@ -587,7 +586,6 @@ def test_user_followers(
                 "id": mocker.ANY,
                 "is_private": True,
                 "profile_picture": None,
-                "url": mocker.ANY,
                 "username": mocker.ANY,
             },
             {
@@ -596,7 +594,6 @@ def test_user_followers(
                 "id": mocker.ANY,
                 "is_private": False,
                 "profile_picture": None,
-                "url": mocker.ANY,
                 "username": mocker.ANY,
             },
         ],
@@ -641,7 +638,6 @@ def test_user_following(
                 "id": mocker.ANY,
                 "is_private": True,
                 "profile_picture": None,
-                "url": mocker.ANY,
                 "username": mocker.ANY,
             },
             {
@@ -650,7 +646,6 @@ def test_user_following(
                 "id": mocker.ANY,
                 "is_private": False,
                 "profile_picture": None,
-                "url": mocker.ANY,
                 "username": mocker.ANY,
             },
         ],

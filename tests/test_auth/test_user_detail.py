@@ -52,7 +52,6 @@ def test_user_detail(
         "website": "https://example.com",
         "following_count": 0,
         "follower_count": 0,
-        "url": mocker.ANY,
     }
 
 

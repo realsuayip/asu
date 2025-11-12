@@ -54,7 +54,6 @@ def test_user_registration_create(
         "gender": "unspecified",
         "id": mocker.ANY,
         "language": "en",
-        "url": mocker.ANY,
         "username": "helen",
     }
     user = User.objects.get(email="helen@example.com")

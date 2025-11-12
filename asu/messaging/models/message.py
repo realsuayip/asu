@@ -4,13 +4,10 @@ from typing import TYPE_CHECKING, Literal, TypedDict
 
 from django.conf import settings
 from django.db import models, transaction
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-
-from asu.messaging.models import Conversation
 
 if TYPE_CHECKING:
     from asu.auth.models import User
@@ -70,12 +67,6 @@ class Message(models.Model):
 
     def __str__(self) -> str:
         return str(self.pk)
-
-    @cached_property
-    def sender_conversation(self) -> Conversation:
-        # Used in "MessageComposeSerializer" to retrieve related
-        # conversation hyperlink.
-        return self.conversations.only("pk").get(holder=self.sender)
 
     def websocket_send(self, target_conversation_id: int) -> None:
         group = "conversations_%s" % self.recipient_id

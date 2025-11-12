@@ -15,32 +15,12 @@ from asu.messaging.models import Conversation, ConversationRequest, Message
 
 
 class MessageComposeSerializer(serializers.ModelSerializer[Message]):
-    conversation = serializers.HyperlinkedRelatedField(  # type: ignore[var-annotated]
-        read_only=True,
-        view_name="api:messaging:conversation-detail",
-        source="sender_conversation",
-    )
-    url = serializers.SerializerMethodField()
-
     class Meta:
         model = Message
         fields = (
             "id",
             "body",
-            "conversation",
             "date_created",
-            "url",
-        )
-
-    @extend_schema_field(serializers.URLField)
-    def get_url(self, obj: Message) -> str:
-        return reverse(
-            "api:messaging:message-detail",
-            kwargs={
-                "pk": obj.pk,
-                "conversation_pk": obj.sender_conversation.pk,
-            },
-            request=self.context["request"],
         )
 
     def create(self, validated_data: dict[str, Any]) -> Message:
@@ -74,7 +54,7 @@ class MessageSerializer(serializers.ModelSerializer[Message]):
         return "sent" if message.sender_id == user.pk else "received"
 
 
-class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation]):
+class ConversationSerializer(serializers.ModelSerializer[Conversation]):
     target = UserPublicReadSerializer(
         fields=(
             "id",
@@ -82,7 +62,6 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
             "username",
             "profile_picture",
             "is_private",
-            "url",
         ),
         ref_name="ConversationUserTarget",
     )
@@ -101,9 +80,7 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer[Conversation
             "date_created",
             "date_modified",
             "messages",
-            "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
 
     @extend_schema_field(MessageSerializer(allow_null=True))
     def get_last_message(self, obj: Conversation) -> dict[str, Any] | None:
@@ -136,9 +113,7 @@ class ConversationDetailSerializer(ConversationSerializer):
             "date_created",
             "date_modified",
             "messages",
-            "url",
         )
-        extra_kwargs = {"url": {"view_name": "api:messaging:conversation-detail"}}
 
     def get_accept_required(self, conversation: Conversation) -> bool:
         return ConversationRequest.objects.filter(

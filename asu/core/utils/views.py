@@ -19,7 +19,7 @@ MT_co = TypeVar("MT_co", bound=models.Model, covariant=True)
 
 class ViewSetMeta(abc.ABCMeta):
     def __new__(
-        mcs,  # noqa: N804
+        mcs,
         name: str,
         bases: tuple[type[Any], ...],
         classdict: dict[str, Any],

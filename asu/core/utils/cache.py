@@ -6,7 +6,10 @@ from typing import Any, ParamSpec, TypeVar
 
 from django.core.cache import cache
 
-__all__ = ["cached_context", "build_vary_key"]
+__all__ = [
+    "build_vary_key",
+    "cached_context",
+]
 
 
 P = ParamSpec("P")

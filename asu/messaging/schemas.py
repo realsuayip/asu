@@ -8,7 +8,10 @@ from asu.messaging.serializers import (
     ReadConversationSerializer,
 )
 
-__all__ = ["message", "conversation"]
+__all__ = [
+    "conversation",
+    "message",
+]
 
 message = {
     "list": extend_schema(

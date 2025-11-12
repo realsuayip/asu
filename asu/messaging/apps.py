@@ -7,4 +7,4 @@ class MessagingConfig(AppConfig):
     verbose_name = pgettext_lazy("app name", "Messaging")
 
     def ready(self) -> None:
-        import asu.messaging.models.signals  # noqa: F401
+        import asu.messaging.models.signals  # noqa: PLC0415, F401

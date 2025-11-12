@@ -4,7 +4,7 @@ import sys
 
 
 def main():
-    from django.core.management import execute_from_command_line
+    from django.core.management import execute_from_command_line  # noqa: PLC0415
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "asu.core.settings")
     execute_from_command_line(sys.argv)

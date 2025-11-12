@@ -1,4 +1,5 @@
 import datetime
+import zoneinfo
 
 from django.urls import reverse
 
@@ -25,7 +26,7 @@ def test_user_detail(
         website="https://example.com",
         gender="unspecified",
         birth_date=datetime.date(2000, 1, 1),
-        date_joined=datetime.date(2025, 1, 1),
+        date_joined=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
 
     with django_assert_num_queries(

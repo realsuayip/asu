@@ -1,4 +1,5 @@
 import datetime
+import zoneinfo
 from typing import Any
 from unittest.mock import ANY
 
@@ -27,7 +28,7 @@ def test_user_me(
         website="https://example.com",
         gender="unspecified",
         birth_date=datetime.date(2000, 1, 1),
-        date_joined=datetime.date(2025, 1, 1),
+        date_joined=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
     client.set_user(user)
     with django_assert_num_queries(
@@ -204,8 +205,8 @@ def test_user_me_third_party_token(
         email="helen@example.com",
         description="hello world!",
         website="https://example.com",
-        date_joined=datetime.date(2025, 1, 1),
         birth_date=datetime.date(2000, 1, 1),
+        date_joined=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
     client.set_user(
         user,

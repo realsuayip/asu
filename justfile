@@ -1,11 +1,12 @@
-env := env("ASU_DOCKER_ENV", "dev")
-file := "docker/" + env + "/docker-compose.yml"
+files_env := env("ASU_COMPOSE_FILES", "compose.yml workers.yml")
+files_abs := prepend("docker/dev/", files_env)
+files := prepend("-f ", files_abs)
 
 _default: (docker 'up -d')
 
 # Run a docker-compose command
 docker *args:
-    docker compose -p asu -f {{ file }} {{ args }}
+    docker compose {{ files }} {{ args }}
 
 # Build Docker containers
 build *args: (docker 'build' args)

@@ -1,0 +1,24 @@
+volumes:
+  rabbitmq-data:
+
+services:
+  rabbitmq:
+    container_name: asu-rabbitmq
+    image: rabbitmq:4.2.0-alpine@sha256:3a20ab5bf4d3b178616ea2639c4970e22347d6eab45b4d9b6e390a1f7d165a61
+    hostname: rabbitmq-local
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  celery-worker: &celery
+    container_name: asu-celery-worker
+    command: watchfiles --filter python "celery worker --loglevel INFO --autoscale=4,0"
+    depends_on:
+      - rabbitmq
+    extends:
+      file: common.yml
+      service: python
+
+  celery-beat:
+    <<: *celery
+    container_name: asu-celery-beat
+    command: celery beat --loglevel INFO

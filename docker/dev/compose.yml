@@ -1,10 +1,12 @@
+name: asu
+
 volumes:
   pg-data:
 
 services:
   db:
     container_name: asu-postgres
-    image: postgres:16.4-alpine
+    image: postgres:18.0-alpine3.22@sha256:48c8ad3a7284b82be4482a52076d47d879fd6fb084a1cbfccbd551f9331b0e40
     user: postgres
     env_file: ../../conf/dev/postgres.env
     ports:
@@ -14,12 +16,8 @@ services:
 
   redis:
     container_name: asu-redis
-    image: redis:7.4-alpine
+    image: redis:8.2.3-alpine3.22@sha256:28c9c4d7596949a24b183eaaab6455f8e5d55ecbf72d02ff5e2c17fe72671d31
     user: redis
-
-  rabbitmq:
-    container_name: asu-rabbitmq
-    image: rabbitmq:3.13-alpine
 
   web:
     container_name: asu-web
@@ -32,19 +30,3 @@ services:
     extends:
       file: common.yml
       service: python
-
-  celery-worker: &celery
-    container_name: asu-celery-worker
-    command: watchfiles --filter python "celery worker -l info"
-    depends_on:
-      - db
-      - redis
-      - rabbitmq
-    extends:
-      file: common.yml
-      service: python
-
-  celery-beat:
-    <<: *celery
-    container_name: asu-celery-beat
-    command: celery beat -l info

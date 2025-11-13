@@ -17,7 +17,7 @@ def test_user_password_reset_check(
     first_party_app_client: OAuthClient,
     mocker: MockerFixture,
 ) -> None:
-    user = UserFactory(email="helen@example.com")
+    user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",
         user=user,
@@ -44,7 +44,7 @@ def test_user_password_reset_check(
 def test_user_password_reset_check_expires_code_after_use(
     first_party_app_client: OAuthClient,
 ) -> None:
-    user = UserFactory(email="helen@example.com")
+    user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",
         user=user,
@@ -66,7 +66,7 @@ def test_user_password_reset_check_expires_code_after_use(
 def test_user_password_reset_check_bad_code(
     first_party_app_client: OAuthClient,
 ) -> None:
-    user = UserFactory(email="helen@example.com")
+    user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",
         user=user,
@@ -90,7 +90,7 @@ def test_user_password_reset_check_expired_code(
 ) -> None:
     past = timezone.now() - timedelta(seconds=settings.PASSWORD_VERIFY_PERIOD + 10)
     mocker.patch("django.utils.timezone.now", return_value=past)
-    user = UserFactory(email="helen@example.com")
+    user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",
         user=user,

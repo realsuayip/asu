@@ -20,11 +20,11 @@ jobs:
       run: |
         docker buildx create --use --driver=docker-container
         cd docker/dev
-        docker buildx bake --allow=fs.read=../.. -f docker-compose.yml web --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
+        docker buildx bake --allow=fs.read=../.. -f compose.yml web --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
 
     - name: Run tests
       run: >-
-        docker compose -f docker/dev/docker-compose.yml run --rm web
+        docker compose -f docker/dev/compose.yml run --rm web
         /bin/sh -c
         "pytest -n2 --no-migrations --cov --cov-report=xml"
 

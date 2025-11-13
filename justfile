@@ -1,6 +1,7 @@
 files_env := env("ASU_COMPOSE_FILES", "compose.yml workers.yml")
 files_abs := prepend("docker/dev/", files_env)
 files := prepend("-f ", files_abs)
+service := "asu-web"
 
 _default: (docker 'up -d')
 
@@ -14,30 +15,15 @@ build *args: (docker 'build' args)
 # Start docker containers and attach to them
 up *args: (docker 'up' args)
 
-# Remove all Docker containers
-down *args: (docker 'down' args)
-
 # Stop all Docker containers
 stop *args: (docker 'stop' args)
 
 # Run a shell command in Django container
 exec *args:
-    docker exec -it asu-web {{ args }}
+    docker exec -it {{ service }} {{ args }}
 
 # Enter Django container console
 console *args: (exec '/bin/sh' args)
-
-# Run tests with coverage
-coverage: (exec '/bin/sh -c \
-    "coverage run --concurrency=multiprocessing \
-    ./manage.py test \
-    --parallel 4 \
-    --shuffle \
-    --timing \
-    --settings=asu.core.settings.test \
-    --no-input && \
-    coverage combine && \
-    coverage html --show-contexts"')
 
 # Check type hints
 type: (exec 'mypy asu/')
@@ -60,12 +46,12 @@ format *args:
     pre-commit run {{ args }}
 
 # Follow logs for given container.
-logs container='asu-web':
+logs container=service:
     docker logs {{ container }} --tail 500 --follow
 
 # Execute a Django management command
 run *args:
-    docker exec -it asu-web python manage.py {{ args }}
+    docker exec -it {{ service }} python manage.py {{ args }}
 
 # Enter Django shell
 shell: (run 'shell')

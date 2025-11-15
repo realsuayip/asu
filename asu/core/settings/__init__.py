@@ -158,10 +158,15 @@ DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
 LOGIN_URL = "two_factor:login"
 LOGIN_REDIRECT_URL = "two_factor:profile"
 
-if DEBUG:
+if DEBUG and not TESTING:
+    import socket
+
     # Django debug toolbar related configuration
     INSTALLED_APPS.append("debug_toolbar")
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
+    ips = socket.gethostbyname_ex(socket.gethostname())[-1]
+    INTERNAL_IPS = [".".join((*ip.split(".")[:-1], "1")) for ip in ips]
 
 
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")

@@ -22,13 +22,13 @@ dependencies = [
     "sorl-thumbnail ~= 12.11",
     "celery ~= 5.5",
     "psycopg[c] ~= 3.2",
-    "redis ~= 6.4",
+    "redis ~= 7.0",
     "hiredis ~= 3.3",
     "Pillow ~= 12.0",
     "python-magic ~= 0.4",
     "boto3 ~= 1.40",
     "phonenumbers ~= 9.0",
-    "sentry-sdk ~= 2.42",
+    "sentry-sdk ~= 2.44",
     "envanter ~= 1.3",
 ]
 

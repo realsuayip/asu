@@ -2,21 +2,21 @@ import itertools
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from django import forms
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Exists, F, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
 
-from rest_framework import mixins, parsers, status
+from rest_framework import mixins, parsers, serializers, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from django_filters import rest_framework as filters
+from rest_filters import Filter, FilterSet
+from rest_filters.fields import CSVField
 
 from asu.auth import schemas
 from asu.auth.models import AccessToken, User, UserBlock, UserFollow, UserFollowRequest
@@ -43,11 +43,7 @@ from asu.auth.serializers.user import (
     UserPublicReadSerializer,
     UserSerializer,
 )
-from asu.core.utils.rest import (
-    EmptySerializer,
-    IDFilter,
-    get_paginator,
-)
+from asu.core.utils.rest import EmptySerializer, get_paginator
 from asu.core.utils.typing import UserRequest
 from asu.core.utils.views import ExtendedViewSet
 from asu.messaging.serializers import MessageComposeSerializer
@@ -58,16 +54,26 @@ if TYPE_CHECKING:
 _CallableT = TypeVar("_CallableT", bound=Callable[..., Any])
 
 
-class RelationFilter(filters.FilterSet):
-    usernames = IDFilter(
-        field_name="username",
-        base_field=forms.CharField(max_length=16),
+class RelationFilter(FilterSet[User]):
+    usernames = Filter(
+        CSVField(
+            child=serializers.CharField(max_length=16),
+            min_length=1,
+            max_length=50,
+        ),
+        field="username",
+        lookup="in",
         required=True,
     )
 
 
-class UserLookupFilter(filters.FilterSet):
-    username = filters.CharFilter(required=True, lookup_expr="iexact")
+class UserLookupFilter(FilterSet[User]):
+    username = Filter(
+        serializers.CharField(max_length=16),
+        field="username",
+        lookup="iexact",
+        required=True,
+    )
 
 
 class UserViewSet(
@@ -192,7 +198,6 @@ class UserViewSet(
         methods=["get"],
         permission_classes=[RequireToken],
         serializer_class=UserPublicReadSerializer,
-        filter_backends=[filters.DjangoFilterBackend],
         url_name="lookup",
     )
     def by(self, request: Request) -> Response:
@@ -367,7 +372,6 @@ class UserViewSet(
         methods=["get"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=RelationSerializer,
-        filter_backends=[filters.DjangoFilterBackend],
     )
     def relations(self, request: UserRequest) -> Response:
         user = request.user

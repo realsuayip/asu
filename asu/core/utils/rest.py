@@ -1,10 +1,8 @@
 from typing import TYPE_CHECKING, Any
 
-from django import forms
-from django.contrib.postgres.forms import SimpleArrayField
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext
 
 from rest_framework import exceptions, pagination, serializers
 from rest_framework.fields import Field
@@ -15,9 +13,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as default_exception_handler
-
-from django_filters import rest_framework as filters
-from drf_spectacular.utils import extend_schema_field
 
 if TYPE_CHECKING:
     from rest_framework.views import APIView
@@ -169,22 +164,6 @@ class APIError(serializers.Serializer[dict[str, Any]]):
         required=False,
         help_text="A mapping with the keys referencing the given parameters.",
     )
-
-
-@extend_schema_field(
-    serializers.CharField(
-        help_text=_("Multiple values may be separated by commas."),
-    )
-)
-class IDFilter(filters.Filter):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        kwargs.setdefault("field_name", "id")
-        kwargs.setdefault("lookup_expr", "in")
-        kwargs.setdefault("base_field", forms.IntegerField(min_value=1))
-        kwargs.setdefault("max_length", 50)
-        super().__init__(*args, **kwargs)
-
-    field_class = SimpleArrayField
 
 
 class ContextDefault:

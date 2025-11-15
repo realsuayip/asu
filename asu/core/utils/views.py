@@ -7,8 +7,8 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 
-from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema_view
+from rest_filters import FilterSet
 
 from asu.core.utils.typing import UserRequest
 
@@ -34,7 +34,7 @@ class ViewSetMeta(abc.ABCMeta):
 class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}
-    filterset_classes: dict[str, type[filters.FilterSet]] = {}
+    filterset_classes: dict[str, type[FilterSet[MT_co]]] = {}
     scopes: dict[str, list[str] | str] = {}
     request: UserRequest
 
@@ -58,8 +58,7 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
         status_code = status_code if data else status.HTTP_204_NO_CONTENT
         return Response(data, status=status_code)
 
-    @property
-    def filterset_class(self) -> type[filters.FilterSet] | None:
+    def get_filterset_class(self) -> type[FilterSet[MT_co]] | None:
         return self.filterset_classes.get(self.action)
 
     def get_serializer_class(self) -> type[serializers.BaseSerializer[Any]]:

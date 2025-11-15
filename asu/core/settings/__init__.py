@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     # Third party apps
     "rest_framework",
     "drf_spectacular",
-    "django_filters",
+    "rest_filters",
     "channels",
     "sorl.thumbnail",
     "widget_tweaks",
@@ -198,6 +198,7 @@ REST_FRAMEWORK = {
     "ALLOWED_VERSIONS": env.list("API_ALLOWED_VERSIONS"),
     "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,
     "DEFAULT_PERMISSION_CLASSES": ["asu.core.utils.denier.DenyAny"],
+    "DEFAULT_FILTER_BACKENDS": ["rest_filters.FilterBackend"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "asu.core.utils.rest.exception_handler",
     "DEFAULT_METADATA_CLASS": "asu.core.utils.rest.EmptyMetadata",

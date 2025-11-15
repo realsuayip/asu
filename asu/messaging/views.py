@@ -2,13 +2,13 @@ from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from rest_framework import mixins
+from rest_framework import mixins, serializers
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_filters import Filter, FilterSet
 
 from asu.auth.permissions import RequireFirstParty, RequireUser
 from asu.core.utils.rest import EmptySerializer, get_paginator
@@ -51,27 +51,20 @@ class MessageViewSet(
         ).delete()
 
 
-class ConversationFilterSet(filters.FilterSet):
-    type = filters.ChoiceFilter(
-        label="Type",
-        method="filter_type",
-        choices=[("requests", "Requests")],
-    )
-
-    def filter_type(
-        self, queryset: QuerySet[Conversation], name: str, value: str
-    ) -> QuerySet[Conversation]:
-        if value == "requests":
-            return queryset.filter(
-                Exists(
-                    ConversationRequest.objects.filter(
-                        date_accepted__isnull=True,
-                        recipient=OuterRef("holder_id"),
-                        sender=OuterRef("target_id"),
-                    )
+class ConversationFilterSet(FilterSet[Conversation]):
+    requests = Filter(
+        serializers.BooleanField(),
+        aliases={
+            "is_requested": Exists(
+                ConversationRequest.objects.filter(
+                    date_accepted__isnull=True,
+                    recipient=OuterRef("holder_id"),
+                    sender=OuterRef("target_id"),
                 )
-            )
-        return queryset  # pragma: no cover
+            ),
+        },
+        template=Q("is_requested"),
+    )
 
 
 class ConversationViewSet(
@@ -86,7 +79,6 @@ class ConversationViewSet(
     filterset_classes = {"list": ConversationFilterSet}
     permission_classes = [RequireUser, RequireFirstParty]
     pagination_class = get_paginator("cursor", ordering="-date_modified")
-    filter_backends = [filters.DjangoFilterBackend]
     schemas = schemas.conversation
 
     def get_queryset(self) -> QuerySet[Conversation]:
@@ -99,7 +91,7 @@ class ConversationViewSet(
 
         queryset = queryset.select_related("target")
         queryset = Conversation.objects.annotate_last_message(queryset)
-        requests_only = self.request.GET.get("type") == "requests"
+        requests_only = self.request.GET.get("requests") == "true"  # todo
 
         if (self.action == "retrieve") or requests_only:
             return queryset

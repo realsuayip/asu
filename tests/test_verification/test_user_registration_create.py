@@ -36,7 +36,7 @@ def test_user_registration_create(
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data=payload,
     )
     assert response.status_code == 201
@@ -89,7 +89,7 @@ def test_user_registration_create_case_invalid_consent(
     }
 
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data=payload,
     )
     assert response.status_code == 400
@@ -127,7 +127,7 @@ def test_user_registration_create_case_expired_consent(
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data=payload,
     )
     assert response.status_code == 400
@@ -159,7 +159,7 @@ def test_user_registration_create_password_validation(
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data=payload,
     )
     assert response.status_code == 400
@@ -205,7 +205,7 @@ def test_user_registration_create_username_validation(
         "username": username,
     }
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data=payload,
     )
     assert response.status_code == 400
@@ -246,7 +246,7 @@ def test_user_registration_create_email_normalization(
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data=payload,
     )
     assert response.status_code == 201
@@ -256,7 +256,7 @@ def test_user_registration_create_email_normalization(
 
 def test_user_registration_create_requires_authentication(client: OAuthClient) -> None:
     response = client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data={
             "email": "helen@example.com",
             "consent": "bad:consent",
@@ -273,7 +273,7 @@ def test_user_registration_create_requires_requires_first_party_app(
     app_client: OAuthClient,
 ) -> None:
     response = app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data={
             "email": "helen@example.com",
             "consent": "bad:consent",
@@ -306,7 +306,7 @@ def test_user_registration_nullifies_other_verifications(
     )
     consent = v1.create_consent()
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data={
             "email": "helen@example.com",
             "consent": consent,
@@ -357,7 +357,7 @@ def test_user_registration_flow(
 
     # Step 3: Create user with given consent
     response = first_party_app_client.post(
-        reverse("api:auth:user-list"),
+        reverse("api:verification:registration-verification-register"),
         data={
             "email": "helen@example.com",
             "consent": consent,

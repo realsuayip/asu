@@ -39,7 +39,6 @@ from asu.auth.serializers.actions import (
     UserDeactivationSerializer,
 )
 from asu.auth.serializers.user import (
-    UserCreateSerializer,
     UserPublicReadSerializer,
     UserSerializer,
 )
@@ -76,11 +75,7 @@ class UserLookupFilter(FilterSet[User]):
     )
 
 
-class UserViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    ExtendedViewSet[User],
-):
+class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     sensitive_actions = {"followers", "following"}
     """
     These actions may reveal sensitive information about the user. If the user
@@ -88,7 +83,6 @@ class UserViewSet(
     do not follow the user. This check is enforced in `get_object()` method.
     """
     serializer_classes = {
-        "create": UserCreateSerializer,
         "me": UserSerializer,
         "by": UserPublicReadSerializer,
         "block": BlockSerializer,
@@ -121,8 +115,6 @@ class UserViewSet(
         permission_classes = self.permission_classes
         if self.action == "retrieve":
             permission_classes = [RequireToken]
-        elif self.action == "create":
-            permission_classes = [RequireFirstParty]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self) -> QuerySet[User]:

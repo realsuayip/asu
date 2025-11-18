@@ -13,7 +13,6 @@ from asu.auth.serializers.actions import (
     UserConnectionSerializer,
 )
 from asu.auth.serializers.user import (
-    UserCreateSerializer,
     UserPublicReadSerializer,
     UserSerializer,
 )
@@ -70,47 +69,6 @@ follow = action(
 )
 unfollow = action(summary="Unfollow a user", tags=[Tag.USER_FOLLOW_OPERATIONS])
 
-
-create = extend_schema(
-    summary="Register a new user",
-    tags=[Tag.USER_REGISTRATION],
-    description="Before you send a request to this endpoint,"
-    " you need to acquire 'consent' string. This string is obtained via "
-    "email validation through registration verification flow. Check"
-    " registration verification documentation to learn more.",
-    examples=[
-        OpenApiExample(
-            "bad user information",
-            value=get_error_repr(
-                {
-                    "email": ["Enter a valid email address."],
-                    "display_name": ["This field may not be blank."],
-                    "username": [
-                        "Usernames can only contain latin letters,"
-                        "numerals and underscores. Trailing, leading"
-                        " or consecutive underscores are not allowed."
-                    ],
-                }
-            ),
-            response_only=True,
-            status_codes=["400"],
-        ),
-        OpenApiExample(
-            "bad consent",
-            value=get_error_repr(
-                {
-                    "email": [
-                        "This e-mail could not be verified. Please provide a"
-                        " validated e-mail address."
-                    ]
-                }
-            ),
-            response_only=True,
-            status_codes=["400"],
-        ),
-    ],
-    responses={201: UserCreateSerializer, 400: APIError},
-)
 
 retrieve = extend_schema(
     summary="Retrieve a user",
@@ -278,7 +236,6 @@ deactivate = extend_schema(
 
 
 user = {
-    "create": create,
     "retrieve": retrieve,
     "block": block,
     "unblock": unblock,

@@ -104,7 +104,7 @@ def test_custom_permission_denied_page(
     response = client.get(
         reverse("two_factor:login"),
         # Since REST framework automatically handles PermissionDenied cases,
-        # use non-API view with explict `Accept` header to simulate this error.
+        # use non-API view with explicit `Accept` header to simulate this error.
         headers={"Accept": "application/json"},
     )
 

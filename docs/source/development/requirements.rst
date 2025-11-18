@@ -5,7 +5,7 @@ Handling Python Requirements
 
 This project uses :code:`pip-tools` to **lock** Python requirements. Each
 requirement must be specified in :code:`pyproject.toml` and then locked via
-:code:`pip-compile`. Development and production requirements are seperated. The
+:code:`pip-compile`. Development and production requirements are separated. The
 relevant commands for generating lock files are:
 
 For development:

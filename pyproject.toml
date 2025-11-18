@@ -54,6 +54,7 @@ dev = [
     "daphne",
     "autobahn==24.4.2",
     "django-debug-toolbar",
+    "django_watchfiles",
     "ipython",
     "tblib",
     "watchfiles",

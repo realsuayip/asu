@@ -163,6 +163,7 @@ if DEBUG and not TESTING:
 
     # Django debug toolbar related configuration
     INSTALLED_APPS.append("debug_toolbar")
+    INSTALLED_APPS.append("django_watchfiles")
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
     ips = socket.gethostbyname_ex(socket.gethostname())[-1]

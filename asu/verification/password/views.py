@@ -8,6 +8,7 @@ from asu.core.utils.views import ExtendedViewSet
 from asu.verification.models import PasswordResetVerification
 from asu.verification.password import schemas
 from asu.verification.password.serializers import (
+    PasswordResetSerializer,
     PasswordResetVerificationCheckSerializer,
     PasswordResetVerificationSerializer,
 )
@@ -44,4 +45,13 @@ class PasswordResetViewSet(
         permission_classes=[RequireFirstParty],
     )
     def check(self, request: Request) -> Response:
+        return self.perform_action()
+
+    @action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[RequireFirstParty],
+        serializer_class=PasswordResetSerializer,
+    )
+    def reset(self, request: Request) -> Response:
         return self.perform_action()

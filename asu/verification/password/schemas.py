@@ -3,6 +3,7 @@ from drf_spectacular.utils import OpenApiExample, extend_schema
 from asu.core.utils.openapi import Tag, get_error_repr
 from asu.core.utils.rest import APIError
 from asu.verification.password.serializers import (
+    PasswordResetSerializer,
     PasswordResetVerificationCheckSerializer,
     PasswordResetVerificationSerializer,
 )
@@ -45,5 +46,34 @@ password_reset_check = extend_schema(
         400: APIError,
     },
 )
+reset = extend_schema(
+    summary="Reset password",
+    tags=[Tag.USER_PASSWORD_RESET],
+    responses={
+        200: PasswordResetSerializer,
+        400: APIError,
+    },
+    examples=[
+        OpenApiExample(
+            "bad values",
+            value=get_error_repr(
+                {
+                    "email": ["This e-mail could not be verified."],
+                    "password": [
+                        "This password is too common.",
+                        "This password is too short. It must contain at"
+                        " least 8 characters.",
+                    ],
+                }
+            ),
+            response_only=True,
+            status_codes=["400"],
+        )
+    ],
+)
 
-password_reset = {"create": password_reset_create, "check": password_reset_check}
+password_reset = {
+    "create": password_reset_create,
+    "check": password_reset_check,
+    "reset": reset,
+}

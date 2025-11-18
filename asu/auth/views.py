@@ -31,7 +31,6 @@ from asu.auth.serializers.actions import (
     FollowRequestSerializer,
     FollowSerializer,
     PasswordChangeSerializer,
-    PasswordResetSerializer,
     ProfilePictureEditSerializer,
     RelationSerializer,
     TicketSerializer,
@@ -92,7 +91,6 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         "followers": UserConnectionSerializer,
         "following": UserConnectionSerializer,
         "blocked": UserConnectionSerializer,
-        "reset_password": PasswordResetSerializer,
         "message": MessageComposeSerializer,
         "ticket": TicketSerializer,
         "profile_picture": ProfilePictureEditSerializer,
@@ -198,16 +196,6 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
 
         serializer = self.get_serializer(user)
         return Response(serializer.data)
-
-    @action(
-        detail=False,
-        methods=["patch"],
-        permission_classes=[RequireFirstParty],
-        serializer_class=PasswordResetSerializer,
-        url_path="password-reset",
-    )
-    def reset_password(self, request: Request) -> Response:
-        return self.perform_action()
 
     @action(
         detail=False,

@@ -29,8 +29,8 @@ def test_user_password_reset(first_party_app_client: OAuthClient) -> None:
         "consent": consent,
         "password": "hln_j1070",
     }
-    response = first_party_app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data=payload,
     )
     assert response.status_code == 200
@@ -52,8 +52,8 @@ def test_user_password_reset_case_invalid_consent(
         "consent": "bad:consent",
         "password": "Hln_1900",
     }
-    response = first_party_app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data=payload,
     )
     assert response.status_code == 400
@@ -85,8 +85,8 @@ def test_user_password_reset_case_expired_consent(
         return_value=timezone.now()
         + timedelta(seconds=settings.PASSWORD_RESET_PERIOD + 1),
     )
-    response = first_party_app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data={
             "email": "helen@example.com",
             "consent": consent,
@@ -118,8 +118,8 @@ def test_user_password_reset_case_unusable_password(
         date_verified=timezone.now(),
     )
     consent = verification.create_consent()
-    response = first_party_app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data={
             "email": "helen@example.com",
             "consent": consent,
@@ -154,8 +154,8 @@ def test_user_password_reset_password_validation(
         "consent": consent,
         "password": "helenexample",
     }
-    response = first_party_app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data=payload,
     )
     assert response.status_code == 400
@@ -170,8 +170,8 @@ def test_user_password_reset_password_validation(
 
 
 def test_user_password_reset_requires_authentication(client: OAuthClient) -> None:
-    response = client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = client.post(
+        reverse("api:verification:password-reset-reset"),
         data={
             "email": "helen@example.com",
             "consent": "bad:consent",
@@ -185,8 +185,8 @@ def test_user_password_reset_requires_authentication(client: OAuthClient) -> Non
 def test_user_password_reset_requires_requires_first_party_app(
     app_client: OAuthClient,
 ) -> None:
-    response = app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data={
             "email": "helen@example.com",
             "consent": "bad:consent",
@@ -218,8 +218,8 @@ def test_user_password_reset_nullifies_other_verifications(
         ]
     )
     consent = v1.create_consent()
-    response = first_party_app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data={
             "email": "helen@example.com",
             "consent": consent,
@@ -266,8 +266,8 @@ def test_user_password_reset_flow(
     consent = response.json()["consent"]
 
     # Step 3: Reset password with given consent
-    response = first_party_app_client.patch(
-        reverse("api:auth:user-reset-password"),
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-reset"),
         data={
             "email": "helen@example.com",
             "consent": consent,

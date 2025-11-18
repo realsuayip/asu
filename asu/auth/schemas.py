@@ -8,7 +8,6 @@ from asu.auth.permissions import OAuthPermission
 from asu.auth.serializers.actions import (
     FollowSerializer,
     PasswordChangeSerializer,
-    PasswordResetSerializer,
     RelationSerializer,
     UserConnectionSerializer,
 )
@@ -146,31 +145,6 @@ by = extend_schema(
     filters=True,
 )
 
-reset_password = extend_schema(
-    summary="Reset password",
-    tags=[Tag.USER_PASSWORD_RESET],
-    responses={
-        200: PasswordResetSerializer,
-        400: APIError,
-    },
-    examples=[
-        OpenApiExample(
-            "bad values",
-            value=get_error_repr(
-                {
-                    "email": ["This e-mail could not be verified."],
-                    "password": [
-                        "This password is too common.",
-                        "This password is too short. It must contain at"
-                        " least 8 characters.",
-                    ],
-                }
-            ),
-            response_only=True,
-            status_codes=["400"],
-        )
-    ],
-)
 change_password = extend_schema(
     summary="Change password",
     tags=[Tag.USER_SETTINGS],
@@ -243,7 +217,6 @@ user = {
     "unfollow": unfollow,
     "me": me,
     "by": by,
-    "reset_password": reset_password,
     "change_password": change_password,
     "followers": followers,
     "following": following,

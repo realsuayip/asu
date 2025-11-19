@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     "channels",
     "sorl.thumbnail",
     "widget_tweaks",
-    "django_celery_beat",
     "corsheaders",
     # OAuth2
     "oauth2_provider",
@@ -280,7 +279,6 @@ SPECTACULAR_SETTINGS = {
 
 REDIS_URL = env.str("REDIS_URL")
 CELERY_BROKER_URL = env.str("RABBITMQ_URL")
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CHANNEL_LAYERS = {
     "default": {

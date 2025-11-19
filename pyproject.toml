@@ -3,7 +3,7 @@ name = "asu"
 version = "0.1.0"
 requires-python = "==3.14.*"
 dependencies = [
-    "django[argon2] ~= 5.2",
+    "django[argon2] ~= 6.0b1",
     "djangorestframework ~= 3.16",
     "asgiref ~= 3.10",
     "channels ~= 4.3",
@@ -16,7 +16,6 @@ dependencies = [
     "django-two-factor-auth ~= 1.18",
     "django-storages ~= 1.14",
     "django-ipware ~= 7.0",
-    "django-celery-beat ~= 2.8",
     "django-stubs-ext",
     "django-widget-tweaks ~= 1.5",
     "sorl-thumbnail ~= 12.11",

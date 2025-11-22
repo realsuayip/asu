@@ -122,7 +122,6 @@ patch_me = extend_schema(
             value=get_error_repr(
                 {
                     "username": ["This field may not be blank."],
-                    "gender": ['"potato" is not a valid choice.'],
                     "birth_date": [
                         "Date has wrong format. Use one of these"
                         " formats instead: YYYY-MM-DD."

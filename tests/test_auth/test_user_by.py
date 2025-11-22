@@ -33,9 +33,8 @@ def test_user_by(
         email="helen@example.com",
         description="hello world!",
         website="https://example.com",
-        gender="unspecified",
         birth_date=datetime.date(2000, 1, 1),
-        date_joined=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
+        created=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
     response = user_client.get(
         reverse(
@@ -51,12 +50,12 @@ def test_user_by(
         "display_name": "Helen",
         "username": "helen",
         "profile_picture": None,
-        "date_joined": "2025-01-01T00:00:00Z",
         "is_private": False,
         "description": "hello world!",
         "website": "https://example.com",
         "following_count": 0,
         "follower_count": 0,
+        "created": "2025-01-01T00:00:00Z",
     }
 
 

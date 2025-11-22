@@ -24,9 +24,8 @@ def test_user_detail(
         email="helen@example.com",
         description="hello world!",
         website="https://example.com",
-        gender="unspecified",
         birth_date=datetime.date(2000, 1, 1),
-        date_joined=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
+        created=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
 
     with django_assert_num_queries(
@@ -47,12 +46,12 @@ def test_user_detail(
         "display_name": "Helen",
         "username": "helen",
         "profile_picture": None,
-        "date_joined": "2025-01-01T00:00:00Z",
         "is_private": False,
         "description": "hello world!",
         "website": "https://example.com",
         "following_count": 0,
         "follower_count": 0,
+        "created": "2025-01-01T00:00:00Z",
     }
 
 
@@ -98,7 +97,7 @@ def test_user_detail_self(
         )
     assert response.status_code == 200
     detail = response.json()
-    assert detail["id"] == user.pk
+    assert detail["id"] == str(user.pk)
 
 
 @pytest.mark.django_db

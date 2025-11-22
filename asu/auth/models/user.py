@@ -1,11 +1,14 @@
 import functools
 import io
-import uuid
 from datetime import timedelta
 from typing import Any, AnyStr, ClassVar
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import (
+    PermissionsMixin,
+    UserManager as DjangoUserManager,
+)
 from django.core import signing
 from django.core.cache import cache
 from django.core.files.base import ContentFile, File
@@ -40,6 +43,7 @@ from asu.auth.models import (
     UserFollow,
     UserFollowRequest,
 )
+from asu.core.models.base import Base
 from asu.core.utils import mailing, messages
 from asu.core.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
 from asu.core.utils.messages import EmailMessage
@@ -90,15 +94,7 @@ class UserManager(DjangoUserManager["User"]):
         return signer.unsign(ticket, max_age=3)
 
 
-class User(AbstractUser):  # type: ignore[django-manager-missing]
-    class Gender(models.TextChoices):
-        MALE = "male", _("Male")
-        FEMALE = "female", _("Female")
-        OTHER = "other", _("Other")
-        UNSPECIFIED = "unspecified", _("Unspecified")
-
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
-
+class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-manager-missing]
     # Personal information
     username = models.CharField(
         _("username"),
@@ -113,12 +109,6 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     )
     website = models.URLField(_("website"), blank=True)
     email = models.EmailField(_("e-mail"), unique=True)
-    gender = models.CharField(
-        _("gender"),
-        max_length=12,
-        choices=Gender.choices,
-        default=Gender.UNSPECIFIED,
-    )
     birth_date = models.DateField(_("birth date"), null=True, blank=True)
     profile_picture = models.ImageField(
         _("profile picture"),
@@ -137,10 +127,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     )
 
     # Messaging
-    allows_receipts = models.BooleanField(
-        _("allows message receipts"),
-        default=True,
-    )
+    allows_receipts = models.BooleanField(_("allows message receipts"), default=True)
     allows_all_messages = models.BooleanField(
         _("allows all incoming messages"),
         default=True,
@@ -151,6 +138,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     )
 
     # Account flags
+    is_active = models.BooleanField(_("active"), default=True)
     is_frozen = models.BooleanField(
         _("frozen"),
         help_text=_("Designates whether this user has frozen their account."),
@@ -162,6 +150,11 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
             "Users with private accounts has the privilege of hiding their identity."
         ),
         default=False,
+    )
+    is_staff = models.BooleanField(
+        _("staff status"),
+        default=False,
+        help_text=_("Designates whether the user can log into this admin site."),
     )
 
     # Relations with other users
@@ -180,8 +173,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         blank=True,
     )
 
-    date_modified = models.DateTimeField(_("date modified"), auto_now=True)
-
+    EMAIL_FIELD = "email"
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
@@ -194,6 +186,10 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
 
     def __str__(self) -> str:
         return self.username
+
+    def clean(self) -> None:
+        super().clean()
+        self.email = User.objects.normalize_email(self.email)
 
     def following_count(self) -> int:
         return self.following.count()
@@ -314,7 +310,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         image.save(thumb_io, format="JPEG")
 
         self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)
-        self.save(update_fields=["profile_picture", "date_modified"])
+        self.save(update_fields=["profile_picture", "updated"])
 
     def get_profile_picture(self, size: tuple[int, int] = (150, 150)) -> str | None:
         if not self.profile_picture:
@@ -334,7 +330,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
         if image:
             sorl.thumbnail.delete(image, delete_file=False)
             image.delete(save=False)
-            self.save(update_fields=["profile_picture", "date_modified"])
+            self.save(update_fields=["profile_picture", "updated"])
 
     def issue_token(self) -> dict[str, Any]:
         # Programmatically issue tokens for this user. Used just after
@@ -392,7 +388,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     @transaction.atomic
     def deactivate(self, *, for_deletion: bool = False) -> UserDeactivation:
         self.is_frozen = True
-        self.save(update_fields=["is_frozen", "date_modified"])
+        self.save(update_fields=["is_frozen", "updated"])
 
         self.revoke_other_tokens()
         self.revoke_all_sessions()
@@ -407,7 +403,7 @@ class User(AbstractUser):  # type: ignore[django-manager-missing]
     @transaction.atomic
     def reactivate(self) -> None:
         self.is_frozen = False
-        self.save(update_fields=["is_frozen", "date_modified"])
+        self.save(update_fields=["is_frozen", "updated"])
 
         UserDeactivation.objects.filter(
             user=self,

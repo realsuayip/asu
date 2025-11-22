@@ -40,8 +40,8 @@ class UserAdmin(BaseUserAdmin[User]):
     readonly_fields = (
         "is_frozen",
         "last_login",
-        "date_joined",
-        "date_modified",
+        "created",
+        "updated",
     )
     fieldsets = (
         (None, {"fields": ("email", "password")}),
@@ -53,7 +53,6 @@ class UserAdmin(BaseUserAdmin[User]):
                     "display_name",
                     "description",
                     "website",
-                    "gender",
                     "birth_date",
                     "profile_picture",
                 )
@@ -88,8 +87,8 @@ class UserAdmin(BaseUserAdmin[User]):
             {
                 "fields": (
                     "last_login",
-                    "date_joined",
-                    "date_modified",
+                    "created",
+                    "updated",
                 )
             },
         ),
@@ -103,9 +102,9 @@ class UserAdmin(BaseUserAdmin[User]):
             },
         ),
     )
-    list_display = ("username", "email", "display_name", "date_joined")
+    list_display = ("username", "email", "display_name", "created")
     search_fields = ("username", "email")
-    ordering = ("-date_joined",)
+    ordering = ("-id",)
 
 
 @admin.register(Group)

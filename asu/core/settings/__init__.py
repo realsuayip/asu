@@ -250,12 +250,11 @@ OAUTH2_USER_FIELDS = {
         "description",
         "website",
         "profile_picture",
-        "date_joined",
         "is_private",
+        "created",
     },
     "user.profile.email:read": {"email"},
     "user.profile.private:read": {
-        "gender",
         "language",
         "birth_date",
         "allows_receipts",

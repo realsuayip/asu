@@ -46,5 +46,5 @@ class EmailCheckSerializer(BaseCheckSerializer):
         verification.null_others()
 
         user.email = verification.email
-        user.save(update_fields=["email", "date_modified"])
+        user.save(update_fields=["email", "updated"])
         return validated_data

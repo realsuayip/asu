@@ -49,7 +49,7 @@ def test_user_replace_profile_picture(
     sample_profile_picture: ContentFile,
 ) -> None:
     user.profile_picture = sample_profile_picture
-    user.save(update_fields=["profile_picture"])
+    user.save(update_fields=["profile_picture", "updated"])
     previous = user.profile_picture.path
     sample_profile_picture.seek(0)
 
@@ -103,7 +103,7 @@ def test_user_delete_profile_picture(
     sample_profile_picture: ContentFile,
 ) -> None:
     user.profile_picture = sample_profile_picture
-    user.save(update_fields=["profile_picture"])
+    user.save(update_fields=["profile_picture", "updated"])
 
     response = user_client.delete(
         reverse("api:auth:user-profile-picture"),

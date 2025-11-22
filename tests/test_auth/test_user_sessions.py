@@ -31,7 +31,7 @@ def test_session_authenticated(user: User) -> None:
         headers={"User-Agent": "TestAgent/2.0"},
     )
     session = Session.objects.get(session_key=client.session.session_key)
-    assert session.user == user.pk
+    assert session.user_id == user.pk
     assert session.user_agent == "TestAgent/2.0"
     assert session.ip == "127.0.0.1"
 

@@ -51,7 +51,6 @@ def test_user_registration_create(
         "birth_date": None,
         "display_name": "Helen",
         "email": "helen@example.com",
-        "gender": "unspecified",
         "id": mocker.ANY,
         "language": "en",
         "username": "helen",
@@ -60,7 +59,6 @@ def test_user_registration_create(
     assert user.username == "helen"
     assert user.display_name == "Helen"
     assert user.birth_date is None
-    assert user.gender == "unspecified"
     assert user.language == "en"
     assert user.description == ""
     assert user.website == ""

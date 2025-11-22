@@ -258,7 +258,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         detail=True,
         methods=["get"],
         serializer_class=UserConnectionSerializer,
-        pagination_class=get_paginator("cursor", ordering="-created"),
+        pagination_class=get_paginator("cursor", ordering="-follow_created"),
         permission_classes=[RequireToken],
     )
     def followers(self, request: Request, pk: int) -> Response:
@@ -266,7 +266,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         queryset = (
             User.objects.active()
             .filter(following=user)
-            .alias(created=F("from_userfollows__date_created"))
+            .alias(follow_created=F("from_userfollows__date_created"))
         )
         return self.list_follow_through(queryset)
 
@@ -274,7 +274,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         detail=True,
         methods=["get"],
         serializer_class=UserConnectionSerializer,
-        pagination_class=get_paginator("cursor", ordering="-created"),
+        pagination_class=get_paginator("cursor", ordering="-follow_created"),
         permission_classes=[RequireToken],
     )
     def following(self, request: Request, pk: int) -> Response:
@@ -282,7 +282,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         queryset = (
             User.objects.active()
             .filter(followed_by=user)
-            .alias(created=F("to_userfollows__date_created"))
+            .alias(follow_created=F("to_userfollows__date_created"))
         )
         return self.list_follow_through(queryset)
 
@@ -290,14 +290,14 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         detail=False,
         methods=["get"],
         serializer_class=UserConnectionSerializer,
-        pagination_class=get_paginator("cursor", ordering="-created"),
+        pagination_class=get_paginator("cursor", ordering="-block_created"),
         permission_classes=[RequireUser, RequireScope],
     )
     def blocked(self, request: UserRequest) -> Response:
         queryset = (
             User.objects.active()
             .filter(blocked_by=request.user)
-            .alias(created=F("to_userblocks__date_created"))
+            .alias(block_created=F("to_userblocks__date_created"))
         )
         return self.list_follow_through(queryset)
 

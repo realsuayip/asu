@@ -1,11 +1,16 @@
 from collections.abc import Iterable
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Func
 from django.db.models.base import ModelBase
 from django.db.models.expressions import DatabaseDefault
 from django.db.models.functions import Now
 from django.utils.translation import gettext_lazy as _
+
+# We cannot enforce `updated` field for `update_fields` in these
+# models since update is being made in third party code.
+THIRD_PARTY_MODELS = (settings.AUTH_USER_MODEL,)
 
 
 class UUIDv7(Func):
@@ -41,7 +46,11 @@ class Base(models.Model):
             and (force_update or not isinstance(self.pk, DatabaseDefault))
         ):
             raise ValueError("'update_fields' is not set")
-        if update_fields is not None and "updated" not in update_fields:
+        if (
+            update_fields is not None
+            and "updated" not in update_fields
+            and self._meta.label not in THIRD_PARTY_MODELS
+        ):
             raise ValueError("'update_fields' must contain the field 'updated'")
         return super().save(
             force_insert=force_insert,

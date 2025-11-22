@@ -31,7 +31,7 @@ def test_user_deactivate(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     user.set_password("hello")
-    user.save(update_fields=["password"])
+    user.save(update_fields=["password", "updated"])
     # Force a session login to create a session. All sessions must
     # be invalidated after deactivating the account.
     client = Client()
@@ -71,7 +71,7 @@ def test_user_deactivate_for_deletion(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     user.set_password("hello")
-    user.save(update_fields=["password"])
+    user.save(update_fields=["password", "updated"])
 
     client = Client()
     client.force_login(user)

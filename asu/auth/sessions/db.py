@@ -23,15 +23,14 @@ class SessionStore(DBStore):
 
     def create_model_instance(self, data: dict[str, Any]) -> Session:
         try:
-            user = int(cast("str", data.get("_auth_user_id")))
+            user_id = cast("str", data.get("_auth_user_id"))
         except (ValueError, TypeError):
-            user = None
-
+            user_id = None
         return Session(
             session_key=self._get_or_create_session_key(),  # type: ignore[attr-defined]
             session_data=self.encode(data),
             expire_date=self.get_expiry_date(),
-            user=user,
+            user_id=user_id,
             user_agent=self.user_agent,
             ip=self.ip,
         )

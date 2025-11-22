@@ -83,7 +83,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         verification.null_others()
 
         user.set_password(password)
-        user.save(update_fields=["password", "date_modified"])
+        user.save(update_fields=["password", "updated"])
         user.revoke_other_tokens(self.context["request"].auth)
 
         send_notice = functools.partial(

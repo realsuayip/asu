@@ -26,9 +26,8 @@ def test_user_me(
         email="helen@example.com",
         description="hello world!",
         website="https://example.com",
-        gender="unspecified",
         birth_date=datetime.date(2000, 1, 1),
-        date_joined=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
+        created=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
     client.set_user(user)
     with django_assert_num_queries(
@@ -45,14 +44,13 @@ def test_user_me(
         "description": "hello world!",
         "website": "https://example.com",
         "profile_picture": None,
-        "gender": "unspecified",
         "language": "en",
         "birth_date": "2000-01-01",
-        "date_joined": "2025-01-01T00:00:00Z",
         "is_private": False,
         "allows_receipts": True,
         "allows_all_messages": True,
         "two_factor_enabled": False,
+        "created": "2025-01-01T00:00:00Z",
     }
 
 
@@ -134,8 +132,8 @@ def test_user_me_update_disallow_email(
                 "description": "hello world!",
                 "website": "https://example.com",
                 "profile_picture": None,
-                "date_joined": "2025-01-01T00:00:00Z",
                 "is_private": False,
+                "created": "2025-01-01T00:00:00Z",
             },
         ),
         (
@@ -147,14 +145,13 @@ def test_user_me_update_disallow_email(
                 "description": "hello world!",
                 "website": "https://example.com",
                 "profile_picture": None,
-                "date_joined": "2025-01-01T00:00:00Z",
                 "is_private": False,
                 "birth_date": "2000-01-01",
                 "allows_receipts": True,
                 "allows_all_messages": True,
-                "gender": "unspecified",
                 "language": "en",
                 "two_factor_enabled": False,
+                "created": "2025-01-01T00:00:00Z",
             },
         ),
         (
@@ -167,8 +164,8 @@ def test_user_me_update_disallow_email(
                 "description": "hello world!",
                 "website": "https://example.com",
                 "profile_picture": None,
-                "date_joined": "2025-01-01T00:00:00Z",
                 "is_private": False,
+                "created": "2025-01-01T00:00:00Z",
             },
         ),
         (
@@ -181,14 +178,13 @@ def test_user_me_update_disallow_email(
                 "description": "hello world!",
                 "website": "https://example.com",
                 "profile_picture": None,
-                "date_joined": "2025-01-01T00:00:00Z",
                 "is_private": False,
                 "birth_date": "2000-01-01",
                 "allows_receipts": True,
                 "allows_all_messages": True,
-                "gender": "unspecified",
                 "language": "en",
                 "two_factor_enabled": False,
+                "created": "2025-01-01T00:00:00Z",
             },
         ),
     ),
@@ -206,7 +202,7 @@ def test_user_me_third_party_token(
         description="hello world!",
         website="https://example.com",
         birth_date=datetime.date(2000, 1, 1),
-        date_joined=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
+        created=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
     client.set_user(
         user,

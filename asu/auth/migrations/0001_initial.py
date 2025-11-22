@@ -397,7 +397,9 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="user",
             constraint=models.CheckConstraint(
-                check=models.Q(("username__regex", "^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$")),
+                condition=models.Q(
+                    ("username__regex", "^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$")
+                ),
                 name="regex_valid_username",
                 violation_error_message="Usernames can only contain latin letters, numerals and underscores. Trailing, leading or consecutive underscores are not allowed.",
             ),

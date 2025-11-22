@@ -35,12 +35,12 @@ class UserPublicReadSerializer(DynamicFieldsMixin, serializers.ModelSerializer[U
             "display_name",
             "username",
             "profile_picture",
-            "date_joined",
             "is_private",
             "description",
             "website",
             "following_count",
             "follower_count",
+            "created",
         )
 
 
@@ -58,20 +58,19 @@ class UserSerializer(DynamicFieldsMixin, serializers.ModelSerializer[User]):
             "description",
             "website",
             "profile_picture",
-            "gender",
             "language",
             "birth_date",
-            "date_joined",
             "is_private",
             "allows_receipts",
             "allows_all_messages",
             "two_factor_enabled",
+            "created",
         )
         read_only_fields = (
             "profile_picture",
             "email",
             "two_factor_enabled",
-            "date_joined",
+            "created",
         )
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
@@ -80,7 +79,7 @@ class UserSerializer(DynamicFieldsMixin, serializers.ModelSerializer[User]):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         validate_username_constraints(instance)
-        instance.save(update_fields=validated_data.keys())
+        instance.save(update_fields={*validated_data, "updated"})
         return instance
 
 
@@ -146,9 +145,9 @@ class UserCreateSerializer(serializers.ModelSerializer[User]):
             "display_name",
             "username",
             "password",
-            "gender",
             "birth_date",
             "language",
             "consent",
             "auth",
         )
+        read_only_fields = ("id", "created", "auth")

@@ -15,7 +15,7 @@ def test_user_password_change(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     user.set_password("0ld_password*")
-    user.save(update_fields=["password"])
+    user.save(update_fields=["password", "updated"])
     token_to_be_revoked = user.issue_token()["refresh_token"]
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = user_client.patch(
@@ -69,7 +69,7 @@ def test_user_password_change_case_bad_new_password(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     user.set_password("0ld_password*")
-    user.save(update_fields=["password"])
+    user.save(update_fields=["password", "updated"])
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = user_client.patch(
             reverse("api:auth:user-change-password"),

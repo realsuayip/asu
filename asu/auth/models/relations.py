@@ -3,8 +3,10 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from asu.core.models.base import Base
 
-class UserThrough(models.Model):
+
+class UserRelation(Base):
     from_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -15,7 +17,6 @@ class UserThrough(models.Model):
         on_delete=models.CASCADE,
         related_name="to_%(class)ss",
     )
-    date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 
     class Meta:
         constraints = [
@@ -30,15 +31,15 @@ class UserThrough(models.Model):
         return "from=%s, to=%s" % (self.from_user_id, self.to_user_id)
 
 
-class UserFollow(UserThrough):
-    pass
+class UserFollow(UserRelation):
+    updated = None
 
 
-class UserBlock(UserThrough):
-    pass
+class UserBlock(UserRelation):
+    updated = None
 
 
-class UserFollowRequest(UserThrough):
+class UserFollowRequest(UserRelation):
     class Status(models.TextChoices):
         PENDING = "pending", _("pending")
         APPROVED = "approved", _("approved")
@@ -50,7 +51,6 @@ class UserFollowRequest(UserThrough):
         choices=Status.choices,
         default=Status.PENDING,
     )
-    date_modified = models.DateTimeField(_("date modified"), auto_now=True)
 
     class Meta:
         constraints = [
@@ -75,10 +75,10 @@ class UserFollowRequest(UserThrough):
     def accept(self) -> None:
         assert self.is_pending
         self.status = self.Status.APPROVED
-        self.save(update_fields=["status", "date_modified"])
+        self.save(update_fields=["status", "updated"])
         self.from_user.add_following(to_user=self.to_user)
 
     def reject(self) -> None:
         assert self.is_pending
         self.status = self.Status.REJECTED
-        self.save(update_fields=["status", "date_modified"])
+        self.save(update_fields=["status", "updated"])

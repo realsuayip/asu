@@ -50,6 +50,7 @@ class Base(models.Model):
             update_fields is not None
             and "updated" not in update_fields
             and self._meta.label not in THIRD_PARTY_MODELS
+            and "updated" in [f.name for f in self._meta.concrete_fields]
         ):
             raise ValueError("'update_fields' must contain the field 'updated'")
         return super().save(

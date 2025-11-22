@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Exists, F, OuterRef, QuerySet
+from django.db.models import Exists, OuterRef, QuerySet
 from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
 
@@ -258,47 +258,35 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         detail=True,
         methods=["get"],
         serializer_class=UserConnectionSerializer,
-        pagination_class=get_paginator("cursor", ordering="-follow_created"),
+        pagination_class=get_paginator("cursor", ordering="-from_userfollows"),
         permission_classes=[RequireToken],
     )
     def followers(self, request: Request, pk: int) -> Response:
         user = self.get_object()
-        queryset = (
-            User.objects.active()
-            .filter(following=user)
-            .alias(follow_created=F("from_userfollows__date_created"))
-        )
+        queryset = User.objects.active().filter(following=user)
         return self.list_follow_through(queryset)
 
     @action(
         detail=True,
         methods=["get"],
         serializer_class=UserConnectionSerializer,
-        pagination_class=get_paginator("cursor", ordering="-follow_created"),
+        pagination_class=get_paginator("cursor", ordering="-to_userfollows"),
         permission_classes=[RequireToken],
     )
     def following(self, request: Request, pk: int) -> Response:
         user = self.get_object()
-        queryset = (
-            User.objects.active()
-            .filter(followed_by=user)
-            .alias(follow_created=F("to_userfollows__date_created"))
-        )
+        queryset = User.objects.active().filter(followed_by=user)
         return self.list_follow_through(queryset)
 
     @action(
         detail=False,
         methods=["get"],
         serializer_class=UserConnectionSerializer,
-        pagination_class=get_paginator("cursor", ordering="-block_created"),
+        pagination_class=get_paginator("cursor", ordering="-to_userblocks"),
         permission_classes=[RequireUser, RequireScope],
     )
     def blocked(self, request: UserRequest) -> Response:
-        queryset = (
-            User.objects.active()
-            .filter(blocked_by=request.user)
-            .alias(block_created=F("to_userblocks__date_created"))
-        )
+        queryset = User.objects.active().filter(blocked_by=request.user)
         return self.list_follow_through(queryset)
 
     @action(
@@ -419,7 +407,7 @@ class FollowRequestViewSet(
     permission_classes = [RequireUser, RequireScope]
     queryset = UserFollowRequest.objects.none()
     serializer_class = FollowRequestSerializer
-    pagination_class = get_paginator("cursor", ordering="-date_created")
+    pagination_class = get_paginator("cursor", ordering="-id")
     schemas = schemas.follow_request
     scopes = {
         "list": "user.follow",

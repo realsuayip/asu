@@ -21,6 +21,3 @@ class Session(AbstractBaseSession):
     )
     user_agent = models.TextField(_("user agent"), blank=True)
     ip = models.GenericIPAddressField(_("ip address"), null=True, blank=True)
-
-    class Meta:
-        indexes = [models.Index(fields=["user"])]

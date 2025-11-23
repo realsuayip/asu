@@ -3,34 +3,30 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from asu.core.models.base import Base
 
-class UserDeactivation(models.Model):
+
+class UserDeactivation(Base):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_("user"),
         on_delete=models.CASCADE,
+        related_name="deactivations",
+        verbose_name=_("user"),
     )
-    date_revoked = models.DateTimeField(
-        _("date revoked"),
-        null=True,
-        blank=True,
-    )
+    revoked = models.DateTimeField(_("date revoked"), null=True, blank=True)
     for_deletion = models.BooleanField(
         _("for deletion"),
-        help_text=_("Marks this user's account for permanent deletion."),
+        help_text=_("Marks this user for permanent deletion."),
         default=False,
     )
 
-    date_created = models.DateTimeField(_("date created"), auto_now_add=True)
-    date_modified = models.DateTimeField(_("date modified"), auto_now=True)
-
     class Meta:
-        verbose_name = _("account deactivation")
-        verbose_name_plural = _("account deactivations")
+        verbose_name = _("user deactivation")
+        verbose_name_plural = _("user deactivations")
         constraints = [
             models.UniqueConstraint(
                 fields=["user"],
-                condition=Q(date_revoked__isnull=True),
+                condition=Q(revoked__isnull=True),
                 name="unique_pending_user_deactivation",
             ),
         ]

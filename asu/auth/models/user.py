@@ -340,8 +340,8 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
 
         UserDeactivation.objects.filter(
             user=self,
-            date_revoked__isnull=True,
-        ).update(date_revoked=timezone.now())
+            revoked__isnull=True,
+        ).update(revoked=timezone.now())
 
     def send_transactional_mail(self, message: EmailMessage) -> int:
         """

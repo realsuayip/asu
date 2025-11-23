@@ -24,7 +24,7 @@ def delete_users_permanently() -> tuple[int, dict[str, int]]:
     """
     deactivations = UserDeactivation.objects.filter(
         for_deletion=True,
-        date_revoked__isnull=True,
-        date_created__lte=timezone.now() - datetime.timedelta(days=30),
+        revoked__isnull=True,
+        created__lte=timezone.now() - datetime.timedelta(days=30),
     ).values("user_id")
     return User.objects.filter(id__in=deactivations).delete()

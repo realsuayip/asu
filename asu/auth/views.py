@@ -33,7 +33,6 @@ from asu.auth.serializers.actions import (
     PasswordChangeSerializer,
     ProfilePictureEditSerializer,
     RelationSerializer,
-    TicketSerializer,
     UserConnectionSerializer,
     UserDeactivationSerializer,
 )
@@ -44,7 +43,6 @@ from asu.auth.serializers.user import (
 from asu.core.utils.rest import EmptySerializer, get_paginator
 from asu.core.utils.typing import UserRequest
 from asu.core.utils.views import ExtendedViewSet
-from asu.messaging.serializers import MessageComposeSerializer
 
 if TYPE_CHECKING:
     from rest_framework.decorators import ViewSetAction
@@ -91,8 +89,6 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         "followers": UserConnectionSerializer,
         "following": UserConnectionSerializer,
         "blocked": UserConnectionSerializer,
-        "message": MessageComposeSerializer,
-        "ticket": TicketSerializer,
         "profile_picture": ProfilePictureEditSerializer,
     }
     filterset_classes = {"relations": RelationFilter, "by": UserLookupFilter}
@@ -288,36 +284,6 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     def blocked(self, request: UserRequest) -> Response:
         queryset = User.objects.active().filter(blocked_by=request.user)
         return self.list_follow_through(queryset)
-
-    @action(
-        detail=True,
-        methods=["post"],
-        permission_classes=[RequireUser, RequireFirstParty],
-        serializer_class=MessageComposeSerializer,
-    )
-    def message(self, request: Request, pk: int) -> Response:
-        context = self.get_serializer_context()
-        context["recipient"] = self.get_object()
-        serializer = self.get_serializer(data=request.data, context=context)
-        return self.perform_action(
-            serializer,
-            status_code=status.HTTP_201_CREATED,
-        )
-
-    @action(
-        detail=False,
-        methods=["post"],
-        permission_classes=[RequireUser, RequireFirstParty],
-        serializer_class=TicketSerializer,
-    )
-    def ticket(self, request: Request) -> Response:
-        """
-        Used to create an authentication ticket for the current user. A
-        signed string will be returned, which can be used as an
-        authentication token in case conventional methods are not
-        possible e.g., through WebSocket protocol.
-        """
-        return self.perform_action(status_code=status.HTTP_201_CREATED)
 
     @action(
         detail=False,

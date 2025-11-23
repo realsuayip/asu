@@ -1,13 +1,6 @@
-import typing
 from collections.abc import Callable
 
-from django.core import signing
-from django.http import HttpRequest, HttpResponse, QueryDict
-
-from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.security.websocket import WebsocketDenier
-
-from asu.auth.models import User
+from django.http import HttpRequest, HttpResponse
 
 
 class UserActivityMiddleware:
@@ -21,27 +14,3 @@ class UserActivityMiddleware:
             user.reactivate()
 
         return self.get_response(request)
-
-
-class QueryAuthMiddleware:
-    """
-    Authenticate using `ticket` query parameter. This short-living, signed
-    ticket is obtained via the API `api:auth:user-ticket`.
-
-    Connection is denied if the ticket could not be verified. All consumers
-    require this authentication.
-    """
-
-    def __init__(self, app: AsyncWebsocketConsumer) -> None:
-        self.app = app
-
-    @typing.no_type_check
-    async def __call__(self, scope, receive, send):
-        query = QueryDict(scope["query_string"])
-        ticket = query.get("ticket", "")
-        try:
-            scope["user_id"] = User.objects.verify_websocket_ticket(ticket)
-        except signing.BadSignature:
-            denier = WebsocketDenier()
-            return await denier(scope, receive, send)
-        return await self.app(scope, receive, send)

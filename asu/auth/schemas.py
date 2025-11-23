@@ -17,7 +17,6 @@ from asu.auth.serializers.user import (
 )
 from asu.core.utils.openapi import Tag, examples, get_error_repr
 from asu.core.utils.rest import APIError
-from asu.messaging.serializers import MessageComposeSerializer
 
 if TYPE_CHECKING:
     from drf_spectacular.openapi import AutoSchema
@@ -94,17 +93,6 @@ blocked = extend_schema(
     responses={200: UserConnectionSerializer(many=True)},
 )
 
-message = extend_schema(
-    summary="Send a message to user",
-    tags=[Tag.MESSAGING],
-    responses={
-        200: MessageComposeSerializer,
-        403: APIError,
-        404: APIError,
-    },
-    examples=[examples.not_found, examples.permission_denied],
-)
-
 get_me = extend_schema(
     summary="Retrieve authenticated user",
     tags=[Tag.USER_SETTINGS, Tag.USER_RETRIEVAL],
@@ -163,10 +151,6 @@ delete_profile_picture = extend_schema(
 )
 profile_picture = lambda f: put_profile_picture(delete_profile_picture(f))  # noqa: E731
 
-ticket = extend_schema(
-    summary="Create authentication ticket", tags=[Tag.USER_AUTHENTICATION]
-)
-
 relations = extend_schema(
     summary="List relations with given users",
     tags=[Tag.USER_FOLLOW_OPERATIONS, Tag.USER_BLOCK_OPERATIONS],
@@ -220,9 +204,7 @@ user = {
     "followers": followers,
     "following": following,
     "blocked": blocked,
-    "message": message,
     "profile_picture": profile_picture,
-    "ticket": ticket,
     "relations": relations,
     "deactivate": deactivate,
 }

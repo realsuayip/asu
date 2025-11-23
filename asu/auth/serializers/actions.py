@@ -163,15 +163,6 @@ class UserConnectionSerializer(UserPublicReadSerializer):
         )
 
 
-class TicketSerializer(serializers.Serializer[dict[str, Any]]):
-    ticket = serializers.CharField(read_only=True)
-
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        user = self.context["request"].user
-        validated_data["ticket"] = user.create_websocket_ticket()
-        return validated_data
-
-
 class ProfilePictureEditSerializer(serializers.ModelSerializer[User]):
     class Meta:
         fields = ("profile_picture",)

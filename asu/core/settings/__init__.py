@@ -10,8 +10,7 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 TESTING = "pytest" in sys.argv[0]
 
 ROOT_URLCONF = "asu.core.urls"
-ASGI_APPLICATION = "asu.core.gateways.dev.application"
-WSGI_APPLICATION = "asu.core.gateways.wsgi.application"
+WSGI_APPLICATION = "asu.core.wsgi.application"
 
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
@@ -33,12 +32,10 @@ INSTALLED_APPS = [
     "asu.core",
     "asu.auth",
     "asu.verification",
-    "asu.messaging",
     # Third party apps
     "rest_framework",
     "drf_spectacular",
     "rest_filters",
-    "channels",
     "sorl.thumbnail",
     "widget_tweaks",
     "corsheaders",
@@ -50,12 +47,6 @@ INSTALLED_APPS = [
     "django_otp.plugins.otp_totp",
     "two_factor",
 ]
-
-if DEBUG or TESTING:
-    # Overrides `runserver` command to add WebSocket capabilities
-    # in local development environment. In production, `uvicorn`
-    # is used instead.
-    INSTALLED_APPS.insert(0, "daphne")
 
 
 MIDDLEWARE = [
@@ -278,15 +269,6 @@ SPECTACULAR_SETTINGS = {
 
 REDIS_URL = env.str("REDIS_URL")
 CELERY_BROKER_URL = env.str("RABBITMQ_URL")
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [REDIS_URL],
-        },
-    },
-}
 
 THUMBNAIL_REDIS_URL = REDIS_URL
 THUMBNAIL_FORCE_OVERWRITE = True

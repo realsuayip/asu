@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import URLPattern, URLResolver, include, path, re_path
+from django.urls import URLPattern, URLResolver, include, path
 from django.views.generic import RedirectView
 
 from drf_spectacular.utils import extend_schema
@@ -17,13 +17,11 @@ from asu.core.views import (
     permission_denied,
     server_error,
 )
-from asu.messaging.websocket import ConversationConsumer
 
 api_urls: list[URLResolver | URLPattern] = [
     path("", APIRootView.as_view(), name="api-root"),
     path("", include("asu.auth.urls")),
     path("", include("asu.verification.urls")),
-    path("", include("asu.messaging.urls")),
 ]
 
 docs_urls = [
@@ -51,10 +49,6 @@ account_urls = [
         name="backup_tokens",
     ),
     path("two-factor/disable/", tf.DisableView.as_view(), name="disable"),
-]
-
-websocket_urls = [
-    re_path(r"conversations/$", ConversationConsumer.as_asgi()),
 ]
 
 

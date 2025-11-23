@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from asu.core.models.base import Base
 from asu.core.utils.cache import build_vary_key, cached_context
 
 
@@ -52,12 +53,9 @@ class ProjectVariableManager(models.Manager["ProjectVariable"]):
         return var.value
 
 
-class ProjectVariable(models.Model):
+class ProjectVariable(Base):
     name = models.TextField(_("name"), unique=True)
     value = models.JSONField(_("value"))
-
-    date_modified = models.DateTimeField(_("date modified"), auto_now=True)
-    date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 
     objects = ProjectVariableManager()
 

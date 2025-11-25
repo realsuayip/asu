@@ -72,7 +72,7 @@ def test_user_password_reset_check_bad_code(
         user=user,
     )
     verification.code = "123456"
-    verification.save(update_fields=["code"])
+    verification.save(update_fields=["code", "updated"])
     response = first_party_app_client.post(
         reverse("api:verification:password-reset-check"),
         data={
@@ -86,16 +86,14 @@ def test_user_password_reset_check_bad_code(
 @pytest.mark.django_db
 def test_user_password_reset_check_expired_code(
     first_party_app_client: OAuthClient,
-    mocker: MockerFixture,
 ) -> None:
     past = timezone.now() - timedelta(seconds=settings.PASSWORD_VERIFY_PERIOD + 10)
-    mocker.patch("django.utils.timezone.now", return_value=past)
     user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",
         user=user,
+        created=past,
     )
-    mocker.stopall()
 
     response = first_party_app_client.post(
         reverse("api:verification:password-reset-check"),

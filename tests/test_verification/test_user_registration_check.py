@@ -56,7 +56,7 @@ def test_verification_registration_check_bad_code(
 ) -> None:
     verification = RegistrationVerification.objects.create(email="helen@example.com")
     verification.code = "123456"
-    verification.save(update_fields=["code"])
+    verification.save(update_fields=["code", "updated"])
     response = first_party_app_client.post(
         reverse("api:verification:registration-verification-check"),
         data={
@@ -70,12 +70,12 @@ def test_verification_registration_check_bad_code(
 @pytest.mark.django_db
 def test_verification_registration_check_expired_code(
     first_party_app_client: OAuthClient,
-    mocker: MockerFixture,
 ) -> None:
     past = timezone.now() - timedelta(seconds=settings.REGISTRATION_VERIFY_PERIOD + 10)
-    mocker.patch("django.utils.timezone.now", return_value=past)
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
-    mocker.stopall()
+    verification = RegistrationVerification.objects.create(
+        email="helen@example.com",
+        created=past,
+    )
 
     response = first_party_app_client.post(
         reverse("api:verification:registration-verification-check"),

@@ -8,11 +8,13 @@ from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import QuerySet
+from django.db.models.expressions import DatabaseDefault
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
 
+from asu.core.models.base import Base
 from asu.core.utils import mailing
 from asu.core.utils.messages import EmailMessage
 
@@ -39,12 +41,12 @@ class VerificationManager(models.Manager[V]):
         max_verify_date = timezone.now() - timedelta(seconds=self.verify_period)
         return self.filter(
             date_verified__isnull=True,
-            date_created__gt=max_verify_date,
+            created__gt=max_verify_date,
             nulled_by__isnull=True,
         )
 
 
-class Verification(models.Model):
+class Verification(Base):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -72,13 +74,11 @@ class Verification(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    date_verified = models.DateTimeField(
+    date_verified = models.DateTimeField(  # todo
         _("date verified"),
         null=True,
         blank=True,
     )
-    date_modified = models.DateTimeField(_("date modified"), auto_now=True)
-    date_created = models.DateTimeField(_("date created"), auto_now_add=True)
 
     # Specifies a namedtuple (subject, body) to be used in send_mail.
     MESSAGES: EmailMessage
@@ -95,7 +95,7 @@ class Verification(models.Model):
         ]
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        created = self.pk is None
+        created = isinstance(self.pk, DatabaseDefault)
 
         if created:
             self.code = get_random_string(6, allowed_chars=string.digits)

@@ -8,7 +8,6 @@ from django.utils import timezone
 
 import pytest
 from pytest_django import DjangoCaptureOnCommitCallbacks
-from pytest_mock import MockerFixture
 
 from asu.auth.models import Application
 from asu.verification.models import EmailVerification
@@ -69,7 +68,7 @@ def test_user_email_change_check_bad_code(client: OAuthClient) -> None:
         user=user,
     )
     verification.code = "123456"
-    verification.save(update_fields=["code"])
+    verification.save(update_fields=["code", "updated"])
     response = client.post(
         reverse("api:verification:email-verification-check"),
         data={
@@ -81,20 +80,16 @@ def test_user_email_change_check_bad_code(client: OAuthClient) -> None:
 
 
 @pytest.mark.django_db
-def test_user_email_change_check_expired_code(
-    client: OAuthClient,
-    mocker: MockerFixture,
-) -> None:
+def test_user_email_change_check_expired_code(client: OAuthClient) -> None:
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
 
     past = timezone.now() - timedelta(seconds=settings.EMAIL_VERIFY_PERIOD + 10)
-    mocker.patch("django.utils.timezone.now", return_value=past)
     verification = EmailVerification.objects.create(
         email="helen_new@example.com",
         user=user,
+        created=past,
     )
-    mocker.stopall()
 
     response = client.post(
         reverse("api:verification:email-verification-check"),

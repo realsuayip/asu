@@ -59,7 +59,7 @@ def test_user_deactivate(
     assert user.is_frozen is True
     assert not Session.objects.filter(user=user.pk).exists()
     assert not AccessToken.objects.filter(user=user).exists()
-    assert deactivation.revoked is None
+    assert deactivation.revoked_at is None
     assert deactivation.for_deletion is False
     assert refresh_token.revoked is not None
 
@@ -102,7 +102,7 @@ def test_user_deactivate_for_deletion(
     assert user.is_frozen is True
     assert not Session.objects.filter(user=user.pk).exists()
     assert not AccessToken.objects.filter(user=user).exists()
-    assert deactivation.revoked is None
+    assert deactivation.revoked_at is None
     assert deactivation.for_deletion is True
     assert refresh_token.revoked is not None
 
@@ -151,12 +151,12 @@ def test_user_reactivate(user: User) -> None:
     user.deactivate()
     deactivation = UserDeactivation.objects.get(user=user)
     assert user.is_frozen is True
-    assert deactivation.revoked is None
+    assert deactivation.revoked_at is None
 
     user.reactivate()
     deactivation.refresh_from_db()
     assert user.is_frozen is False
-    assert deactivation.revoked is not None
+    assert deactivation.revoked_at is not None
 
 
 @pytest.mark.django_db
@@ -175,7 +175,7 @@ def test_user_reactivate_by_session_activity(
     deactivation.refresh_from_db()
 
     assert user.is_frozen is False
-    assert deactivation.revoked is not None
+    assert deactivation.revoked_at is not None
 
 
 @pytest.mark.django_db
@@ -207,7 +207,7 @@ def test_task_delete_users_permanently(mocker: MockerFixture) -> None:
     UserDeactivation.objects.create(
         user=deletion_cancelled,
         for_deletion=True,
-        revoked=now + datetime.timedelta(hours=6),
+        revoked_at=now + datetime.timedelta(hours=6),
         created_at=now,
     )
 
@@ -222,7 +222,7 @@ def test_task_delete_users_permanently(mocker: MockerFixture) -> None:
 
 @pytest.mark.django_db
 def test_user_deactivation_unique_constraint(user: User) -> None:
-    UserDeactivation.objects.create(user=user, revoked=timezone.now())
+    UserDeactivation.objects.create(user=user, revoked_at=timezone.now())
     UserDeactivation.objects.create(user=user)
     with pytest.raises(IntegrityError):
         UserDeactivation.objects.create(user=user)

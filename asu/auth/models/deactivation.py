@@ -13,7 +13,7 @@ class UserDeactivation(Base):
         related_name="deactivations",
         verbose_name=_("user"),
     )
-    revoked = models.DateTimeField(_("date revoked"), null=True, blank=True)
+    revoked_at = models.DateTimeField(_("date revoked"), null=True, blank=True)
     for_deletion = models.BooleanField(
         _("for deletion"),
         help_text=_("Marks this user for permanent deletion."),
@@ -26,7 +26,7 @@ class UserDeactivation(Base):
         constraints = [
             models.UniqueConstraint(
                 fields=["user"],
-                condition=Q(revoked__isnull=True),
+                condition=Q(revoked_at__isnull=True),
                 name="unique_pending_user_deactivation",
             ),
         ]

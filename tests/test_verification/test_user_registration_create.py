@@ -70,7 +70,7 @@ def test_user_registration_create(
     assert user.is_active is True
 
     verification.refresh_from_db()
-    assert verification.date_completed is not None
+    assert verification.completed_at is not None
     assert verification.user == user
 
 
@@ -318,7 +318,7 @@ def test_user_registration_nullifies_other_verifications(
     v1.refresh_from_db()
     v2.refresh_from_db()
 
-    assert v1.date_completed is not None
+    assert v1.completed_at is not None
     assert v2.nulled_by == v1
 
 

@@ -78,8 +78,8 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         if verification is None:
             self.fail_email()
 
-        verification.date_completed = timezone.now()
-        verification.save(update_fields=["date_completed", "updated_at"])
+        verification.completed_at = timezone.now()
+        verification.save(update_fields=["completed_at", "updated_at"])
         verification.null_others()
 
         user.set_password(password)

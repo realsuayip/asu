@@ -31,7 +31,7 @@ def test_verification_registration_send(
     )
     assert verification.user is None
     assert verification.is_eligible is False
-    assert verification.date_completed is None
+    assert verification.completed_at is None
 
 
 @pytest.mark.django_db

@@ -32,7 +32,7 @@ def test_user_password_reset_send(
         in mail.outbox[0].body
     )
     assert verification.is_eligible is False
-    assert verification.date_completed is None
+    assert verification.completed_at is None
 
 
 @pytest.mark.django_db

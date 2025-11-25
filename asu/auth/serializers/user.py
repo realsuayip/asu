@@ -132,8 +132,8 @@ class UserCreateSerializer(serializers.ModelSerializer[User]):
         user.set_password(password)
         user.save()
         verification.user = user
-        verification.date_completed = timezone.now()
-        verification.save(update_fields=["user", "date_completed", "updated_at"])
+        verification.completed_at = timezone.now()
+        verification.save(update_fields=["user", "completed_at", "updated_at"])
         verification.null_others()
         user._auth_dict = user.issue_token()  # type: ignore[attr-defined]
         return user

@@ -40,7 +40,7 @@ def test_user_password_reset(first_party_app_client: OAuthClient) -> None:
     assert user.check_password("hln_j1070")
 
     verification.refresh_from_db()
-    assert verification.date_completed is not None
+    assert verification.completed_at is not None
 
 
 @pytest.mark.django_db
@@ -231,7 +231,7 @@ def test_user_password_reset_nullifies_other_verifications(
     v1.refresh_from_db()
     v2.refresh_from_db()
 
-    assert v1.date_completed is not None
+    assert v1.completed_at is not None
     assert v2.nulled_by == v1
 
 

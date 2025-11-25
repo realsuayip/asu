@@ -125,7 +125,7 @@ class ConsentVerificationManager(VerificationManager[CV]):
         max_register_date = timezone.now() - timedelta(seconds=period)
         return self.filter(
             verified_at__isnull=False,
-            date_completed__isnull=True,
+            completed_at__isnull=True,
             verified_at__gt=max_register_date,
             nulled_by__isnull=True,
         )
@@ -180,7 +180,7 @@ class ConsentVerification(Verification):
     past age, or outright garbage consent information).
     """
 
-    date_completed = models.DateTimeField(
+    completed_at = models.DateTimeField(
         _("date completed"),
         null=True,
         blank=True,
@@ -207,7 +207,7 @@ class ConsentVerification(Verification):
 
     @property
     def is_eligible(self) -> bool:
-        if (self.verified_at is None) or self.date_completed:
+        if (self.verified_at is None) or self.completed_at:
             return False
 
         period = self.ELIGIBLE_PERIOD

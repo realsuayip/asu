@@ -27,7 +27,7 @@ def test_user_me(
         description="hello world!",
         website="https://example.com",
         birth_date=datetime.date(2000, 1, 1),
-        created=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
+        created_at=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
     client.set_user(user)
     with django_assert_num_queries(
@@ -50,7 +50,7 @@ def test_user_me(
         "allows_receipts": True,
         "allows_all_messages": True,
         "two_factor_enabled": False,
-        "created": "2025-01-01T00:00:00Z",
+        "created_at": "2025-01-01T00:00:00Z",
     }
 
 
@@ -133,7 +133,7 @@ def test_user_me_update_disallow_email(
                 "website": "https://example.com",
                 "profile_picture": None,
                 "is_private": False,
-                "created": "2025-01-01T00:00:00Z",
+                "created_at": "2025-01-01T00:00:00Z",
             },
         ),
         (
@@ -151,7 +151,7 @@ def test_user_me_update_disallow_email(
                 "allows_all_messages": True,
                 "language": "en",
                 "two_factor_enabled": False,
-                "created": "2025-01-01T00:00:00Z",
+                "created_at": "2025-01-01T00:00:00Z",
             },
         ),
         (
@@ -165,7 +165,7 @@ def test_user_me_update_disallow_email(
                 "website": "https://example.com",
                 "profile_picture": None,
                 "is_private": False,
-                "created": "2025-01-01T00:00:00Z",
+                "created_at": "2025-01-01T00:00:00Z",
             },
         ),
         (
@@ -184,7 +184,7 @@ def test_user_me_update_disallow_email(
                 "allows_all_messages": True,
                 "language": "en",
                 "two_factor_enabled": False,
-                "created": "2025-01-01T00:00:00Z",
+                "created_at": "2025-01-01T00:00:00Z",
             },
         ),
     ),
@@ -202,7 +202,7 @@ def test_user_me_third_party_token(
         description="hello world!",
         website="https://example.com",
         birth_date=datetime.date(2000, 1, 1),
-        created=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
+        created_at=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
     client.set_user(
         user,

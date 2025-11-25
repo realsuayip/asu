@@ -42,9 +42,9 @@ class EmailCheckSerializer(BaseCheckSerializer):
             raise NotFound(messages.BAD_VERIFICATION_CODE)
 
         verification.date_verified = timezone.now()
-        verification.save(update_fields=["date_verified", "updated"])
+        verification.save(update_fields=["date_verified", "updated_at"])
         verification.null_others()
 
         user.email = verification.email
-        user.save(update_fields=["email", "updated"])
+        user.save(update_fields=["email", "updated_at"])
         return validated_data

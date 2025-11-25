@@ -25,7 +25,7 @@ def test_user_detail(
         description="hello world!",
         website="https://example.com",
         birth_date=datetime.date(2000, 1, 1),
-        created=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
+        created_at=datetime.datetime(2025, 1, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),
     )
 
     with django_assert_num_queries(
@@ -51,7 +51,7 @@ def test_user_detail(
         "website": "https://example.com",
         "following_count": 0,
         "follower_count": 0,
-        "created": "2025-01-01T00:00:00Z",
+        "created_at": "2025-01-01T00:00:00Z",
     }
 
 

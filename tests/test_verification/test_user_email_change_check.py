@@ -68,7 +68,7 @@ def test_user_email_change_check_bad_code(client: OAuthClient) -> None:
         user=user,
     )
     verification.code = "123456"
-    verification.save(update_fields=["code", "updated"])
+    verification.save(update_fields=["code", "updated_at"])
     response = client.post(
         reverse("api:verification:email-verification-check"),
         data={
@@ -88,7 +88,7 @@ def test_user_email_change_check_expired_code(client: OAuthClient) -> None:
     verification = EmailVerification.objects.create(
         email="helen_new@example.com",
         user=user,
-        created=past,
+        created_at=past,
     )
 
     response = client.post(

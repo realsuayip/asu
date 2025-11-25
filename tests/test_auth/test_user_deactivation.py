@@ -31,7 +31,7 @@ def test_user_deactivate(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     user.set_password("hello")
-    user.save(update_fields=["password", "updated"])
+    user.save(update_fields=["password", "updated_at"])
     # Force a session login to create a session. All sessions must
     # be invalidated after deactivating the account.
     client = Client()
@@ -71,7 +71,7 @@ def test_user_deactivate_for_deletion(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     user.set_password("hello")
-    user.save(update_fields=["password", "updated"])
+    user.save(update_fields=["password", "updated_at"])
 
     client = Client()
     client.force_login(user)
@@ -197,18 +197,18 @@ def test_task_delete_users_permanently(mocker: MockerFixture) -> None:
     UserDeactivation.objects.create(
         user=delete_immediately,
         for_deletion=True,
-        created=now,
+        created_at=now,
     )
     UserDeactivation.objects.create(
         user=not_for_deletion,
         for_deletion=False,
-        created=now,
+        created_at=now,
     )
     UserDeactivation.objects.create(
         user=deletion_cancelled,
         for_deletion=True,
         revoked=now + datetime.timedelta(hours=6),
-        created=now,
+        created_at=now,
     )
 
     future = now + datetime.timedelta(days=30)

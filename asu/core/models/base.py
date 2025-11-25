@@ -8,7 +8,7 @@ from django.db.models.expressions import DatabaseDefault
 from django.db.models.functions import Now
 from django.utils.translation import gettext_lazy as _
 
-# We cannot enforce `updated` field for `update_fields` in these
+# We cannot enforce `updated_at` field for `update_fields` in these
 # models since update is being made in third party code.
 THIRD_PARTY_MODELS = (settings.AUTH_USER_MODEL,)
 
@@ -26,8 +26,8 @@ class AutoUpdatedField(models.DateTimeField):
 class Base(models.Model):
     id = models.UUIDField(_("id"), primary_key=True, db_default=UUIDv7())
 
-    created = models.DateTimeField(_("created"), db_default=Now())
-    updated = AutoUpdatedField(_("updated"), db_default=Now(), editable=False)
+    created_at = models.DateTimeField(_("date created"), db_default=Now())
+    updated_at = AutoUpdatedField(_("date updated"), db_default=Now(), editable=False)
 
     class Meta:
         abstract = True
@@ -48,11 +48,11 @@ class Base(models.Model):
             raise ValueError("'update_fields' is not set")
         if (
             update_fields is not None
-            and "updated" not in update_fields
+            and "updated_at" not in update_fields
             and self._meta.label not in THIRD_PARTY_MODELS
-            and "updated" in [f.name for f in self._meta.concrete_fields]
+            and "updated_at" in [f.name for f in self._meta.concrete_fields]
         ):
-            raise ValueError("'update_fields' must contain the field 'updated'")
+            raise ValueError("'update_fields' must contain the field 'updated_at'")
         return super().save(
             force_insert=force_insert,
             force_update=force_update,

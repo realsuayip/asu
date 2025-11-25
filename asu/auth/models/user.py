@@ -243,7 +243,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
         image.save(thumb_io, format="JPEG")
 
         self.profile_picture = ContentFile(thumb_io.getvalue(), name=name)
-        self.save(update_fields=["profile_picture", "updated"])
+        self.save(update_fields=["profile_picture", "updated_at"])
 
     def get_profile_picture(self, size: tuple[int, int] = (150, 150)) -> str | None:
         if not self.profile_picture:
@@ -263,7 +263,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
         if image:
             sorl.thumbnail.delete(image, delete_file=False)
             image.delete(save=False)
-            self.save(update_fields=["profile_picture", "updated"])
+            self.save(update_fields=["profile_picture", "updated_at"])
 
     def issue_token(self) -> dict[str, Any]:
         # Programmatically issue tokens for this user. Used just after
@@ -321,7 +321,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
     @transaction.atomic
     def deactivate(self, *, for_deletion: bool = False) -> UserDeactivation:
         self.is_frozen = True
-        self.save(update_fields=["is_frozen", "updated"])
+        self.save(update_fields=["is_frozen", "updated_at"])
 
         self.revoke_other_tokens()
         self.revoke_all_sessions()
@@ -336,7 +336,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
     @transaction.atomic
     def reactivate(self) -> None:
         self.is_frozen = False
-        self.save(update_fields=["is_frozen", "updated"])
+        self.save(update_fields=["is_frozen", "updated_at"])
 
         UserDeactivation.objects.filter(
             user=self,

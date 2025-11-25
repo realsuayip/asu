@@ -40,8 +40,8 @@ class UserAdmin(BaseUserAdmin[User]):
     readonly_fields = (
         "is_frozen",
         "last_login",
-        "created",
-        "updated",
+        "created_at",
+        "updated_at",
     )
     fieldsets = (
         (None, {"fields": ("email", "password")}),
@@ -87,8 +87,8 @@ class UserAdmin(BaseUserAdmin[User]):
             {
                 "fields": (
                     "last_login",
-                    "created",
-                    "updated",
+                    "created_at",
+                    "updated_at",
                 )
             },
         ),
@@ -102,7 +102,7 @@ class UserAdmin(BaseUserAdmin[User]):
             },
         ),
     )
-    list_display = ("username", "email", "display_name", "created")
+    list_display = ("username", "email", "display_name", "created_at")
     search_fields = ("username", "email")
     ordering = ("-id",)
 

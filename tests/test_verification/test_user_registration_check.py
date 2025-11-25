@@ -56,7 +56,7 @@ def test_verification_registration_check_bad_code(
 ) -> None:
     verification = RegistrationVerification.objects.create(email="helen@example.com")
     verification.code = "123456"
-    verification.save(update_fields=["code", "updated"])
+    verification.save(update_fields=["code", "updated_at"])
     response = first_party_app_client.post(
         reverse("api:verification:registration-verification-check"),
         data={
@@ -74,7 +74,7 @@ def test_verification_registration_check_expired_code(
     past = timezone.now() - timedelta(seconds=settings.REGISTRATION_VERIFY_PERIOD + 10)
     verification = RegistrationVerification.objects.create(
         email="helen@example.com",
-        created=past,
+        created_at=past,
     )
 
     response = first_party_app_client.post(

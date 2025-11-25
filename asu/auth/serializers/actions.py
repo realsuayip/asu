@@ -73,7 +73,7 @@ class PasswordChangeSerializer(serializers.ModelSerializer[User]):
             raise serializers.ValidationError({"new_password": err.messages})
 
         instance.set_password(new)
-        instance.save(update_fields=["password", "updated"])
+        instance.save(update_fields=["password", "updated_at"])
         instance.revoke_other_tokens(request.auth)
 
         send_notice = functools.partial(

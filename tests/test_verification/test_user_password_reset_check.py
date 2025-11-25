@@ -72,7 +72,7 @@ def test_user_password_reset_check_bad_code(
         user=user,
     )
     verification.code = "123456"
-    verification.save(update_fields=["code", "updated"])
+    verification.save(update_fields=["code", "updated_at"])
     response = first_party_app_client.post(
         reverse("api:verification:password-reset-check"),
         data={
@@ -92,7 +92,7 @@ def test_user_password_reset_check_expired_code(
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",
         user=user,
-        created=past,
+        created_at=past,
     )
 
     response = first_party_app_client.post(

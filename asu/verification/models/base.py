@@ -41,7 +41,7 @@ class VerificationManager(models.Manager[V]):
         max_verify_date = timezone.now() - timedelta(seconds=self.verify_period)
         return self.filter(
             date_verified__isnull=True,
-            created__gt=max_verify_date,
+            created_at__gt=max_verify_date,
             nulled_by__isnull=True,
         )
 

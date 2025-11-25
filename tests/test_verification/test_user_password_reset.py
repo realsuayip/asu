@@ -111,7 +111,7 @@ def test_user_password_reset_case_unusable_password(
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
     user.set_unusable_password()
-    user.save(update_fields=["password", "updated"])
+    user.save(update_fields=["password", "updated_at"])
     verification = PasswordResetVerification.objects.create(
         user=user,
         email="helen@example.com",

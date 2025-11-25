@@ -79,11 +79,11 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
             self.fail_email()
 
         verification.date_completed = timezone.now()
-        verification.save(update_fields=["date_completed", "updated"])
+        verification.save(update_fields=["date_completed", "updated_at"])
         verification.null_others()
 
         user.set_password(password)
-        user.save(update_fields=["password", "updated"])
+        user.save(update_fields=["password", "updated_at"])
         user.revoke_other_tokens(self.context["request"].auth)
 
         send_notice = functools.partial(

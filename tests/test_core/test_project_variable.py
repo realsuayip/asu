@@ -44,7 +44,7 @@ def test_get_value_db_cache_invalidates_on_save(
     assert value == cached_value == "im pink"
 
     var.value = "im blue"
-    var.save(update_fields=["value", "updated"])
+    var.save(update_fields=["value", "updated_at"])
 
     assert cache.get(cache_key) is None
     with django_assert_num_queries(1):

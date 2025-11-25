@@ -73,7 +73,7 @@ def test_user_password_reset_send_user_with_unusable_password(
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
     user.set_unusable_password()
-    user.save(update_fields=["password", "updated"])
+    user.save(update_fields=["password", "updated_at"])
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
             reverse("api:verification:password-reset-list"),

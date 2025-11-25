@@ -75,10 +75,10 @@ class UserFollowRequest(UserRelation):
     def accept(self) -> None:
         assert self.is_pending
         self.status = self.Status.APPROVED
-        self.save(update_fields=["status", "updated"])
+        self.save(update_fields=["status", "updated_at"])
         self.from_user.add_following(to_user=self.to_user)
 
     def reject(self) -> None:
         assert self.is_pending
         self.status = self.Status.REJECTED
-        self.save(update_fields=["status", "updated"])
+        self.save(update_fields=["status", "updated_at"])

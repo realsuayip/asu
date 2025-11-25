@@ -242,7 +242,7 @@ OAUTH2_USER_FIELDS = {
         "website",
         "profile_picture",
         "is_private",
-        "created",
+        "created_at",
     },
     "user.profile.email:read": {"email"},
     "user.profile.private:read": {

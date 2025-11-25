@@ -34,7 +34,7 @@ def test_user_email_change_check(client: OAuthClient) -> None:
     assert response.json() == {"email": verification.email}
     verification.refresh_from_db()
     user.refresh_from_db()
-    assert verification.date_verified is not None
+    assert verification.verified_at is not None
     assert user.email == "helen_new@example.com"
 
 
@@ -139,7 +139,7 @@ def test_user_email_change_nullifies_other_verifications(
     v1.refresh_from_db()
     v2.refresh_from_db()
 
-    assert v1.date_verified is not None
+    assert v1.verified_at is not None
     assert v2.nulled_by == v1
 
 

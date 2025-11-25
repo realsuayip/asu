@@ -31,7 +31,7 @@ def test_verification_registration_check(
     }
     verification.refresh_from_db()
     assert verification.is_eligible is True
-    assert verification.date_verified is not None
+    assert verification.verified_at is not None
     assert verification.date_completed is None
 
 

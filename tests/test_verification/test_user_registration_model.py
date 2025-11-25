@@ -20,7 +20,7 @@ def test_verification_registration_code_generation() -> None:
 @pytest.mark.django_db
 def test_verification_registration_get_with_consent() -> None:
     verification = RegistrationVerification.objects.create(
-        email="helen@example.com", date_verified=timezone.now()
+        email="helen@example.com", verified_at=timezone.now()
     )
     consent = verification.create_consent()
     actual = RegistrationVerification.objects.get_with_consent(
@@ -36,7 +36,7 @@ def test_verification_registration_get_with_consent_case_expired(
     # Create a verified registration
     verification = RegistrationVerification.objects.create(
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
 

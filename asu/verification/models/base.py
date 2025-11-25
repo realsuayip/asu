@@ -40,7 +40,7 @@ class VerificationManager(models.Manager[V]):
     def verifiable(self) -> QuerySet[V]:
         max_verify_date = timezone.now() - timedelta(seconds=self.verify_period)
         return self.filter(
-            date_verified__isnull=True,
+            verified_at__isnull=True,
             created_at__gt=max_verify_date,
             nulled_by__isnull=True,
         )
@@ -74,7 +74,7 @@ class Verification(Base):
         on_delete=models.SET_NULL,
     )
 
-    date_verified = models.DateTimeField(  # todo
+    verified_at = models.DateTimeField(
         _("date verified"),
         null=True,
         blank=True,
@@ -124,9 +124,9 @@ class ConsentVerificationManager(VerificationManager[CV]):
         period = self.eligible_period
         max_register_date = timezone.now() - timedelta(seconds=period)
         return self.filter(
-            date_verified__isnull=False,
+            verified_at__isnull=False,
             date_completed__isnull=True,
-            date_verified__gt=max_register_date,
+            verified_at__gt=max_register_date,
             nulled_by__isnull=True,
         )
 
@@ -207,11 +207,11 @@ class ConsentVerification(Verification):
 
     @property
     def is_eligible(self) -> bool:
-        if (self.date_verified is None) or self.date_completed:
+        if (self.verified_at is None) or self.date_completed:
             return False
 
         period = self.ELIGIBLE_PERIOD
-        delta = (timezone.now() - self.date_verified).total_seconds()
+        delta = (timezone.now() - self.verified_at).total_seconds()
         return delta < period
 
     def null_others(self) -> None:

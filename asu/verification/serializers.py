@@ -41,7 +41,7 @@ class BaseCheckSerializer(serializers.Serializer[ConsentVerification | dict[str,
         except self.model.DoesNotExist:
             raise NotFound(messages.BAD_VERIFICATION_CODE)
 
-        verification.date_verified = timezone.now()
-        verification.save(update_fields=["date_verified", "updated_at"])
+        verification.verified_at = timezone.now()
+        verification.save(update_fields=["verified_at", "updated_at"])
         validated_data["consent"] = verification.create_consent()
         return validated_data

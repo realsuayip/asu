@@ -33,7 +33,7 @@ def test_user_email_change_send(
         f"<div class='code'><strong>{verification.code}</strong></div>"
         in mail.outbox[0].body
     )
-    assert verification.date_verified is None
+    assert verification.verified_at is None
 
 
 @pytest.mark.django_db

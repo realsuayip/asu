@@ -24,7 +24,7 @@ def test_user_registration_create(
 ) -> None:
     create_default_application()
     verification = RegistrationVerification.objects.create(
-        email="helen@example.com", date_verified=timezone.now()
+        email="helen@example.com", verified_at=timezone.now()
     )
     consent = verification.create_consent()
 
@@ -109,7 +109,7 @@ def test_user_registration_create_case_expired_consent(
 ) -> None:
     verification = RegistrationVerification.objects.create(
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     mocker.patch(
@@ -146,7 +146,7 @@ def test_user_registration_create_password_validation(
 ) -> None:
     verification = RegistrationVerification.objects.create(
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     payload = {
@@ -192,7 +192,7 @@ def test_user_registration_create_username_validation(
     UserFactory.create(username="Helen")
     verification = RegistrationVerification.objects.create(
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     payload = {
@@ -233,7 +233,7 @@ def test_user_registration_create_email_normalization(
     create_default_application()
     verification = RegistrationVerification.objects.create(
         email=verification_email,
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     payload = {
@@ -292,12 +292,12 @@ def test_user_registration_nullifies_other_verifications(
         [
             RegistrationVerification(
                 email="helen@example.com",
-                date_verified=timezone.now(),
+                verified_at=timezone.now(),
                 code="111111",
             ),
             RegistrationVerification(
                 email="helen@example.com",
-                date_verified=timezone.now(),
+                verified_at=timezone.now(),
                 code="111112",
             ),
         ]

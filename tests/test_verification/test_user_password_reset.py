@@ -21,7 +21,7 @@ def test_user_password_reset(first_party_app_client: OAuthClient) -> None:
     verification = PasswordResetVerification.objects.create(
         user=user,
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     payload = {
@@ -77,7 +77,7 @@ def test_user_password_reset_case_expired_consent(
     verification = PasswordResetVerification.objects.create(
         user=user,
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     mocker.patch(
@@ -115,7 +115,7 @@ def test_user_password_reset_case_unusable_password(
     verification = PasswordResetVerification.objects.create(
         user=user,
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     response = first_party_app_client.post(
@@ -146,7 +146,7 @@ def test_user_password_reset_password_validation(
     verification = PasswordResetVerification.objects.create(
         user=user,
         email="helen@example.com",
-        date_verified=timezone.now(),
+        verified_at=timezone.now(),
     )
     consent = verification.create_consent()
     payload = {
@@ -206,13 +206,13 @@ def test_user_password_reset_nullifies_other_verifications(
             PasswordResetVerification(
                 email="helen@example.com",
                 user=user,
-                date_verified=timezone.now(),
+                verified_at=timezone.now(),
                 code="111111",
             ),
             PasswordResetVerification(
                 email="helen@example.com",
                 user=user,
-                date_verified=timezone.now(),
+                verified_at=timezone.now(),
                 code="111112",
             ),
         ]

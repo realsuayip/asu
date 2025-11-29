@@ -2,21 +2,13 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from asu.core.utils import messages
-from asu.verification.models.base import ConsentVerification, ConsentVerificationManager
-
-
-class PasswordResetVerificationManager(
-    ConsentVerificationManager["PasswordResetVerification"]
-):
-    verify_period = settings.PASSWORD_VERIFY_PERIOD
-    eligible_period = settings.PASSWORD_RESET_PERIOD
+from asu.verification.models.base import ConsentVerification
 
 
 class PasswordResetVerification(ConsentVerification):
-    objects = PasswordResetVerificationManager()
-
-    ELIGIBLE_PERIOD = settings.PASSWORD_RESET_PERIOD
-    MESSAGES = messages.password_reset
+    COMPLETE_PERIOD = settings.PASSWORD_RESET_PERIOD
+    VERIFY_PERIOD = settings.PASSWORD_VERIFY_PERIOD
+    EMAIL_MESSAGE = messages.password_reset
 
     class Meta(ConsentVerification.Meta):
         verbose_name = _("password reset verification")

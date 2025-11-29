@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.conf import settings
 from django.db import models
 from django.db.models import QuerySet
@@ -10,11 +12,10 @@ from asu.verification.models.base import ConsentVerification, ConsentVerificatio
 class RegistrationVerificationManager(
     ConsentVerificationManager["RegistrationVerification"]
 ):
-    verify_period = settings.REGISTRATION_VERIFY_PERIOD
-    eligible_period = settings.REGISTRATION_REGISTER_PERIOD
-
     def eligible(self) -> QuerySet[RegistrationVerification]:
-        return super().eligible().filter(user__isnull=True)
+        return (
+            super().eligible().filter(user__isnull=True)
+        )  # todo maybe make this default if  user is always set after final step
 
 
 class RegistrationVerification(ConsentVerification):
@@ -26,10 +27,11 @@ class RegistrationVerification(ConsentVerification):
         blank=True,
     )
 
-    objects = RegistrationVerificationManager()
+    objects: ClassVar = RegistrationVerificationManager()
 
-    ELIGIBLE_PERIOD = settings.REGISTRATION_REGISTER_PERIOD
-    MESSAGES = messages.registration
+    COMPLETE_PERIOD = settings.REGISTRATION_REGISTER_PERIOD
+    VERIFY_PERIOD = settings.REGISTRATION_VERIFY_PERIOD
+    EMAIL_MESSAGE = messages.registration
 
     class Meta(ConsentVerification.Meta):
         verbose_name = _("registration verification")

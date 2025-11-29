@@ -5,14 +5,14 @@ from asu.core.utils.rest import APIError
 from asu.verification.password.serializers import (
     PasswordResetSerializer,
     PasswordResetVerificationCheckSerializer,
-    PasswordResetVerificationSerializer,
+    PasswordResetVerificationSendSerializer,
 )
 from asu.verification.registration.schemas import consent_examples
 
 __all__ = ["password_reset"]
 
 
-password_reset_create = extend_schema(
+send = extend_schema(
     summary="Send password reset verification",
     tags=[Tag.USER_PASSWORD_RESET],
     description="The provided email will receive a code to verify the"
@@ -27,12 +27,12 @@ password_reset_create = extend_schema(
         ),
     ],
     responses={
-        201: PasswordResetVerificationSerializer,
+        201: PasswordResetVerificationSendSerializer,
         400: APIError,
     },
 )
 
-password_reset_check = extend_schema(
+verify = extend_schema(
     summary="Check password reset verification",
     tags=[Tag.USER_PASSWORD_RESET],
     description="Given an e-mail (one that received verification"
@@ -46,7 +46,7 @@ password_reset_check = extend_schema(
         400: APIError,
     },
 )
-reset = extend_schema(
+complete = extend_schema(
     summary="Reset password",
     tags=[Tag.USER_PASSWORD_RESET],
     responses={
@@ -73,7 +73,7 @@ reset = extend_schema(
 )
 
 password_reset = {
-    "create": password_reset_create,
-    "check": password_reset_check,
-    "reset": reset,
+    "send": send,
+    "verify": verify,
+    "complete": complete,
 }

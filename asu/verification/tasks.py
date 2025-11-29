@@ -14,7 +14,7 @@ logger = get_task_logger(__name__)
 
 
 @app.task
-def send_registration_email(*, email: str) -> None:
+def send_registration_email(*, email: str, uid: str) -> None:
     logger.info("Registration requested, email=%s", email)
     if User.objects.filter(email__iexact=email).exists():
         # Skip sending email if user with this email is already registered.
@@ -22,12 +22,12 @@ def send_registration_email(*, email: str) -> None:
         return
 
     with transaction.atomic():
-        verification = RegistrationVerification.objects.create(email=email)
+        verification = RegistrationVerification.objects.create(id=uid, email=email)
         transaction.on_commit(verification.send_email)
 
 
 @app.task
-def send_email_change_email(*, user_id: int, email: str) -> None:
+def send_email_change_email(*, user_id: int, email: str, uid: str) -> None:
     if User.objects.filter(email__iexact=email).exists():
         logger.warning("Email change request cancelled, email=%s", email)
         return
@@ -39,12 +39,12 @@ def send_email_change_email(*, user_id: int, email: str) -> None:
         email,
     )
     with transaction.atomic():
-        verification = EmailVerification.objects.create(email=email, user=user)
+        verification = EmailVerification.objects.create(id=uid, email=email, user=user)
         transaction.on_commit(verification.send_email)
 
 
 @app.task
-def send_password_reset_email(*, email: str) -> None:
+def send_password_reset_email(*, email: str, uid: str) -> None:
     try:
         user = User.objects.only("id", "password").get(email__iexact=email)
     except User.DoesNotExist:
@@ -58,5 +58,9 @@ def send_password_reset_email(*, email: str) -> None:
         return
     logger.info("Password reset requested, user_id=%s", user.pk)
     with transaction.atomic():
-        verification = PasswordResetVerification.objects.create(user=user, email=email)
+        verification = PasswordResetVerification.objects.create(
+            id=uid,
+            user=user,
+            email=email,
+        )
         transaction.on_commit(verification.send_email)

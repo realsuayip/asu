@@ -3,14 +3,14 @@ from drf_spectacular.utils import OpenApiExample, extend_schema
 from asu.core.utils.openapi import Tag, examples, get_error_repr
 from asu.core.utils.rest import APIError
 from asu.verification.registration.serializers import (
-    RegistrationCheckSerializer,
-    RegistrationSerializer,
+    RegistrationVerificationCheckSerializer,
+    RegistrationVerificationSendSerializer,
 )
 
 __all__ = ["email"]
 
 
-email_create = extend_schema(
+send = extend_schema(
     summary="Send email verification",
     tags=[Tag.USER_EMAIL_CHANGE],
     description="Used to change the e-mail of currently authenticated user."
@@ -26,12 +26,12 @@ email_create = extend_schema(
         ),
     ],
     responses={
-        201: RegistrationSerializer,
+        201: RegistrationVerificationSendSerializer,
         400: APIError,
     },
 )
 
-email_check = extend_schema(
+complete = extend_schema(
     summary="Check email verification",
     tags=[Tag.USER_EMAIL_CHANGE],
     description="Given an e-mail (one that received verification"
@@ -62,10 +62,10 @@ email_check = extend_schema(
         ),
     ],
     responses={
-        200: RegistrationCheckSerializer,
+        200: RegistrationVerificationCheckSerializer,
         404: APIError,
         400: APIError,
     },
 )
 
-email = {"create": email_create, "check": email_check}
+email = {"send": send, "complete": complete}

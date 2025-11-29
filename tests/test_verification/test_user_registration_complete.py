@@ -1,4 +1,5 @@
 import re
+import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -26,20 +27,18 @@ def test_user_registration_create(
     verification = RegistrationVerification.objects.create(
         email="helen@example.com", verified_at=timezone.now()
     )
-    consent = verification.create_consent()
-
     payload = {
-        "email": "helen@example.com",
-        "consent": consent,
+        "id": verification.pk,
         "display_name": "Helen",
         "password": "Hln_1900",
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 201
+    user = User.objects.get()
     assert response.json() == {
         "auth": {
             "access_token": mocker.ANY,
@@ -51,11 +50,12 @@ def test_user_registration_create(
         "birth_date": None,
         "display_name": "Helen",
         "email": "helen@example.com",
-        "id": mocker.ANY,
+        "id": str(user.pk),
         "language": "en",
         "username": "helen",
+        "created_at": mocker.ANY,
     }
-    user = User.objects.get(email="helen@example.com")
+    assert user.email == "helen@example.com"
     assert user.username == "helen"
     assert user.display_name == "Helen"
     assert user.birth_date is None
@@ -75,24 +75,23 @@ def test_user_registration_create(
 
 
 @pytest.mark.django_db
-def test_user_registration_create_case_invalid_consent(
+def test_user_registration_create_case_invalid_id(
     first_party_app_client: OAuthClient,
 ) -> None:
     payload = {
-        "email": "helen@example.com",
-        "consent": "bad:consent",
+        "id": uuid.uuid7().hex,
         "display_name": "Helen",
         "password": "Hln_1900",
         "username": "helen",
     }
 
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 400
     assert response.json()["errors"] == {
-        "email": [
+        "id": [
             {
                 "code": "invalid",
                 "message": "This e-mail could not be verified."
@@ -103,7 +102,7 @@ def test_user_registration_create_case_invalid_consent(
 
 
 @pytest.mark.django_db
-def test_user_registration_create_case_expired_consent(
+def test_user_registration_create_case_expired_id(
     first_party_app_client: OAuthClient,
     mocker: MockerFixture,
 ) -> None:
@@ -111,26 +110,24 @@ def test_user_registration_create_case_expired_consent(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
-    consent = verification.create_consent()
     mocker.patch(
         "django.utils.timezone.now",
         return_value=timezone.now()
         + timedelta(seconds=settings.REGISTRATION_REGISTER_PERIOD + 1),
     )
     payload = {
-        "email": "helen@example.com",
-        "consent": consent,
+        "id": verification.pk,
         "display_name": "Helen",
         "password": "Hln_1900",
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 400
     assert response.json()["errors"] == {
-        "email": [
+        "id": [
             {
                 "code": "invalid",
                 "message": "This e-mail could not be verified."
@@ -148,16 +145,14 @@ def test_user_registration_create_password_validation(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
-    consent = verification.create_consent()
     payload = {
-        "email": "helen@example.com",
-        "consent": consent,
+        "id": verification.pk,
         "display_name": "Helen",
         "password": "helenexample",
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 400
@@ -194,16 +189,14 @@ def test_user_registration_create_username_validation(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
-    consent = verification.create_consent()
     payload = {
-        "email": "helen@example.com",
-        "consent": consent,
+        "id": verification.pk,
         "display_name": "Helen",
         "password": "helenexample",
         "username": username,
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 400
@@ -217,47 +210,11 @@ def test_user_registration_create_username_validation(
     }
 
 
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    "verification_email, creation_email",
-    (
-        ("Helen@example.com", "Helen@Example.com"),
-        ("Helen@example.com", "helen@example.com"),
-    ),
-)
-def test_user_registration_create_email_normalization(
-    first_party_app_client: OAuthClient,
-    verification_email: str,
-    creation_email: str,
-) -> None:
-    create_default_application()
-    verification = RegistrationVerification.objects.create(
-        email=verification_email,
-        verified_at=timezone.now(),
-    )
-    consent = verification.create_consent()
-    payload = {
-        "email": creation_email,
-        "consent": consent,
-        "display_name": "Helen",
-        "password": "hln_14194xx",
-        "username": "helen",
-    }
-    response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
-        data=payload,
-    )
-    assert response.status_code == 201
-    user = User.objects.only("email").get(username="helen")
-    assert user.email == verification_email
-
-
 def test_user_registration_create_requires_authentication(client: OAuthClient) -> None:
     response = client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": "bad:consent",
+            "id": uuid.uuid7().hex,
             "display_name": "Helen",
             "password": "Hln_1900",
             "username": "helen",
@@ -271,10 +228,9 @@ def test_user_registration_create_requires_requires_first_party_app(
     app_client: OAuthClient,
 ) -> None:
     response = app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": "bad:consent",
+            "id": uuid.uuid7().hex,
             "display_name": "Helen",
             "password": "Hln_1900",
             "username": "helen",
@@ -284,7 +240,7 @@ def test_user_registration_create_requires_requires_first_party_app(
 
 
 @pytest.mark.django_db
-def test_user_registration_nullifies_other_verifications(
+def test_user_registration_nullifies_other_verifications(  # todo
     first_party_app_client: OAuthClient,
 ) -> None:
     create_default_application()
@@ -302,12 +258,10 @@ def test_user_registration_nullifies_other_verifications(
             ),
         ]
     )
-    consent = v1.create_consent()
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": consent,
+            "id": v1.pk,
             "display_name": "Helen",
             "password": "Hln_1900",
             "username": "helen",
@@ -333,32 +287,28 @@ def test_user_registration_flow(
     # Step 1: Send verification email containing code
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
-            reverse("api:verification:registration-verification-list"),
+            reverse("api:verification:registration-send"),
             data={"email": "helen@example.com"},
         )
     assert response.status_code == 201
+    uid = response.json()["id"]
     code = re.search(
         r"<div class='code'><strong>(\d+)</strong></div>",
         mail.outbox[0].body,
     ).group(1)
 
-    # Step 2: Use grabbed code to get a consent
+    # Step 2: Pair id with code to verify it
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-check"),
-        data={
-            "email": "helen@example.com",
-            "code": code,
-        },
+        reverse("api:verification:registration-verify"),
+        data={"id": uid, "code": code},
     )
-    assert response.status_code == 200
-    consent = response.json()["consent"]
+    assert response.status_code == 204
 
-    # Step 3: Create user with given consent
+    # Step 3: Create user with verified id
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verification-register"),
+        reverse("api:verification:registration-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": consent,
+            "id": uid,
             "display_name": "Helen",
             "password": "Hln_1900",
             "username": "helen",

@@ -19,7 +19,7 @@ def test_user_email_change_send(
     client.set_user(user, scope="")
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = client.post(
-            reverse("api:verification:email-verification-list"),
+            reverse("api:verification:email-change-send"),
             data={"email": "helen_new@example.com"},
         )
     assert response.status_code == 201
@@ -27,6 +27,10 @@ def test_user_email_change_send(
     assert len(mail.outbox) == 1
 
     verification = EmailVerification.objects.get()
+    assert response.json() == {
+        "id": str(verification.pk),
+        "email": "helen_new@example.com",
+    }
     assert verification.email == "helen_new@example.com"
     assert verification.user == user
     assert (
@@ -41,13 +45,15 @@ def test_user_email_change_send_email_normalization(client: OAuthClient) -> None
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
     response = client.post(
-        reverse("api:verification:email-verification-list"),
+        reverse("api:verification:email-change-send"),
         data={"email": "helen_new@Example.com"},
     )
     assert response.status_code == 201
-    assert response.json() == {"email": "helen_new@example.com"}
-
     verification = EmailVerification.objects.only("email").get()
+    assert response.json() == {
+        "id": str(verification.pk),
+        "email": "helen_new@example.com",
+    }
     assert verification.email == "helen_new@example.com"
 
 
@@ -69,7 +75,7 @@ def test_user_email_change_send_email_taken(
     client.set_user(user, scope="")
     with django_capture_on_commit_callbacks(execute=True):
         response = client.post(
-            reverse("api:verification:email-verification-list"),
+            reverse("api:verification:email-change-send"),
             data={"email": "previously_existing@example.com"},
         )
     assert response.status_code == 201
@@ -84,7 +90,7 @@ def test_user_email_change_send_requires_first_party_app_client(
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="", app=authorization_code_third_party_app)
     response = client.post(
-        reverse("api:verification:email-verification-list"),
+        reverse("api:verification:email-change-send"),
         data={"email": "helen_new@example.com"},
     )
     assert response.status_code == 403
@@ -95,7 +101,7 @@ def test_user_email_change_send_requires_user(
     first_party_app_client: OAuthClient,
 ) -> None:
     response = first_party_app_client.post(
-        reverse("api:verification:email-verification-list"),
+        reverse("api:verification:email-change-send"),
         data={"email": "helen@example.com"},
     )
     assert response.status_code == 403

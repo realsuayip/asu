@@ -1,47 +1,45 @@
 from typing import Any
 
 from django.db import transaction
-from django.utils import timezone
+from django.db.models.functions import Now
 
-from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from asu.auth.models import User
 from asu.core.utils import messages
 from asu.verification.models import EmailVerification
-from asu.verification.serializers import BaseCheckSerializer
+from asu.verification.serializers import (
+    VerificationCheckSerializer,
+    VerificationSendSerializer,
+)
 from asu.verification.tasks import send_email_change_email
 
 
-class EmailSerializer(serializers.Serializer[dict[str, Any]]):
-    email = serializers.EmailField()
-
-    def validate_email(self, email: str) -> str:
-        return User.objects.normalize_email(email)
-
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+class EmailVerificationSendSerializer(VerificationSendSerializer):
+    def send(self, *, email: str, uid: str) -> None:
         send_email_change_email.delay(
             user_id=self.context["request"].user.pk,
-            email=validated_data["email"],
+            email=email,
+            uid=uid,
         )
-        return validated_data
 
 
-class EmailCheckSerializer(BaseCheckSerializer):
-    consent = None
-
+class ChangeEmailSerializer(VerificationCheckSerializer):
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         user = self.context["request"].user
+        pk, code = validated_data["id"], validated_data["code"]
 
         try:
-            verification = EmailVerification.objects.verifiable().get(
-                user=user, **validated_data
+            verification = (
+                EmailVerification.objects.verifiable()
+                .only("pk", "email")
+                .select_for_update()
+                .get(pk=pk, code=code, user=user)
             )
         except EmailVerification.DoesNotExist:
             raise NotFound(messages.BAD_VERIFICATION_CODE)
 
-        verification.verified_at = timezone.now()
+        verification.verified_at = Now()
         verification.save(update_fields=["verified_at", "updated_at"])
         verification.null_others()
 

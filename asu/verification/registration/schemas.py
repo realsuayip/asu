@@ -1,17 +1,17 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
-from asu.auth.serializers.user import UserCreateSerializer
 from asu.core.utils.openapi import Tag, examples, get_error_repr
 from asu.core.utils.rest import APIError
 from asu.verification.registration.serializers import (
-    RegistrationCheckSerializer,
-    RegistrationSerializer,
+    RegistrationVerificationCheckSerializer,
+    RegistrationVerificationSendSerializer,
+    UserCreateSerializer,
 )
 
 __all__ = ["registration"]
 
 
-registration_create = extend_schema(
+send = extend_schema(
     summary="Send registration verification",
     tags=[Tag.USER_REGISTRATION],
     description="Given that provided email that is not already taken,"
@@ -26,7 +26,7 @@ registration_create = extend_schema(
         ),
     ],
     responses={
-        201: RegistrationSerializer,
+        201: RegistrationVerificationSendSerializer,
         400: APIError,
     },
 )
@@ -60,7 +60,7 @@ consent_examples = [
 ]
 
 
-registration_check = extend_schema(
+verify = extend_schema(
     summary="Check registration verification",
     tags=[Tag.USER_REGISTRATION],
     description="Given an e-mail (one that received verification"
@@ -68,13 +68,13 @@ registration_check = extend_schema(
     " a valid combination.",
     examples=consent_examples,
     responses={
-        200: RegistrationCheckSerializer,
+        200: RegistrationVerificationCheckSerializer,
         404: APIError,
         400: APIError,
     },
 )
 
-register = extend_schema(
+complete = extend_schema(
     summary="Register a new user",
     tags=[Tag.USER_REGISTRATION],
     description="Before you send a request to this endpoint,"
@@ -117,7 +117,7 @@ register = extend_schema(
 
 
 registration = {
-    "create": registration_create,
-    "check": registration_check,
-    "register": register,
+    "send": send,
+    "verify": verify,
+    "complete": complete,
 }

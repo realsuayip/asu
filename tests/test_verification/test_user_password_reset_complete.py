@@ -1,4 +1,5 @@
 import re
+import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -7,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 import pytest
-from pytest_django import DjangoCaptureOnCommitCallbacks
+from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks
 from pytest_mock import MockerFixture
 
 from asu.verification.models import PasswordResetVerification
@@ -16,25 +17,34 @@ from tests.factories import UserFactory
 
 
 @pytest.mark.django_db
-def test_user_password_reset(first_party_app_client: OAuthClient) -> None:
+def test_user_password_reset_complete(
+    first_party_app_client: OAuthClient,
+    django_assert_num_queries: DjangoAssertNumQueries,
+) -> None:
     user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         user=user,
         email="helen@example.com",
         verified_at=timezone.now(),
     )
-    consent = verification.create_consent()
     payload = {
-        "email": "helen@example.com",
-        "consent": consent,
+        "id": verification.pk,
         "password": "hln_j1070",
     }
-    response = first_party_app_client.post(
-        reverse("api:verification:password-reset-reset"),
-        data=payload,
-    )
-    assert response.status_code == 200
-    assert response.json() == {"email": "helen@example.com"}
+    with django_assert_num_queries(
+        2  # savepoint
+        + 1  # fetch user
+        + 1  # fetch verification
+        + 1  # update verification
+        + 2  # null others
+        + 1  # set password
+        + 1  # fetch user tokens for invalidation
+    ):
+        response = first_party_app_client.post(
+            reverse("api:verification:password-reset-complete"),
+            data=payload,
+        )
+    assert response.status_code == 204
 
     user.refresh_from_db()
     assert user.check_password("hln_j1070")
@@ -44,21 +54,20 @@ def test_user_password_reset(first_party_app_client: OAuthClient) -> None:
 
 
 @pytest.mark.django_db
-def test_user_password_reset_case_invalid_consent(
+def test_user_password_reset_complete_case_invalid_id(
     first_party_app_client: OAuthClient,
 ) -> None:
     payload = {
-        "email": "helen@example.com",
-        "consent": "bad:consent",
+        "id": uuid.uuid7(),
         "password": "Hln_1900",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data=payload,
     )
     assert response.status_code == 400
     assert response.json()["errors"] == {
-        "email": [
+        "id": [
             {
                 "code": "invalid",
                 "message": "This e-mail could not be verified."
@@ -69,7 +78,7 @@ def test_user_password_reset_case_invalid_consent(
 
 
 @pytest.mark.django_db
-def test_user_password_reset_case_expired_consent(
+def test_user_password_reset_complete_case_expired_id(
     first_party_app_client: OAuthClient,
     mocker: MockerFixture,
 ) -> None:
@@ -79,23 +88,21 @@ def test_user_password_reset_case_expired_consent(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
-    consent = verification.create_consent()
     mocker.patch(
         "django.utils.timezone.now",
         return_value=timezone.now()
         + timedelta(seconds=settings.PASSWORD_RESET_PERIOD + 1),
     )
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": consent,
+            "id": verification.pk,
             "password": "Hln_1900",
         },
     )
     assert response.status_code == 400
     assert response.json()["errors"] == {
-        "email": [
+        "id": [
             {
                 "code": "invalid",
                 "message": "This e-mail could not be verified."
@@ -106,7 +113,7 @@ def test_user_password_reset_case_expired_consent(
 
 
 @pytest.mark.django_db
-def test_user_password_reset_case_unusable_password(
+def test_user_password_reset_complete_case_unusable_password(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
@@ -117,18 +124,16 @@ def test_user_password_reset_case_unusable_password(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
-    consent = verification.create_consent()
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": consent,
+            "id": verification.pk,
             "password": "Hln_1900",
         },
     )
     assert response.status_code == 400
     assert response.json()["errors"] == {
-        "email": [
+        "id": [
             {
                 "code": "invalid",
                 "message": "This e-mail could not be verified."
@@ -139,7 +144,7 @@ def test_user_password_reset_case_unusable_password(
 
 
 @pytest.mark.django_db
-def test_user_password_reset_password_validation(
+def test_user_password_reset_complete_password_validation(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
@@ -148,14 +153,12 @@ def test_user_password_reset_password_validation(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
-    consent = verification.create_consent()
     payload = {
-        "email": "helen@example.com",
-        "consent": consent,
+        "id": verification.pk,
         "password": "helenexample",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data=payload,
     )
     assert response.status_code == 400
@@ -169,12 +172,13 @@ def test_user_password_reset_password_validation(
     }
 
 
-def test_user_password_reset_requires_authentication(client: OAuthClient) -> None:
+def test_user_password_reset_complete_requires_authentication(
+    client: OAuthClient,
+) -> None:
     response = client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": "bad:consent",
+            "id": uuid.uuid7(),
             "password": "Hln_1900",
         },
     )
@@ -182,14 +186,13 @@ def test_user_password_reset_requires_authentication(client: OAuthClient) -> Non
 
 
 @pytest.mark.django_db
-def test_user_password_reset_requires_requires_first_party_app(
+def test_user_password_reset_complete_requires_requires_first_party_app(
     app_client: OAuthClient,
 ) -> None:
     response = app_client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": "bad:consent",
+            "id": uuid.uuid7(),
             "password": "Hln_1900",
         },
     )
@@ -197,7 +200,7 @@ def test_user_password_reset_requires_requires_first_party_app(
 
 
 @pytest.mark.django_db
-def test_user_password_reset_nullifies_other_verifications(
+def test_user_password_reset_complete_nullifies_other_verifications(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
@@ -217,16 +220,14 @@ def test_user_password_reset_nullifies_other_verifications(
             ),
         ]
     )
-    consent = v1.create_consent()
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": consent,
+            "id": v1.pk,
             "password": "Hln_1900",
         },
     )
-    assert response.status_code == 200
+    assert response.status_code == 204
 
     v1.refresh_from_db()
     v2.refresh_from_db()
@@ -245,36 +246,35 @@ def test_user_password_reset_flow(
     # Step 1: Send verification email containing code
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
-            reverse("api:verification:password-reset-list"),
+            reverse("api:verification:password-reset-send"),
             data={"email": "helen@example.com"},
         )
     assert response.status_code == 201
+    uid = response.json()["id"]
     code = re.search(
         r"<div class='code'><strong>(\d+)</strong></div>",
         mail.outbox[0].body,
     ).group(1)
 
-    # Step 2: Use grabbed code to get a consent
+    # Step 2: Pair id with code to verify it
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-check"),
+        reverse("api:verification:password-reset-verify"),
         data={
-            "email": "helen@example.com",
+            "id": uid,
             "code": code,
         },
     )
-    assert response.status_code == 200
-    consent = response.json()["consent"]
+    assert response.status_code == 204
 
-    # Step 3: Reset password with given consent
+    # Step 3: Reset password with verified id
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-reset"),
+        reverse("api:verification:password-reset-complete"),
         data={
-            "email": "helen@example.com",
-            "consent": consent,
+            "id": uid,
             "password": "Hln_1900",
         },
     )
-    assert response.status_code == 200
+    assert response.status_code == 204
 
     user.refresh_from_db()
     assert user.check_password("Hln_1900")

@@ -22,7 +22,7 @@ def test_verification_registration_verify(first_party_app_client: OAuthClient) -
     )
     assert response.status_code == 204
     verification.refresh_from_db()
-    assert verification.is_eligible is True
+    assert RegistrationVerification.objects.eligible().only("id").get() == verification
     assert verification.verified_at is not None
     assert verification.completed_at is None
 
@@ -63,7 +63,7 @@ def test_verification_registration_verify_bad_code(
 def test_verification_registration_verify_expired_code(
     first_party_app_client: OAuthClient,
 ) -> None:
-    past = timezone.now() - timedelta(seconds=settings.REGISTRATION_VERIFY_PERIOD + 10)
+    past = timezone.now() - timedelta(seconds=settings.REGISTRATION_VERIFY_TIMEOUT + 10)
     verification = RegistrationVerification.objects.create(
         email="helen@example.com",
         created_at=past,

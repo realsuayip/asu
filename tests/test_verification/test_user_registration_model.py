@@ -40,6 +40,6 @@ def test_verification_registration_eligible_case_expired(
     mocker.patch(
         "django.utils.timezone.now",
         return_value=timezone.now()
-        + timedelta(seconds=settings.REGISTRATION_REGISTER_PERIOD + 10),
+        + timedelta(seconds=settings.REGISTRATION_COMPLETE_TIMEOUT + 10),
     )
     assert RegistrationVerification.objects.eligible().exists() is False

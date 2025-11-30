@@ -13,6 +13,7 @@ from pytest_django import DjangoCaptureOnCommitCallbacks
 from pytest_mock import MockerFixture
 
 from asu.auth.models import User
+from asu.core.utils import messages
 from asu.verification.models import RegistrationVerification
 from tests.conftest import OAuthClient, create_default_application
 from tests.factories import UserFactory
@@ -89,16 +90,8 @@ def test_user_registration_create_case_invalid_id(
         reverse("api:verification:registration-complete"),
         data=payload,
     )
-    assert response.status_code == 400
-    assert response.json()["errors"] == {
-        "id": [
-            {
-                "code": "invalid",
-                "message": "This e-mail could not be verified."
-                " Please provide a validated e-mail address.",
-            }
-        ]
-    }
+    assert response.status_code == 404
+    assert response.json()["message"] == messages.BAD_VERIFICATION_ID
 
 
 @pytest.mark.django_db
@@ -113,7 +106,7 @@ def test_user_registration_create_case_expired_id(
     mocker.patch(
         "django.utils.timezone.now",
         return_value=timezone.now()
-        + timedelta(seconds=settings.REGISTRATION_REGISTER_PERIOD + 1),
+        + timedelta(seconds=settings.REGISTRATION_COMPLETE_TIMEOUT + 1),
     )
     payload = {
         "id": verification.pk,
@@ -125,16 +118,8 @@ def test_user_registration_create_case_expired_id(
         reverse("api:verification:registration-complete"),
         data=payload,
     )
-    assert response.status_code == 400
-    assert response.json()["errors"] == {
-        "id": [
-            {
-                "code": "invalid",
-                "message": "This e-mail could not be verified."
-                " Please provide a validated e-mail address.",
-            }
-        ]
-    }
+    assert response.status_code == 404
+    assert response.json()["message"] == messages.BAD_VERIFICATION_ID
 
 
 @pytest.mark.django_db

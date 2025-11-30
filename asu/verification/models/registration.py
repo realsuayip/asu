@@ -6,19 +6,20 @@ from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from asu.core.utils import messages
-from asu.verification.models.base import ConsentVerification, ConsentVerificationManager
+from asu.verification.models.base import (
+    ExtendedVerification,
+    ExtendedVerificationManager,
+)
 
 
 class RegistrationVerificationManager(
-    ConsentVerificationManager["RegistrationVerification"]
+    ExtendedVerificationManager["RegistrationVerification"]
 ):
     def eligible(self) -> QuerySet[RegistrationVerification]:
-        return (
-            super().eligible().filter(user__isnull=True)
-        )  # todo maybe make this default if  user is always set after final step
+        return super().eligible().filter(user__isnull=True)
 
 
-class RegistrationVerification(ConsentVerification):
+class RegistrationVerification(ExtendedVerification):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
@@ -29,16 +30,10 @@ class RegistrationVerification(ConsentVerification):
 
     objects: ClassVar = RegistrationVerificationManager()
 
-    COMPLETE_PERIOD = settings.REGISTRATION_REGISTER_PERIOD
-    VERIFY_PERIOD = settings.REGISTRATION_VERIFY_PERIOD
-    EMAIL_MESSAGE = messages.registration
+    VERIFY_TIMEOUT = settings.REGISTRATION_VERIFY_TIMEOUT
+    COMPLETE_TIMEOUT = settings.REGISTRATION_COMPLETE_TIMEOUT
+    EMAIL_MESSAGE = messages.REGISTRATION_VERIFICATION
 
-    class Meta(ConsentVerification.Meta):
+    class Meta(ExtendedVerification.Meta):
         verbose_name = _("registration verification")
         verbose_name_plural = _("registration verifications")
-
-    @property
-    def is_eligible(self) -> bool:
-        if self.user is not None:
-            return False
-        return super().is_eligible

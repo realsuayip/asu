@@ -34,7 +34,7 @@ def test_verification_registration_send(
         in mail.outbox[0].body
     )
     assert verification.user is None
-    assert verification.is_eligible is False
+    assert not RegistrationVerification.objects.eligible().exists()
     assert verification.completed_at is None
 
 

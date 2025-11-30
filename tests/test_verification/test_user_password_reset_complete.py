@@ -11,6 +11,7 @@ import pytest
 from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks
 from pytest_mock import MockerFixture
 
+from asu.core.utils import messages
 from asu.verification.models import PasswordResetVerification
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
@@ -65,16 +66,8 @@ def test_user_password_reset_complete_case_invalid_id(
         reverse("api:verification:password-reset-complete"),
         data=payload,
     )
-    assert response.status_code == 400
-    assert response.json()["errors"] == {
-        "id": [
-            {
-                "code": "invalid",
-                "message": "This e-mail could not be verified."
-                " Please provide a validated e-mail address.",
-            }
-        ]
-    }
+    assert response.status_code == 404
+    assert response.json()["message"] == messages.BAD_VERIFICATION_ID
 
 
 @pytest.mark.django_db
@@ -91,7 +84,7 @@ def test_user_password_reset_complete_case_expired_id(
     mocker.patch(
         "django.utils.timezone.now",
         return_value=timezone.now()
-        + timedelta(seconds=settings.PASSWORD_RESET_PERIOD + 1),
+        + timedelta(seconds=settings.PASSWORD_RESET_COMPLETE_TIMEOUT + 1),
     )
     response = first_party_app_client.post(
         reverse("api:verification:password-reset-complete"),
@@ -100,16 +93,8 @@ def test_user_password_reset_complete_case_expired_id(
             "password": "Hln_1900",
         },
     )
-    assert response.status_code == 400
-    assert response.json()["errors"] == {
-        "id": [
-            {
-                "code": "invalid",
-                "message": "This e-mail could not be verified."
-                " Please provide a validated e-mail address.",
-            }
-        ]
-    }
+    assert response.status_code == 404
+    assert response.json()["message"] == messages.BAD_VERIFICATION_ID
 
 
 @pytest.mark.django_db
@@ -131,16 +116,8 @@ def test_user_password_reset_complete_case_unusable_password(
             "password": "Hln_1900",
         },
     )
-    assert response.status_code == 400
-    assert response.json()["errors"] == {
-        "id": [
-            {
-                "code": "invalid",
-                "message": "This e-mail could not be verified."
-                " Please provide a validated e-mail address.",
-            }
-        ]
-    }
+    assert response.status_code == 404
+    assert response.json()["message"] == messages.BAD_VERIFICATION_ID
 
 
 @pytest.mark.django_db

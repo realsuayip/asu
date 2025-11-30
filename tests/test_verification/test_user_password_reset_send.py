@@ -35,7 +35,7 @@ def test_user_password_reset_send(
         f"<div class='code'><strong>{verification.code}</strong></div>"
         in mail.outbox[0].body
     )
-    assert verification.is_eligible is False
+    assert not PasswordResetVerification.objects.eligible().exists()
     assert verification.completed_at is None
 
 

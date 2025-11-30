@@ -4,12 +4,13 @@ import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.db.models.functions import Now
-from django.utils.translation import gettext
 
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from asu.auth.models import User
 from asu.auth.serializers.user import AuthSerializer, validate_username_constraints
+from asu.core.utils import messages
 from asu.verification.models.registration import RegistrationVerification
 from asu.verification.serializers import (
     VerificationCheckSerializer,
@@ -41,14 +42,7 @@ class UserCreateSerializer(serializers.ModelSerializer[User]):
                 .get(pk=pk)
             )
         except RegistrationVerification.DoesNotExist:
-            raise serializers.ValidationError(
-                {
-                    "id": gettext(
-                        "This e-mail could not be verified."
-                        " Please provide a validated e-mail address."
-                    )
-                }
-            )
+            raise NotFound(messages.BAD_VERIFICATION_ID)
 
         password = validated_data.pop("password")
         user = User(email=verification.email, **validated_data)

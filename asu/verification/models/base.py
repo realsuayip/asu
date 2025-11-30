@@ -25,10 +25,11 @@ generate_random_code = partial(get_random_string, length=6, allowed_chars=string
 
 class VerificationManager[T: Verification](models.Manager[T]):
     def verifiable(self) -> QuerySet[T]:
-        max_verify_date = timezone.now() - timedelta(seconds=self.model.VERIFY_PERIOD)
+        timeout = self.model.VERIFY_TIMEOUT
+        min_created_at = timezone.now() - timedelta(seconds=timeout)
         return self.filter(
+            created_at__gt=min_created_at,
             verified_at__isnull=True,
-            created_at__gt=max_verify_date,
             nulled_by__isnull=True,
         )
 
@@ -41,18 +42,13 @@ class Verification(Base):
         null=True,
         blank=True,
     )
-    email = models.EmailField(_("email"), db_index=True)
+    email = models.EmailField(_("email"))
     code = models.CharField(
         _("code"),
         max_length=6,
         validators=[code_validator],
         default=generate_random_code,
     )
-
-    # If the user successfully makes use of another verification object,
-    # null remaining verification objects so that they couldn't be used
-    # to repeat the related action. In a nutshell, this field is another
-    # way of stating "is_expired".
     nulled_by = models.ForeignKey(
         "self",
         null=True,
@@ -60,14 +56,9 @@ class Verification(Base):
         verbose_name=_("nulled by"),
         on_delete=models.SET_NULL,
     )
+    verified_at = models.DateTimeField(_("date verified"), null=True, blank=True)
 
-    verified_at = models.DateTimeField(
-        _("date verified"),
-        null=True,
-        blank=True,
-    )
-
-    VERIFY_PERIOD: int
+    VERIFY_TIMEOUT: int
     EMAIL_MESSAGE: EmailMessage
 
     objects: ClassVar[VerificationManager[Self]] = VerificationManager()
@@ -76,6 +67,9 @@ class Verification(Base):
         abstract = True
 
     def null_others(self) -> None:
+        # If the user successfully makes use of another verification object,
+        # null outstanding verification objects so that they couldn't be used
+        # to repeat the related action.
         queryset = type(self).objects.verifiable()
         queryset.update(nulled_by=self, updated_at=Now())
 
@@ -90,38 +84,28 @@ class Verification(Base):
         )
 
 
-class ConsentVerificationManager[T: ConsentVerification](VerificationManager[T]):
+class ExtendedVerificationManager[T: ExtendedVerification](VerificationManager[T]):
     def eligible(self) -> QuerySet[T]:
-        period = self.model.COMPLETE_PERIOD
-        max_register_date = timezone.now() - timedelta(seconds=period)
+        # If a verification object is in 'eligible' state, it can be used to
+        # 'complete' the related action.
+        timeout = self.model.COMPLETE_TIMEOUT
+        min_verified_at = timezone.now() - timedelta(seconds=timeout)
         return self.filter(
-            verified_at__gt=max_register_date,
+            verified_at__gt=min_verified_at,
             completed_at__isnull=True,
             nulled_by__isnull=True,
         )
 
 
-class ConsentVerification(Verification):
+class ExtendedVerification(Verification):
     completed_at = models.DateTimeField(_("date completed"), null=True, blank=True)
 
-    COMPLETE_PERIOD: int
+    COMPLETE_TIMEOUT: int
 
-    objects: ClassVar[ConsentVerificationManager[Self]] = ConsentVerificationManager()
+    objects: ClassVar[ExtendedVerificationManager[Self]] = ExtendedVerificationManager()
 
     class Meta(Verification.Meta):
         abstract = True
-
-    def __str__(self) -> str:
-        return "%s <#%s>" % (self.email, self.pk)
-
-    @property
-    def is_eligible(self) -> bool:
-        if (self.verified_at is None) or self.completed_at:
-            return False
-
-        period = self.COMPLETE_PERIOD
-        delta = (timezone.now() - self.verified_at).total_seconds()
-        return delta < period
 
     def null_others(self) -> None:
         super().null_others()

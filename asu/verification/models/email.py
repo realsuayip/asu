@@ -20,5 +20,5 @@ class EmailVerification(Verification):
 
     objects: ClassVar = EmailVerificationManager()
 
-    VERIFY_PERIOD = settings.EMAIL_VERIFY_PERIOD
-    EMAIL_MESSAGE = messages.email_verification
+    VERIFY_TIMEOUT = settings.EMAIL_CHANGE_VERIFY_TIMEOUT
+    EMAIL_MESSAGE = messages.EMAIL_CHANGE_VERIFICATION

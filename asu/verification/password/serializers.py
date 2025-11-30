@@ -5,9 +5,9 @@ import django.core.exceptions
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.db.models.functions import Now
-from django.utils.translation import gettext
 
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from asu.core.utils import messages
 from asu.verification.models import PasswordResetVerification
@@ -56,14 +56,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
             # Under normal circumstances, it is not possible to acquire ident
             # while having 'unusable' password. We still do this check in case
             # unusable password is set after acquiring ident.
-            raise serializers.ValidationError(
-                {
-                    "id": gettext(
-                        "This e-mail could not be verified. Please provide"
-                        " a validated e-mail address."
-                    )
-                }
-            )
+            raise NotFound(messages.BAD_VERIFICATION_ID)
 
         # Validate password
         password = validated_data["password"]
@@ -81,7 +74,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
         user.revoke_other_tokens(self.context["request"].auth)
 
         send_notice = functools.partial(
-            user.send_transactional_mail, message=messages.password_change_notice
+            user.send_transactional_mail, message=messages.PASSWORD_CHANGE_NOTICE
         )
         transaction.on_commit(send_notice)
         return validated_data

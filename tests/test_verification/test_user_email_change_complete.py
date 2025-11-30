@@ -83,7 +83,7 @@ def test_user_email_change_complete_expired_code(client: OAuthClient) -> None:
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
 
-    past = timezone.now() - timedelta(seconds=settings.EMAIL_VERIFY_PERIOD + 10)
+    past = timezone.now() - timedelta(seconds=settings.EMAIL_CHANGE_VERIFY_TIMEOUT + 10)
     verification = EmailVerification.objects.create(
         email="helen_new@example.com",
         user=user,

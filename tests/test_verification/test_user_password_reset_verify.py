@@ -27,7 +27,7 @@ def test_user_password_reset_verify(first_party_app_client: OAuthClient) -> None
     )
     assert response.status_code == 204
     verification.refresh_from_db()
-    assert verification.is_eligible is True
+    assert PasswordResetVerification.objects.eligible().only("id").get() == verification
     assert verification.verified_at is not None
     assert verification.completed_at is None
 
@@ -79,7 +79,9 @@ def test_user_password_reset_verify_bad_code(
 def test_user_password_reset_verify_expired_code(
     first_party_app_client: OAuthClient,
 ) -> None:
-    past = timezone.now() - timedelta(seconds=settings.PASSWORD_VERIFY_PERIOD + 10)
+    past = timezone.now() - timedelta(
+        seconds=settings.PASSWORD_RESET_VERIFY_TIMEOUT + 10
+    )
     user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",

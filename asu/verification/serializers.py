@@ -9,7 +9,7 @@ from rest_framework.exceptions import NotFound
 
 from asu.auth.models import User
 from asu.core.utils import messages
-from asu.verification.models.base import ConsentVerification, code_validator
+from asu.verification.models.base import ExtendedVerification, code_validator
 
 
 class VerificationSendSerializer(serializers.Serializer[dict[str, Any]]):
@@ -37,7 +37,7 @@ class VerificationCheckSerializer(serializers.Serializer[dict[str, Any]]):
         write_only=True,
     )
 
-    model: ClassVar[type[ConsentVerification]]
+    model: ClassVar[type[ExtendedVerification]]
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         pk, code = validated_data["id"], validated_data["code"]

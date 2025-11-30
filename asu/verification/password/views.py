@@ -1,4 +1,4 @@
-from rest_framework import mixins
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -9,42 +9,30 @@ from asu.verification.models import PasswordResetVerification
 from asu.verification.password import schemas
 from asu.verification.password.serializers import (
     PasswordResetSerializer,
-    PasswordResetVerificationCheckSerializer,
-    PasswordResetVerificationSerializer,
+    PasswordResetVerificationSendSerializer,
+    PasswordResetVerificationVerifySerializer,
 )
 
 
-class PasswordResetViewSet(
-    mixins.CreateModelMixin, ExtendedViewSet[PasswordResetVerification]
-):
-    """
-    This ViewSet is partly responsible for password *reset* flow, in
-    other words, account recovery, in case the user forgets their
-    password. The password change flow is different and not handled
-    here.
-
-    The three-step mechanism used in this flow is very similar to
-    registration flow. Check out 'RegistrationViewSet' to learn
-    about it.
-
-    The only difference is, instead of asking user profile
-    information, we just ask for the new password.
-
-    The actual password change endpoint is located in 'reset_password'
-    action of 'UserViewSet'.
-    """
-
-    serializer_classes = {"create": PasswordResetVerificationSerializer}
-    permission_classes = [RequireFirstParty]
+class PasswordResetViewSet(ExtendedViewSet[PasswordResetVerification]):
     schemas = schemas.password_reset
 
     @action(
         detail=False,
         methods=["post"],
-        serializer_class=PasswordResetVerificationCheckSerializer,
+        serializer_class=PasswordResetVerificationSendSerializer,
         permission_classes=[RequireFirstParty],
     )
-    def check(self, request: Request) -> Response:
+    def send(self, request: Request) -> Response:
+        return self.perform_action(status_code=status.HTTP_201_CREATED)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        serializer_class=PasswordResetVerificationVerifySerializer,
+        permission_classes=[RequireFirstParty],
+    )
+    def verify(self, request: Request) -> Response:
         return self.perform_action()
 
     @action(
@@ -53,5 +41,5 @@ class PasswordResetViewSet(
         permission_classes=[RequireFirstParty],
         serializer_class=PasswordResetSerializer,
     )
-    def reset(self, request: Request) -> Response:
+    def complete(self, request: Request) -> Response:
         return self.perform_action()

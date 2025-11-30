@@ -28,11 +28,15 @@ BAD_VERIFICATION_CODE = _(
     " problem persists, please request a new verification code or"
     " contact support for assistance."
 )
+BAD_VERIFICATION_ID = _(
+    "We couldn't verify your credentials. This can happen if it takes too long"
+    " to enter your information. Please request a new code and try again."
+)
 
 
 # Email messages
 
-password_reset = EmailMessage(
+PASSWORD_RESET = EmailMessage(
     subject=_("Verify your email to reset your password"),
     body=_(
         "To continue for the password reset process,"
@@ -40,7 +44,7 @@ password_reset = EmailMessage(
         " the application:"
     ),
 )
-password_change_notice = EmailMessage(
+PASSWORD_CHANGE_NOTICE = EmailMessage(
     subject=_("Your password has been changed"),
     body=_(
         "The password for your account was just changed. If this was you,"
@@ -48,7 +52,7 @@ password_change_notice = EmailMessage(
         " immediately, or contact the support team to restore your password."
     ),
 )
-registration = EmailMessage(
+REGISTRATION_VERIFICATION = EmailMessage(
     subject=_("Verify your email for registration"),
     body=_(
         "To continue for the registration process,"
@@ -56,7 +60,7 @@ registration = EmailMessage(
         " the application:"
     ),
 )
-email_verification = EmailMessage(
+EMAIL_CHANGE_VERIFICATION = EmailMessage(
     subject=_("Verify this email address"),
     body=_(
         "To change your email, you need to enter the following"

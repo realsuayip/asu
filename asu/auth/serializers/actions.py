@@ -77,7 +77,7 @@ class PasswordChangeSerializer(serializers.ModelSerializer[User]):
         instance.revoke_other_tokens(request.auth)
 
         send_notice = functools.partial(
-            instance.send_transactional_mail, message=messages.password_change_notice
+            instance.send_transactional_mail, message=messages.PASSWORD_CHANGE_NOTICE
         )
         transaction.on_commit(send_notice)
         return instance

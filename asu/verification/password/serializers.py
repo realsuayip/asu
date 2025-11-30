@@ -31,7 +31,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
     id = serializers.UUIDField(write_only=True)
     password = serializers.CharField(write_only=True)
 
-    @transaction.atomic
+    @transaction.atomic(durable=True)
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         try:
             verification = (
@@ -44,6 +44,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
                     "user__email",
                     "user__password",
                 )
+                .select_for_update(of=("self",))
                 .get(pk=validated_data["id"])
             )
         except PasswordResetVerification.DoesNotExist:
@@ -71,7 +72,8 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
 
         user.set_password(password)
         user.save(update_fields=["password", "updated_at"])
-        user.revoke_other_tokens(self.context["request"].auth)
+        user.revoke_other_tokens()
+        user.revoke_all_sessions()
 
         send_notice = functools.partial(
             user.send_transactional_mail, message=messages.PASSWORD_CHANGE_NOTICE

@@ -34,12 +34,13 @@ def test_user_password_reset_complete(
     }
     with django_assert_num_queries(
         2  # savepoint
-        + 1  # fetch user
+        + 1  # fetch token
         + 1  # fetch verification
         + 1  # update verification
         + 2  # null others
         + 1  # set password
         + 1  # fetch user tokens for invalidation
+        + 1  # fetch user sessions for invalidation
     ):
         response = first_party_app_client.post(
             reverse("api:verification:password-reset-complete"),

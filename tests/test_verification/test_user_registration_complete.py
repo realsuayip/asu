@@ -9,7 +9,7 @@ from django.utils import timezone
 
 import pytest
 from oauth2_provider.settings import oauth2_settings
-from pytest_django import DjangoCaptureOnCommitCallbacks
+from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks
 from pytest_mock import MockerFixture
 
 from asu.auth.models import User
@@ -23,6 +23,7 @@ from tests.factories import UserFactory
 def test_user_registration_create(
     first_party_app_client: OAuthClient,
     mocker: MockerFixture,
+    django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     create_default_application()
     verification = RegistrationVerification.objects.create(
@@ -34,10 +35,20 @@ def test_user_registration_create(
         "password": "Hln_1900",
         "username": "helen",
     }
-    response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
-        data=payload,
-    )
+    with django_assert_num_queries(
+        1  # fetch token
+        + 4  # savepoint
+        + 1  # fetch verification
+        + 2  # username constraint checks
+        + 1  # insert user
+        + 1  # update verification
+        + 2  # null others
+        + 4  # issue tokens
+    ):
+        response = first_party_app_client.post(
+            reverse("api:verification:registration-complete"),
+            data=payload,
+        )
     assert response.status_code == 201
     user = User.objects.get()
     assert response.json() == {

@@ -41,16 +41,11 @@ class VerificationCheckSerializer(serializers.Serializer[dict[str, Any]]):
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         pk, code = validated_data["id"], validated_data["code"]
-        try:
-            verification = (
-                self.model.objects.verifiable()
-                .only("pk")
-                .select_for_update()
-                .get(pk=pk, code=code)
-            )
-        except self.model.DoesNotExist:
+        updated = (
+            self.model.objects.verifiable()
+            .filter(pk=pk, code=code)
+            .update(verified_at=Now(), updated_at=Now())
+        )
+        if not updated:
             raise NotFound(messages.BAD_VERIFICATION_CODE)
-
-        verification.verified_at = Now()
-        verification.save(update_fields=["verified_at", "updated_at"])
         return validated_data

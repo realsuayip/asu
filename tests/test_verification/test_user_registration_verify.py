@@ -5,21 +5,29 @@ from django.urls import reverse
 from django.utils import timezone
 
 import pytest
+from pytest_django import DjangoAssertNumQueries
 
 from asu.verification.models import RegistrationVerification
 from tests.conftest import OAuthClient
 
 
 @pytest.mark.django_db
-def test_verification_registration_verify(first_party_app_client: OAuthClient) -> None:
+def test_verification_registration_verify(
+    first_party_app_client: OAuthClient,
+    django_assert_num_queries: DjangoAssertNumQueries,
+) -> None:
     verification = RegistrationVerification.objects.create(email="helen@example.com")
-    response = first_party_app_client.post(
-        reverse("api:verification:registration-verify"),
-        data={
-            "id": verification.pk,
-            "code": verification.code,
-        },
-    )
+    with django_assert_num_queries(
+        1  # fetch token
+        + 1  # update verification
+    ):
+        response = first_party_app_client.post(
+            reverse("api:verification:registration-verify"),
+            data={
+                "id": verification.pk,
+                "code": verification.code,
+            },
+        )
     assert response.status_code == 204
     verification.refresh_from_db()
     assert RegistrationVerification.objects.eligible().only("id").get() == verification

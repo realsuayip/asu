@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 import pytest
+from pytest_django import DjangoAssertNumQueries
 
 from asu.verification.models import PasswordResetVerification
 from tests.conftest import OAuthClient
@@ -12,19 +13,26 @@ from tests.factories import UserFactory
 
 
 @pytest.mark.django_db
-def test_user_password_reset_verify(first_party_app_client: OAuthClient) -> None:
+def test_user_password_reset_verify(
+    first_party_app_client: OAuthClient,
+    django_assert_num_queries: DjangoAssertNumQueries,
+) -> None:
     user = UserFactory.create(email="helen@example.com")
     verification = PasswordResetVerification.objects.create(
         email="helen@example.com",
         user=user,
     )
-    response = first_party_app_client.post(
-        reverse("api:verification:password-reset-verify"),
-        data={
-            "id": verification.pk,
-            "code": verification.code,
-        },
-    )
+    with django_assert_num_queries(
+        1  # fetch token
+        + 1  # update verification
+    ):
+        response = first_party_app_client.post(
+            reverse("api:verification:password-reset-verify"),
+            data={
+                "id": verification.pk,
+                "code": verification.code,
+            },
+        )
     assert response.status_code == 204
     verification.refresh_from_db()
     assert PasswordResetVerification.objects.eligible().only("id").get() == verification

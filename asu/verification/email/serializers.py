@@ -24,7 +24,7 @@ class EmailVerificationSendSerializer(VerificationSendSerializer):
 
 
 class ChangeEmailSerializer(VerificationCheckSerializer):
-    @transaction.atomic
+    @transaction.atomic(durable=True)
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         user = self.context["request"].user
         pk, code = validated_data["id"], validated_data["code"]

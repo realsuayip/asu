@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 import pytest
-from pytest_django import DjangoCaptureOnCommitCallbacks
+from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks
 
 from asu.auth.models import Application
 from asu.verification.models import EmailVerification
@@ -16,20 +16,31 @@ from tests.factories import UserFactory
 
 
 @pytest.mark.django_db
-def test_user_email_change_complete(client: OAuthClient) -> None:
+def test_user_email_change_complete(
+    client: OAuthClient,
+    django_assert_num_queries: DjangoAssertNumQueries,
+) -> None:
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
     verification = EmailVerification.objects.create(
         email="helen_new@example.com",
         user=user,
     )
-    response = client.post(
-        reverse("api:verification:email-change-complete"),
-        data={
-            "id": verification.pk,
-            "code": verification.code,
-        },
-    )
+    with django_assert_num_queries(
+        2  # savepoint
+        + 1  # fetch user
+        + 1  # fetch verification
+        + 1  # update verification
+        + 1  # null others
+        + 1  # update user
+    ):
+        response = client.post(
+            reverse("api:verification:email-change-complete"),
+            data={
+                "id": verification.pk,
+                "code": verification.code,
+            },
+        )
     assert response.status_code == 204
     verification.refresh_from_db()
     user.refresh_from_db()

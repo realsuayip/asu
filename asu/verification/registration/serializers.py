@@ -29,9 +29,10 @@ class RegistrationVerificationCheckSerializer(VerificationCheckSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer[User]):
+    id = serializers.UUIDField()
     auth = AuthSerializer(source="_auth_dict", read_only=True)
 
-    @transaction.atomic
+    @transaction.atomic(durable=True)
     def create(self, validated_data: dict[str, Any]) -> User:
         pk = validated_data.pop("id")
         try:

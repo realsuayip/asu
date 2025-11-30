@@ -236,11 +236,11 @@ def test_user_registration_create_requires_requires_first_party_app(
 
 
 @pytest.mark.django_db
-def test_user_registration_nullifies_other_verifications(  # todo
+def test_user_registration_nullifies_other_verifications(
     first_party_app_client: OAuthClient,
 ) -> None:
     create_default_application()
-    v1, v2 = RegistrationVerification.objects.bulk_create(
+    v1, v2, v3 = RegistrationVerification.objects.bulk_create(
         [
             RegistrationVerification(
                 email="helen@example.com",
@@ -251,6 +251,10 @@ def test_user_registration_nullifies_other_verifications(  # todo
                 email="helen@example.com",
                 verified_at=timezone.now(),
                 code="111112",
+            ),
+            RegistrationVerification(
+                email="helen@example.com",
+                code="111113",
             ),
         ]
     )
@@ -267,9 +271,10 @@ def test_user_registration_nullifies_other_verifications(  # todo
 
     v1.refresh_from_db()
     v2.refresh_from_db()
+    v3.refresh_from_db()
 
     assert v1.completed_at is not None
-    assert v2.nulled_by == v1
+    assert v2.nulled_by == v3.nulled_by == v1
 
 
 @pytest.mark.django_db

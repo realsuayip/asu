@@ -182,7 +182,7 @@ def test_user_password_reset_complete_nullifies_other_verifications(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    v1, v2 = PasswordResetVerification.objects.bulk_create(
+    v1, v2, v3 = PasswordResetVerification.objects.bulk_create(
         [
             PasswordResetVerification(
                 email="helen@example.com",
@@ -195,6 +195,11 @@ def test_user_password_reset_complete_nullifies_other_verifications(
                 user=user,
                 verified_at=timezone.now(),
                 code="111112",
+            ),
+            PasswordResetVerification(
+                email="helen@example.com",
+                user=user,
+                code="111113",
             ),
         ]
     )
@@ -209,9 +214,10 @@ def test_user_password_reset_complete_nullifies_other_verifications(
 
     v1.refresh_from_db()
     v2.refresh_from_db()
+    v3.refresh_from_db()
 
     assert v1.completed_at is not None
-    assert v2.nulled_by == v1
+    assert v2.nulled_by == v3.nulled_by == v1
 
 
 @pytest.mark.django_db

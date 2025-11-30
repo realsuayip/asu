@@ -54,7 +54,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
             or (user := verification.user) is None
             or not user.has_usable_password()
         ):
-            # Under normal circumstances, it is not possible to acquire id
+            # Under normal circumstances, it isn't possible to acquire valid id
             # while having 'unusable' password. We still do this check in case
             # unusable password is set after acquiring id.
             raise NotFound(messages.BAD_VERIFICATION_ID)

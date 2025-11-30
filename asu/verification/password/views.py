@@ -9,8 +9,8 @@ from asu.verification.models import PasswordResetVerification
 from asu.verification.password import schemas
 from asu.verification.password.serializers import (
     PasswordResetSerializer,
-    PasswordResetVerificationCheckSerializer,
     PasswordResetVerificationSendSerializer,
+    PasswordResetVerificationVerifySerializer,
 )
 
 
@@ -29,7 +29,7 @@ class PasswordResetViewSet(ExtendedViewSet[PasswordResetVerification]):
     @action(
         detail=False,
         methods=["post"],
-        serializer_class=PasswordResetVerificationCheckSerializer,
+        serializer_class=PasswordResetVerificationVerifySerializer,
         permission_classes=[RequireFirstParty],
     )
     def verify(self, request: Request) -> Response:

@@ -12,8 +12,8 @@ from rest_framework.exceptions import NotFound
 from asu.core.utils import messages
 from asu.verification.models import PasswordResetVerification
 from asu.verification.serializers import (
-    VerificationCheckSerializer,
     VerificationSendSerializer,
+    VerificationVerifySerializer,
 )
 from asu.verification.tasks import send_password_reset_email
 
@@ -23,7 +23,7 @@ class PasswordResetVerificationSendSerializer(VerificationSendSerializer):
         send_password_reset_email.delay(uid=uid, email=email)
 
 
-class PasswordResetVerificationCheckSerializer(VerificationCheckSerializer):
+class PasswordResetVerificationVerifySerializer(VerificationVerifySerializer):
     model = PasswordResetVerification
 
 
@@ -54,9 +54,9 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
             or (user := verification.user) is None
             or not user.has_usable_password()
         ):
-            # Under normal circumstances, it is not possible to acquire ident
+            # Under normal circumstances, it is not possible to acquire id
             # while having 'unusable' password. We still do this check in case
-            # unusable password is set after acquiring ident.
+            # unusable password is set after acquiring id.
             raise NotFound(messages.BAD_VERIFICATION_ID)
 
         # Validate password

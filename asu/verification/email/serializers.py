@@ -8,8 +8,8 @@ from rest_framework.exceptions import NotFound
 from asu.core.utils import messages
 from asu.verification.models import EmailVerification
 from asu.verification.serializers import (
-    VerificationCheckSerializer,
     VerificationSendSerializer,
+    VerificationVerifySerializer,
 )
 from asu.verification.tasks import send_email_change_email
 
@@ -23,7 +23,7 @@ class EmailVerificationSendSerializer(VerificationSendSerializer):
         )
 
 
-class ChangeEmailSerializer(VerificationCheckSerializer):
+class ChangeEmailSerializer(VerificationVerifySerializer):
     @transaction.atomic(durable=True)
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         user = self.context["request"].user

@@ -13,8 +13,8 @@ from asu.auth.serializers.user import AuthSerializer, validate_username_constrai
 from asu.core.utils import messages
 from asu.verification.models.registration import RegistrationVerification
 from asu.verification.serializers import (
-    VerificationCheckSerializer,
     VerificationSendSerializer,
+    VerificationVerifySerializer,
 )
 from asu.verification.tasks import send_registration_email
 
@@ -24,7 +24,7 @@ class RegistrationVerificationSendSerializer(VerificationSendSerializer):
         send_registration_email.delay(email=email, uid=uid)
 
 
-class RegistrationVerificationCheckSerializer(VerificationCheckSerializer):
+class RegistrationVerificationVerifySerializer(VerificationVerifySerializer):
     model = RegistrationVerification
 
 

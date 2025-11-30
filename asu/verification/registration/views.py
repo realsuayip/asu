@@ -8,8 +8,8 @@ from asu.core.utils.views import ExtendedViewSet
 from asu.verification.models import RegistrationVerification
 from asu.verification.registration import schemas
 from asu.verification.registration.serializers import (
-    RegistrationVerificationCheckSerializer,
     RegistrationVerificationSendSerializer,
+    RegistrationVerificationVerifySerializer,
     UserCreateSerializer,
 )
 
@@ -29,7 +29,7 @@ class RegistrationViewSet(ExtendedViewSet[RegistrationVerification]):
     @action(
         detail=False,
         methods=["post"],
-        serializer_class=RegistrationVerificationCheckSerializer,
+        serializer_class=RegistrationVerificationVerifySerializer,
         permission_classes=[RequireFirstParty],
     )
     def verify(self, request: Request) -> Response:

@@ -29,7 +29,7 @@ class VerificationSendSerializer(serializers.Serializer[dict[str, Any]]):
         raise NotImplementedError
 
 
-class VerificationCheckSerializer(serializers.Serializer[dict[str, Any]]):
+class VerificationVerifySerializer(serializers.Serializer[dict[str, Any]]):
     id = serializers.UUIDField(write_only=True)
     code = serializers.CharField(
         label=_("code"),

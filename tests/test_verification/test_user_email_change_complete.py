@@ -30,8 +30,9 @@ def test_user_email_change_complete(
         2  # savepoint
         + 1  # fetch user
         + 1  # fetch verification
+        + 1  # lock other verifications
         + 1  # update verification
-        + 1  # null others
+        + 0  # null others
         + 1  # update user
     ):
         response = client.post(
@@ -124,20 +125,17 @@ def test_user_email_change_nullifies_other_verifications(
     email: str,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
+    user2 = UserFactory.create(email="other@example.com")
     client.set_user(user, scope="")
 
-    v1, v2 = EmailVerification.objects.bulk_create(
+    v1, v2, v3, v4 = EmailVerification.objects.bulk_create(
         [
-            EmailVerification(
-                email="helen_new@example.com",
-                user=user,
-                code="111111",
-            ),
-            EmailVerification(
-                email=email,
-                user=user,
-                code="111112",
-            ),
+            EmailVerification(email="helen_new@example.com", user=user),
+            EmailVerification(email=email, user=user),
+            # other user contesting for same email
+            EmailVerification(email="helen_new@example.com", user=user2),
+            # unrelated verification, should not be nullified
+            EmailVerification(email="unrelated@example.com", user=user2),
         ]
     )
     response = client.post(
@@ -148,9 +146,12 @@ def test_user_email_change_nullifies_other_verifications(
 
     v1.refresh_from_db()
     v2.refresh_from_db()
+    v3.refresh_from_db()
+    v4.refresh_from_db()
 
     assert v1.verified_at is not None
-    assert v2.nulled_by == v1
+    assert v2.nulled_by == v3.nulled_by == v1
+    assert v4.nulled_by is None
 
 
 @pytest.mark.django_db

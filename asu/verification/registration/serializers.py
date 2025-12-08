@@ -1,9 +1,7 @@
 from typing import Any
 
-import django.core.exceptions
-from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
-from django.db.models.functions import Now
+from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
@@ -39,7 +37,6 @@ class UserCreateSerializer(serializers.ModelSerializer[User]):
             verification = (
                 RegistrationVerification.objects.eligible()
                 .only("pk", "email")
-                .select_for_update()
                 .get(pk=pk)
             )
         except RegistrationVerification.DoesNotExist:
@@ -47,19 +44,16 @@ class UserCreateSerializer(serializers.ModelSerializer[User]):
 
         password = validated_data.pop("password")
         user = User(email=verification.email, **validated_data)
+        user.set_validated_password(password)
         validate_username_constraints(user)
-
-        try:
-            validate_password(password, user=user)
-        except django.core.exceptions.ValidationError as err:
-            raise serializers.ValidationError({"password": err.messages})
-
-        user.set_password(password)
         user.save(force_insert=True)
-        verification.user = user
-        verification.completed_at = Now()
-        verification.save(update_fields=["user", "completed_at", "updated_at"])
-        verification.null_others()
+
+        if not verification.complete(
+            lock_query=Q(email__iexact=verification.email),
+            user=user,
+        ):
+            raise NotFound(messages.BAD_VERIFICATION_ID)
+
         user._auth_dict = user.issue_token()  # type: ignore[attr-defined]
         return user
 

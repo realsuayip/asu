@@ -1,7 +1,6 @@
 from typing import Any
 
 from django.db import transaction
-from django.db.models.functions import Now
 
 from rest_framework.exceptions import NotFound
 
@@ -32,16 +31,14 @@ class ChangeEmailSerializer(VerificationVerifySerializer):
         try:
             verification = (
                 EmailVerification.objects.verifiable()
-                .only("pk", "email")
-                .select_for_update()
+                .only("pk", "email", "user_id")
                 .get(pk=pk, code=code, user=user)
             )
         except EmailVerification.DoesNotExist:
             raise NotFound(messages.BAD_VERIFICATION_CODE)
 
-        verification.verified_at = Now()
-        verification.save(update_fields=["verified_at", "updated_at"])
-        verification.null_others()
+        if not verification.complete():
+            raise NotFound(messages.BAD_VERIFICATION_CODE)
 
         user.email = verification.email
         user.save(update_fields=["email", "updated_at"])

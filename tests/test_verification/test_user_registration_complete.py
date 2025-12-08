@@ -40,9 +40,10 @@ def test_user_registration_create(
         + 4  # savepoint
         + 1  # fetch verification
         + 2  # username constraint checks
+        + 2  # verification complete locks
         + 1  # insert user
         + 1  # update verification
-        + 2  # null others
+        + 0  # null others
         + 4  # issue tokens
     ):
         response = first_party_app_client.post(
@@ -188,7 +189,7 @@ def test_user_registration_create_username_validation(
     payload = {
         "id": verification.pk,
         "display_name": "Helen",
-        "password": "helenexample",
+        "password": "Hln_1900",
         "username": username,
     }
     response = first_party_app_client.post(
@@ -240,21 +241,22 @@ def test_user_registration_nullifies_other_verifications(
     first_party_app_client: OAuthClient,
 ) -> None:
     create_default_application()
-    v1, v2, v3 = RegistrationVerification.objects.bulk_create(
+    v1, v2, v3, v4, v5 = RegistrationVerification.objects.bulk_create(
         [
             RegistrationVerification(
                 email="helen@example.com",
                 verified_at=timezone.now(),
-                code="111111",
             ),
             RegistrationVerification(
                 email="helen@example.com",
                 verified_at=timezone.now(),
-                code="111112",
             ),
+            RegistrationVerification(email="helen@example.com"),
+            # unrelated verifications, they should not be affected
+            RegistrationVerification(email="other@example.com"),
             RegistrationVerification(
-                email="helen@example.com",
-                code="111113",
+                email="other2@example.com",
+                verified_at=timezone.now(),
             ),
         ]
     )
@@ -272,9 +274,13 @@ def test_user_registration_nullifies_other_verifications(
     v1.refresh_from_db()
     v2.refresh_from_db()
     v3.refresh_from_db()
+    v4.refresh_from_db()
+    v5.refresh_from_db()
 
     assert v1.completed_at is not None
     assert v2.nulled_by == v3.nulled_by == v1
+    assert v4.nulled_by is None
+    assert v5.nulled_by is None
 
 
 @pytest.mark.django_db

@@ -1,12 +1,14 @@
 import string
+import uuid
+from collections.abc import Iterable
 from datetime import timedelta
 from functools import partial
 from typing import ClassVar, Self
 
 from django.conf import settings
 from django.core.validators import RegexValidator
-from django.db import models
-from django.db.models import QuerySet
+from django.db import OperationalError, models
+from django.db.models import Q, QuerySet
 from django.db.models.functions import Now
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -33,14 +35,20 @@ class VerificationManager[T: Verification](models.Manager[T]):
             nulled_by__isnull=True,
         )
 
+    def lock_verifiable(self, *, condition: Q, nowait: bool = False) -> list[uuid.UUID]:
+        return list(
+            self.verifiable()
+            .filter(condition)
+            .values_list("id", flat=True)
+            .select_for_update(nowait=nowait)
+        )
+
 
 class Verification(Base):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
     )
     email = models.EmailField(_("email"))
     code = models.CharField(
@@ -66,12 +74,17 @@ class Verification(Base):
     class Meta:
         abstract = True
 
-    def null_others(self) -> None:
+    def null_others(self, *, locked: Iterable[uuid.UUID]) -> None:
         # If the user successfully makes use of another verification object,
         # null outstanding verification objects so that they couldn't be used
         # to repeat the related action.
-        queryset = type(self).objects.verifiable()
-        queryset.update(nulled_by=self, updated_at=Now())
+        others = [pk for pk in locked if pk != self.pk]
+        if not others:
+            return
+        type(self).objects.filter(
+            pk__in=others,
+            nulled_by__isnull=True,
+        ).update(nulled_by=self, updated_at=Now())
 
     def send_email(self) -> int:
         title, content = self.EMAIL_MESSAGE.subject, self.EMAIL_MESSAGE.body
@@ -96,6 +109,17 @@ class ExtendedVerificationManager[T: ExtendedVerification](VerificationManager[T
             nulled_by__isnull=True,
         )
 
+    def lock_eligible(self, *, condition: Q) -> list[uuid.UUID]:
+        try:
+            return list(
+                self.eligible()
+                .filter(condition)
+                .values_list("id", flat=True)
+                .select_for_update(nowait=True)
+            )
+        except OperationalError:
+            return []
+
 
 class ExtendedVerification(Verification):
     completed_at = models.DateTimeField(_("date completed"), null=True, blank=True)
@@ -107,7 +131,17 @@ class ExtendedVerification(Verification):
     class Meta(Verification.Meta):
         abstract = True
 
-    def null_others(self) -> None:
-        super().null_others()
-        queryset = type(self).objects.eligible()
-        queryset.update(nulled_by=self, updated_at=Now())
+    def complete(self, *, lock_query: Q, **attrs: object) -> bool:
+        klass = type(self)
+        verifiable, eligible = (
+            klass.objects.lock_verifiable(condition=lock_query),
+            klass.objects.lock_eligible(condition=lock_query),
+        )
+        if self.pk not in eligible:
+            return False
+        self.completed_at = Now()
+        for name, value in attrs.items():
+            setattr(self, name, value)
+        self.save(update_fields=[*attrs, "completed_at", "updated_at"])
+        self.null_others(locked=verifiable + eligible)
+        return True

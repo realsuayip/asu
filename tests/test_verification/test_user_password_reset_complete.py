@@ -36,8 +36,9 @@ def test_user_password_reset_complete(
         2  # savepoint
         + 1  # fetch token
         + 1  # fetch verification
+        + 2  # lock verifications
         + 1  # update verification
-        + 2  # null others
+        + 0  # null others
         + 1  # set password
         + 1  # fetch user tokens for invalidation
         + 1  # fetch user sessions for invalidation
@@ -182,24 +183,26 @@ def test_user_password_reset_complete_nullifies_other_verifications(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    v1, v2, v3 = PasswordResetVerification.objects.bulk_create(
+    user2 = UserFactory.create(email="other@example.com")
+    v1, v2, v3, v4, v5 = PasswordResetVerification.objects.bulk_create(
         [
             PasswordResetVerification(
                 email="helen@example.com",
                 user=user,
                 verified_at=timezone.now(),
-                code="111111",
             ),
             PasswordResetVerification(
                 email="helen@example.com",
                 user=user,
                 verified_at=timezone.now(),
-                code="111112",
             ),
+            PasswordResetVerification(email="helen@example.com", user=user),
+            # unrelated verifications, they should not be affected
+            PasswordResetVerification(email="other_new@example.com", user=user2),
             PasswordResetVerification(
-                email="helen@example.com",
-                user=user,
-                code="111113",
+                email="other_new2@example.com",
+                user=user2,
+                verified_at=timezone.now(),
             ),
         ]
     )
@@ -215,9 +218,13 @@ def test_user_password_reset_complete_nullifies_other_verifications(
     v1.refresh_from_db()
     v2.refresh_from_db()
     v3.refresh_from_db()
+    v4.refresh_from_db()
+    v5.refresh_from_db()
 
     assert v1.completed_at is not None
     assert v2.nulled_by == v3.nulled_by == v1
+    assert v4.nulled_by is None
+    assert v5.nulled_by is None
 
 
 @pytest.mark.django_db
@@ -262,3 +269,39 @@ def test_user_password_reset_flow(
 
     user.refresh_from_db()
     assert user.check_password("Hln_1900")
+
+
+@pytest.mark.django_db
+def test_user_password_reset_flow_case_email_change_invalidation(
+    first_party_app_client: OAuthClient,
+) -> None:
+    # If email is changed for some reason in mid-flow, the verification
+    # should not be usable.
+    user = UserFactory.create(email="helen@example.com")
+
+    first_party_app_client.post(
+        reverse("api:verification:password-reset-send"),
+        data={"email": "helen@example.com"},
+    )
+    verification = PasswordResetVerification.objects.get()
+
+    first_party_app_client.post(
+        reverse("api:verification:password-reset-verify"),
+        data={
+            "id": str(verification.pk),
+            "code": verification.code,
+        },
+    )
+
+    # Email changed mid-flow
+    user.email = "changed@example.com"
+    user.save(update_fields=["email", "updated_at"])
+
+    response = first_party_app_client.post(
+        reverse("api:verification:password-reset-complete"),
+        data={
+            "id": str(verification.pk),
+            "password": "Hln_1900",
+        },
+    )
+    assert response.status_code == 404

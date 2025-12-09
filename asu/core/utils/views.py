@@ -1,5 +1,7 @@
 import abc
-from typing import Any
+import typing
+from typing import Any, NotRequired
+from uuid import UUID
 
 from django.db.models import Model, QuerySet
 
@@ -29,14 +31,19 @@ class ViewSetMeta(abc.ABCMeta):
         return cls
 
 
+class ViewSetKwargs(typing.TypedDict, total=False):
+    pk: NotRequired[UUID]
+
+
 class ExtendedViewSet[T: Model](viewsets.GenericViewSet[T], metaclass=ViewSetMeta):
     lookup_value_converter = "uuid"
+    request: UserRequest
+    kwargs: ViewSetKwargs  # type: ignore[assignment]
 
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}
     filterset_classes: dict[str, type[FilterSet[T]]] = {}
     scopes: dict[str, list[str] | str] = {}
-    request: UserRequest
 
     def perform_action(
         self,

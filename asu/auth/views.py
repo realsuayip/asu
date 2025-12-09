@@ -1,6 +1,7 @@
 import itertools
 from collections.abc import Sequence
 from typing import Any
+from uuid import UUID
 
 from django.conf import settings
 from django.db import transaction
@@ -210,7 +211,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         permission_classes=[RequireUser, RequireScope],
         serializer_class=BlockSerializer,
     )
-    def block(self, request: Request, pk: int) -> Response:
+    def block(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
 
     @action(
@@ -219,7 +220,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         permission_classes=[RequireUser, RequireScope],
         serializer_class=UnblockSerializer,
     )
-    def unblock(self, request: Request, pk: int) -> Response:
+    def unblock(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
 
     @action(
@@ -228,7 +229,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         permission_classes=[RequireUser, RequireScope],
         serializer_class=FollowSerializer,
     )
-    def follow(self, request: Request, pk: int) -> Response:
+    def follow(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
 
     @action(
@@ -237,7 +238,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         permission_classes=[RequireUser, RequireScope],
         serializer_class=UnfollowSerializer,
     )
-    def unfollow(self, request: Request, pk: int) -> Response:
+    def unfollow(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
 
     @action(
@@ -247,7 +248,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         pagination_class=get_paginator("cursor", ordering="-from_userfollows"),
         permission_classes=[RequireToken],
     )
-    def followers(self, request: Request, pk: int) -> Response:
+    def followers(self, request: Request, pk: UUID) -> Response:
         user = self.get_object()
         queryset = User.objects.active().filter(following=user)
         return self.perform_list_action(queryset)
@@ -259,7 +260,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         pagination_class=get_paginator("cursor", ordering="-to_userfollows"),
         permission_classes=[RequireToken],
     )
-    def following(self, request: Request, pk: int) -> Response:
+    def following(self, request: Request, pk: UUID) -> Response:
         user = self.get_object()
         queryset = User.objects.active().filter(followed_by=user)
         return self.perform_list_action(queryset)
@@ -383,7 +384,7 @@ class FollowRequestViewSet(
         permission_classes=[RequireUser, RequireScope],
         serializer_class=EmptySerializer,
     )
-    def accept(self, request: UserRequest, pk: int) -> Response:
+    def accept(self, request: UserRequest, pk: UUID) -> Response:
         with transaction.atomic():
             instance = self.get_object()
             instance.accept()
@@ -395,7 +396,7 @@ class FollowRequestViewSet(
         permission_classes=[RequireUser, RequireScope],
         serializer_class=EmptySerializer,
     )
-    def reject(self, request: UserRequest, pk: int) -> Response:
+    def reject(self, request: UserRequest, pk: UUID) -> Response:
         with transaction.atomic():
             instance = self.get_object()
             instance.reject()

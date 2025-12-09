@@ -2,6 +2,7 @@ import abc
 from typing import Any, TypeVar
 
 from django.db import models
+from django.db.models import QuerySet
 
 from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS
@@ -57,6 +58,11 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
         data = serializer.data or None
         status_code = status_code if data else status.HTTP_204_NO_CONTENT
         return Response(data, status=status_code)
+
+    def perform_list_action(self, queryset: QuerySet[MT_co]) -> Response:
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     def get_filterset_class(self) -> type[FilterSet[MT_co]] | None:
         return self.filterset_classes.get(self.action)

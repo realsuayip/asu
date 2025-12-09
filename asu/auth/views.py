@@ -240,11 +240,6 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     def unfollow(self, request: Request, pk: int) -> Response:
         return self.perform_relation_action()
 
-    def list_follow_through(self, queryset: QuerySet[User]) -> Response:
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
-
     @action(
         detail=True,
         methods=["get"],
@@ -255,7 +250,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     def followers(self, request: Request, pk: int) -> Response:
         user = self.get_object()
         queryset = User.objects.active().filter(following=user)
-        return self.list_follow_through(queryset)
+        return self.perform_list_action(queryset)
 
     @action(
         detail=True,
@@ -267,7 +262,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     def following(self, request: Request, pk: int) -> Response:
         user = self.get_object()
         queryset = User.objects.active().filter(followed_by=user)
-        return self.list_follow_through(queryset)
+        return self.perform_list_action(queryset)
 
     @action(
         detail=False,
@@ -278,7 +273,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     )
     def blocked(self, request: UserRequest) -> Response:
         queryset = User.objects.active().filter(blocked_by=request.user)
-        return self.list_follow_through(queryset)
+        return self.perform_list_action(queryset)
 
     @action(
         detail=False,

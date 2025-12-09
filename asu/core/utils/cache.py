@@ -2,7 +2,7 @@ import functools
 import operator
 from collections.abc import Callable
 from inspect import Parameter, signature
-from typing import Any, ParamSpec, TypeVar
+from typing import Any
 
 from django.core.cache import cache
 
@@ -10,10 +10,6 @@ __all__ = [
     "build_vary_key",
     "cached_context",
 ]
-
-
-P = ParamSpec("P")
-RT = TypeVar("RT")
 
 
 def get_argument(
@@ -116,7 +112,7 @@ def get_key_resolver(
     raise ValueError("no parameter named `%s` was found." % lookup)
 
 
-def cached_context(
+def cached_context[RT, **P](
     *,
     key: str,
     timeout: float | None = None,

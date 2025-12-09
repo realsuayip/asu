@@ -1,8 +1,7 @@
 import abc
-from typing import Any, TypeVar
+from typing import Any
 
-from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Model, QuerySet
 
 from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS
@@ -12,8 +11,6 @@ from drf_spectacular.utils import extend_schema_view
 from rest_filters import FilterSet
 
 from asu.core.utils.typing import UserRequest
-
-MT_co = TypeVar("MT_co", bound=models.Model, covariant=True)
 
 
 class ViewSetMeta(abc.ABCMeta):
@@ -32,10 +29,10 @@ class ViewSetMeta(abc.ABCMeta):
         return cls
 
 
-class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
+class ExtendedViewSet[T: Model](viewsets.GenericViewSet[T], metaclass=ViewSetMeta):
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}
-    filterset_classes: dict[str, type[FilterSet[MT_co]]] = {}
+    filterset_classes: dict[str, type[FilterSet[T]]] = {}
     scopes: dict[str, list[str] | str] = {}
     request: UserRequest
 
@@ -59,12 +56,12 @@ class ExtendedViewSet(viewsets.GenericViewSet[MT_co], metaclass=ViewSetMeta):
         status_code = status_code if data else status.HTTP_204_NO_CONTENT
         return Response(data, status=status_code)
 
-    def perform_list_action(self, queryset: QuerySet[MT_co]) -> Response:
+    def perform_list_action(self, queryset: QuerySet[T]) -> Response:
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    def get_filterset_class(self) -> type[FilterSet[MT_co]] | None:
+    def get_filterset_class(self) -> type[FilterSet[T]] | None:
         return self.filterset_classes.get(self.action)
 
     def get_serializer_class(self) -> type[serializers.BaseSerializer[Any]]:

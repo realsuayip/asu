@@ -69,7 +69,7 @@ USERNAME_CONSTRAINTS = [
     ),
     models.UniqueConstraint(
         Upper("username"),
-        name="unique_lower_username",
+        name="unique_ci_username",
         violation_error_message=_("The username you specified is already in use."),
     ),
 ]

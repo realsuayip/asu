@@ -1,93 +1,73 @@
 import functools
-from typing import Any, NoReturn
+from typing import Any
 
-import django.core.exceptions
-from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
-from django.utils import timezone
-from django.utils.translation import gettext
+from django.db.models import Q
 
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
-from asu.auth.models import User
 from asu.core.utils import messages
 from asu.verification.models import PasswordResetVerification
-from asu.verification.serializers import BaseCheckSerializer
+from asu.verification.serializers import (
+    VerificationSendSerializer,
+    VerificationVerifySerializer,
+)
 from asu.verification.tasks import send_password_reset_email
 
 
-class PasswordResetVerificationSerializer(serializers.Serializer[dict[str, Any]]):
-    email = serializers.EmailField()
-
-    def validate_email(self, email: str) -> str:
-        return User.objects.normalize_email(email)
-
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        send_password_reset_email.delay(email=validated_data["email"])
-        return validated_data
+class PasswordResetVerificationSendSerializer(VerificationSendSerializer):
+    def send(self, *, email: str, uid: str) -> None:
+        send_password_reset_email.delay(uid=uid, email=email)
 
 
-class PasswordResetVerificationCheckSerializer(BaseCheckSerializer):
+class PasswordResetVerificationVerifySerializer(VerificationVerifySerializer):
     model = PasswordResetVerification
 
 
 class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
-    email = serializers.EmailField()
-    consent = serializers.CharField(write_only=True)
-    password = serializers.CharField(
-        write_only=True,
-        style={"input_type": "password"},
-    )
+    id = serializers.UUIDField(write_only=True)
+    password = serializers.CharField(write_only=True)
 
-    def validate_email(self, email: str) -> str:
-        return User.objects.normalize_email(email)
-
-    def fail_email(self) -> NoReturn:
-        raise serializers.ValidationError(
-            {
-                "email": gettext(
-                    "This e-mail could not be verified. Please provide"
-                    " a validated e-mail address."
-                )
-            }
-        )
-
-    @transaction.atomic
+    @transaction.atomic(durable=True)
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        email, password = validated_data["email"], validated_data["password"]
         try:
-            user = User.objects.get(email=email)
-            if not user.has_usable_password():
-                # This block should be unreachable in normal circumstances since
-                # this condition is also checked before sending code to email.
-                # However, if the consent is generated somehow this check
-                # ensures the password validation still fails.
-                raise ValueError
-        except (User.DoesNotExist, ValueError):
-            self.fail_email()
+            verification = (
+                PasswordResetVerification.objects.eligible()
+                .select_related("user")
+                .only(
+                    "id",
+                    "email",
+                    "user_id",
+                    "user__username",
+                    "user__email",
+                    "user__password",
+                )
+                .get(pk=validated_data["id"])
+            )
+        except PasswordResetVerification.DoesNotExist:
+            verification = None
+        if (
+            verification is None
+            or (user := verification.user) is None
+            or verification.email.lower() != verification.user.email.lower()
+            or not user.has_usable_password()
+        ):
+            # Under normal circumstances, it isn't possible to acquire valid id
+            # while having 'unusable' password. We still do this check in case
+            # unusable password is set after acquiring id.
+            raise NotFound(messages.BAD_VERIFICATION_ID)
+        user.set_validated_password(validated_data["password"])
 
-        try:
-            validate_password(password, user=user)
-        except django.core.exceptions.ValidationError as err:
-            raise serializers.ValidationError({"password": err.messages})
+        if not verification.complete(lock_query=Q(user_id=verification.user_id)):
+            raise NotFound(messages.BAD_VERIFICATION_ID)
 
-        verification = PasswordResetVerification.objects.get_with_consent(
-            email, validated_data["consent"], user=user
-        )
-
-        if verification is None:
-            self.fail_email()
-
-        verification.completed_at = timezone.now()
-        verification.save(update_fields=["completed_at", "updated_at"])
-        verification.null_others()
-
-        user.set_password(password)
         user.save(update_fields=["password", "updated_at"])
-        user.revoke_other_tokens(self.context["request"].auth)
+        user.revoke_other_tokens()
+        user.revoke_all_sessions()
 
         send_notice = functools.partial(
-            user.send_transactional_mail, message=messages.password_change_notice
+            user.send_transactional_mail, message=messages.PASSWORD_CHANGE_NOTICE
         )
         transaction.on_commit(send_notice)
         return validated_data

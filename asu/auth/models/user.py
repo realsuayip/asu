@@ -3,12 +3,14 @@ import io
 from datetime import timedelta
 from typing import Any, AnyStr, ClassVar
 
+import django.core.exceptions
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import (
     PermissionsMixin,
     UserManager as DjangoUserManager,
 )
+from django.contrib.auth.password_validation import validate_password
 from django.core.cache import cache
 from django.core.files.base import ContentFile, File
 from django.core.validators import (
@@ -23,6 +25,8 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
+
+from rest_framework import serializers
 
 import oauthlib.common
 import sorl.thumbnail
@@ -342,6 +346,13 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
             user=self,
             revoked_at__isnull=True,
         ).update(revoked_at=timezone.now())
+
+    def set_validated_password(self, raw_password: str, /) -> None:
+        try:
+            validate_password(raw_password, user=self)
+        except django.core.exceptions.ValidationError as err:
+            raise serializers.ValidationError({"password": err.messages})
+        self.set_password(raw_password)
 
     def send_transactional_mail(self, message: EmailMessage) -> int:
         """

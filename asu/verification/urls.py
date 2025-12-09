@@ -1,3 +1,5 @@
+from django.urls import include, path
+
 from rest_framework.routers import SimpleRouter
 
 from asu.verification.email.views import EmailViewSet
@@ -7,19 +9,9 @@ from asu.verification.registration.views import RegistrationViewSet
 app_name = "verification"
 
 router = SimpleRouter()
-router.register(
-    "verifications/registration",
-    RegistrationViewSet,
-    basename="registration-verification",
-)
-router.register(
-    "verifications/email",
-    EmailViewSet,
-    basename="email-verification",
-)
-router.register(
-    "verifications/password-reset",
-    PasswordResetViewSet,
-    basename="password-reset",
-)
-urlpatterns = router.urls
+router.register("registration", RegistrationViewSet, basename="registration")
+router.register("email", EmailViewSet, basename="email-change")
+router.register("password-reset", PasswordResetViewSet, basename="password-reset")
+urlpatterns = [
+    path("verifications/", include(router.urls)),
+]

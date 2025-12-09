@@ -1,5 +1,4 @@
 import re
-import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -61,7 +60,7 @@ def test_user_password_reset_complete_case_invalid_id(
     first_party_app_client: OAuthClient,
 ) -> None:
     payload = {
-        "id": uuid.uuid7(),
+        "id": "019b04e3-90e4-7751-a386-7a4550a69409",
         "password": "Hln_1900",
     }
     response = first_party_app_client.post(
@@ -157,7 +156,7 @@ def test_user_password_reset_complete_requires_authentication(
     response = client.post(
         reverse("api:verification:password-reset-complete"),
         data={
-            "id": uuid.uuid7(),
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "password": "Hln_1900",
         },
     )
@@ -171,7 +170,7 @@ def test_user_password_reset_complete_requires_requires_first_party_app(
     response = app_client.post(
         reverse("api:verification:password-reset-complete"),
         data={
-            "id": uuid.uuid7(),
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "password": "Hln_1900",
         },
     )

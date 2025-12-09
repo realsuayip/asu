@@ -109,7 +109,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
 
     def get_object(self) -> User:
         as_user = bool(self.request.user and self.request.user.is_authenticated)
-        if as_user and (str(self.request.user.pk) == self.kwargs["pk"]):
+        if as_user and (self.request.user.pk == self.kwargs["pk"]):
             # If the user is displaying their own object, don't
             # bother making additional database queries.
             return self.request.user

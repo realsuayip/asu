@@ -5,6 +5,7 @@ from django import urls
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import URLPattern, URLResolver
+from django.urls.converters import UUIDConverter
 from django.views import defaults
 
 from rest_framework.exceptions import (
@@ -38,14 +39,26 @@ class APIRootView(BaseAPIRootView):
 
     def resolve_url(self, namespace: str, url: URLPattern) -> str | None:
         try:
+            if url.pattern.converters:
+                kwargs: dict[str, object] = {
+                    name: self.converter_to_sample(converter)
+                    for name, converter in url.pattern.converters.items()
+                }
+            else:
+                kwargs = dict(url.pattern.regex.groupindex)
             relpath = reverse(
                 namespace + ":" + str(url.name),
-                kwargs=dict(url.pattern.regex.groupindex),
+                kwargs=kwargs,
                 request=self.request,
             )
         except urls.NoReverseMatch:
             return None
         return self.request.build_absolute_uri(relpath)
+
+    def converter_to_sample(self, converter: object) -> str:
+        if isinstance(converter, UUIDConverter):
+            return "019b04e3-90e4-7751-a386-7a4550a69409"
+        return ""
 
     def order(self, resolver: URLResolver | URLPattern) -> int:
         if isinstance(resolver, URLPattern):

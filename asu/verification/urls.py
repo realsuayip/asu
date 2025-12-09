@@ -8,7 +8,7 @@ from asu.verification.registration.views import RegistrationViewSet
 
 app_name = "verification"
 
-router = SimpleRouter()
+router = SimpleRouter(use_regex_path=False)
 router.register("registration", RegistrationViewSet, basename="registration")
 router.register("email", EmailViewSet, basename="email-change")
 router.register("password-reset", PasswordResetViewSet, basename="password-reset")

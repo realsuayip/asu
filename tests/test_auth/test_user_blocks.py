@@ -169,7 +169,7 @@ def test_user_block_endpoints_require_authentication(
     response = client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
     assert response.status_code == 401
@@ -190,7 +190,7 @@ def test_user_block_endpoints_require_user_token(
     response = app_client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         ),
     )
     assert response.status_code == 403
@@ -218,7 +218,7 @@ def test_user_block_endpoints_require_scope(
     response = client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         ),
     )
     assert response.status_code == 403
@@ -239,7 +239,7 @@ def test_user_block_endpoints_non_existing_user(
     response = user_client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
     assert response.status_code == 404

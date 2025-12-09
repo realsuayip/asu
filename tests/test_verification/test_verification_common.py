@@ -1,5 +1,3 @@
-import uuid
-
 from django.urls import reverse
 
 import pytest
@@ -26,7 +24,10 @@ def test_verification_verify_missing(
         first_party_app_client.set_user(user, scope="")
     response = first_party_app_client.post(
         reverse(endpoint),
-        data={"id": uuid.uuid7(), "code": "987654"},
+        data={
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
+            "code": "987654",
+        },
     )
     assert response.status_code == 404
 
@@ -52,7 +53,7 @@ def test_verification_verify_invalid_code(
     response = first_party_app_client.post(
         reverse(endpoint),
         data={
-            "id": uuid.uuid7(),
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "code": code,
         },
     )
@@ -79,7 +80,10 @@ def test_verification_verify_requires_authentication(
 ) -> None:
     response = client.post(
         reverse(endpoint),
-        data={"id": uuid.uuid7(), "code": "123456"},
+        data={
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
+            "code": "123456",
+        },
     )
     assert response.status_code == 401
 
@@ -99,6 +103,9 @@ def test_verification_verify_requires_first_party_app(
 ) -> None:
     response = app_client.post(
         reverse(endpoint),
-        data={"id": uuid.uuid7(), "code": "123456"},
+        data={
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
+            "code": "123456",
+        },
     )
     assert response.status_code == 403

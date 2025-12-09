@@ -178,7 +178,7 @@ def test_user_follow_endpoints_require_authentication(
     response = client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
     assert response.status_code == 401
@@ -199,7 +199,7 @@ def test_user_follow_endpoints_require_user_token(
     response = app_client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         ),
     )
     assert response.status_code == 403
@@ -227,7 +227,7 @@ def test_user_follow_endpoints_require_scope(
     response = client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         ),
     )
     assert response.status_code == 403
@@ -248,7 +248,7 @@ def test_user_follow_endpoints_non_existing_user(
     response = user_client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
     assert response.status_code == 404
@@ -503,7 +503,12 @@ def test_user_follow_request_respond_requires_authentication(
     client: OAuthClient,
     endpoint: str,
 ) -> None:
-    response = client.get(reverse(endpoint, kwargs={"pk": 1}))
+    response = client.get(
+        reverse(
+            endpoint,
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
+        )
+    )
     assert response.status_code == 401
 
 
@@ -519,7 +524,12 @@ def test_user_follow_request_respond_requires_user_client(
     app_client: OAuthClient,
     endpoint: str,
 ) -> None:
-    response = app_client.get(reverse(endpoint, kwargs={"pk": 1}))
+    response = app_client.get(
+        reverse(
+            endpoint,
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
+        )
+    )
     assert response.status_code == 403
 
 
@@ -542,7 +552,7 @@ def test_user_follow_request_respond_requires_scope(
     response = client.post(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
     assert response.status_code == 403
@@ -757,7 +767,7 @@ def test_user_follower_endpoints_user_not_found(
     response = app_client.get(
         reverse(
             endpoint,
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
     assert response.status_code == 404

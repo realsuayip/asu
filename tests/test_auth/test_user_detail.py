@@ -73,7 +73,7 @@ def test_user_detail_requires_authentication(client: OAuthClient) -> None:
     response = client.get(
         reverse(
             "api:auth:user-detail",
-            kwargs={"pk": 1},
+            kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
     assert response.status_code == 401

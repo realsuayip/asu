@@ -30,6 +30,8 @@ class ViewSetMeta(abc.ABCMeta):
 
 
 class ExtendedViewSet[T: Model](viewsets.GenericViewSet[T], metaclass=ViewSetMeta):
+    lookup_value_converter = "uuid"
+
     schemas: dict[str, Any] | None = None
     serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}
     filterset_classes: dict[str, type[FilterSet[T]]] = {}

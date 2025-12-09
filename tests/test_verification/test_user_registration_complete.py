@@ -1,5 +1,4 @@
 import re
-import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -92,7 +91,7 @@ def test_user_registration_create_case_invalid_id(
     first_party_app_client: OAuthClient,
 ) -> None:
     payload = {
-        "id": uuid.uuid7().hex,
+        "id": "019b04e3-90e4-7751-a386-7a4550a69409",
         "display_name": "Helen",
         "password": "Hln_1900",
         "username": "helen",
@@ -246,7 +245,7 @@ def test_user_registration_create_requires_authentication(client: OAuthClient) -
     response = client.post(
         reverse("api:verification:registration-complete"),
         data={
-            "id": uuid.uuid7().hex,
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "display_name": "Helen",
             "password": "Hln_1900",
             "username": "helen",
@@ -262,7 +261,7 @@ def test_user_registration_create_requires_requires_first_party_app(
     response = app_client.post(
         reverse("api:verification:registration-complete"),
         data={
-            "id": uuid.uuid7().hex,
+            "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "display_name": "Helen",
             "password": "Hln_1900",
             "username": "helen",

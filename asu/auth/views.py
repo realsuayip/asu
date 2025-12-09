@@ -1,6 +1,6 @@
 import itertools
-from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Any, TypeVar
+from collections.abc import Sequence
+from typing import Any
 
 from django.conf import settings
 from django.db import transaction
@@ -33,6 +33,8 @@ from asu.auth.serializers.actions import (
     PasswordChangeSerializer,
     ProfilePictureEditSerializer,
     RelationSerializer,
+    UnblockSerializer,
+    UnfollowSerializer,
     UserConnectionSerializer,
     UserDeactivationSerializer,
 )
@@ -43,11 +45,6 @@ from asu.auth.serializers.user import (
 from asu.core.utils.rest import EmptySerializer, get_paginator
 from asu.core.utils.typing import UserRequest
 from asu.core.utils.views import ExtendedViewSet
-
-if TYPE_CHECKING:
-    from rest_framework.decorators import ViewSetAction
-
-_CallableT = TypeVar("_CallableT", bound=Callable[..., Any])
 
 
 class RelationFilter(FilterSet[User]):
@@ -82,10 +79,6 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     serializer_classes = {
         "me": UserSerializer,
         "by": UserPublicReadSerializer,
-        "block": BlockSerializer,
-        "unblock": BlockSerializer,
-        "follow": FollowSerializer,
-        "unfollow": FollowSerializer,
         "followers": UserConnectionSerializer,
         "following": UserConnectionSerializer,
         "blocked": UserConnectionSerializer,
@@ -203,46 +196,49 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     def change_password(self, request: UserRequest) -> Response:
         return self.perform_action()
 
-    def save_through(self) -> Response:
+    def perform_relation_action(self) -> Response:
         # Common save method for user blocking and following.
-        context = self.get_serializer_context()
-        context["to_user"] = self.get_object()
-        serializer = self.get_serializer(data=self.request.data, context=context)
-        return self.perform_action(serializer)
-
-    def delete_through(self, model: type[UserFollow | UserBlock]) -> Response:
-        # Common delete method for user blocking and following.
         to_user = self.get_object()
         context = self.get_serializer_context()
         context["to_user"] = to_user
-        serializer = self.get_serializer(data={}, context=context)
-        serializer.is_valid(raise_exception=True)
-        model.objects.filter(from_user=self.request.user, to_user=to_user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = self.get_serializer(data=self.request.data, context=context)
+        return self.perform_action(serializer)
 
-    @staticmethod
-    def through_action(method: _CallableT) -> ViewSetAction[_CallableT]:
-        return action(
-            detail=True,
-            methods=["post"],
-            permission_classes=[RequireUser, RequireScope],
-        )(method)
-
-    @through_action
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[RequireUser, RequireScope],
+        serializer_class=BlockSerializer,
+    )
     def block(self, request: Request, pk: int) -> Response:
-        return self.save_through()
+        return self.perform_relation_action()
 
-    @through_action
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[RequireUser, RequireScope],
+        serializer_class=UnblockSerializer,
+    )
     def unblock(self, request: Request, pk: int) -> Response:
-        return self.delete_through(model=UserBlock)
+        return self.perform_relation_action()
 
-    @through_action
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[RequireUser, RequireScope],
+        serializer_class=FollowSerializer,
+    )
     def follow(self, request: Request, pk: int) -> Response:
-        return self.save_through()
+        return self.perform_relation_action()
 
-    @through_action
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[RequireUser, RequireScope],
+        serializer_class=UnfollowSerializer,
+    )
     def unfollow(self, request: Request, pk: int) -> Response:
-        return self.delete_through(model=UserFollow)
+        return self.perform_relation_action()
 
     def list_follow_through(self, queryset: QuerySet[User]) -> Response:
         page = self.paginate_queryset(queryset)

@@ -1,5 +1,5 @@
 import functools
-from typing import Any, TypeVar, cast
+from typing import Any, cast
 
 from django.db import models, transaction
 from django.db.models import Q, QuerySet
@@ -21,8 +21,6 @@ from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.core.utils import messages
 from asu.core.utils.rest import ContextDefault
 from asu.core.utils.typing import UserRequest
-
-T = TypeVar("T", bound=models.Model)
 
 user_fields = (
     "id",
@@ -64,7 +62,7 @@ class PasswordChangeSerializer(serializers.Serializer[dict[str, str]]):
         return validated_data
 
 
-class CreateRelationSerializer(serializers.Serializer[dict[str, Any]]):
+class UserRelationSerializer(serializers.Serializer[dict[str, Any]]):
     from_user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     to_user = serializers.HiddenField(default=ContextDefault("to_user"))
 
@@ -74,13 +72,13 @@ class CreateRelationSerializer(serializers.Serializer[dict[str, Any]]):
         return attrs
 
 
-class BlockSerializer(CreateRelationSerializer):
-    def get_rels(
+class BlockSerializer(UserRelationSerializer):
+    def get_rels[T: (UserFollow, UserFollowRequest)](
         self, model: type[T], *, from_user: User, to_user: User
     ) -> QuerySet[T]:
-        # Given m2m through model, return queryset
+        # Given follow relation model, return queryset
         # containing objects for both directions
-        return model._default_manager.filter(
+        return model.objects.filter(
             (Q(from_user=from_user) & Q(to_user=to_user))
             | (Q(to_user=from_user) & Q(from_user=to_user))
         )
@@ -98,12 +96,18 @@ class BlockSerializer(CreateRelationSerializer):
         return validated_data
 
 
+class UnblockSerializer(UserRelationSerializer):
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        UserBlock.objects.filter(**validated_data).delete()
+        return validated_data
+
+
 class FollowStatus(models.TextChoices):
     FOLLOWING = "following", "Following"
     REQUEST_SENT = "follow_request_sent", "Follow Request Sent"
 
 
-class FollowSerializer(CreateRelationSerializer):
+class FollowSerializer(UserRelationSerializer):
     status = serializers.ChoiceField(choices=FollowStatus.choices, read_only=True)
 
     def create_relations(self, from_user: User, to_user: User) -> FollowStatus:
@@ -122,6 +126,12 @@ class FollowSerializer(CreateRelationSerializer):
         # since `get_object()` checks for that and returns 403. So, we can
         # safely proceed to creating follow relations.
         return {"status": self.create_relations(**validated_data)}
+
+
+class UnfollowSerializer(UserRelationSerializer):
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        UserFollow.objects.filter(**validated_data).delete()
+        return validated_data
 
 
 class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):

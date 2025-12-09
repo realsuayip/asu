@@ -18,10 +18,10 @@ def test_user_password_change(
     user.save(update_fields=["password", "updated_at"])
     token_to_be_revoked = user.issue_token()["refresh_token"]
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
-        response = user_client.patch(
+        response = user_client.post(
             reverse("api:auth:user-change-password"),
             data={
-                "password": "0ld_password*",
+                "old_password": "0ld_password*",
                 "new_password": "1new_password*",
             },
         )
@@ -43,17 +43,17 @@ def test_user_password_change_case_bad_current_password(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
-        response = user_client.patch(
+        response = user_client.post(
             reverse("api:auth:user-change-password"),
             data={
-                "password": "0ld_password*",
+                "old_password": "0ld_password*",
                 "new_password": "1new_password*",
             },
         )
     assert len(callbacks) == 0
     assert response.status_code == 400
     assert response.json()["errors"] == {
-        "password": [
+        "old_password": [
             {
                 "message": "Your password was not correct.",
                 "code": "invalid",
@@ -71,10 +71,10 @@ def test_user_password_change_case_bad_new_password(
     user.set_password("0ld_password*")
     user.save(update_fields=["password", "updated_at"])
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
-        response = user_client.patch(
+        response = user_client.post(
             reverse("api:auth:user-change-password"),
             data={
-                "password": "0ld_password*",
+                "old_password": "0ld_password*",
                 "new_password": "password",
             },
         )
@@ -91,7 +91,7 @@ def test_user_password_change_case_bad_new_password(
 
 
 def test_user_password_change_requires_authentication(client: OAuthClient) -> None:
-    response = client.patch(
+    response = client.post(
         reverse("api:auth:user-change-password"),
         data={
             "password": "0ld_password*",
@@ -108,7 +108,7 @@ def test_user_password_change_requires_first_party_app_client(
     authorization_code_third_party_app: Application,
 ) -> None:
     client.set_user(user, app=authorization_code_third_party_app)
-    response = client.patch(
+    response = client.post(
         reverse("api:auth:user-change-password"),
         data={
             "password": "0ld_password*",
@@ -122,7 +122,7 @@ def test_user_password_change_requires_first_party_app_client(
 def test_user_password_change_requires_user(
     first_party_app_client: OAuthClient,
 ) -> None:
-    response = first_party_app_client.patch(
+    response = first_party_app_client.post(
         reverse("api:auth:user-change-password"),
         data={
             "password": "0ld_password*",

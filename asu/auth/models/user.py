@@ -357,11 +357,17 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
             revoked_at__isnull=True,
         ).update(revoked_at=timezone.now())
 
-    def set_validated_password(self, raw_password: str, /) -> None:
+    def set_validated_password(
+        self,
+        raw_password: str,
+        /,
+        *,
+        key: str = "password",
+    ) -> None:
         try:
             validate_password(raw_password, user=self)
         except django.core.exceptions.ValidationError as err:
-            raise serializers.ValidationError({"password": err.messages})
+            raise serializers.ValidationError({key: err.messages})
         self.set_password(raw_password)
 
     def send_transactional_mail(self, message: EmailMessage) -> int:

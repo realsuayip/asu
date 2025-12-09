@@ -1,8 +1,6 @@
 import functools
 from typing import Any, TypeVar, cast
 
-import django.core.exceptions
-from django.contrib.auth.password_validation import validate_password
 from django.db import models, transaction
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext
@@ -22,6 +20,7 @@ from asu.auth.models import (
 from asu.auth.serializers.user import UserPublicReadSerializer
 from asu.core.utils import messages
 from asu.core.utils.rest import ContextDefault
+from asu.core.utils.typing import UserRequest
 
 T = TypeVar("T", bound=models.Model)
 
@@ -40,47 +39,29 @@ RelatedUserField = UserPublicReadSerializer(
 )
 
 
-class PasswordChangeSerializer(serializers.ModelSerializer[User]):
-    new_password = serializers.CharField(
-        write_only=True,
-        style={"input_type": "password"},
-    )
+class PasswordChangeSerializer(serializers.Serializer[dict[str, str]]):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = User
-        fields = ("password", "new_password")
-        extra_kwargs = {
-            "password": {
-                "max_length": None,
-                "write_only": True,
-                "style": {"input_type": "password"},
-            },
-        }
+    @transaction.atomic(durable=True)
+    def create(self, validated_data: dict[str, str]) -> dict[str, str]:
+        request: UserRequest = self.context["request"]
+        user = request.user
 
-    @transaction.atomic
-    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
-        request = self.context["request"]
-        current, new = validated_data["password"], validated_data["new_password"]
-
-        if not instance.check_password(current):
+        if not user.check_password(validated_data["old_password"]):
             raise serializers.ValidationError(
-                {"password": gettext("Your password was not correct.")}
+                {"old_password": gettext("Your password was not correct.")}
             )
 
-        try:
-            validate_password(new, user=instance)
-        except django.core.exceptions.ValidationError as err:
-            raise serializers.ValidationError({"new_password": err.messages})
-
-        instance.set_password(new)
-        instance.save(update_fields=["password", "updated_at"])
-        instance.revoke_other_tokens(request.auth)
+        user.set_validated_password(validated_data["new_password"], key="new_password")
+        user.save(update_fields=["password", "updated_at"])
+        user.revoke_other_tokens(request.auth)
 
         send_notice = functools.partial(
-            instance.send_transactional_mail, message=messages.PASSWORD_CHANGE_NOTICE
+            user.send_transactional_mail, message=messages.PASSWORD_CHANGE_NOTICE
         )
         transaction.on_commit(send_notice)
-        return instance
+        return validated_data
 
 
 class CreateRelationSerializer(serializers.Serializer[dict[str, Any]]):

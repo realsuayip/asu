@@ -195,14 +195,13 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
 
     @action(
         detail=False,
-        methods=["patch"],
+        methods=["post"],
         permission_classes=[RequireUser, RequireFirstParty],
         serializer_class=PasswordChangeSerializer,
         url_path="password-change",
     )
     def change_password(self, request: UserRequest) -> Response:
-        serializer = self.get_serializer(instance=request.user, data=request.data)
-        return self.perform_action(serializer)
+        return self.perform_action()
 
     def save_through(self) -> Response:
         # Common save method for user blocking and following.

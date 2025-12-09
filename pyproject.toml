@@ -83,8 +83,6 @@ addopts = [
 source = ["asu"]
 omit = [
     "asu/core/settings/*",
-    "asu/messaging/*",
-    "asu/core/utils/workers.py",
     "*/migrations/*",
 ]
 branch = true

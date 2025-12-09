@@ -1,7 +1,0 @@
-- model: core.projectvariable
-  pk: 1
-  fields:
-    name: DEFAULT_OAUTH_CLIENT
-    value: "test_client"
-    date_modified: 2023-06-28 14:46:32.464272+00:00
-    date_created: 2023-06-28 14:46:32.464305+00:00

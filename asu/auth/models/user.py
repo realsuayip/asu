@@ -105,7 +105,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
         validators=[MaxLengthValidator(140)],
     )
     website = models.URLField(_("website"), blank=True)
-    email = models.EmailField(_("e-mail"))
+    email = models.EmailField(_("e-mail"), unique=True)
     birth_date = models.DateField(_("birth date"), null=True, blank=True)
     profile_picture = models.ImageField(
         _("profile picture"),

@@ -1,7 +1,8 @@
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import Any
 
 import django.core.exceptions
+from django.db.models.constraints import BaseConstraint
 
 from rest_framework import serializers
 
@@ -10,12 +11,18 @@ from asu.auth.models.user import USERNAME_CONSTRAINTS
 from asu.core.utils.rest import DynamicFieldsMixin
 
 
-def validate_username_constraints(instance: User) -> None:
-    for constraint in USERNAME_CONSTRAINTS:
+def validate_user_constraints(
+    instance: User,
+    /,
+    *,
+    name: str,
+    constraints: Iterable[BaseConstraint],
+) -> None:
+    for constraint in constraints:
         try:
             constraint.validate(User, instance)  # type: ignore[attr-defined]
         except django.core.exceptions.ValidationError as err:
-            raise serializers.ValidationError({"username": err.messages})
+            raise serializers.ValidationError({name: err.messages})
 
 
 class UserPublicReadSerializer(DynamicFieldsMixin, serializers.ModelSerializer[User]):
@@ -74,7 +81,11 @@ class UserSerializer(DynamicFieldsMixin, serializers.ModelSerializer[User]):
         # could be called, triggering related database constraints.
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        validate_username_constraints(instance)
+        validate_user_constraints(
+            instance,
+            constraints=USERNAME_CONSTRAINTS,
+            name="username",
+        )
         instance.save(update_fields={*validated_data, "updated_at"})
         return instance
 

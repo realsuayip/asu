@@ -39,7 +39,7 @@ def test_user_registration_create(
         1  # fetch token
         + 4  # savepoint
         + 1  # fetch verification
-        + 2  # username constraint checks
+        + 3  # username + email constraint checks
         + 2  # verification complete locks
         + 1  # insert user
         + 1  # update verification
@@ -132,6 +132,41 @@ def test_user_registration_create_case_expired_id(
     )
     assert response.status_code == 404
     assert response.json()["message"] == messages.BAD_VERIFICATION_ID
+
+
+@pytest.mark.django_db
+def test_user_registration_create_case_email_validation(
+    first_party_app_client: OAuthClient,
+) -> None:
+    # In normal circumstances, the registration flow does not allow using same
+    # email to register multiple users at the same time. However, if the email
+    # gets taken by another mechanism, we should still block registration via
+    # unique constraint on email.
+    create_default_application()
+    verification = RegistrationVerification.objects.create(
+        email="helen@example.com",
+        verified_at=timezone.now(),
+    )
+    UserFactory.create(email="helen@example.com")
+    payload = {
+        "id": verification.pk,
+        "display_name": "Helen",
+        "password": "Hln_1900",
+        "username": "helen",
+    }
+    response = first_party_app_client.post(
+        reverse("api:verification:registration-complete"),
+        data=payload,
+    )
+    assert response.status_code == 400
+    assert response.json()["errors"] == {
+        "id": [
+            {
+                "message": "This e-mail is not usable.",
+                "code": "invalid",
+            }
+        ]
+    }
 
 
 @pytest.mark.django_db

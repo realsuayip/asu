@@ -20,7 +20,7 @@ from django.core.validators import (
 )
 from django.db import models, transaction
 from django.db.models import F, Q, QuerySet, Value
-from django.db.models.functions import Concat, Lower
+from django.db.models.functions import Concat, Upper
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -62,15 +62,22 @@ class UsernameValidator(RegexValidator):
 
 
 USERNAME_CONSTRAINTS = [
-    models.UniqueConstraint(
-        Lower("username"),
-        name="unique_lower_username",
-        violation_error_message=_("The username you specified is already in use."),
-    ),
     models.CheckConstraint(
         condition=Q(username__regex=UsernameValidator.regex),
         name="regex_valid_username",
         violation_error_message=UsernameValidator.message,
+    ),
+    models.UniqueConstraint(
+        Upper("username"),
+        name="unique_lower_username",
+        violation_error_message=_("The username you specified is already in use."),
+    ),
+]
+EMAIL_CONSTRAINTS = [
+    models.UniqueConstraint(
+        Upper("email"),
+        name="unique_ci_email",
+        violation_error_message=_("This e-mail is not usable."),
     ),
 ]
 
@@ -98,7 +105,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
         validators=[MaxLengthValidator(140)],
     )
     website = models.URLField(_("website"), blank=True)
-    email = models.EmailField(_("e-mail"), unique=True)
+    email = models.EmailField(_("e-mail"))
     birth_date = models.DateField(_("birth date"), null=True, blank=True)
     profile_picture = models.ImageField(
         _("profile picture"),
@@ -172,7 +179,10 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
-        constraints = [*USERNAME_CONSTRAINTS]
+        constraints = [
+            *USERNAME_CONSTRAINTS,
+            *EMAIL_CONSTRAINTS,
+        ]
 
     def __str__(self) -> str:
         return self.username

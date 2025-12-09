@@ -7,7 +7,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
 from asu.auth.models import User
-from asu.auth.serializers.user import AuthSerializer, validate_username_constraints
+from asu.auth.models.user import EMAIL_CONSTRAINTS, USERNAME_CONSTRAINTS
+from asu.auth.serializers.user import AuthSerializer, validate_user_constraints
 from asu.core.utils import messages
 from asu.verification.models.registration import RegistrationVerification
 from asu.verification.serializers import (
@@ -45,7 +46,16 @@ class UserCreateSerializer(serializers.ModelSerializer[User]):
         password = validated_data.pop("password")
         user = User(email=verification.email, **validated_data)
         user.set_validated_password(password)
-        validate_username_constraints(user)
+        validate_user_constraints(
+            user,
+            constraints=USERNAME_CONSTRAINTS,
+            name="username",
+        )
+        validate_user_constraints(
+            user,
+            constraints=EMAIL_CONSTRAINTS,
+            name="id",
+        )
         user.save(force_insert=True)
 
         if not verification.complete(

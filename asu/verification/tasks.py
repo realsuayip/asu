@@ -27,7 +27,7 @@ def send_registration_email(*, email: str, uid: str) -> None:
 
 
 @app.task
-def send_email_change_email(*, user_id: int, email: str, uid: str) -> None:
+def send_email_change_email(*, user_id: str, email: str, uid: str) -> None:
     if User.objects.filter(email__iexact=email).exists():
         logger.warning("Email change request cancelled, email=%s", email)
         return

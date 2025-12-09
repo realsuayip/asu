@@ -57,7 +57,7 @@ run *args:
 shell: (run 'shell')
 
 # Run tests
-test *args: (exec 'pytest --no-migrations' args)
+test *args: (exec 'pytest --reuse-db --no-migrations' args)
 
 alias mypy := type
 alias f := format

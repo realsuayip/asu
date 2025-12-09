@@ -16,7 +16,7 @@ from asu.verification.tasks import send_email_change_email
 class EmailVerificationSendSerializer(VerificationSendSerializer):
     def send(self, *, email: str, uid: str) -> None:
         send_email_change_email.delay(
-            user_id=self.context["request"].user.pk,
+            user_id=str(self.context["request"].user.pk),
             email=email,
             uid=uid,
         )

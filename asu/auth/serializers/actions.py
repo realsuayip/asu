@@ -22,20 +22,6 @@ from asu.core.utils import messages
 from asu.core.utils.rest import ContextDefault
 from asu.core.utils.typing import UserRequest
 
-user_fields = (
-    "id",
-    "display_name",
-    "username",
-    "profile_picture",
-    "description",
-    "is_private",
-)
-RelatedUserField = UserPublicReadSerializer(
-    read_only=True,
-    fields=user_fields,
-    ref_name="RelatedUser",
-)
-
 
 class PasswordChangeSerializer(serializers.Serializer[dict[str, str]]):
     old_password = serializers.CharField(write_only=True)
@@ -83,7 +69,7 @@ class BlockSerializer(UserRelationSerializer):
             | (Q(to_user=from_user) & Q(from_user=to_user))
         )
 
-    @transaction.atomic
+    @transaction.atomic(durable=True)
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         _, created = UserBlock.objects.get_or_create(**validated_data)
         if created:
@@ -135,11 +121,23 @@ class UnfollowSerializer(UserRelationSerializer):
 
 
 class FollowRequestSerializer(serializers.ModelSerializer[UserFollowRequest]):
-    from_user = RelatedUserField
+    from_user = UserPublicReadSerializer(
+        read_only=True,
+        fields=(
+            "id",
+            "display_name",
+            "username",
+            "profile_picture",
+            "description",
+            "is_private",
+        ),
+        ref_name="RelatedUser",
+    )
 
     class Meta:
         model = UserFollowRequest
         fields = ("id", "from_user")
+        read_only_fields = ("id", "from_user")
 
 
 class UserConnectionSerializer(UserPublicReadSerializer):
@@ -182,6 +180,7 @@ class UserWithRelationSerializer(serializers.ModelSerializer[User]):
     class Meta:
         model = User
         fields = ("id", "username", "relations")
+        read_only_fields = fields
 
     @extend_schema_field(
         serializers.ListField(

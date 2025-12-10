@@ -44,6 +44,7 @@ class UserPublicReadSerializer(DynamicFieldsMixin, serializers.ModelSerializer[U
             "follower_count",
             "created_at",
         )
+        read_only_fields = fields
 
 
 class UserSerializer(DynamicFieldsMixin, serializers.ModelSerializer[User]):

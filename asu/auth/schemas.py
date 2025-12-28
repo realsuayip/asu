@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 from drf_spectacular.contrib.django_oauth_toolkit import DjangoOAuthToolkitScheme
 from drf_spectacular.utils import OpenApiExample, extend_schema
 
-from asu.auth.permissions import OAuthPermission
+from asu.auth.permissions import OAuthPermission, RequireScope
 from asu.auth.serializers.actions import (
     FollowSerializer,
     PasswordChangeSerializer,
@@ -38,10 +38,8 @@ class OAuthScheme(DjangoOAuthToolkitScheme):  # type: ignore[no-untyped-call]
         if not has_oauth:
             return []
 
-        try:
-            scopes = view.required_scopes
-        except KeyError:
-            scopes = []
+        has_scopes = any(isinstance(p, RequireScope) for p in permissions)
+        scopes = view.get_required_scopes() if has_scopes else []
         return {"oauth2": scopes}
 
 

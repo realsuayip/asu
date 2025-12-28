@@ -1,5 +1,4 @@
 import itertools
-from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
@@ -10,9 +9,7 @@ from django.db.models.functions import JSONObject
 from django.shortcuts import get_object_or_404
 
 from rest_framework import mixins, parsers, serializers, status
-from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -45,7 +42,7 @@ from asu.auth.serializers.user import (
 )
 from asu.core.utils.rest import EmptySerializer, get_paginator
 from asu.core.utils.typing import UserRequest
-from asu.core.utils.views import ExtendedViewSet
+from asu.core.utils.views import ExtendedViewSet, action
 
 
 class RelationFilter(FilterSet[User]):
@@ -77,33 +74,9 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
     marked their account private, these will be inaccessible to users that
     do not follow the user. This check is enforced in `get_object()` method.
     """
-    serializer_classes = {
-        "me": UserSerializer,
-        "by": UserPublicReadSerializer,
-        "followers": UserConnectionSerializer,
-        "following": UserConnectionSerializer,
-        "blocked": UserConnectionSerializer,
-        "profile_picture": ProfilePictureEditSerializer,
-    }
-    filterset_classes = {"relations": RelationFilter, "by": UserLookupFilter}
-    serializer_class = UserPublicReadSerializer
+    serializer_classes = {"retrieve": UserPublicReadSerializer}
+    permission_classes = {"retrieve": [RequireToken]}
     schemas = schemas.user
-    scopes = {
-        "me": "user.profile",
-        "block": "user.block",
-        "unblock": "user.block",
-        "blocked": "user.block",
-        "follow": "user.follow",
-        "unfollow": "user.follow",
-        "relations": "user.profile",
-    }
-
-    def get_permissions(self) -> Sequence[BasePermission]:
-        # todo: use ExtendedViewSet?
-        permission_classes = self.permission_classes
-        if self.action == "retrieve":
-            permission_classes = [RequireToken]
-        return [permission() for permission in permission_classes]
 
     def get_queryset(self) -> QuerySet[User]:
         return User.objects.active()
@@ -159,6 +132,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         methods=["get", "patch"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=UserSerializer,
+        required_scopes=["user.profile"],
     )
     def me(self, request: UserRequest) -> Response:
         user, token = request.user, request.auth
@@ -178,6 +152,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         methods=["get"],
         permission_classes=[RequireToken],
         serializer_class=UserPublicReadSerializer,
+        filterset_class=UserLookupFilter,
         url_name="lookup",
     )
     def by(self, request: Request) -> Response:
@@ -210,6 +185,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         methods=["post"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=BlockSerializer,
+        required_scopes=["user.block"],
     )
     def block(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
@@ -219,6 +195,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         methods=["post"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=UnblockSerializer,
+        required_scopes=["user.block"],
     )
     def unblock(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
@@ -228,6 +205,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         methods=["post"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=FollowSerializer,
+        required_scopes=["user.follow"],
     )
     def follow(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
@@ -237,6 +215,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         methods=["post"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=UnfollowSerializer,
+        required_scopes=["user.follow"],
     )
     def unfollow(self, request: Request, pk: UUID) -> Response:
         return self.perform_relation_action()
@@ -271,6 +250,7 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         serializer_class=UserConnectionSerializer,
         pagination_class=get_paginator("cursor", ordering="-to_userblocks"),
         permission_classes=[RequireUser, RequireScope],
+        required_scopes=["user.block"],
     )
     def blocked(self, request: UserRequest) -> Response:
         queryset = User.objects.active().filter(blocked_by=request.user)
@@ -297,6 +277,8 @@ class UserViewSet(mixins.RetrieveModelMixin, ExtendedViewSet[User]):
         methods=["get"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=RelationSerializer,
+        filterset_class=RelationFilter,
+        required_scopes=["user.profile"],
     )
     def relations(self, request: UserRequest) -> Response:
         user = request.user
@@ -361,16 +343,14 @@ class FollowRequestViewSet(
     mixins.ListModelMixin,
     ExtendedViewSet[UserFollowRequest],
 ):
-    permission_classes = [RequireUser, RequireScope]
     queryset = UserFollowRequest.objects.none()
-    serializer_class = FollowRequestSerializer
+    serializer_classes = {"list": FollowRequestSerializer}
     pagination_class = get_paginator("cursor", ordering="-id")
+
+    permission_classes = {"list": [RequireUser, RequireScope]}
+    required_scopes = {"list": ["user.follow"]}
+
     schemas = schemas.follow_request
-    scopes = {
-        "list": "user.follow",
-        "accept": "user.follow",
-        "reject": "user.follow",
-    }
 
     def get_queryset(self) -> QuerySet[UserFollowRequest]:
         queryset = self.request.user.get_pending_follow_requests()
@@ -383,6 +363,7 @@ class FollowRequestViewSet(
         methods=["post"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=EmptySerializer,
+        required_scopes=["user.follow"],
     )
     def accept(self, request: UserRequest, pk: UUID) -> Response:
         with transaction.atomic():
@@ -395,6 +376,7 @@ class FollowRequestViewSet(
         methods=["post"],
         permission_classes=[RequireUser, RequireScope],
         serializer_class=EmptySerializer,
+        required_scopes=["user.follow"],
     )
     def reject(self, request: UserRequest, pk: UUID) -> Response:
         with transaction.atomic():

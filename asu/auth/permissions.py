@@ -73,4 +73,6 @@ class RequireScope(OAuthPermission):
     """
 
     has_oauth_permission = TokenHasScope.has_permission
-    get_scopes = TokenHasScope.get_scopes
+
+    def get_scopes(self, request: Request, view: APIView) -> list[str]:
+        return view.get_required_scopes()  # type: ignore[attr-defined, no-any-return]

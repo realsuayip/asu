@@ -1,10 +1,9 @@
 from rest_framework import status
-from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from asu.auth.permissions import RequireFirstParty
-from asu.core.utils.views import ExtendedViewSet
+from asu.core.utils.views import ExtendedViewSet, action
 from asu.verification.models import PasswordResetVerification
 from asu.verification.password import schemas
 from asu.verification.password.serializers import (

@@ -28,7 +28,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-celerybeat-schedule
+celerybeat-schedule*
 .vscode
 .idea
 .DS_Store

@@ -4,7 +4,7 @@ volumes:
 services:
   rabbitmq:
     container_name: asu-rabbitmq
-    image: rabbitmq:4.2.0-alpine@sha256:3a20ab5bf4d3b178616ea2639c4970e22347d6eab45b4d9b6e390a1f7d165a61
+    image: rabbitmq:4.2.6@sha256:0f0eeaba114a94a9e4aae6a5bde40de85e0ab3b9ae7fe715a25cac19c4253643
     hostname: rabbitmq-local
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq

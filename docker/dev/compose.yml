@@ -6,17 +6,17 @@ volumes:
 services:
   db:
     container_name: asu-postgres
-    image: postgres:18.0-alpine3.22@sha256:48c8ad3a7284b82be4482a52076d47d879fd6fb084a1cbfccbd551f9331b0e40
+    image: postgres:18.4-trixie@sha256:8ff36f3c66371cba71d20ceedccfc3de9669a68737607888c4ef0af93abe8e39
     user: postgres
     env_file: ../../conf/dev/postgres.env
     ports:
       - "5432:5432"
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql
 
   redis:
     container_name: asu-redis
-    image: redis:8.2.3-alpine3.22@sha256:28c9c4d7596949a24b183eaaab6455f8e5d55ecbf72d02ff5e2c17fe72671d31
+    image: redis:8.6.3-trixie@sha256:4d25e2fe601f7ffaeb4437cb6ced3518bc36edf34ebe98863c80836943d94529
     user: redis
 
   web:

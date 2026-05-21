@@ -41,6 +41,6 @@ class RegistrationVerification(ExtendedVerification):
         indexes = [
             models.Index(
                 Upper("email"),
-                name="registration_verification_email_idx",
+                name="registration_email_idx",
             )
         ]

@@ -24,7 +24,7 @@ def test_user_password_reset_send(
     assert len(callbacks) == 1
     assert len(mail.outbox) == 1
 
-    verification = PasswordResetVerification.objects.get()
+    verification = PasswordResetVerification.objects.select_related("user").get()
     assert response.json() == {
         "id": str(verification.pk),
         "email": "helen@example.com",

@@ -46,7 +46,7 @@ from asu.auth.models import (
     UserFollow,
     UserFollowRequest,
 )
-from asu.core.models.base import Base
+from asu.core.models.base import Base, BaseManager
 from asu.core.utils import mailing, messages
 from asu.core.utils.file import FileSizeValidator, MimeTypeValidator, UserContentPath
 from asu.core.utils.messages import EmailMessage
@@ -82,7 +82,7 @@ EMAIL_CONSTRAINTS = [
 ]
 
 
-class UserManager(DjangoUserManager["User"]):
+class UserManager(BaseManager["User"], DjangoUserManager["User"]):
     def active(self) -> QuerySet[User]:
         """
         Users who are publicly available and can

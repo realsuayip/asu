@@ -26,7 +26,7 @@ def test_user_email_change_send(
     assert len(callbacks) == 1
     assert len(mail.outbox) == 1
 
-    verification = EmailVerification.objects.get()
+    verification = EmailVerification.objects.select_related("user").get()
     assert response.json() == {
         "id": str(verification.pk),
         "email": "helen_new@example.com",

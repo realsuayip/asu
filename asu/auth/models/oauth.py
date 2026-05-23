@@ -4,9 +4,10 @@ from django.utils.translation import gettext_lazy as _
 from oauth2_provider.models import AbstractApplication
 
 from asu.core.models import ProjectVariable
+from asu.core.models.base import BaseManager
 
 
-class ApplicationManager(models.Manager["Application"]):
+class ApplicationManager(BaseManager["Application"]):
     def get_default(self) -> Application:
         # Figure out the default application, this is application is
         # used to programmatically issue tokens, outside the oauth

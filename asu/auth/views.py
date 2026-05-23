@@ -366,7 +366,7 @@ class FollowRequestViewSet(
         required_scopes=["user.follow"],
     )
     def accept(self, request: UserRequest, pk: UUID) -> Response:
-        with transaction.atomic():
+        with transaction.atomic(durable=True):
             instance = self.get_object()
             instance.accept()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -379,7 +379,7 @@ class FollowRequestViewSet(
         required_scopes=["user.follow"],
     )
     def reject(self, request: UserRequest, pk: UUID) -> Response:
-        with transaction.atomic():
+        with transaction.atomic(durable=True):
             instance = self.get_object()
             instance.reject()
         return Response(status=status.HTTP_204_NO_CONTENT)

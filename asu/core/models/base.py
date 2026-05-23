@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from typing import ClassVar, Self
 
 from django.conf import settings
 from django.db import models
@@ -17,11 +18,18 @@ class AutoUpdatedField(models.DateTimeField):
         return self.get_default()
 
 
+class BaseManager[T: models.Model](models.Manager[T]):
+    def get_queryset(self) -> models.QuerySet[T]:
+        return super().get_queryset().fetch_mode(models.RAISE)
+
+
 class Base(models.Model):
     id = models.UUIDField(_("id"), primary_key=True, db_default=UUID7())
 
     created_at = models.DateTimeField(_("date created"), db_default=Now())
     updated_at = AutoUpdatedField(_("date updated"), db_default=Now(), editable=False)
+
+    objects: ClassVar[BaseManager[Self]] = BaseManager()
 
     class Meta:
         abstract = True

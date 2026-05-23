@@ -81,7 +81,9 @@ def test_user_registration_create(
     assert user.is_private is False
     assert user.is_active is True
 
-    verification.refresh_from_db()
+    verification.refresh_from_db(
+        from_queryset=RegistrationVerification.objects.select_related("user")
+    )
     assert verification.completed_at is not None
     assert verification.user == user
 

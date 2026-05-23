@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
-from asu.core.models.base import Base
+from asu.core.models.base import Base, BaseManager
 from asu.core.utils import mailing
 from asu.core.utils.messages import EmailMessage
 
@@ -25,7 +25,7 @@ code_validator = RegexValidator(
 generate_random_code = partial(get_random_string, length=6, allowed_chars=string.digits)
 
 
-class VerificationManager[T: Verification](models.Manager[T]):
+class VerificationManager[T: Verification](BaseManager[T]):
     def verifiable(self) -> QuerySet[T]:
         timeout = self.model.VERIFY_TIMEOUT
         min_created_at = timezone.now() - timedelta(seconds=timeout)

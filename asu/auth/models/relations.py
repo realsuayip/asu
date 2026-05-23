@@ -76,7 +76,12 @@ class UserFollowRequest(UserRelation):
         assert self.is_pending
         self.status = self.Status.APPROVED
         self.save(update_fields=["status", "updated_at"])
-        self.from_user.add_following(to_user=self.to_user)
+
+        rel = UserFollow(from_user_id=self.from_user_id, to_user_id=self.to_user_id)
+        UserFollow.objects.bulk_create(
+            [rel],
+            ignore_conflicts=True,
+        )
 
     def reject(self) -> None:
         assert self.is_pending

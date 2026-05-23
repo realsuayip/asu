@@ -3,6 +3,7 @@ from typing import Any
 from django.urls import reverse
 
 import pytest
+from pytest_django import DjangoAssertNumQueries
 from pytest_mock import MockerFixture
 
 from asu.auth.models import User, UserBlock, UserFollow, UserFollowRequest
@@ -420,6 +421,7 @@ def test_user_follow_request_list_requires_scope(
 def test_user_follow_request_accept(
     user: User,
     client: OAuthClient,
+    django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     client.set_user(user, scope="user.follow:write")
     profile = UserFactory.create(is_private=True)
@@ -428,12 +430,19 @@ def test_user_follow_request_accept(
         to_user=user,
         status=UserFollowRequest.Status.PENDING,
     )
-    response = client.post(
-        reverse(
-            "api:auth:follow-request-accept",
-            kwargs={"pk": request.pk},
+    with django_assert_num_queries(
+        1  # fetch user
+        + 4  # savepoint
+        + 1  # fetch follow request
+        + 1  # update follow request,
+        + 1  # insert follow relation
+    ):
+        response = client.post(
+            reverse(
+                "api:auth:follow-request-accept",
+                kwargs={"pk": request.pk},
+            )
         )
-    )
     assert response.status_code == 204
     assert UserFollow.objects.get(from_user=profile, to_user=user)
     request.refresh_from_db()

@@ -1,15 +1,15 @@
-from typing import Any
+from typing import Any, ClassVar
 
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from asu.core.models.base import Base
+from asu.core.models.base import Base, BaseManager
 from asu.core.utils.cache import build_vary_key, cached_context
 
 
-class ProjectVariableManager(models.Manager["ProjectVariable"]):
+class ProjectVariableManager(BaseManager["ProjectVariable"]):
     BUILD_VARS: dict[str, str] = {
         "BRAND": settings.PROJECT_BRAND,
         "SUPPORT_EMAIL": settings.PROJECT_SUPPORT_EMAIL,
@@ -57,7 +57,7 @@ class ProjectVariable(Base):
     name = models.TextField(_("name"), unique=True)
     value = models.JSONField(_("value"))
 
-    objects = ProjectVariableManager()
+    objects: ClassVar[ProjectVariableManager] = ProjectVariableManager()
 
     class Meta:
         verbose_name = _("project variable")

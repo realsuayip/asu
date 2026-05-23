@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        db_default=asu.core.models.base.UUIDv7(),
+                        db_default=django.db.models.functions.UUID7(),
                         primary_key=True,
                         serialize=False,
                         verbose_name="id",
@@ -239,7 +239,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        db_default=asu.core.models.base.UUIDv7(),
+                        db_default=django.db.models.functions.UUID7(),
                         primary_key=True,
                         serialize=False,
                         verbose_name="id",
@@ -297,7 +297,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        db_default=asu.core.models.base.UUIDv7(),
+                        db_default=django.db.models.functions.UUID7(),
                         primary_key=True,
                         serialize=False,
                         verbose_name="id",
@@ -353,7 +353,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        db_default=asu.core.models.base.UUIDv7(),
+                        db_default=django.db.models.functions.UUID7(),
                         primary_key=True,
                         serialize=False,
                         verbose_name="id",
@@ -411,7 +411,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        db_default=asu.core.models.base.UUIDv7(),
+                        db_default=django.db.models.functions.UUID7(),
                         primary_key=True,
                         serialize=False,
                         verbose_name="id",

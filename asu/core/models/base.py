@@ -2,20 +2,14 @@ from collections.abc import Iterable
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Func
 from django.db.models.base import ModelBase
 from django.db.models.expressions import DatabaseDefault
-from django.db.models.functions import Now
+from django.db.models.functions import UUID7, Now
 from django.utils.translation import gettext_lazy as _
 
 # We cannot enforce `updated_at` field for `update_fields` in these
 # models since update is being made in third party code.
 THIRD_PARTY_MODELS = (settings.AUTH_USER_MODEL,)
-
-
-class UUIDv7(Func):
-    function = "uuidv7"
-    output_field = models.UUIDField()
 
 
 class AutoUpdatedField(models.DateTimeField):
@@ -24,7 +18,7 @@ class AutoUpdatedField(models.DateTimeField):
 
 
 class Base(models.Model):
-    id = models.UUIDField(_("id"), primary_key=True, db_default=UUIDv7())
+    id = models.UUIDField(_("id"), primary_key=True, db_default=UUID7())
 
     created_at = models.DateTimeField(_("date created"), db_default=Now())
     updated_at = AutoUpdatedField(_("date updated"), db_default=Now(), editable=False)

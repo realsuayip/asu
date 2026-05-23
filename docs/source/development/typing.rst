@@ -7,7 +7,7 @@ mode. To check types use:
 
 .. code:: shell
 
-   make type
+   just type
 
 If you're adding a new (untyped) Python package, search for external
 type stubs and (if found) consider adding them to development

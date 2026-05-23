@@ -11,26 +11,26 @@ Here is a checklist you can use just before committing:
 
    .. code:: shell
 
-      make format
+      just format
 
 -  Check typing errors:
 
    .. code:: shell
 
-      make type
+      just type
 
 -  Run tests:
 
    .. code:: shell
 
-      make test
+      just test
 
    Additionally, you may check coverage stats to see if you have missed
    any important lines:
 
    .. code:: shell
 
-      make coverage
+      just coverage
 
    .. warning::
 
@@ -43,7 +43,7 @@ Here is a checklist you can use just before committing:
 
    .. code:: shell
 
-      make docs
+      just docs
 
 -  Finally, if developing an API, check the OpenAPI documentation. It
    should render properly and present appropriate information.

@@ -4,62 +4,43 @@
 
 Documentation available at: [https://asu.readthedocs.io](https://asu.readthedocs.io)
 
-This is a comprehensive Django project for reference. The project roughly
-constitutes a real-time chat application with **complete** user management (see
-feature rundown for details).
+This is a comprehensive Django project for reference.
 
-You may use this as a base project (for your projects themed as social media
-websites, community forums etc.) or you can scrap the parts you don't need and
+You may use this as a base project, or you can scrap the parts you don't need and
 bootstrap a highly optimized Django project.
 
-## Major features
+## Features
 
 * Authentication & Account Management
     * OAuth 2.0 (Authorization Code with PKCE & Client Credentials)
     * Two-factor authentication
-    * CRU operations
+    * CRUD operations
     * Blocking operations
     * Following operations
-      * Follow requests
-      * Ability to mark profile as 'private'
+        * Follow requests
+        * Ability to mark profile as 'private'
     * Profile pictures
-      * Thumbnail generation
-      * Image validation
-          * Image scaling & compression on upload
-          * Mime type validation
+        * Thumbnail generation
+        * Image validation
+            * Image scaling & compression on upload
+            * Mime type validation
 * Verifications (all flows employ email confirmation)
     * Registration flow
-      * No account generation before email validation.
     * Password reset flow
     * Email change flow
-* Messaging
-    * CRUD operations
-    * One-to-one conversations & messaging
-    * Message requests
-    * Read receipts
-    * Ability to disable messages from strangers
-    * Instant messaging with WebSocket
-      *  Ticket-based authentication
-
-Notice that interactions of these features are well-handled. For instance,
-users with blocking relations may not message each other. You may message
-your followers without having them accept your message request (and so on).
 
 ## Technical details
 
 The project is an example of a standard Django stack, the components being:
 
 * Postgres (database)
-* Redis (cache & channel layer)
+* Redis (cache)
 * RabbitMQ (message broker)
 * Celery (task queue)
 * Nginx (reverse proxy)
 
 All of these components are available through Docker setup (for both
 production and development environments).
-
-There is also single-node-ready Kubernetes configuration that can easily be
-adjusted to support multiple nodes.
 
 The project has a high test coverage and all the major features are
 well-tested.
@@ -76,15 +57,14 @@ git clone https://github.com/realsuayip/asu
 Navigate to the root directory, and run:
 
 ````shell
-make
+just
 ````
 
-Makefile also includes helper targets that can execute related Docker
-commands, if you don't have GNU make at your disposal, you may also use the
-docker commands directly:
+This project uses [just](<hhttps://github.com/casey/just/>) command
+runner, to see available commands, run:
 
 ````shell
-docker-compose -p asu -f docker/docker-compose.yml up
+just --list
 ````
 
 If you are using it for the first time, it might take a while to set up the

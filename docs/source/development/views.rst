@@ -35,7 +35,7 @@ new views. This specific implementation has few advantages:
    require user for the action. For that, also include
    ``asu.auth.permissions.RequireUser``.
 
--  You can use ``get_action_save_response`` method to easily handle
+-  You can use ``perform_action`` method to easily handle
    serializer create & update requests in actions. This method handles
    all the validation and serialization and reduces repetition so that
    you don't have to write this over and over:

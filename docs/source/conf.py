@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "asu"
-copyright = "2023, şuayip üzülmez"
+copyright = "2026, şuayip üzülmez"
 author = "şuayip üzülmez"
 release = "1.0"
 

@@ -1,28 +1,15 @@
 .. _handling-requirements:
 
-Handling Python Requirements
-============================
+##############################
+ Handling Python Requirements
+##############################
 
-This project uses :code:`pip-tools` to **lock** Python requirements. Each
-requirement must be specified in :code:`pyproject.toml` and then locked via
-:code:`pip-compile`. Development and production requirements are separated. The
-relevant commands for generating lock files are:
+This project uses ``uv`` to **lock** Python requirements. Each
+requirement must be specified in ``pyproject.toml`` and then locked via
+``uv lock``. Development and production requirements are separated via
+dependency groups.
 
-For development:
+If you're upgrading packages, make sure to add ``--upgrade`` flag.
 
-.. code-block:: shell
-
-    pip-compile --extra=dev --output-file=deps/dev.txt pyproject.toml
-
-
-For production:
-
-.. code-block:: shell
-
-    pip-compile --allow-unsafe --extra=prod --generate-hashes --output-file=deps/prod.txt pyproject.toml
-
-
-If you're upgrading packages, make sure to add :code:`--upgrade` flag.
-
-Once you update the dependencies, rebuild the project and make sure the tests
-are passing.
+Once you update the dependencies, rebuild the project and make sure the
+tests are passing.

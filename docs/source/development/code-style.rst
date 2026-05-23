@@ -1,55 +1,49 @@
-Code Style
-==========
+############
+ Code Style
+############
 
-The project uses variety of tools (including formatters and linters) to ensure
-the code is written in a consistent manner.
-
-* For formatting Python files, use the latest :code:`black`.
-* For linting, use the latest :code:`ruff`. Ruff is also used to sort imports.
-
-Make sure you have :code:`pre-commit` in your environment and project hooks are
-installed to your Git directory. Pre-commit configuration includes other useful
-checks as well as the tools listed above.
+Make sure you have ``pre-commit`` in your environment and project hooks
+are installed to your Git directory.
 
 Here is a checklist you can use just before committing:
 
-*   Check :code:`pre-commit` hooks are passing:
+-  Check ``pre-commit`` hooks are passing:
 
-    .. code-block:: shell
+   .. code:: shell
 
-        make format
+      make format
 
-*   Check typing errors:
+-  Check typing errors:
 
-    .. code-block:: shell
+   .. code:: shell
 
-        make type
+      make type
 
-*   Run tests:
+-  Run tests:
 
-    .. code-block:: shell
+   .. code:: shell
 
-            make test
+      make test
 
-    Additionally, you may check coverage stats to see if you have
-    missed any important lines:
+   Additionally, you may check coverage stats to see if you have missed
+   any important lines:
 
-    .. code-block:: shell
+   .. code:: shell
 
-            make coverage
+      make coverage
 
-    .. warning::
+   .. warning::
 
-            If you have changed any of the project dependencies (e.g. Python
-            requirements or Docker image tags), you need to rebuild Docker
-            image(s) before running tests.
+      If you have changed any of the project dependencies (e.g. Python
+      requirements or Docker image tags), you need to rebuild Docker
+      image(s) before running tests.
 
-*   If new documentation is added, make sure it builds and content is rendered
-    properly:
+-  If new documentation is added, make sure it builds and content is
+   rendered properly:
 
-    .. code-block:: shell
+   .. code:: shell
 
-            make docs
+      make docs
 
-*   Finally, if developing an API, check the OpenAPI documentation. It should
-    render properly and present appropriate information.
+-  Finally, if developing an API, check the OpenAPI documentation. It
+   should render properly and present appropriate information.

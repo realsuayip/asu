@@ -20,7 +20,7 @@ def test_user_follow(
     profile = UserFactory.create()
     response = client.post(
         reverse(
-            "api:auth:user-follow",
+            "api:v1:auth:user-follow",
             kwargs={"pk": profile.pk},
         )
     )
@@ -36,7 +36,7 @@ def test_user_follow_subsequent_ok(
 ) -> None:
     profile = UserFactory.create()
     url = reverse(
-        "api:auth:user-follow",
+        "api:v1:auth:user-follow",
         kwargs={"pk": profile.pk},
     )
     r1 = user_client.post(url)
@@ -56,7 +56,7 @@ def test_user_unfollow(
     follow = UserFollow.objects.create(from_user=user, to_user=profile)
     response = client.post(
         reverse(
-            "api:auth:user-unfollow",
+            "api:v1:auth:user-unfollow",
             kwargs={"pk": profile.pk},
         )
     )
@@ -73,7 +73,7 @@ def test_user_unfollow_subsequent_ok(
     profile = UserFactory.create()
     follow = UserFollow.objects.create(from_user=user, to_user=profile)
     url = reverse(
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-unfollow",
         kwargs={"pk": profile.pk},
     )
     r1 = user_client.post(url)
@@ -88,7 +88,7 @@ def test_user_unfollow_ok_if_no_previous_relation(user_client: OAuthClient) -> N
     profile = UserFactory.create()
     response = user_client.post(
         reverse(
-            "api:auth:user-unfollow",
+            "api:v1:auth:user-unfollow",
             kwargs={"pk": profile.pk},
         )
     )
@@ -99,8 +99,8 @@ def test_user_unfollow_ok_if_no_previous_relation(user_client: OAuthClient) -> N
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 def test_user_follow_endpoints_fail_if_blocked(
@@ -123,8 +123,8 @@ def test_user_follow_endpoints_fail_if_blocked(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 def test_user_follow_endpoints_fail_if_self(
@@ -145,8 +145,8 @@ def test_user_follow_endpoints_fail_if_self(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 def test_user_follow_endpoints_fail_if_blocked_by(
@@ -168,8 +168,8 @@ def test_user_follow_endpoints_fail_if_blocked_by(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 def test_user_follow_endpoints_require_authentication(
@@ -189,8 +189,8 @@ def test_user_follow_endpoints_require_authentication(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 def test_user_follow_endpoints_require_user_token(
@@ -210,8 +210,8 @@ def test_user_follow_endpoints_require_user_token(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 @pytest.mark.parametrize(
@@ -238,8 +238,8 @@ def test_user_follow_endpoints_require_scope(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 def test_user_follow_endpoints_non_existing_user(
@@ -259,8 +259,8 @@ def test_user_follow_endpoints_non_existing_user(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-follow",
-        "api:auth:user-unfollow",
+        "api:v1:auth:user-follow",
+        "api:v1:auth:user-unfollow",
     ),
 )
 @pytest.mark.parametrize(
@@ -293,7 +293,7 @@ def test_user_follow_private_sends_follow_request(
     profile = UserFactory.create(is_private=True)
     response = user_client.post(
         reverse(
-            "api:auth:user-follow",
+            "api:v1:auth:user-follow",
             kwargs={"pk": profile.pk},
         )
     )
@@ -315,7 +315,7 @@ def test_user_follow_private_sends_follow_request_subsequent_ok(
 ) -> None:
     profile = UserFactory.create(is_private=True)
     url = reverse(
-        "api:auth:user-follow",
+        "api:v1:auth:user-follow",
         kwargs={"pk": profile.pk},
     )
     r1 = user_client.post(url)
@@ -340,7 +340,7 @@ def test_user_follow_private_already_following(
     UserFollow.objects.create(from_user=user, to_user=profile)
     response = user_client.post(
         reverse(
-            "api:auth:user-follow",
+            "api:v1:auth:user-follow",
             kwargs={"pk": profile.pk},
         )
     )
@@ -363,7 +363,7 @@ def test_user_follow_request_list(
     )
     response = client.get(
         reverse(
-            "api:auth:follow-request-list",
+            "api:v1:auth:follow-request-list",
         )
     )
     assert response.status_code == 200
@@ -387,7 +387,7 @@ def test_user_follow_request_list(
 
 
 def test_user_follow_request_list_requires_authentication(client: OAuthClient) -> None:
-    response = client.get(reverse("api:auth:follow-request-list"))
+    response = client.get(reverse("api:v1:auth:follow-request-list"))
     assert response.status_code == 401
 
 
@@ -395,7 +395,7 @@ def test_user_follow_request_list_requires_authentication(client: OAuthClient) -
 def test_user_follow_request_list_requires_user_client(app_client: OAuthClient) -> None:
     response = app_client.get(
         reverse(
-            "api:auth:follow-request-list",
+            "api:v1:auth:follow-request-list",
         )
     )
     assert response.status_code == 403
@@ -411,7 +411,7 @@ def test_user_follow_request_list_requires_scope(
     client.set_user(user, scope=scope)
     response = client.get(
         reverse(
-            "api:auth:follow-request-list",
+            "api:v1:auth:follow-request-list",
         )
     )
     assert response.status_code == 403
@@ -439,7 +439,7 @@ def test_user_follow_request_accept(
     ):
         response = client.post(
             reverse(
-                "api:auth:follow-request-accept",
+                "api:v1:auth:follow-request-accept",
                 kwargs={"pk": request.pk},
             )
         )
@@ -463,7 +463,7 @@ def test_user_follow_request_reject(
     )
     response = client.post(
         reverse(
-            "api:auth:follow-request-reject",
+            "api:v1:auth:follow-request-reject",
             kwargs={"pk": request.pk},
         )
     )
@@ -476,8 +476,8 @@ def test_user_follow_request_reject(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:follow-request-accept",
-        "api:auth:follow-request-reject",
+        "api:v1:auth:follow-request-accept",
+        "api:v1:auth:follow-request-reject",
     ),
 )
 def test_user_follow_request_responds_only_to_pending(
@@ -504,8 +504,8 @@ def test_user_follow_request_responds_only_to_pending(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:follow-request-accept",
-        "api:auth:follow-request-reject",
+        "api:v1:auth:follow-request-accept",
+        "api:v1:auth:follow-request-reject",
     ),
 )
 def test_user_follow_request_respond_requires_authentication(
@@ -525,8 +525,8 @@ def test_user_follow_request_respond_requires_authentication(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:follow-request-accept",
-        "api:auth:follow-request-reject",
+        "api:v1:auth:follow-request-accept",
+        "api:v1:auth:follow-request-reject",
     ),
 )
 def test_user_follow_request_respond_requires_user_client(
@@ -546,8 +546,8 @@ def test_user_follow_request_respond_requires_user_client(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:follow-request-accept",
-        "api:auth:follow-request-reject",
+        "api:v1:auth:follow-request-accept",
+        "api:v1:auth:follow-request-reject",
     ),
 )
 @pytest.mark.parametrize("scope", ("", "user.follow:read"))
@@ -591,7 +591,7 @@ def test_user_followers(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-followers",
+            "api:v1:auth:user-followers",
             kwargs={"pk": user.pk},
         )
     )
@@ -643,7 +643,7 @@ def test_user_following(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-following",
+            "api:v1:auth:user-following",
             kwargs={"pk": user.pk},
         )
     )
@@ -675,8 +675,8 @@ def test_user_following(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-followers",
-        "api:auth:user-following",
+        "api:v1:auth:user-followers",
+        "api:v1:auth:user-following",
     ),
 )
 def test_user_follower_endpoints_respect_privacy(
@@ -699,8 +699,8 @@ def test_user_follower_endpoints_respect_privacy(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-following",
-        "api:auth:user-followers",
+        "api:v1:auth:user-following",
+        "api:v1:auth:user-followers",
     ),
 )
 def test_user_follower_endpoints_require_authentication(
@@ -721,8 +721,8 @@ def test_user_follower_endpoints_require_authentication(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-following",
-        "api:auth:user-followers",
+        "api:v1:auth:user-following",
+        "api:v1:auth:user-followers",
     ),
 )
 def test_user_follower_endpoints_client_credentials(
@@ -743,8 +743,8 @@ def test_user_follower_endpoints_client_credentials(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-following",
-        "api:auth:user-followers",
+        "api:v1:auth:user-following",
+        "api:v1:auth:user-followers",
     ),
 )
 def test_user_follower_endpoints_client_credentials_respects_privacy(
@@ -765,8 +765,8 @@ def test_user_follower_endpoints_client_credentials_respects_privacy(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-following",
-        "api:auth:user-followers",
+        "api:v1:auth:user-following",
+        "api:v1:auth:user-followers",
     ),
 )
 def test_user_follower_endpoints_user_not_found(

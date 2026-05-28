@@ -35,7 +35,7 @@ def test_user_detail(
     ):
         response = user_client.get(
             reverse(
-                "api:auth:user-detail",
+                "api:v1:auth:user-detail",
                 kwargs={"pk": profile.pk},
             )
         )
@@ -62,7 +62,7 @@ def test_user_detail_client_credentials(
 ) -> None:
     response = app_client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": user.pk},
         )
     )
@@ -72,7 +72,7 @@ def test_user_detail_client_credentials(
 def test_user_detail_requires_authentication(client: OAuthClient) -> None:
     response = client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": "019b04e3-90e4-7751-a386-7a4550a69409"},
         )
     )
@@ -91,7 +91,7 @@ def test_user_detail_self(
     ):
         response = user_client.get(
             reverse(
-                "api:auth:user-detail",
+                "api:v1:auth:user-detail",
                 kwargs={"pk": user.pk},
             )
         )
@@ -114,7 +114,7 @@ def test_user_detail_follow_counts(
 
     response = app_client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": profile.pk},
         )
     )
@@ -134,7 +134,7 @@ def test_user_detail_returns_ok_while_blocking(
     UserBlock.objects.create(from_user=user, to_user=profile)
     response = user_client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": profile.pk},
         )
     )
@@ -151,7 +151,7 @@ def test_user_detail_returns_ok_while_being_blocked(
     UserBlock.objects.create(from_user=profile, to_user=user)
     response = user_client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": profile.pk},
         )
     )
@@ -163,7 +163,7 @@ def test_user_detail_frozen_user(app_client: OAuthClient) -> None:
     frozen_profile = UserFactory.create(is_frozen=True)
     response = app_client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": frozen_profile.pk},
         )
     )
@@ -175,7 +175,7 @@ def test_user_detail_inactive_user(app_client: OAuthClient) -> None:
     frozen_profile = UserFactory.create(is_active=False)
     response = app_client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": frozen_profile.pk},
         )
     )

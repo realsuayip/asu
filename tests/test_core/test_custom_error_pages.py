@@ -47,7 +47,7 @@ def test_custom_not_found_error_page(client: OAuthClient) -> None:
 def test_custom_bad_request_page(client: OAuthClient, mocker: MockerFixture) -> None:
     # JSON version
     mocker.patch("asu.core.views.APIRootView.get", error_view(SuspiciousOperation))
-    response = client.get(reverse("api:api-root"))
+    response = client.get(reverse("api:v1:api-root"))
     assert response.status_code == 400
     assert "application/json" in response.headers["Content-Type"]
     assert response.json() == {
@@ -74,7 +74,7 @@ def test_custom_server_error_page(mocker: MockerFixture) -> None:
 
     # JSON version
     mocker.patch("asu.core.views.APIRootView.get", error_view(ZeroDivisionError))
-    response = client.get(reverse("api:api-root"), raise_request_exception=False)
+    response = client.get(reverse("api:v1:api-root"), raise_request_exception=False)
 
     assert response.status_code == 500
     assert "application/json" in response.headers["Content-Type"]

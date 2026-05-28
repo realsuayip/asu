@@ -22,7 +22,7 @@ def test_verification_registration_verify(
         + 1  # update verification
     ):
         response = first_party_app_client.post(
-            reverse("api:verification:registration-verify"),
+            reverse("api:v1:verification:registration-verify"),
             data={
                 "id": verification.pk,
                 "code": verification.code,
@@ -41,7 +41,7 @@ def test_verification_registration_verify_expires_code_after_use(
 ) -> None:
     verification = RegistrationVerification.objects.create(email="helen@example.com")
     url, payload = (
-        reverse("api:verification:registration-verify"),
+        reverse("api:v1:verification:registration-verify"),
         {"id": verification.pk, "code": verification.code},
     )
     r1 = first_party_app_client.post(url, data=payload)
@@ -58,7 +58,7 @@ def test_verification_registration_verify_bad_code(
     verification.code = "123456"
     verification.save(update_fields=["code", "updated_at"])
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verify"),
+        reverse("api:v1:verification:registration-verify"),
         data={
             "id": verification.pk,
             "code": "987654",
@@ -78,7 +78,7 @@ def test_verification_registration_verify_expired_code(
     )
 
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verify"),
+        reverse("api:v1:verification:registration-verify"),
         data={
             "id": verification.pk,
             "code": verification.code,

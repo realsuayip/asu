@@ -21,7 +21,7 @@ def test_user_set_profile_picture(
     sample_profile_picture: ContentFile,
 ) -> None:
     response = user_client.put(
-        reverse("api:auth:user-profile-picture"),
+        reverse("api:v1:auth:user-profile-picture"),
         data={"profile_picture": sample_profile_picture},
         format="multipart",
     )
@@ -32,7 +32,7 @@ def test_user_set_profile_picture(
 
     profile = user_client.get(
         reverse(
-            "api:auth:user-detail",
+            "api:v1:auth:user-detail",
             kwargs={"pk": user.pk},
         )
     )
@@ -54,7 +54,7 @@ def test_user_replace_profile_picture(
     sample_profile_picture.seek(0)
 
     response = user_client.put(
-        reverse("api:auth:user-profile-picture"),
+        reverse("api:v1:auth:user-profile-picture"),
         data={"profile_picture": sample_profile_picture},
         format="multipart",
     )
@@ -67,7 +67,7 @@ def test_user_replace_profile_picture(
 def test_user_profile_picture_endpoints_require_authentication(
     client: OAuthClient,
 ) -> None:
-    url = reverse("api:auth:user-profile-picture")
+    url = reverse("api:v1:auth:user-profile-picture")
     r1 = client.put(url)
     r2 = client.delete(url)
     assert r1.status_code == r2.status_code == 401
@@ -77,7 +77,7 @@ def test_user_profile_picture_endpoints_require_authentication(
 def test_user_profile_picture_endpoints_require_user_token(
     app_client: OAuthClient,
 ) -> None:
-    url = reverse("api:auth:user-profile-picture")
+    url = reverse("api:v1:auth:user-profile-picture")
     r1 = app_client.put(url)
     r2 = app_client.delete(url)
     assert r1.status_code == r2.status_code == 403
@@ -90,7 +90,7 @@ def test_user_profile_picture_endpoints_require_first_party_app(
     authorization_code_third_party_app: Application,
 ) -> None:
     client.set_user(user, app=authorization_code_third_party_app)
-    url = reverse("api:auth:user-profile-picture")
+    url = reverse("api:v1:auth:user-profile-picture")
     r1 = client.put(url)
     r2 = client.delete(url)
     assert r1.status_code == r2.status_code == 403
@@ -106,7 +106,7 @@ def test_user_delete_profile_picture(
     user.save(update_fields=["profile_picture", "updated_at"])
 
     response = user_client.delete(
-        reverse("api:auth:user-profile-picture"),
+        reverse("api:v1:auth:user-profile-picture"),
     )
     assert response.status_code == 204
     user.refresh_from_db()
@@ -117,5 +117,5 @@ def test_user_delete_profile_picture(
 def test_user_delete_profile_picture_ok_if_not_previously_exists(
     user_client: OAuthClient,
 ) -> None:
-    response = user_client.delete(reverse("api:auth:user-profile-picture"))
+    response = user_client.delete(reverse("api:v1:auth:user-profile-picture"))
     assert response.status_code == 204

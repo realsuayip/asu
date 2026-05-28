@@ -19,7 +19,7 @@ def test_user_relations_unrelated(
     UserFactory.create(username="bob")
     response = client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={
                 "usernames": "helen,bob",
             },
@@ -35,13 +35,13 @@ def test_user_relations_unrelated(
 
 
 def test_user_relations_requires_authentication(client: OAuthClient) -> None:
-    response = client.get(reverse("api:auth:user-relations"))
+    response = client.get(reverse("api:v1:auth:user-relations"))
     assert response.status_code == 401
 
 
 @pytest.mark.django_db
 def test_user_relations_requires_user_token(app_client: OAuthClient) -> None:
-    response = app_client.get(reverse("api:auth:user-relations"))
+    response = app_client.get(reverse("api:v1:auth:user-relations"))
     assert response.status_code == 403
 
 
@@ -53,7 +53,7 @@ def test_user_relations_requires_scope(
     scope: str,
 ) -> None:
     client.set_user(user, scope=scope)
-    response = client.get(reverse("api:auth:user-relations"))
+    response = client.get(reverse("api:v1:auth:user-relations"))
     assert response.status_code == 403
 
 
@@ -78,7 +78,7 @@ def test_user_relations_related_mixed(
     UserBlock.objects.create(from_user=james, to_user=user)
     response = client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={
                 "usernames": "helen,bob,james",
             },
@@ -117,7 +117,7 @@ def test_user_relations_following(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -144,7 +144,7 @@ def test_user_relations_followed_by(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -172,7 +172,7 @@ def test_user_relations_both_following_and_followed_by(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -199,7 +199,7 @@ def test_user_relations_blocking(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -226,7 +226,7 @@ def test_user_relations_blocked_by(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -254,7 +254,7 @@ def test_user_relations_both_blocking_and_blocked_by(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -285,7 +285,7 @@ def test_user_relations_follow_request_sent(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -316,7 +316,7 @@ def test_user_relations_follow_request_received(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -352,7 +352,7 @@ def test_user_relations_both_follow_request_sent_and_received(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )
@@ -384,7 +384,7 @@ def test_user_relations_mixed_followed_by_follow_request_sent(
 
     response = user_client.get(
         reverse(
-            "api:auth:user-relations",
+            "api:v1:auth:user-relations",
             query={"usernames": "helen"},
         )
     )

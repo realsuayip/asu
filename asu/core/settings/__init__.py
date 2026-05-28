@@ -195,9 +195,6 @@ if DEBUG and not TESTING:
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",
-    "DEFAULT_VERSION": env.str("API_DEFAULT_VERSION"),
-    "ALLOWED_VERSIONS": env.list("API_ALLOWED_VERSIONS"),
     "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,
     "DEFAULT_PERMISSION_CLASSES": ["asu.core.utils.denier.DenyAny"],
     "DEFAULT_FILTER_BACKENDS": ["rest_filters.FilterBackend"],
@@ -265,7 +262,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "asu API",
     "DESCRIPTION": "Welcome to asu OpenAPI documentation. Select an endpoint"
     " from the sidebar to start.",
-    "SCHEMA_PATH_PREFIX": "/api",
+    "SCHEMA_PATH_PREFIX": "/api/v[0-9]",
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_COERCE_PATH_PK_SUFFIX": True,
     "OAUTH2_FLOWS": ["authorizationCode", "clientCredentials"],

@@ -27,7 +27,7 @@ def test_user_password_reset_verify(
         + 1  # update verification
     ):
         response = first_party_app_client.post(
-            reverse("api:verification:password-reset-verify"),
+            reverse("api:v1:verification:password-reset-verify"),
             data={
                 "id": verification.pk,
                 "code": verification.code,
@@ -50,7 +50,7 @@ def test_user_password_reset_verify_expires_code_after_use(
         user=user,
     )
     url, payload = (
-        reverse("api:verification:password-reset-verify"),
+        reverse("api:v1:verification:password-reset-verify"),
         {
             "id": verification.pk,
             "code": verification.code,
@@ -74,7 +74,7 @@ def test_user_password_reset_verify_bad_code(
     verification.code = "123456"
     verification.save(update_fields=["code", "updated_at"])
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-verify"),
+        reverse("api:v1:verification:password-reset-verify"),
         data={
             "id": verification.pk,
             "code": "987654",
@@ -98,7 +98,7 @@ def test_user_password_reset_verify_expired_code(
     )
 
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-verify"),
+        reverse("api:v1:verification:password-reset-verify"),
         data={
             "id": verification.pk,
             "code": verification.code,

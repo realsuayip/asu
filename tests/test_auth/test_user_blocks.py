@@ -19,7 +19,7 @@ def test_user_block(
     profile = UserFactory.create()
     response = client.post(
         reverse(
-            "api:auth:user-block",
+            "api:v1:auth:user-block",
             kwargs={"pk": profile.pk},
         )
     )
@@ -34,7 +34,7 @@ def test_user_block_subsequent_ok(
 ) -> None:
     profile = UserFactory.create()
     url = reverse(
-        "api:auth:user-block",
+        "api:v1:auth:user-block",
         kwargs={"pk": profile.pk},
     )
     r1 = user_client.post(url)
@@ -53,7 +53,7 @@ def test_user_unblock(
     block = UserBlock.objects.create(from_user=user, to_user=profile)
     response = client.post(
         reverse(
-            "api:auth:user-unblock",
+            "api:v1:auth:user-unblock",
             kwargs={"pk": profile.pk},
         )
     )
@@ -70,7 +70,7 @@ def test_user_unblock_subsequent_ok(
     profile = UserFactory.create()
     block = UserBlock.objects.create(from_user=user, to_user=profile)
     url = reverse(
-        "api:auth:user-unblock",
+        "api:v1:auth:user-unblock",
         kwargs={"pk": profile.pk},
     )
     r1 = user_client.post(url)
@@ -85,7 +85,7 @@ def test_user_unblock_ok_if_no_previous_relation(user_client: OAuthClient) -> No
     profile = UserFactory.create()
     response = user_client.post(
         reverse(
-            "api:auth:user-unblock",
+            "api:v1:auth:user-unblock",
             kwargs={"pk": profile.pk},
         )
     )
@@ -96,8 +96,8 @@ def test_user_unblock_ok_if_no_previous_relation(user_client: OAuthClient) -> No
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-block",
-        "api:auth:user-unblock",
+        "api:v1:auth:user-block",
+        "api:v1:auth:user-unblock",
     ),
 )
 def test_user_block_endpoints_fail_if_self(
@@ -124,7 +124,7 @@ def test_user_block_allowed_while_being_blocked(
 
     response = user_client.post(
         reverse(
-            "api:auth:user-block",
+            "api:v1:auth:user-block",
             kwargs={"pk": profile.pk},
         )
     )
@@ -146,7 +146,7 @@ def test_user_unblock_allowed_while_being_blocked(
     )
     response = user_client.post(
         reverse(
-            "api:auth:user-unblock",
+            "api:v1:auth:user-unblock",
             kwargs={"pk": profile.pk},
         )
     )
@@ -158,8 +158,8 @@ def test_user_unblock_allowed_while_being_blocked(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-block",
-        "api:auth:user-unblock",
+        "api:v1:auth:user-block",
+        "api:v1:auth:user-unblock",
     ),
 )
 def test_user_block_endpoints_require_authentication(
@@ -179,8 +179,8 @@ def test_user_block_endpoints_require_authentication(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-block",
-        "api:auth:user-unblock",
+        "api:v1:auth:user-block",
+        "api:v1:auth:user-unblock",
     ),
 )
 def test_user_block_endpoints_require_user_token(
@@ -200,8 +200,8 @@ def test_user_block_endpoints_require_user_token(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-block",
-        "api:auth:user-unblock",
+        "api:v1:auth:user-block",
+        "api:v1:auth:user-unblock",
     ),
 )
 @pytest.mark.parametrize(
@@ -228,8 +228,8 @@ def test_user_block_endpoints_require_scope(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-block",
-        "api:auth:user-unblock",
+        "api:v1:auth:user-block",
+        "api:v1:auth:user-unblock",
     ),
 )
 def test_user_block_endpoints_non_existing_user(
@@ -249,8 +249,8 @@ def test_user_block_endpoints_non_existing_user(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:auth:user-block",
-        "api:auth:user-unblock",
+        "api:v1:auth:user-block",
+        "api:v1:auth:user-unblock",
     ),
 )
 @pytest.mark.parametrize(
@@ -284,7 +284,7 @@ def test_user_block_removes_follow(
     follow = UserFollow.objects.create(from_user=user, to_user=profile)
     response = user_client.post(
         reverse(
-            "api:auth:user-block",
+            "api:v1:auth:user-block",
             kwargs={"pk": profile.pk},
         )
     )
@@ -303,7 +303,7 @@ def test_user_block_removes_follower(
     follower = UserFollow.objects.create(from_user=profile, to_user=user)
     response = user_client.post(
         reverse(
-            "api:auth:user-block",
+            "api:v1:auth:user-block",
             kwargs={"pk": profile.pk},
         )
     )
@@ -326,7 +326,7 @@ def test_user_block_rejects_received_pending_follow_request(
     )
     response = user_client.post(
         reverse(
-            "api:auth:user-block",
+            "api:v1:auth:user-block",
             kwargs={"pk": profile.pk},
         )
     )
@@ -349,7 +349,7 @@ def test_user_block_rejects_sent_pending_follow_request(
     )
     response = user_client.post(
         reverse(
-            "api:auth:user-block",
+            "api:v1:auth:user-block",
             kwargs={"pk": profile.pk},
         )
     )
@@ -377,7 +377,7 @@ def test_user_block_only_rejects_pending_follow_requests(
     )
     response = user_client.post(
         reverse(
-            "api:auth:user-block",
+            "api:v1:auth:user-block",
             kwargs={"pk": profile.pk},
         )
     )
@@ -411,7 +411,7 @@ def test_user_blocked_list(
             for to_user in (profile, private, inactive, frozen)
         ]
     )
-    response = client.get(reverse("api:auth:user-blocked"))
+    response = client.get(reverse("api:v1:auth:user-blocked"))
     assert response.json() == {
         "next": None,
         "previous": None,
@@ -437,13 +437,13 @@ def test_user_blocked_list(
 
 
 def test_user_blocked_list_requires_authentication(client: OAuthClient) -> None:
-    response = client.get(reverse("api:auth:user-blocked"))
+    response = client.get(reverse("api:v1:auth:user-blocked"))
     assert response.status_code == 401
 
 
 @pytest.mark.django_db
 def test_user_blocked_list_requires_user_token(app_client: OAuthClient) -> None:
-    response = app_client.get(reverse("api:auth:user-blocked"))
+    response = app_client.get(reverse("api:v1:auth:user-blocked"))
     assert response.status_code == 403
 
 
@@ -455,5 +455,5 @@ def test_user_blocked_list_requires_scope(
     scope: str,
 ) -> None:
     client.set_user(user, scope=scope)
-    response = client.get(reverse("api:auth:user-blocked"))
+    response = client.get(reverse("api:v1:auth:user-blocked"))
     assert response.status_code == 403

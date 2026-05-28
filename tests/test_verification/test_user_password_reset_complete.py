@@ -43,7 +43,7 @@ def test_user_password_reset_complete(
         + 1  # fetch user sessions for invalidation
     ):
         response = first_party_app_client.post(
-            reverse("api:verification:password-reset-complete"),
+            reverse("api:v1:verification:password-reset-complete"),
             data=payload,
         )
     assert response.status_code == 204
@@ -64,7 +64,7 @@ def test_user_password_reset_complete_case_invalid_id(
         "password": "Hln_1900",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data=payload,
     )
     assert response.status_code == 404
@@ -88,7 +88,7 @@ def test_user_password_reset_complete_case_expired_id(
         + timedelta(seconds=settings.PASSWORD_RESET_COMPLETE_TIMEOUT + 1),
     )
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data={
             "id": verification.pk,
             "password": "Hln_1900",
@@ -111,7 +111,7 @@ def test_user_password_reset_complete_case_unusable_password(
         verified_at=timezone.now(),
     )
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data={
             "id": verification.pk,
             "password": "Hln_1900",
@@ -136,7 +136,7 @@ def test_user_password_reset_complete_password_validation(
         "password": "helenexample",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data=payload,
     )
     assert response.status_code == 400
@@ -154,7 +154,7 @@ def test_user_password_reset_complete_requires_authentication(
     client: OAuthClient,
 ) -> None:
     response = client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data={
             "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "password": "Hln_1900",
@@ -168,7 +168,7 @@ def test_user_password_reset_complete_requires_requires_first_party_app(
     app_client: OAuthClient,
 ) -> None:
     response = app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data={
             "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "password": "Hln_1900",
@@ -206,7 +206,7 @@ def test_user_password_reset_complete_nullifies_other_verifications(
         ]
     )
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data={
             "id": v1.pk,
             "password": "Hln_1900",
@@ -236,7 +236,7 @@ def test_user_password_reset_flow(
     # Step 1: Send verification email containing code
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
-            reverse("api:verification:password-reset-send"),
+            reverse("api:v1:verification:password-reset-send"),
             data={"email": "helen@example.com"},
         )
     assert response.status_code == 201
@@ -248,7 +248,7 @@ def test_user_password_reset_flow(
 
     # Step 2: Pair id with code to verify it
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-verify"),
+        reverse("api:v1:verification:password-reset-verify"),
         data={
             "id": uid,
             "code": code,
@@ -258,7 +258,7 @@ def test_user_password_reset_flow(
 
     # Step 3: Reset password with verified id
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data={
             "id": uid,
             "password": "Hln_1900",
@@ -279,13 +279,13 @@ def test_user_password_reset_flow_case_email_change_invalidation(
     user = UserFactory.create(email="helen@example.com")
 
     first_party_app_client.post(
-        reverse("api:verification:password-reset-send"),
+        reverse("api:v1:verification:password-reset-send"),
         data={"email": "helen@example.com"},
     )
     verification = PasswordResetVerification.objects.get()
 
     first_party_app_client.post(
-        reverse("api:verification:password-reset-verify"),
+        reverse("api:v1:verification:password-reset-verify"),
         data={
             "id": str(verification.pk),
             "code": verification.code,
@@ -297,7 +297,7 @@ def test_user_password_reset_flow_case_email_change_invalidation(
     user.save(update_fields=["email", "updated_at"])
 
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-complete"),
+        reverse("api:v1:verification:password-reset-complete"),
         data={
             "id": str(verification.pk),
             "password": "Hln_1900",

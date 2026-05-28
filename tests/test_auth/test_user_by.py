@@ -15,7 +15,7 @@ from tests.factories import UserFactory
 def test_user_by_requires_authentication(client: OAuthClient) -> None:
     response = client.get(
         reverse(
-            "api:auth:user-lookup",
+            "api:v1:auth:user-lookup",
             query={"username": "hello"},
         )
     )
@@ -38,7 +38,7 @@ def test_user_by(
     )
     response = user_client.get(
         reverse(
-            "api:auth:user-lookup",
+            "api:v1:auth:user-lookup",
             query={
                 "username": profile.username,
             },
@@ -66,7 +66,7 @@ def test_user_by_client_credentials(
 ) -> None:
     response = app_client.get(
         reverse(
-            "api:auth:user-lookup",
+            "api:v1:auth:user-lookup",
             query={"username": user.username},
         )
     )
@@ -77,7 +77,7 @@ def test_user_by_client_credentials(
 def test_user_by_user_not_found(app_client: OAuthClient) -> None:
     response = app_client.get(
         reverse(
-            "api:auth:user-lookup",
+            "api:v1:auth:user-lookup",
             query={"username": "helen"},
         )
     )
@@ -88,11 +88,11 @@ def test_user_by_user_not_found(app_client: OAuthClient) -> None:
 def test_user_by_query_param_required(app_client: OAuthClient) -> None:
     r1 = app_client.get(
         reverse(
-            "api:auth:user-lookup",
+            "api:v1:auth:user-lookup",
             query={"username": ""},
         )
     )
-    r2 = app_client.get(reverse("api:auth:user-lookup"))
+    r2 = app_client.get(reverse("api:v1:auth:user-lookup"))
     assert r1.status_code == 400
     assert r2.status_code == 400
     assert r1.json()["errors"] == {

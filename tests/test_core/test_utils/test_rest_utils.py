@@ -218,7 +218,7 @@ def test_exception_handler(exception, expected):
 
 
 def test_empty_metadata(client: OAuthClient) -> None:
-    response = client.options(reverse("api:api-root"))
+    response = client.options(reverse("api:v1:api-root"))
     assert response.content == b""
 
 
@@ -236,12 +236,11 @@ def test_docs(client: OAuthClient) -> None:
 
 
 def test_api_root(client: OAuthClient) -> None:
-    url = reverse("api:api-root")
+    url = reverse("api:v1:api-root")
 
     response = client.get(url, headers={"User-Agent": "test"})
     assert response.status_code == 200
     assert response.json() == {
-        "version": "1.0",
         "secure": False,
         "ip": "127.0.0.1",
         "user-agent": "test",

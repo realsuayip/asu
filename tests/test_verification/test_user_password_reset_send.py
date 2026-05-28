@@ -17,7 +17,7 @@ def test_user_password_reset_send(
     user = UserFactory.create(email="helen@example.com")
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = first_party_app_client.post(
-            reverse("api:verification:password-reset-send"),
+            reverse("api:v1:verification:password-reset-send"),
             data={"email": "helen@example.com"},
         )
     assert response.status_code == 201
@@ -45,7 +45,7 @@ def test_user_password_reset_send_email_normalization(
 ) -> None:
     UserFactory.create(email="helen@example.com")
     response = first_party_app_client.post(
-        reverse("api:verification:password-reset-send"),
+        reverse("api:v1:verification:password-reset-send"),
         data={"email": "helen@Example.com"},
     )
     assert response.status_code == 201
@@ -64,7 +64,7 @@ def test_user_password_reset_send_invalid_email(
 ) -> None:
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
-            reverse("api:verification:password-reset-send"),
+            reverse("api:v1:verification:password-reset-send"),
             data={"email": "nonexisting@example.com"},
         )
     assert response.status_code == 201
@@ -82,7 +82,7 @@ def test_user_password_reset_send_user_with_unusable_password(
     user.save(update_fields=["password", "updated_at"])
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
-            reverse("api:verification:password-reset-send"),
+            reverse("api:v1:verification:password-reset-send"),
             data={"email": "helen@example.com"},
         )
     assert response.status_code == 201
@@ -98,7 +98,7 @@ def test_user_password_reset_send_requires_authentication(
     client: OAuthClient,
 ) -> None:
     response = client.post(
-        reverse("api:verification:password-reset-send"),
+        reverse("api:v1:verification:password-reset-send"),
         data={"email": "helen@example.com"},
     )
     assert response.status_code == 401
@@ -109,7 +109,7 @@ def test_user_password_reset_send_requires_first_party_app_client(
     app_client: OAuthClient,
 ) -> None:
     response = app_client.post(
-        reverse("api:verification:password-reset-send"),
+        reverse("api:v1:verification:password-reset-send"),
         data={"email": "helen@example.com"},
     )
     assert response.status_code == 403

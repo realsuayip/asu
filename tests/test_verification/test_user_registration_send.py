@@ -16,7 +16,7 @@ def test_verification_registration_send(
 ) -> None:
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = first_party_app_client.post(
-            reverse("api:verification:registration-send"),
+            reverse("api:v1:verification:registration-send"),
             data={"email": "helen@example.com"},
         )
     assert response.status_code == 201
@@ -43,7 +43,7 @@ def test_verification_registration_send_email_normalization(
     first_party_app_client: OAuthClient,
 ) -> None:
     response = first_party_app_client.post(
-        reverse("api:verification:registration-send"),
+        reverse("api:v1:verification:registration-send"),
         data={"email": "helen@Example.com"},
     )
     assert response.status_code == 201
@@ -73,7 +73,7 @@ def test_verification_registration_send_email_taken(
     UserFactory.create(email=existing_email)
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
-            reverse("api:verification:registration-send"),
+            reverse("api:v1:verification:registration-send"),
             data={"email": wanted_email},
         )
     assert "Registration mail cancelled, email=%s" % wanted_email in caplog.messages
@@ -86,7 +86,7 @@ def test_verification_registration_send_requires_authentication(
     client: OAuthClient,
 ) -> None:
     response = client.post(
-        reverse("api:verification:registration-send"),
+        reverse("api:v1:verification:registration-send"),
         data={"email": "helen@example.com"},
     )
     assert response.status_code == 401
@@ -97,7 +97,7 @@ def test_verification_registration_send_requires_first_party_app_client(
     app_client: OAuthClient,
 ) -> None:
     response = app_client.post(
-        reverse("api:verification:registration-send"),
+        reverse("api:v1:verification:registration-send"),
         data={"email": "helen@example.com"},
     )
     assert response.status_code == 403

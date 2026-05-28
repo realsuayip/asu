@@ -46,7 +46,7 @@ def test_user_deactivate(
     )
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = user_client.post(
-            reverse("api:auth:user-deactivate"),
+            reverse("api:v1:auth:user-deactivate"),
             data={"password": "hello"},
         )
     assert response.status_code == 204
@@ -85,7 +85,7 @@ def test_user_deactivate_for_deletion(
     )
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = user_client.post(
-            reverse("api:auth:user-deactivate"),
+            reverse("api:v1:auth:user-deactivate"),
             data={
                 "password": "hello",
                 "for_deletion": True,
@@ -110,7 +110,7 @@ def test_user_deactivate_for_deletion(
 @pytest.mark.django_db
 def test_user_deactivate_invalid_password(user_client: OAuthClient) -> None:
     response = user_client.post(
-        reverse("api:auth:user-deactivate"),
+        reverse("api:v1:auth:user-deactivate"),
         data={"password": "rand"},
     )
     assert response.status_code == 400
@@ -125,13 +125,13 @@ def test_user_deactivate_invalid_password(user_client: OAuthClient) -> None:
 
 
 def test_user_deactivate_requires_authentication(client: OAuthClient) -> None:
-    response = client.post(reverse("api:auth:user-deactivate"))
+    response = client.post(reverse("api:v1:auth:user-deactivate"))
     assert response.status_code == 401
 
 
 @pytest.mark.django_db
 def test_user_deactivate_requires_user_token(app_client: OAuthClient) -> None:
-    response = app_client.post(reverse("api:auth:user-deactivate"))
+    response = app_client.post(reverse("api:v1:auth:user-deactivate"))
     assert response.status_code == 403
 
 
@@ -142,7 +142,7 @@ def test_user_deactivate_requires_first_party_token(
     authorization_code_third_party_app: Application,
 ) -> None:
     client.set_user(user, app=authorization_code_third_party_app)
-    response = client.post(reverse("api:auth:user-deactivate"))
+    response = client.post(reverse("api:v1:auth:user-deactivate"))
     assert response.status_code == 403
 
 

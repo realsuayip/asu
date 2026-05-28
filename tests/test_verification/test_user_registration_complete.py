@@ -46,7 +46,7 @@ def test_user_registration_create(
         + 4  # issue tokens
     ):
         response = first_party_app_client.post(
-            reverse("api:verification:registration-complete"),
+            reverse("api:v1:verification:registration-complete"),
             data=payload,
         )
     assert response.status_code == 201
@@ -100,7 +100,7 @@ def test_user_registration_create_case_invalid_id(
     }
 
     response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 404
@@ -128,7 +128,7 @@ def test_user_registration_create_case_expired_id(
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 404
@@ -156,7 +156,7 @@ def test_user_registration_create_case_email_validation(
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 400
@@ -185,7 +185,7 @@ def test_user_registration_create_password_validation(
         "username": "helen",
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 400
@@ -229,7 +229,7 @@ def test_user_registration_create_username_validation(
         "username": username,
     }
     response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data=payload,
     )
     assert response.status_code == 400
@@ -245,7 +245,7 @@ def test_user_registration_create_username_validation(
 
 def test_user_registration_create_requires_authentication(client: OAuthClient) -> None:
     response = client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data={
             "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "display_name": "Helen",
@@ -261,7 +261,7 @@ def test_user_registration_create_requires_requires_first_party_app(
     app_client: OAuthClient,
 ) -> None:
     response = app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data={
             "id": "019b04e3-90e4-7751-a386-7a4550a69409",
             "display_name": "Helen",
@@ -297,7 +297,7 @@ def test_user_registration_nullifies_other_verifications(
         ]
     )
     response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data={
             "id": v1.pk,
             "display_name": "Helen",
@@ -330,7 +330,7 @@ def test_user_registration_flow(
     # Step 1: Send verification email containing code
     with django_capture_on_commit_callbacks(execute=True):
         response = first_party_app_client.post(
-            reverse("api:verification:registration-send"),
+            reverse("api:v1:verification:registration-send"),
             data={"email": "helen@example.com"},
         )
     assert response.status_code == 201
@@ -342,14 +342,14 @@ def test_user_registration_flow(
 
     # Step 2: Pair id with code to verify it
     response = first_party_app_client.post(
-        reverse("api:verification:registration-verify"),
+        reverse("api:v1:verification:registration-verify"),
         data={"id": uid, "code": code},
     )
     assert response.status_code == 204
 
     # Step 3: Create user with verified id
     response = first_party_app_client.post(
-        reverse("api:verification:registration-complete"),
+        reverse("api:v1:verification:registration-complete"),
         data={
             "id": uid,
             "display_name": "Helen",
@@ -362,5 +362,5 @@ def test_user_registration_flow(
     # Can we use returned token to fetch our user?
     token = response.json()["auth"]["access_token"]
     client.set_token(token)
-    response = client.get(reverse("api:auth:user-me"))
+    response = client.get(reverse("api:v1:auth:user-me"))
     assert response.status_code == 200

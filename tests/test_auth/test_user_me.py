@@ -34,7 +34,7 @@ def test_user_me(
         1  # fetch user
         + 2  # fetch otp devices (totp, static)
     ):
-        response = client.get(reverse("api:auth:user-me"))
+        response = client.get(reverse("api:v1:auth:user-me"))
     assert response.status_code == 200
     assert response.json() == {
         "id": mocker.ANY,
@@ -56,13 +56,13 @@ def test_user_me(
 
 def test_user_me_requires_authentication() -> None:
     client = OAuthClient()
-    response = client.get(reverse("api:auth:user-me"))
+    response = client.get(reverse("api:v1:auth:user-me"))
     assert response.status_code == 401
 
 
 @pytest.mark.django_db
 def test_user_me_requires_user_authentication(app_client: OAuthClient) -> None:
-    response = app_client.get(reverse("api:auth:user-me"))
+    response = app_client.get(reverse("api:v1:auth:user-me"))
     assert response.status_code == 403
 
 
@@ -72,7 +72,7 @@ def test_user_me_update(
     user_client: OAuthClient,
 ) -> None:
     response = user_client.patch(
-        reverse("api:auth:user-me"),
+        reverse("api:v1:auth:user-me"),
         data={
             "display_name": "__Potato__",
             "description": "Lorem ipsum",
@@ -92,7 +92,7 @@ def test_user_me_update_username_taken(user_client: OAuthClient) -> None:
     UserFactory.create(username="suzie")
 
     response = user_client.patch(
-        reverse("api:auth:user-me"),
+        reverse("api:v1:auth:user-me"),
         data={"username": "Suzie"},
     )
     assert response.status_code == 400
@@ -112,7 +112,7 @@ def test_user_me_update_disallow_email(
     user_client: OAuthClient,
 ) -> None:
     email = "hello@example.com"
-    response = user_client.patch(reverse("api:auth:user-me"), data={"email": email})
+    response = user_client.patch(reverse("api:v1:auth:user-me"), data={"email": email})
     assert response.status_code == 200
 
     user.refresh_from_db()
@@ -209,7 +209,7 @@ def test_user_me_third_party_token(
         scope=scope,
         app=authorization_code_third_party_app,
     )
-    response = client.get(reverse("api:auth:user-me"))
+    response = client.get(reverse("api:v1:auth:user-me"))
     assert response.status_code == 200
     assert response.json() == detail
 
@@ -235,7 +235,7 @@ def test_user_me_third_party_token_case_bad_scope(
         scope=scope,
         app=authorization_code_third_party_app,
     )
-    response = client.get(reverse("api:auth:user-me"))
+    response = client.get(reverse("api:v1:auth:user-me"))
     assert response.status_code == 403
 
 
@@ -254,7 +254,7 @@ def test_user_me_third_party_token_update_not_allowed(
         app=authorization_code_third_party_app,
     )
     response = client.patch(
-        reverse("api:auth:user-me"),
+        reverse("api:v1:auth:user-me"),
         data={"display_name": "Helen"},
     )
     assert response.status_code == 403
@@ -267,5 +267,5 @@ def test_user_me_properly_responds_with_405_rather_than_403(
     authorization_code_third_party_app: Application,
 ):
     client.set_user(user, app=authorization_code_third_party_app)
-    response = client.post(reverse("api:auth:user-me"))
+    response = client.post(reverse("api:v1:auth:user-me"))
     assert response.status_code == 405

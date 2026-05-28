@@ -18,7 +18,7 @@ from asu.core.views import (
     server_error,
 )
 
-api_urls: list[URLResolver | URLPattern] = [
+api_v1_urls: list[URLResolver | URLPattern] = [
     path("", APIRootView.as_view(), name="api-root"),
     path("", include("asu.auth.urls")),
     path("", include("asu.verification.urls")),
@@ -56,7 +56,17 @@ urlpatterns: list[URLPattern | URLResolver] = [
     path("", RedirectView.as_view(pattern_name="two_factor:profile"), name="index"),
     path("admin/", admin.site.urls),
     path("account/", include((account_urls, "two_factor"))),
-    path("api/", include((api_urls, "api"))),
+    path(
+        "api/",
+        include(
+            (
+                [
+                    path("v1/", include((api_v1_urls, "v1"))),
+                ],
+                "api",
+            )
+        ),
+    ),
     path("o/", include((oauth_urls, "oauth2_provider"))),
     path("docs/", include((docs_urls, "docs"))),
 ]

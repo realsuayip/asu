@@ -10,16 +10,16 @@ from tests.factories import UserFactory
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:verification:registration-verify",
-        "api:verification:password-reset-verify",
-        "api:verification:email-change-complete",
+        "api:v1:verification:registration-verify",
+        "api:v1:verification:password-reset-verify",
+        "api:v1:verification:email-change-complete",
     ),
 )
 def test_verification_verify_missing(
     first_party_app_client: OAuthClient,
     endpoint: str,
 ) -> None:
-    if endpoint == "api:verification:email-change-complete":
+    if endpoint == "api:v1:verification:email-change-complete":
         user = UserFactory.create(email="helen_old@example.com")
         first_party_app_client.set_user(user, scope="")
     response = first_party_app_client.post(
@@ -37,9 +37,9 @@ def test_verification_verify_missing(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:verification:registration-verify",
-        "api:verification:password-reset-verify",
-        "api:verification:email-change-complete",
+        "api:v1:verification:registration-verify",
+        "api:v1:verification:password-reset-verify",
+        "api:v1:verification:email-change-complete",
     ),
 )
 def test_verification_verify_invalid_code(
@@ -47,7 +47,7 @@ def test_verification_verify_invalid_code(
     endpoint: str,
     code: str,
 ) -> None:
-    if endpoint == "api:verification:email-change-complete":
+    if endpoint == "api:v1:verification:email-change-complete":
         user = UserFactory.create(email="helen_old@example.com")
         first_party_app_client.set_user(user, scope="")
     response = first_party_app_client.post(
@@ -69,9 +69,9 @@ def test_verification_verify_invalid_code(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:verification:registration-verify",
-        "api:verification:password-reset-verify",
-        "api:verification:email-change-complete",
+        "api:v1:verification:registration-verify",
+        "api:v1:verification:password-reset-verify",
+        "api:v1:verification:email-change-complete",
     ),
 )
 def test_verification_verify_requires_authentication(
@@ -92,9 +92,9 @@ def test_verification_verify_requires_authentication(
 @pytest.mark.parametrize(
     "endpoint",
     (
-        "api:verification:registration-verify",
-        "api:verification:password-reset-verify",
-        "api:verification:email-change-complete",
+        "api:v1:verification:registration-verify",
+        "api:v1:verification:password-reset-verify",
+        "api:v1:verification:email-change-complete",
     ),
 )
 def test_verification_verify_requires_first_party_app(

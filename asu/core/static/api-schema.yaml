@@ -1,9 +1,12 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: asu API
   version: v1
   description: Welcome to asu OpenAPI documentation. Select an endpoint from the sidebar
     to start.
+  license:
+    name: BSD-3-Clause
+    url: https://opensource.org/license/bsd-3-clause
 paths:
   /api/v1/users/{id}/:
     get:
@@ -20,7 +23,6 @@ paths:
       - User Retrieval
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -57,7 +59,6 @@ paths:
       security:
       - oauth2:
         - user.block:write
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -94,7 +95,6 @@ paths:
       security:
       - oauth2:
         - user.follow:write
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -149,7 +149,6 @@ paths:
       - User Follow Operations
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -191,7 +190,6 @@ paths:
       - User Follow Operations
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -228,7 +226,6 @@ paths:
       security:
       - oauth2:
         - user.block:write
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -261,7 +258,6 @@ paths:
       security:
       - oauth2:
         - user.follow:write
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -294,7 +290,6 @@ paths:
       security:
       - oauth2:
         - user.block:read
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -318,7 +313,6 @@ paths:
       - User Retrieval
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -359,7 +353,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -396,7 +389,6 @@ paths:
       security:
       - oauth2:
         - user.follow:read
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -420,7 +412,6 @@ paths:
       security:
       - oauth2:
         - user.follow:write
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -453,7 +444,6 @@ paths:
       security:
       - oauth2:
         - user.follow:write
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -480,7 +470,6 @@ paths:
       security:
       - oauth2:
         - user.profile:read
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -507,7 +496,6 @@ paths:
       security:
       - oauth2:
         - user.profile:write
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -559,7 +547,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -583,7 +570,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -598,7 +584,6 @@ paths:
       - User Settings
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -623,7 +608,6 @@ paths:
       security:
       - oauth2:
         - user.profile:read
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -679,7 +663,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -733,7 +716,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -778,7 +760,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '200':
           description: No response body
@@ -835,7 +816,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -880,7 +860,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -934,7 +913,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -997,7 +975,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -1042,7 +1019,6 @@ paths:
         required: true
       security:
       - oauth2: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -1349,14 +1325,14 @@ components:
         language:
           $ref: '#/components/schemas/LanguageEnum'
         birth_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
-          nullable: true
         is_private:
           type: boolean
           title: Private
-          description: Users with private accounts has the privilege of hiding their
-            identity.
+          description: Private profiles are only visible to approved followers.
         allows_receipts:
           type: boolean
           title: Allows message receipts
@@ -1440,8 +1416,7 @@ components:
           type: boolean
           readOnly: true
           title: Private
-          description: Users with private accounts has the privilege of hiding their
-            identity.
+          description: Private profiles are only visible to approved followers.
         description:
           type: string
           readOnly: true
@@ -1523,14 +1498,14 @@ components:
         language:
           $ref: '#/components/schemas/LanguageEnum'
         birth_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
-          nullable: true
         is_private:
           type: boolean
           title: Private
-          description: Users with private accounts has the privilege of hiding their
-            identity.
+          description: Private profiles are only visible to approved followers.
         allows_receipts:
           type: boolean
           title: Allows message receipts
@@ -1577,8 +1552,7 @@ components:
           type: boolean
           readOnly: true
           title: Private
-          description: Users with private accounts has the privilege of hiding their
-            identity.
+          description: Private profiles are only visible to approved followers.
       required:
       - description
       - display_name
@@ -1606,9 +1580,10 @@ components:
           maxLength: 16
           minLength: 3
         birth_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
-          nullable: true
         language:
           $ref: '#/components/schemas/LanguageEnum'
         auth:
@@ -1648,9 +1623,10 @@ components:
           minLength: 1
           maxLength: 128
         birth_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
-          nullable: true
         language:
           $ref: '#/components/schemas/LanguageEnum'
       required:
@@ -1692,8 +1668,7 @@ components:
           type: boolean
           readOnly: true
           title: Private
-          description: Users with private accounts has the privilege of hiding their
-            identity.
+          description: Private profiles are only visible to approved followers.
         description:
           type: string
           readOnly: true
@@ -1742,10 +1717,6 @@ components:
       - relations
       - username
   securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: sessionid
     oauth2:
       type: oauth2
       flows:

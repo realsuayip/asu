@@ -262,9 +262,18 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "asu API",
     "DESCRIPTION": "Welcome to asu OpenAPI documentation. Select an endpoint"
     " from the sidebar to start.",
+    "LICENSE": {
+        "name": "BSD-3-Clause",
+        "url": "https://opensource.org/license/bsd-3-clause",
+    },
+    "OAS_VERSION": "3.1.0",
+    "DISABLE_DOCSTRING_DESCRIPTIONS": True,
     "SCHEMA_PATH_PREFIX": "/api/v[0-9]",
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_COERCE_PATH_PK_SUFFIX": True,
+    "AUTHENTICATION_WHITELIST": [
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication"
+    ],
     "OAUTH2_FLOWS": ["authorizationCode", "clientCredentials"],
     "OAUTH2_AUTHORIZATION_URL": reverse_lazy("oauth2_provider:authorize"),
     "OAUTH2_TOKEN_URL": reverse_lazy("oauth2_provider:token"),

@@ -37,6 +37,7 @@ dev = [
     "pytest-sugar",
     "pytest-randomly",
     "pytest-xdist",
+    "pytest-socket",
     "pytest-cov",
     "factory-boy",
     # Typing
@@ -76,6 +77,8 @@ addopts = [
     "--import-mode=importlib",
     "--ds=asu.core.settings.test",
     "--tb=short",
+    "--disable-socket",
+    "--allow-hosts=db"
 ]
 
 [tool.coverage.run]

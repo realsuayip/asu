@@ -89,7 +89,7 @@ class Verification(Base):
     def send_email(self) -> int:
         title, content = self.EMAIL_MESSAGE.subject, self.EMAIL_MESSAGE.body
         return mailing.send(
-            "code",
+            "code.html",
             title=title,
             content=content,
             recipients=[self.email],

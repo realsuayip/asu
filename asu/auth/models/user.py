@@ -376,7 +376,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
         determine subject and body.
         """
         return mailing.send(
-            "transactional",
+            "transactional.html",
             title=message.subject,
             content=message.body,
             recipients=[self.email],

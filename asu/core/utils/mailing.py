@@ -25,7 +25,7 @@ def _send_sync(
     context.setdefault("title", title)
     context.setdefault("content", content)
 
-    template = "mailing/%s.html" % template
+    template = f"mailing/{template}"
 
     with translation.override(language):
         body = render_to_string(template, context=context)

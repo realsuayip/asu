@@ -6,7 +6,7 @@ from asu.core.utils import mailing
 
 def test_send_mail() -> None:
     mailing.send(
-        "empty",
+        "empty.html",
         title="Hello World",
         content="Howdy?",
         recipients=["someone@example.com"],
@@ -22,7 +22,7 @@ def test_send_mail() -> None:
 
 def test_send_mail_respects_language() -> None:
     mailing.send(
-        "empty",
+        "empty.html",
         title=_("German"),
         content=_("Swedish"),
         recipients=["someone@example.com"],

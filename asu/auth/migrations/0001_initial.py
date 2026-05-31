@@ -148,7 +148,7 @@ class Migration(migrations.Migration):
                     "is_private",
                     models.BooleanField(
                         default=False,
-                        help_text="Users with private accounts has the privilege of hiding their identity.",
+                        help_text="Private profiles are only visible to approved followers.",
                         verbose_name="private",
                     ),
                 ),

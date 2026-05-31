@@ -143,9 +143,7 @@ class User(Base, PermissionsMixin, AbstractBaseUser):  # type: ignore[django-man
     )
     is_private = models.BooleanField(
         _("private"),
-        help_text=_(
-            "Users with private accounts has the privilege of hiding their identity."
-        ),
+        help_text=_("Private profiles are only visible to approved followers."),
         default=False,
     )
     is_staff = models.BooleanField(

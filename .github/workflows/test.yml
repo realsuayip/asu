@@ -26,7 +26,7 @@ jobs:
       run: >-
         docker compose -f docker/dev/compose.yml run --rm web
         /bin/sh -c
-        "pytest -n2 --no-migrations --cov --cov-report=xml"
+        "pytest -n2 --cov --cov-report=xml"
 
     - name: Upload coverage
       uses: codecov/codecov-action@v3

@@ -3,6 +3,7 @@ from typing import Any, cast
 
 from django import urls
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.management import call_command
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import URLPattern, URLResolver
@@ -89,13 +90,14 @@ class APIRootView(BaseAPIRootView):
 
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         ip, _ = get_client_ip(request)
-        ret = {
-            "version": request.version,
+        ret: dict[str, Any] = {
             "secure": request.is_secure(),
             "ip": ip,
             "user-agent": request.headers.get("user-agent"),
             "docs": request.build_absolute_uri(reverse("docs:browse")),
-            "schema": request.build_absolute_uri(reverse("docs:openapi-schema")),
+            "schema": request.build_absolute_uri(
+                staticfiles_storage.url("api-schema.yaml")
+            ),
         }
         if settings.DEBUG or request.query_params.get("routes") == "1":
             ret["routes"] = self.get_routes()

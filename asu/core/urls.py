@@ -4,8 +4,6 @@ from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path
 from django.views.generic import RedirectView
 
-from drf_spectacular.utils import extend_schema
-from drf_spectacular.views import SpectacularAPIView
 from oauth2_provider.urls import base_urlpatterns as oauth_urls
 from two_factor import views as tf
 
@@ -24,14 +22,6 @@ api_v1_urls: list[URLResolver | URLPattern] = [
     path("", include("asu.verification.urls")),
 ]
 
-docs_urls = [
-    path(
-        "schema/",
-        extend_schema(exclude=True)(SpectacularAPIView).as_view(),
-        name="openapi-schema",
-    ),
-    path("", DocsView.as_view(), name="browse"),
-]
 
 account_urls = [
     path("", tf.ProfileView.as_view(), name="profile"),
@@ -68,7 +58,17 @@ urlpatterns: list[URLPattern | URLResolver] = [
         ),
     ),
     path("o/", include((oauth_urls, "oauth2_provider"))),
-    path("docs/", include((docs_urls, "docs"))),
+    path(
+        "docs/",
+        include(
+            (
+                [
+                    path("", DocsView.as_view(), name="browse"),
+                ],
+                "docs",
+            )
+        ),
+    ),
 ]
 
 if settings.DEBUG:

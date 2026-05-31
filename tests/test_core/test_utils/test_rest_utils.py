@@ -224,15 +224,10 @@ def test_empty_metadata(client: OAuthClient) -> None:
 
 def test_docs(client: OAuthClient) -> None:
     browser = reverse("docs:browse")
-    schema = reverse("docs:openapi-schema")
 
     r1 = client.get(browser)
     assert r1.status_code == 200
     assert "text/html" in r1.headers["Content-Type"]
-
-    r2 = client.get(schema)
-    assert r2.status_code == 200
-    assert "application/vnd.oai.openapi" in r2.headers["Content-Type"]
 
 
 def test_api_root(client: OAuthClient) -> None:
@@ -245,7 +240,7 @@ def test_api_root(client: OAuthClient) -> None:
         "ip": "127.0.0.1",
         "user-agent": "test",
         "docs": "http://testserver/docs/",
-        "schema": "http://testserver/docs/schema/",
+        "schema": "http://testserver/static/api-schema.yaml",
     }
 
     # Make sure route resolving logic works

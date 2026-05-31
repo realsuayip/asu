@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -10,7 +11,7 @@
 <body>
 
 <elements-api
-        apiDescriptionUrl="{{ schema_url }}"
+        apiDescriptionUrl="{% static 'api-schema.yaml' %}"
         router="hash"
         layout="responsive"
         hideSchemas="true"

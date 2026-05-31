@@ -1,0 +1,1780 @@
+openapi: 3.0.3
+info:
+  title: asu API
+  version: v1
+  description: Welcome to asu OpenAPI documentation. Select an endpoint from the sidebar
+    to start.
+paths:
+  /api/v1/users/{id}/:
+    get:
+      operationId: users_retrieve
+      summary: Retrieve a user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Retrieval
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublicRead'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/{id}/block/:
+    post:
+      operationId: users_block_create
+      summary: Block a user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Block Operations
+      security:
+      - oauth2:
+        - user.block:write
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/{id}/follow/:
+    post:
+      operationId: users_follow_create
+      description: Depending on the user's choice, this action will either send a
+        follow request (if the account is private) or immediately follow the user.
+        Request might fail with 403 if the user is not allowed to follow the other
+        user (i.e., in case of blocking relations).
+      summary: Follow a user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Follow Operations
+      security:
+      - oauth2:
+        - user.follow:write
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Follow'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                AccessToResourceWasDenied:
+                  value:
+                    status: 403
+                    code: permission_denied
+                    message: You do not have permission to perform this action.
+                  summary: access to resource was denied
+          description: ''
+  /api/v1/users/{id}/followers/:
+    get:
+      operationId: users_followers_list
+      summary: List followers of a user
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Follow Operations
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserConnectionList'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/{id}/following/:
+    get:
+      operationId: users_following_list
+      summary: List follows of a user
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Follow Operations
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserConnectionList'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/{id}/unblock/:
+    post:
+      operationId: users_unblock_create
+      summary: Unblock a user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Block Operations
+      security:
+      - oauth2:
+        - user.block:write
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/{id}/unfollow/:
+    post:
+      operationId: users_unfollow_create
+      summary: Unfollow a user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Follow Operations
+      security:
+      - oauth2:
+        - user.follow:write
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/blocked/:
+    get:
+      operationId: users_blocked_list
+      summary: List blocked users
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      tags:
+      - User Block Operations
+      security:
+      - oauth2:
+        - user.block:read
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserConnectionList'
+          description: ''
+  /api/v1/users/by/:
+    get:
+      operationId: users_by_retrieve
+      summary: Retrieve a user by username
+      parameters:
+      - name: username
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+        explode: false
+      tags:
+      - User Retrieval
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublicRead'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/deactivate/:
+    post:
+      operationId: users_deactivate_create
+      summary: Deactivate authenticated user
+      tags:
+      - User Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeactivationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDeactivationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDeactivationRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                BadPassword:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      password:
+                      - message: Your password was not correct.
+                        code: invalid
+                  summary: bad password
+          description: ''
+  /api/v1/users/follow-requests/:
+    get:
+      operationId: users_follow_requests_list
+      summary: List follow requests
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      tags:
+      - User Follow Operations
+      security:
+      - oauth2:
+        - user.follow:read
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFollowRequestList'
+          description: ''
+  /api/v1/users/follow-requests/{id}/accept/:
+    post:
+      operationId: users_follow_requests_accept_create
+      summary: Accept a follow request
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Follow Operations
+      security:
+      - oauth2:
+        - user.follow:write
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/follow-requests/{id}/reject/:
+    post:
+      operationId: users_follow_requests_reject_create
+      summary: Reject a follow request
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - User Follow Operations
+      security:
+      - oauth2:
+        - user.follow:write
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/users/me/:
+    get:
+      operationId: users_me_retrieve
+      summary: Retrieve authenticated user
+      tags:
+      - User Settings
+      - User Retrieval
+      security:
+      - oauth2:
+        - user.profile:read
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_me_partial_update
+      summary: Update authenticated user
+      tags:
+      - User Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - oauth2:
+        - user.profile:write
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                BadValues:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      username:
+                      - message: This field may not be blank.
+                        code: invalid
+                      birth_date:
+                      - message: 'Date has wrong format. Use one of these formats
+                          instead: YYYY-MM-DD.'
+                        code: invalid
+                      website:
+                      - message: Enter a valid URL.
+                        code: invalid
+                  summary: bad values
+          description: ''
+  /api/v1/users/password-change/:
+    post:
+      operationId: users_password_change_create
+      summary: Change password
+      tags:
+      - User Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+          description: ''
+  /api/v1/users/profile-picture/:
+    put:
+      operationId: users_profile_picture_update
+      summary: Upload new profile picture
+      tags:
+      - User Settings
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfilePictureEditRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilePictureEdit'
+          description: ''
+    delete:
+      operationId: users_profile_picture_destroy
+      summary: Remove profile picture
+      tags:
+      - User Settings
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/relations/:
+    get:
+      operationId: users_relations_retrieve
+      summary: List relations with given users
+      parameters:
+      - name: usernames
+        in: query
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 16
+        explode: false
+      tags:
+      - User Follow Operations
+      - User Block Operations
+      security:
+      - oauth2:
+        - user.profile:read
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relation'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                IdsNotProvided:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      ids:
+                      - message: This field is required.
+                        code: invalid
+                  summary: ids not provided
+                TooManyIds:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      ids:
+                      - message: List contains 51 items, it should contain no more
+                          than 50.
+                        code: invalid
+                  summary: too many ids
+          description: ''
+  /api/v1/verifications/email/complete/:
+    post:
+      operationId: verifications_email_complete_create
+      summary: Verify email verification
+      tags:
+      - User Email Change
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangeEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangeEmailRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                FieldsHaveErrors:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      code:
+                      - message: Please enter a valid code.
+                        code: invalid
+                  summary: fields have errors
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/verifications/email/send/:
+    post:
+      operationId: verifications_email_send_create
+      summary: Send email verification
+      tags:
+      - User Email Change
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailVerificationSendRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailVerificationSendRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailVerificationSendRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationVerificationSend'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                E-mailIsInvalid:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      email:
+                      - message: Enter a valid email address.
+                        code: invalid
+                  summary: e-mail is invalid
+          description: ''
+  /api/v1/verifications/password-reset/complete/:
+    post:
+      operationId: verifications_password_reset_complete_create
+      summary: Reset password
+      tags:
+      - User Password Reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                BadValues:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      password:
+                      - message: This password is too common.
+                        code: invalid
+                      - message: This password is too short. It must contain at least
+                          8 characters.
+                        code: invalid
+                  summary: bad values
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/verifications/password-reset/send/:
+    post:
+      operationId: verifications_password_reset_send_create
+      summary: Send password reset verification
+      tags:
+      - User Password Reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerificationSendRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerificationSendRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerificationSendRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetVerificationSend'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                E-mailIsInvalid:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      email:
+                      - message: Enter a valid email address.
+                        code: invalid
+                  summary: e-mail is invalid
+          description: ''
+  /api/v1/verifications/password-reset/verify/:
+    post:
+      operationId: verifications_password_reset_verify_create
+      summary: Verify password reset verification
+      tags:
+      - User Password Reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerificationVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerificationVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerificationVerifyRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                FieldsHaveErrors:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      code:
+                      - message: Please enter a valid code.
+                        code: invalid
+                  summary: fields have errors
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/verifications/registration/complete/:
+    post:
+      operationId: verifications_registration_complete_create
+      summary: Register a new user
+      tags:
+      - User Registration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreate'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                BadUserInformation:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      display_name:
+                      - message: This field may not be blank.
+                        code: invalid
+                      username:
+                      - message: Usernames can only contain latin letters,numerals
+                          and underscores. Trailing, leading or consecutive underscores
+                          are not allowed.
+                        code: invalid
+                  summary: bad user information
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+  /api/v1/verifications/registration/send/:
+    post:
+      operationId: verifications_registration_send_create
+      summary: Send registration verification
+      tags:
+      - User Registration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationVerificationSendRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegistrationVerificationSendRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegistrationVerificationSendRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationVerificationSend'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                E-mailIsInvalid:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      email:
+                      - message: Enter a valid email address.
+                        code: invalid
+                  summary: e-mail is invalid
+          description: ''
+  /api/v1/verifications/registration/verify/:
+    post:
+      operationId: verifications_registration_verify_create
+      summary: Verify registration verification
+      tags:
+      - User Registration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationVerificationVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegistrationVerificationVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegistrationVerificationVerifyRequest'
+        required: true
+      security:
+      - oauth2: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                FieldsHaveErrors:
+                  value:
+                    status: 400
+                    code: invalid
+                    message: One or more parameters to your request was invalid.
+                    errors:
+                      code:
+                      - message: Please enter a valid code.
+                        code: invalid
+                  summary: fields have errors
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+              examples:
+                ResourceWasNotFound:
+                  value:
+                    status: 404
+                    code: not_found
+                    message: Not found.
+                  summary: resource was not found
+          description: ''
+components:
+  schemas:
+    APIError:
+      type: object
+      properties:
+        status:
+          type: integer
+          maximum: 599
+          minimum: 100
+          description: HTTP status code.
+        code:
+          type: string
+          description: A code identifying the class of the error.
+        message:
+          type: string
+          description: Human readable summary of the error.
+        errors:
+          allOf:
+          - $ref: '#/components/schemas/Errors'
+          description: A mapping with the keys referencing the given parameters.
+      required:
+      - code
+      - message
+      - status
+    Auth:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          $ref: '#/components/schemas/TokenTypeEnum'
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+        scope:
+          type: string
+      required:
+      - access_token
+      - expires_in
+      - refresh_token
+      - scope
+      - token_type
+    AuthRequest:
+      type: object
+      properties:
+        access_token:
+          type: string
+          minLength: 1
+        token_type:
+          $ref: '#/components/schemas/TokenTypeEnum'
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+          minLength: 1
+        scope:
+          type: string
+          minLength: 1
+      required:
+      - access_token
+      - expires_in
+      - refresh_token
+      - scope
+      - token_type
+    ChangeEmailRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          writeOnly: true
+        code:
+          type: string
+          writeOnly: true
+          minLength: 1
+          pattern: ^\d{6}$
+      required:
+      - code
+      - id
+    EmailVerificationSendRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    ErrorDetail:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+      required:
+      - code
+      - message
+    Errors:
+      type: object
+      properties:
+        non_field_errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+          description: If errors are not related to specific parameters, this key
+            might be present to contain other kinds of errors.
+        field_name:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+          description: Contains errors related to `field_name` parameter. Number of
+            such keys might vary.
+    Follow:
+      type: object
+      properties:
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+      required:
+      - status
+    FollowRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        from_user:
+          allOf:
+          - $ref: '#/components/schemas/RelatedUser'
+          readOnly: true
+      required:
+      - from_user
+      - id
+    LanguageEnum:
+      enum:
+      - en
+      - tr
+      type: string
+      description: |-
+        * `en` - English
+        * `tr` - Turkish
+    PaginatedFollowRequestList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowRequest'
+    PaginatedUserConnectionList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserConnection'
+    PasswordChangeRequest:
+      type: object
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - new_password
+      - old_password
+    PasswordResetRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - id
+      - password
+    PasswordResetVerificationSend:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+      required:
+      - email
+      - id
+    PasswordResetVerificationSendRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    PasswordResetVerificationVerifyRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          writeOnly: true
+        code:
+          type: string
+          writeOnly: true
+          minLength: 1
+          pattern: ^\d{6}$
+      required:
+      - code
+      - id
+    PatchedUserRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 32
+        username:
+          type: string
+          minLength: 3
+          pattern: ^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$
+          maxLength: 16
+        description:
+          type: string
+          maxLength: 140
+        website:
+          type: string
+          format: uri
+          maxLength: 200
+        profile_picture:
+          type: string
+          format: binary
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        is_private:
+          type: boolean
+          title: Private
+          description: Users with private accounts has the privilege of hiding their
+            identity.
+        allows_receipts:
+          type: boolean
+          title: Allows message receipts
+        allows_all_messages:
+          type: boolean
+          title: Allows all incoming messages
+          description: Users that are not followed by this user can send message requests
+            to them.
+        two_factor_enabled:
+          type: boolean
+    ProfilePictureEdit:
+      type: object
+      properties:
+        profile_picture:
+          type: string
+          format: uri
+      required:
+      - profile_picture
+    ProfilePictureEditRequest:
+      type: object
+      properties:
+        profile_picture:
+          type: string
+          format: binary
+      required:
+      - profile_picture
+    RegistrationVerificationSend:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+      required:
+      - email
+      - id
+    RegistrationVerificationSendRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    RegistrationVerificationVerifyRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          writeOnly: true
+        code:
+          type: string
+          writeOnly: true
+          minLength: 1
+          pattern: ^\d{6}$
+      required:
+      - code
+      - id
+    RelatedUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+        is_private:
+          type: boolean
+          readOnly: true
+          title: Private
+          description: Users with private accounts has the privilege of hiding their
+            identity.
+        description:
+          type: string
+          readOnly: true
+      required:
+      - description
+      - display_name
+      - id
+      - is_private
+      - profile_picture
+      - username
+    Relation:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserWithRelation'
+      required:
+      - results
+    RelationsEnum:
+      enum:
+      - following
+      - followed_by
+      - follow_request_sent
+      - follow_request_received
+      - blocking
+      - blocked_by
+      type: string
+      description: |-
+        * `following` - following
+        * `followed_by` - followed_by
+        * `follow_request_sent` - follow_request_sent
+        * `follow_request_received` - follow_request_received
+        * `blocking` - blocking
+        * `blocked_by` - blocked_by
+    StatusEnum:
+      enum:
+      - following
+      - follow_request_sent
+      type: string
+      description: |-
+        * `following` - Following
+        * `follow_request_sent` - Follow Request Sent
+    TokenTypeEnum:
+      enum:
+      - Bearer
+      type: string
+      description: '* `Bearer` - Bearer'
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        display_name:
+          type: string
+          maxLength: 32
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$
+          maxLength: 16
+          minLength: 3
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: E-mail
+        description:
+          type: string
+          maxLength: 140
+        website:
+          type: string
+          format: uri
+          maxLength: 200
+        profile_picture:
+          type: string
+          format: uri
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        is_private:
+          type: boolean
+          title: Private
+          description: Users with private accounts has the privilege of hiding their
+            identity.
+        allows_receipts:
+          type: boolean
+          title: Allows message receipts
+        allows_all_messages:
+          type: boolean
+          title: Allows all incoming messages
+          description: Users that are not followed by this user can send message requests
+            to them.
+        two_factor_enabled:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date created
+      required:
+      - created_at
+      - display_name
+      - email
+      - id
+      - profile_picture
+      - two_factor_enabled
+      - username
+    UserConnection:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+        description:
+          type: string
+          readOnly: true
+        is_private:
+          type: boolean
+          readOnly: true
+          title: Private
+          description: Users with private accounts has the privilege of hiding their
+            identity.
+      required:
+      - description
+      - display_name
+      - id
+      - is_private
+      - profile_picture
+      - username
+    UserCreate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: E-mail
+        display_name:
+          type: string
+          maxLength: 32
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$
+          maxLength: 16
+          minLength: 3
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        auth:
+          allOf:
+          - $ref: '#/components/schemas/Auth'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date created
+      required:
+      - auth
+      - created_at
+      - display_name
+      - email
+      - id
+      - username
+    UserCreateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 32
+        username:
+          type: string
+          minLength: 3
+          pattern: ^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$
+          maxLength: 16
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+      required:
+      - display_name
+      - id
+      - password
+      - username
+    UserDeactivationRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        for_deletion:
+          type: boolean
+          writeOnly: true
+          default: false
+          description: Marks this user for permanent deletion.
+      required:
+      - password
+    UserPublicRead:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+        is_private:
+          type: boolean
+          readOnly: true
+          title: Private
+          description: Users with private accounts has the privilege of hiding their
+            identity.
+        description:
+          type: string
+          readOnly: true
+        website:
+          type: string
+          format: uri
+          readOnly: true
+        following_count:
+          type: integer
+        follower_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date created
+      required:
+      - created_at
+      - description
+      - display_name
+      - follower_count
+      - following_count
+      - id
+      - is_private
+      - profile_picture
+      - username
+      - website
+    UserWithRelation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        relations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RelationsEnum'
+          description: May contain multiple relations.
+          readOnly: true
+      required:
+      - id
+      - relations
+      - username
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /o/authorize/
+          tokenUrl: /o/token/
+          scopes:
+            user.profile:read: Retrieve your account, with your public information.
+            user.profile.email:read: Retrieve your email address.
+            user.profile.private:read: Retrieve your private information, including
+              your personal preferences.
+            user.profile:write: Alter your profile and account settings, including
+              your personal preferences.
+            user.follow:read: Display your list of followers and follow requests.
+            user.follow:write: Follow and unfollow people on your behalf, send follow
+              requests.
+            user.block:read: Display your list of blocked users
+            user.block:write: Block and unblock people on your behalf.
+        clientCredentials:
+          tokenUrl: /o/token/
+          scopes:
+            user.profile:read: Retrieve your account, with your public information.
+            user.profile.email:read: Retrieve your email address.
+            user.profile.private:read: Retrieve your private information, including
+              your personal preferences.
+            user.profile:write: Alter your profile and account settings, including
+              your personal preferences.
+            user.follow:read: Display your list of followers and follow requests.
+            user.follow:write: Follow and unfollow people on your behalf, send follow
+              requests.
+            user.block:read: Display your list of blocked users
+            user.block:write: Block and unblock people on your behalf.

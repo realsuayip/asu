@@ -3,6 +3,7 @@ from typing import Any, cast
 
 from django import urls
 from django.conf import settings
+from django.core.management import call_command
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import URLPattern, URLResolver
 from django.urls.converters import UUIDConverter
@@ -23,7 +24,6 @@ from rest_framework.reverse import reverse
 from rest_framework.routers import APIRootView as BaseAPIRootView
 from rest_framework.views import APIView
 
-from drf_spectacular.plumbing import get_relative_url, set_query_parameters
 from drf_spectacular.settings import spectacular_settings
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import AUTHENTICATION_CLASSES
@@ -147,25 +147,21 @@ class DocsView(APIView):
     permission_classes = spectacular_settings.SERVE_PERMISSIONS
     authentication_classes = AUTHENTICATION_CLASSES
 
-    url_name = "docs:openapi-schema"
-    template_name = "docs.html"
-
     @extend_schema(exclude=True)
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if settings.DEBUG:
+            # Refresh OpenAPI schema during development.
+            call_command(
+                "spectacular",
+                file=settings.BASE_DIR / "asu/core/static/api-schema.yaml",
+                format="openapi",
+                api_version="v1",
+                lang="en",
+                validate=True,
+            )
         return Response(
-            data={
-                "title": spectacular_settings.TITLE,
-                "schema_url": self.get_schema_url(request),
-            },
-            template_name=self.template_name,
-        )
-
-    def get_schema_url(self, request: Request) -> str:
-        schema_url = get_relative_url(reverse(self.url_name, request=request))
-        return set_query_parameters(
-            url=schema_url,
-            lang=request.GET.get("lang"),
-            version=request.GET.get("version"),
+            data={"title": spectacular_settings.TITLE},
+            template_name="docs.html",
         )
 
 

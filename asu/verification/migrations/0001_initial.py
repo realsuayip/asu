@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         blank=True,
                         null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
+                        on_delete=django.db.models.deletion.DB_SET_NULL,
                         to="verification.passwordresetverification",
                         verbose_name="nulled by",
                     ),
@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
                 (
                     "user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         to=settings.AUTH_USER_MODEL,
                         verbose_name="user",
                     ),
@@ -159,7 +159,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         blank=True,
                         null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
+                        on_delete=django.db.models.deletion.DB_SET_NULL,
                         to="verification.emailverification",
                         verbose_name="nulled by",
                     ),
@@ -167,7 +167,7 @@ class Migration(migrations.Migration):
                 (
                     "user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         to=settings.AUTH_USER_MODEL,
                         verbose_name="user",
                     ),
@@ -247,7 +247,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         blank=True,
                         null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
+                        on_delete=django.db.models.deletion.DB_SET_NULL,
                         to="verification.registrationverification",
                         verbose_name="nulled by",
                     ),
@@ -257,7 +257,7 @@ class Migration(migrations.Migration):
                     models.OneToOneField(
                         blank=True,
                         null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
+                        on_delete=django.db.models.deletion.DB_SET_NULL,
                         to=settings.AUTH_USER_MODEL,
                         verbose_name="user",
                     ),

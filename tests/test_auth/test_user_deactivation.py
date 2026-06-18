@@ -194,7 +194,7 @@ def test_task_delete_users_permanently(mocker: MockerFixture) -> None:
     UserDeactivation.objects.create(user=to_be_deleted_later, for_deletion=True)
 
     # These deactivations will be triggered immediately.
-    UserDeactivation.objects.create(
+    gone = UserDeactivation.objects.create(
         user=delete_immediately,
         for_deletion=True,
         created_at=now,
@@ -214,10 +214,13 @@ def test_task_delete_users_permanently(mocker: MockerFixture) -> None:
     future = now + datetime.timedelta(days=30)
     mocker.patch("django.utils.timezone.now", return_value=future)
     num, objs = delete_users_permanently()
-    assert num == 2
+    assert num == 1
     assert objs["account.User"] == 1
+    assert UserDeactivation.objects.count() == 3
     with pytest.raises(User.DoesNotExist):
         delete_immediately.refresh_from_db()
+    with pytest.raises(UserDeactivation.DoesNotExist):
+        gone.refresh_from_db()
 
 
 @pytest.mark.django_db

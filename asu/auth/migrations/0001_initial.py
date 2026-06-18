@@ -220,7 +220,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         blank=True,
                         null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="sessions",
                         to=settings.AUTH_USER_MODEL,
                         verbose_name="user",
@@ -263,7 +263,7 @@ class Migration(migrations.Migration):
                 (
                     "from_user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="from_%(class)ss",
                         to=settings.AUTH_USER_MODEL,
                     ),
@@ -271,7 +271,7 @@ class Migration(migrations.Migration):
                 (
                     "to_user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="to_%(class)ss",
                         to=settings.AUTH_USER_MODEL,
                     ),
@@ -335,7 +335,7 @@ class Migration(migrations.Migration):
                 (
                     "user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="deactivations",
                         to=settings.AUTH_USER_MODEL,
                         verbose_name="user",
@@ -377,7 +377,7 @@ class Migration(migrations.Migration):
                 (
                     "from_user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="from_%(class)ss",
                         to=settings.AUTH_USER_MODEL,
                     ),
@@ -385,7 +385,7 @@ class Migration(migrations.Migration):
                 (
                     "to_user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="to_%(class)ss",
                         to=settings.AUTH_USER_MODEL,
                     ),
@@ -448,7 +448,7 @@ class Migration(migrations.Migration):
                 (
                     "from_user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="from_%(class)ss",
                         to=settings.AUTH_USER_MODEL,
                     ),
@@ -456,7 +456,7 @@ class Migration(migrations.Migration):
                 (
                     "to_user",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.DB_CASCADE,
                         related_name="to_%(class)ss",
                         to=settings.AUTH_USER_MODEL,
                     ),

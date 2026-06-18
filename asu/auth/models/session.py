@@ -15,7 +15,7 @@ class Session(AbstractBaseSession):
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.DB_CASCADE,
         related_name="sessions",
         verbose_name=_("user"),
     )

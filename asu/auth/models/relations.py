@@ -9,12 +9,12 @@ from asu.core.models.base import Base
 class UserRelation(Base):
     from_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.DB_CASCADE,
         related_name="from_%(class)ss",
     )
     to_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.DB_CASCADE,
         related_name="to_%(class)ss",
     )
 

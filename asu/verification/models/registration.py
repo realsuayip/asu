@@ -24,7 +24,7 @@ class RegistrationVerification(ExtendedVerification):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
-        on_delete=models.SET_NULL,
+        on_delete=models.DB_SET_NULL,
         null=True,
         blank=True,
     )

@@ -9,7 +9,7 @@ from asu.core.models.base import Base
 class UserDeactivation(Base):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.DB_CASCADE,
         related_name="deactivations",
         verbose_name=_("user"),
     )

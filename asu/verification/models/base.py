@@ -48,7 +48,7 @@ class Verification(Base):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("user"),
-        on_delete=models.CASCADE,
+        on_delete=models.DB_CASCADE,
     )
     email = models.EmailField(_("email"))
     code = models.CharField(
@@ -62,7 +62,7 @@ class Verification(Base):
         null=True,
         blank=True,
         verbose_name=_("nulled by"),
-        on_delete=models.SET_NULL,
+        on_delete=models.DB_SET_NULL,
     )
     verified_at = models.DateTimeField(_("date verified"), null=True, blank=True)
 

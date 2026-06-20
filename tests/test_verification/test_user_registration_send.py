@@ -5,6 +5,7 @@ import pytest
 from pytest_django import DjangoCaptureOnCommitCallbacks
 
 from asu.verification.models import RegistrationVerification
+
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
 from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX

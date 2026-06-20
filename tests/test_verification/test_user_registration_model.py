@@ -7,6 +7,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from asu.verification.models import RegistrationVerification
+
 from tests.factories import RegistrationVerificationFactory
 
 

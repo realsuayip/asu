@@ -6,6 +6,7 @@ from rest_framework.exceptions import ErrorDetail
 import pytest
 
 from asu.core.utils.rest import exception_handler
+
 from tests.conftest import OAuthClient
 
 exception_handler_cases = (

@@ -4,6 +4,7 @@ from django.urls import reverse
 import pytest
 
 from asu.auth.models import Application, User
+
 from tests.conftest import OAuthClient
 
 

@@ -14,6 +14,7 @@ from pytest_mock import MockerFixture
 from asu.auth.models import User
 from asu.core.utils import messages
 from asu.verification.models import RegistrationVerification
+
 from tests.conftest import OAuthClient, create_default_application
 from tests.factories import RegistrationVerificationFactory, UserFactory
 from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX

@@ -20,6 +20,7 @@ from asu.auth.models import (
     UserDeactivation,
 )
 from asu.auth.tasks import delete_users_permanently
+
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
 

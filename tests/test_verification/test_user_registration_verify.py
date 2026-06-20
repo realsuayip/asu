@@ -8,6 +8,7 @@ import pytest
 from pytest_django import DjangoAssertNumQueries
 
 from asu.verification.models import RegistrationVerification
+
 from tests.conftest import OAuthClient
 from tests.factories import RegistrationVerificationFactory
 

@@ -11,6 +11,7 @@ from pytest_django import DjangoCaptureOnCommitCallbacks
 from pytest_mock import MockerFixture
 
 from asu.auth.models import User
+
 from tests.conftest import OAuthClient
 from tests.factories import (
     RegistrationVerificationFactory,

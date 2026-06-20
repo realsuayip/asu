@@ -7,6 +7,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from asu.auth.models import User
+
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
 

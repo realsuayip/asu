@@ -24,7 +24,7 @@ class SessionStore(DBStore):
     def create_model_instance(self, data: dict[str, Any]) -> Session:
         try:
             user_id = cast("str", data.get("_auth_user_id"))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             user_id = None
         return Session(
             session_key=self._get_or_create_session_key(),  # type: ignore[attr-defined]

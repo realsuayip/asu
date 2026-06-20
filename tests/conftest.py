@@ -10,6 +10,7 @@ from oauth2_provider.settings import oauth2_settings
 
 from asu.auth.models import AccessToken, Application, User
 from asu.core.models import ProjectVariable
+
 from tests.factories import UserFactory
 
 

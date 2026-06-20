@@ -11,6 +11,7 @@ from pytest_mock import MockerFixture
 
 from asu.core.utils import messages
 from asu.verification.models import PasswordResetVerification
+
 from tests.conftest import OAuthClient
 from tests.factories import PasswordResetVerificationFactory, UserFactory
 from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX

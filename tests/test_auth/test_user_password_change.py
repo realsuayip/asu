@@ -5,6 +5,7 @@ import pytest
 from pytest_django import DjangoCaptureOnCommitCallbacks
 
 from asu.auth.models import Application, RefreshToken, User
+
 from tests.conftest import OAuthClient
 
 

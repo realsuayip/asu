@@ -2,6 +2,7 @@ import pytest
 from django_otp.models import Device
 
 from asu.auth.models import AccessToken, RefreshToken, StaticDevice, TOTPDevice, User
+
 from tests.conftest import create_default_application
 
 

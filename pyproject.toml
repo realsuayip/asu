@@ -164,11 +164,13 @@ section-order = [
     "third-party",
     "first-party",
     "local-folder",
+    "tests",
 ]
 
 [tool.ruff.lint.isort.sections]
 django = ["django"]
 rest_framework = ["rest_framework"]
+tests = ["tests"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "*/migrations/*" = ["E501"]

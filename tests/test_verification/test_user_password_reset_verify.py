@@ -8,6 +8,7 @@ import pytest
 from pytest_django import DjangoAssertNumQueries
 
 from asu.verification.models import PasswordResetVerification
+
 from tests.conftest import OAuthClient
 from tests.factories import PasswordResetVerificationFactory, UserFactory
 

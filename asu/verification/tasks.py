@@ -15,11 +15,11 @@ logger = get_task_logger(__name__)
 
 @app.task
 def send_registration_email(*, email: str, uid: str) -> None:
-    logger.info("Registration requested, email=%s", email)
     if User.objects.filter(email__iexact=email).exists():
         # Skip sending email if user with this email is already registered.
         logger.warning("Registration mail cancelled, email=%s", email)
         return
+    logger.info("Registration requested, email=%s", email)
     RegistrationVerification.objects.start(pk=uuid.UUID(uid), email=email)
 
 
@@ -47,9 +47,10 @@ def send_password_reset_email(*, email: str, uid: str) -> None:
     if not user.has_usable_password():
         logger.warning(
             "Password reset request is cancelled because user did not have"
-            " usable password, user_id=%s",
+            " usable password, user_id=%s email=%s",
             user.pk,
+            email,
         )
         return
-    logger.info("Password reset requested, user_id=%s", user.pk)
+    logger.info("Password reset requested, user_id=%s email=%s", user.pk, email)
     PasswordResetVerification.objects.start(pk=uuid.UUID(uid), email=email, user=user)

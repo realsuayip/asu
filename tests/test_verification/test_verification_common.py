@@ -12,7 +12,10 @@ from pytest_mock import MockerFixture
 
 from asu.auth.models import User
 from tests.conftest import OAuthClient
-from tests.factories import UserFactory
+from tests.factories import (
+    RegistrationVerificationFactory,
+    UserFactory,
+)
 
 EMAIL_CODE_REGEX = _lazy_re_compile(r"<div class='code'><strong>(\d+)</strong></div>")
 
@@ -48,9 +51,18 @@ def test_code_generation(
     obj = klass.objects.get()
     assert (
         obj.code_hash
-        == "c17da4147deca060345465d9097a3cdbe02e8beb189ec82cabf4c59da300bce5"
+        == "ad73700bc37a183bfe895893392cd80931649356c535d878323e2ed6afe8b072"
     )
     assert code == "123456"
+
+
+@pytest.mark.django_db
+def test_code_generation_same_code() -> None:
+    v1, v2 = RegistrationVerificationFactory.create_batch(
+        code="123456",
+        size=2,
+    )
+    assert v1.code_hash != v2.code_hash
 
 
 @pytest.mark.django_db

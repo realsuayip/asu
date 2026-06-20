@@ -32,7 +32,7 @@ def get_code_hash(
     code: str,
 ) -> str:
     return salted_hmac(
-        key_salt=pk.hex,
+        key_salt=pk.bytes,
         value=code,
         secret=settings.VERIFICATION_SECRET_KEY,
         algorithm="sha256",

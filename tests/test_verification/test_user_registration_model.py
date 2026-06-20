@@ -7,20 +7,14 @@ import pytest
 from pytest_mock import MockerFixture
 
 from asu.verification.models import RegistrationVerification
-
-
-@pytest.mark.django_db
-def test_verification_registration_code_generation() -> None:
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
-
-    assert len(verification.code) == 6
-    assert verification.code.isdigit()
+from tests.factories import RegistrationVerificationFactory
 
 
 @pytest.mark.django_db
 def test_verification_registration_eligible() -> None:
-    verification = RegistrationVerification.objects.create(
-        email="helen@example.com", verified_at=timezone.now()
+    verification = RegistrationVerificationFactory.create(
+        email="helen@example.com",
+        verified_at=timezone.now(),
     )
     actual = RegistrationVerification.objects.eligible().get()
     assert actual == verification
@@ -31,7 +25,7 @@ def test_verification_registration_eligible_case_expired(
     mocker: MockerFixture,
 ) -> None:
     # Create a verified registration
-    RegistrationVerification.objects.create(
+    RegistrationVerificationFactory.create(
         email="helen@example.com",
         verified_at=timezone.now(),
     )

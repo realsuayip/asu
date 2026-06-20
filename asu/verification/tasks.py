@@ -1,4 +1,4 @@
-from django.db import transaction
+import uuid
 
 from celery.utils.log import get_task_logger
 
@@ -20,10 +20,7 @@ def send_registration_email(*, email: str, uid: str) -> None:
         # Skip sending email if user with this email is already registered.
         logger.warning("Registration mail cancelled, email=%s", email)
         return
-
-    with transaction.atomic():
-        verification = RegistrationVerification.objects.create(id=uid, email=email)
-        transaction.on_commit(verification.send_email)
+    RegistrationVerification.objects.start(pk=uuid.UUID(uid), email=email)
 
 
 @app.task
@@ -38,9 +35,7 @@ def send_email_change_email(*, user_id: str, email: str, uid: str) -> None:
         user.email,
         email,
     )
-    with transaction.atomic():
-        verification = EmailVerification.objects.create(id=uid, email=email, user=user)
-        transaction.on_commit(verification.send_email)
+    EmailVerification.objects.start(pk=uuid.UUID(uid), email=email, user=user)
 
 
 @app.task
@@ -57,10 +52,4 @@ def send_password_reset_email(*, email: str, uid: str) -> None:
         )
         return
     logger.info("Password reset requested, user_id=%s", user.pk)
-    with transaction.atomic():
-        verification = PasswordResetVerification.objects.create(
-            id=uid,
-            user=user,
-            email=email,
-        )
-        transaction.on_commit(verification.send_email)
+    PasswordResetVerification.objects.start(pk=uuid.UUID(uid), email=email, user=user)

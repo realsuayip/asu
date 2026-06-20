@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 
 from django.conf import settings
@@ -12,7 +11,8 @@ from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks
 from asu.auth.models import Application
 from asu.verification.models import EmailVerification
 from tests.conftest import OAuthClient
-from tests.factories import UserFactory
+from tests.factories import EmailVerificationFactory, UserFactory
+from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX
 
 
 @pytest.mark.django_db
@@ -22,9 +22,10 @@ def test_user_email_change_complete(
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
-    verification = EmailVerification.objects.create(
+    verification = EmailVerificationFactory.create(
         email="helen_new@example.com",
         user=user,
+        code="123456",
     )
     with django_assert_num_queries(
         2  # savepoint
@@ -39,7 +40,7 @@ def test_user_email_change_complete(
             reverse("api:v1:verification:email-change-complete"),
             data={
                 "id": verification.pk,
-                "code": verification.code,
+                "code": "123456",
             },
         )
     assert response.status_code == 204
@@ -53,15 +54,16 @@ def test_user_email_change_complete(
 def test_user_email_change_complete_expires_code_after_use(client: OAuthClient) -> None:
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
-    verification = EmailVerification.objects.create(
+    verification = EmailVerificationFactory.create(
         email="helen_new@example.com",
         user=user,
+        code="123456",
     )
     url, payload = (
         reverse("api:v1:verification:email-change-complete"),
         {
             "id": verification.pk,
-            "code": verification.code,
+            "code": "123456",
         },
     )
     r1 = client.post(url, data=payload)
@@ -74,12 +76,11 @@ def test_user_email_change_complete_expires_code_after_use(client: OAuthClient) 
 def test_user_email_change_complete_bad_code(client: OAuthClient) -> None:
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
-    verification = EmailVerification.objects.create(
+    verification = EmailVerificationFactory.create(
         email="helen_new@example.com",
         user=user,
+        code="123456",
     )
-    verification.code = "123456"
-    verification.save(update_fields=["code", "updated_at"])
     response = client.post(
         reverse("api:v1:verification:email-change-complete"),
         data={
@@ -96,17 +97,18 @@ def test_user_email_change_complete_expired_code(client: OAuthClient) -> None:
     client.set_user(user, scope="")
 
     past = timezone.now() - timedelta(seconds=settings.EMAIL_CHANGE_VERIFY_TIMEOUT + 10)
-    verification = EmailVerification.objects.create(
+    verification = EmailVerificationFactory.create(
         email="helen_new@example.com",
         user=user,
         created_at=past,
+        code="123456",
     )
 
     response = client.post(
         reverse("api:v1:verification:email-change-complete"),
         data={
             "id": verification.pk,
-            "code": verification.code,
+            "code": "123456",
         },
     )
     assert response.status_code == 404
@@ -128,25 +130,29 @@ def test_user_email_change_nullifies_other_verifications(
     user2 = UserFactory.create(email="other@example.com")
     client.set_user(user, scope="")
 
-    v1, v2, v3, v4 = EmailVerification.objects.bulk_create(
-        [
-            EmailVerification(email="helen_new@example.com", user=user),
-            EmailVerification(email=email, user=user),
-            # other user contesting for same email
-            EmailVerification(email="helen_new@example.com", user=user2),
-            # unrelated verification, should not be nullified
-            EmailVerification(email="unrelated@example.com", user=user2),
-        ]
+    v1, v2, v3, v4 = (
+        EmailVerificationFactory.create(
+            code="123456",
+            email="helen_new@example.com",
+            user=user,
+        ),
+        EmailVerificationFactory.create(email=email, user=user),
+        # other user contesting for same email
+        EmailVerificationFactory.create(email="helen_new@example.com", user=user2),
+        # unrelated verification, should not be nullified
+        EmailVerificationFactory.create(email="unrelated@example.com", user=user2),
     )
+
     response = client.post(
         reverse("api:v1:verification:email-change-complete"),
-        data={"id": v1.pk, "code": v1.code},
+        data={"id": v1.pk, "code": "123456"},
     )
     assert response.status_code == 204
 
+    qs = EmailVerification.objects.select_related("nulled_by")
     v1.refresh_from_db()
-    v2.refresh_from_db()
-    v3.refresh_from_db()
+    v2.refresh_from_db(from_queryset=qs)
+    v3.refresh_from_db(from_queryset=qs)
     v4.refresh_from_db()
 
     assert v1.verified_at is not None
@@ -170,10 +176,7 @@ def test_user_email_change_flow(
         )
     assert response.status_code == 201
     uid = response.json()["id"]
-    code = re.search(
-        r"<div class='code'><strong>(\d+)</strong></div>",
-        mail.outbox[0].body,
-    ).group(1)
+    code = EMAIL_CODE_REGEX.search(mail.outbox[0].body).group(1)
 
     # Step 2: Pair id with code to verify and change email
     response = client.post(

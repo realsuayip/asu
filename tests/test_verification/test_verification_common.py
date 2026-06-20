@@ -1,9 +1,56 @@
+import uuid
+
+from django.apps import apps
+from django.core import mail
+from django.test import override_settings
 from django.urls import reverse
+from django.utils.regex_helper import _lazy_re_compile
 
 import pytest
+from pytest_django import DjangoCaptureOnCommitCallbacks
+from pytest_mock import MockerFixture
 
+from asu.auth.models import User
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
+
+EMAIL_CODE_REGEX = _lazy_re_compile(r"<div class='code'><strong>(\d+)</strong></div>")
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "model",
+    (
+        "verification.EmailVerification",
+        "verification.RegistrationVerification",
+        "verification.PasswordResetVerification",
+    ),
+)
+@override_settings(VERIFICATION_SECRET_KEY="secret")
+def test_code_generation(
+    mocker: MockerFixture,
+    model: str,
+    user: User,
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+) -> None:
+    klass = apps.get_model(model)
+    mocker.patch(
+        "asu.verification.models.base.get_random_string",
+        return_value="123456",
+    )
+    with django_capture_on_commit_callbacks(execute=True):
+        klass.objects.start(
+            pk=uuid.UUID("019ee4bce367772f817c9ad0e358c6cf"),
+            email=user.email,
+            user=user,
+        )
+    code = EMAIL_CODE_REGEX.search(mail.outbox[0].body).group(1)
+    obj = klass.objects.get()
+    assert (
+        obj.code_hash
+        == "c17da4147deca060345465d9097a3cdbe02e8beb189ec82cabf4c59da300bce5"
+    )
+    assert code == "123456"
 
 
 @pytest.mark.django_db

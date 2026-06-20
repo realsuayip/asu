@@ -9,23 +9,25 @@ from pytest_django import DjangoAssertNumQueries
 
 from asu.verification.models import RegistrationVerification
 from tests.conftest import OAuthClient
+from tests.factories import RegistrationVerificationFactory
 
 
 @pytest.mark.django_db
-def test_verification_registration_verify(
+def test_verification_registration_verify_a85(
     first_party_app_client: OAuthClient,
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
+    verification = RegistrationVerificationFactory.create(code="123456")
     with django_assert_num_queries(
         1  # fetch token
+        + 1  # fetch verification
         + 1  # update verification
     ):
         response = first_party_app_client.post(
             reverse("api:v1:verification:registration-verify"),
             data={
                 "id": verification.pk,
-                "code": verification.code,
+                "code": "123456",
             },
         )
     assert response.status_code == 204
@@ -39,10 +41,10 @@ def test_verification_registration_verify(
 def test_verification_registration_verify_expires_code_after_use(
     first_party_app_client: OAuthClient,
 ) -> None:
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
+    verification = RegistrationVerificationFactory.create(code="123456")
     url, payload = (
         reverse("api:v1:verification:registration-verify"),
-        {"id": verification.pk, "code": verification.code},
+        {"id": verification.pk, "code": "123456"},
     )
     r1 = first_party_app_client.post(url, data=payload)
     r2 = first_party_app_client.post(url, data=payload)
@@ -54,9 +56,7 @@ def test_verification_registration_verify_expires_code_after_use(
 def test_verification_registration_verify_bad_code(
     first_party_app_client: OAuthClient,
 ) -> None:
-    verification = RegistrationVerification.objects.create(email="helen@example.com")
-    verification.code = "123456"
-    verification.save(update_fields=["code", "updated_at"])
+    verification = RegistrationVerificationFactory.create(code="123456")
     response = first_party_app_client.post(
         reverse("api:v1:verification:registration-verify"),
         data={
@@ -72,16 +72,16 @@ def test_verification_registration_verify_expired_code(
     first_party_app_client: OAuthClient,
 ) -> None:
     past = timezone.now() - timedelta(seconds=settings.REGISTRATION_VERIFY_TIMEOUT + 10)
-    verification = RegistrationVerification.objects.create(
-        email="helen@example.com",
+    verification = RegistrationVerificationFactory.create(
         created_at=past,
+        code="123456",
     )
 
     response = first_party_app_client.post(
         reverse("api:v1:verification:registration-verify"),
         data={
             "id": verification.pk,
-            "code": verification.code,
+            "code": "123456",
         },
     )
     assert response.status_code == 404

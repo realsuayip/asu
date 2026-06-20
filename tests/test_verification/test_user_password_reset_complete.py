@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 
 from django.conf import settings
@@ -13,7 +12,8 @@ from pytest_mock import MockerFixture
 from asu.core.utils import messages
 from asu.verification.models import PasswordResetVerification
 from tests.conftest import OAuthClient
-from tests.factories import UserFactory
+from tests.factories import PasswordResetVerificationFactory, UserFactory
+from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX
 
 
 @pytest.mark.django_db
@@ -22,7 +22,7 @@ def test_user_password_reset_complete(
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         user=user,
         email="helen@example.com",
         verified_at=timezone.now(),
@@ -77,7 +77,7 @@ def test_user_password_reset_complete_case_expired_id(
     mocker: MockerFixture,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         user=user,
         email="helen@example.com",
         verified_at=timezone.now(),
@@ -105,7 +105,7 @@ def test_user_password_reset_complete_case_unusable_password(
     user = UserFactory.create(email="helen@example.com")
     user.set_unusable_password()
     user.save(update_fields=["password", "updated_at"])
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         user=user,
         email="helen@example.com",
         verified_at=timezone.now(),
@@ -126,7 +126,7 @@ def test_user_password_reset_complete_password_validation(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         user=user,
         email="helen@example.com",
         verified_at=timezone.now(),
@@ -183,27 +183,31 @@ def test_user_password_reset_complete_nullifies_other_verifications(
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
     user2 = UserFactory.create(email="other@example.com")
-    v1, v2, v3, v4, v5 = PasswordResetVerification.objects.bulk_create(
-        [
-            PasswordResetVerification(
-                email="helen@example.com",
-                user=user,
-                verified_at=timezone.now(),
-            ),
-            PasswordResetVerification(
-                email="helen@example.com",
-                user=user,
-                verified_at=timezone.now(),
-            ),
-            PasswordResetVerification(email="helen@example.com", user=user),
-            # unrelated verifications, they should not be affected
-            PasswordResetVerification(email="other_new@example.com", user=user2),
-            PasswordResetVerification(
-                email="other_new2@example.com",
-                user=user2,
-                verified_at=timezone.now(),
-            ),
-        ]
+    v1, v2, v3, v4, v5 = (
+        PasswordResetVerificationFactory.create(
+            email="helen@example.com",
+            user=user,
+            verified_at=timezone.now(),
+        ),
+        PasswordResetVerificationFactory.create(
+            email="helen@example.com",
+            user=user,
+            verified_at=timezone.now(),
+        ),
+        PasswordResetVerificationFactory.create(
+            email="helen@example.com",
+            user=user,
+        ),
+        # unrelated verifications, they should not be affected
+        PasswordResetVerificationFactory.create(
+            email="other_new@example.com",
+            user=user2,
+        ),
+        PasswordResetVerificationFactory.create(
+            email="other_new2@example.com",
+            user=user2,
+            verified_at=timezone.now(),
+        ),
     )
     response = first_party_app_client.post(
         reverse("api:v1:verification:password-reset-complete"),
@@ -214,9 +218,10 @@ def test_user_password_reset_complete_nullifies_other_verifications(
     )
     assert response.status_code == 204
 
+    qs = PasswordResetVerification.objects.select_related("nulled_by")
     v1.refresh_from_db()
-    v2.refresh_from_db()
-    v3.refresh_from_db()
+    v2.refresh_from_db(from_queryset=qs)
+    v3.refresh_from_db(from_queryset=qs)
     v4.refresh_from_db()
     v5.refresh_from_db()
 
@@ -241,10 +246,7 @@ def test_user_password_reset_flow(
         )
     assert response.status_code == 201
     uid = response.json()["id"]
-    code = re.search(
-        r"<div class='code'><strong>(\d+)</strong></div>",
-        mail.outbox[0].body,
-    ).group(1)
+    code = EMAIL_CODE_REGEX.search(mail.outbox[0].body).group(1)
 
     # Step 2: Pair id with code to verify it
     response = first_party_app_client.post(
@@ -273,22 +275,25 @@ def test_user_password_reset_flow(
 @pytest.mark.django_db
 def test_user_password_reset_flow_case_email_change_invalidation(
     first_party_app_client: OAuthClient,
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     # If email is changed for some reason in mid-flow, the verification
     # should not be usable.
     user = UserFactory.create(email="helen@example.com")
 
-    first_party_app_client.post(
-        reverse("api:v1:verification:password-reset-send"),
-        data={"email": "helen@example.com"},
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        first_party_app_client.post(
+            reverse("api:v1:verification:password-reset-send"),
+            data={"email": "helen@example.com"},
+        )
     verification = PasswordResetVerification.objects.get()
+    code = EMAIL_CODE_REGEX.search(mail.outbox[0].body).group(1)
 
     first_party_app_client.post(
         reverse("api:v1:verification:password-reset-verify"),
         data={
             "id": str(verification.pk),
-            "code": verification.code,
+            "code": code,
         },
     )
 

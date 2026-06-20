@@ -31,10 +31,13 @@ class ChangeEmailSerializer(VerificationVerifySerializer):
         try:
             verification = (
                 EmailVerification.objects.verifiable()
-                .only("pk", "email", "user_id")
-                .get(pk=pk, code=code, user=user)
+                .only("pk", "email", "user_id", "code_hash")
+                .get(pk=pk, user=user)
             )
         except EmailVerification.DoesNotExist:
+            raise NotFound(messages.BAD_VERIFICATION_CODE)
+
+        if not verification.verify_code(code=code):
             raise NotFound(messages.BAD_VERIFICATION_CODE)
 
         if not verification.complete():

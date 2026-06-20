@@ -8,6 +8,7 @@ from asu.auth.models import Application
 from asu.verification.models import EmailVerification
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
+from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX
 
 
 @pytest.mark.django_db
@@ -33,10 +34,7 @@ def test_user_email_change_send(
     }
     assert verification.email == "helen_new@example.com"
     assert verification.user == user
-    assert (
-        f"<div class='code'><strong>{verification.code}</strong></div>"
-        in mail.outbox[0].body
-    )
+    assert EMAIL_CODE_REGEX.search(mail.outbox[0].body)
     assert verification.verified_at is None
 
 

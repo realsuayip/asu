@@ -7,13 +7,15 @@ from typing import ClassVar, Self
 
 from django.conf import settings
 from django.core.validators import RegexValidator
-from django.db import OperationalError, models
+from django.db import OperationalError, models, transaction
 from django.db.models import Q, QuerySet
-from django.db.models.functions import Now
+from django.db.models.functions import Length, Now
+from django.db.models.lookups import Exact
 from django.utils import timezone
-from django.utils.crypto import get_random_string
+from django.utils.crypto import constant_time_compare, get_random_string, salted_hmac
 from django.utils.translation import gettext_lazy as _
 
+from asu.auth.models import User
 from asu.core.models.base import Base, BaseManager
 from asu.core.utils import mailing
 from asu.core.utils.messages import EmailMessage
@@ -22,10 +24,41 @@ code_validator = RegexValidator(
     regex=r"^\d{6}$",
     message=_("Please enter a valid code."),
 )
-generate_random_code = partial(get_random_string, length=6, allowed_chars=string.digits)
+
+
+def get_code_hash(
+    *,
+    pk: uuid.UUID,
+    code: str,
+) -> str:
+    return salted_hmac(
+        key_salt=pk.bytes,
+        value=code,
+        secret=settings.VERIFICATION_SECRET_KEY,
+        algorithm="sha256",
+    ).hexdigest()
 
 
 class VerificationManager[T: Verification](BaseManager[T]):
+    @transaction.atomic(durable=True)
+    def start(
+        self,
+        *,
+        pk: uuid.UUID,
+        email: str,
+        user: User | None = None,
+    ) -> None:
+        code = get_random_string(6, allowed_chars=string.digits)
+        code_hash = get_code_hash(pk=pk, code=code)
+        verification = self.create(
+            pk=pk,
+            email=email,
+            user=user,
+            code_hash=code_hash,
+        )
+        send_email = partial(verification.send_email, code=code)
+        transaction.on_commit(send_email)
+
     def verifiable(self) -> QuerySet[T]:
         timeout = self.model.VERIFY_TIMEOUT
         min_created_at = timezone.now() - timedelta(seconds=timeout)
@@ -51,12 +84,7 @@ class Verification(Base):
         on_delete=models.DB_CASCADE,
     )
     email = models.EmailField(_("email"))
-    code = models.CharField(
-        _("code"),
-        max_length=6,
-        validators=[code_validator],
-        default=generate_random_code,
-    )
+    code_hash = models.CharField(_("code hash"))
     nulled_by = models.ForeignKey(
         "self",
         null=True,
@@ -73,6 +101,16 @@ class Verification(Base):
 
     class Meta:
         abstract = True
+        constraints = [
+            models.CheckConstraint(
+                name="%(class)s_code_hash_length",
+                condition=Exact(Length("code_hash"), 64),
+            )
+        ]
+
+    def verify_code(self, *, code: str) -> bool:
+        code_hash = get_code_hash(pk=self.pk, code=code)
+        return constant_time_compare(self.code_hash, code_hash)
 
     def null_others(self, *, locked: Iterable[uuid.UUID]) -> None:
         # If the user successfully makes use of another verification object,
@@ -86,14 +124,18 @@ class Verification(Base):
             nulled_by__isnull=True,
         ).update(nulled_by=self, updated_at=Now())
 
-    def send_email(self) -> int:
+    def send_email(
+        self,
+        *,
+        code: str,
+    ) -> int:
         title, content = self.EMAIL_MESSAGE.subject, self.EMAIL_MESSAGE.body
         return mailing.send(
             "code.html",
             title=title,
             content=content,
             recipients=[self.email],
-            context={"code": self.code},
+            context={"code": code},
         )
 
 

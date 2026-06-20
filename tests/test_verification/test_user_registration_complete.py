@@ -1,4 +1,4 @@
-import re
+import random
 from datetime import timedelta
 
 from django.conf import settings
@@ -15,7 +15,8 @@ from asu.auth.models import User
 from asu.core.utils import messages
 from asu.verification.models import RegistrationVerification
 from tests.conftest import OAuthClient, create_default_application
-from tests.factories import UserFactory
+from tests.factories import RegistrationVerificationFactory, UserFactory
+from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX
 
 
 @pytest.mark.django_db
@@ -25,8 +26,9 @@ def test_user_registration_create(
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     create_default_application()
-    verification = RegistrationVerification.objects.create(
-        email="helen@example.com", verified_at=timezone.now()
+    verification = RegistrationVerificationFactory.create(
+        email="helen@example.com",
+        verified_at=timezone.now(),
     )
     payload = {
         "id": verification.pk,
@@ -112,7 +114,7 @@ def test_user_registration_create_case_expired_id(
     first_party_app_client: OAuthClient,
     mocker: MockerFixture,
 ) -> None:
-    verification = RegistrationVerification.objects.create(
+    verification = RegistrationVerificationFactory.create(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
@@ -144,7 +146,7 @@ def test_user_registration_create_case_email_validation(
     # gets taken by another mechanism, we should still block registration via
     # unique constraint on email.
     create_default_application()
-    verification = RegistrationVerification.objects.create(
+    verification = RegistrationVerificationFactory.create(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
@@ -174,7 +176,7 @@ def test_user_registration_create_case_email_validation(
 def test_user_registration_create_password_validation(
     first_party_app_client: OAuthClient,
 ) -> None:
-    verification = RegistrationVerification.objects.create(
+    verification = RegistrationVerificationFactory.create(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
@@ -218,7 +220,7 @@ def test_user_registration_create_username_validation(
     error_message: str,
 ) -> None:
     UserFactory.create(username="Helen")
-    verification = RegistrationVerification.objects.create(
+    verification = RegistrationVerificationFactory.create(
         email="helen@example.com",
         verified_at=timezone.now(),
     )
@@ -277,22 +279,26 @@ def test_user_registration_nullifies_other_verifications(
     first_party_app_client: OAuthClient,
 ) -> None:
     create_default_application()
+    code_hash = f"{random.getrandbits(256):x}"
     v1, v2, v3, v4, v5 = RegistrationVerification.objects.bulk_create(
         [
             RegistrationVerification(
                 email="helen@example.com",
                 verified_at=timezone.now(),
+                code_hash=code_hash,
             ),
             RegistrationVerification(
                 email="helen@example.com",
                 verified_at=timezone.now(),
+                code_hash=code_hash,
             ),
-            RegistrationVerification(email="helen@example.com"),
+            RegistrationVerification(email="helen@example.com", code_hash=code_hash),
             # unrelated verifications, they should not be affected
-            RegistrationVerification(email="other@example.com"),
+            RegistrationVerification(email="other@example.com", code_hash=code_hash),
             RegistrationVerification(
                 email="other2@example.com",
                 verified_at=timezone.now(),
+                code_hash=code_hash,
             ),
         ]
     )
@@ -335,10 +341,7 @@ def test_user_registration_flow(
         )
     assert response.status_code == 201
     uid = response.json()["id"]
-    code = re.search(
-        r"<div class='code'><strong>(\d+)</strong></div>",
-        mail.outbox[0].body,
-    ).group(1)
+    code = EMAIL_CODE_REGEX.search(mail.outbox[0].body).group(1)
 
     # Step 2: Pair id with code to verify it
     response = first_party_app_client.post(

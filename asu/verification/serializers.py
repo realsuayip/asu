@@ -1,6 +1,7 @@
 import uuid
 from typing import Any, ClassVar
 
+from django.db import OperationalError
 from django.db.models.functions import Now
 from django.utils.translation import gettext_lazy as _
 
@@ -41,11 +42,18 @@ class VerificationVerifySerializer(serializers.Serializer[dict[str, Any]]):
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         pk, code = validated_data["id"], validated_data["code"]
-        updated = (
-            self.model.objects.verifiable()
-            .filter(pk=pk, code=code)
-            .update(verified_at=Now(), updated_at=Now())
-        )
-        if not updated:
+        try:
+            verification = (
+                self.model.objects.verifiable()
+                .filter(pk=pk)
+                .only("pk", "code_hash")
+                .select_for_update(nowait=True)
+                .get()
+            )
+        except self.model.DoesNotExist, OperationalError:
             raise NotFound(messages.BAD_VERIFICATION_CODE)
+        if not verification.verify_code(code=code):
+            raise NotFound(messages.BAD_VERIFICATION_CODE)
+        verification.verified_at = Now()
+        verification.save(update_fields=["verified_at", "updated_at"])
         return validated_data

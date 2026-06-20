@@ -7,6 +7,7 @@ from pytest_django import DjangoCaptureOnCommitCallbacks
 from asu.verification.models import PasswordResetVerification
 from tests.conftest import OAuthClient
 from tests.factories import UserFactory
+from tests.test_verification.test_verification_common import EMAIL_CODE_REGEX
 
 
 @pytest.mark.django_db
@@ -31,10 +32,7 @@ def test_user_password_reset_send(
     }
     assert verification.email == "helen@example.com"
     assert verification.user == user
-    assert (
-        f"<div class='code'><strong>{verification.code}</strong></div>"
-        in mail.outbox[0].body
-    )
+    assert EMAIL_CODE_REGEX.search(mail.outbox[0].body)
     assert not PasswordResetVerification.objects.eligible().exists()
     assert verification.completed_at is None
 

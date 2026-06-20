@@ -9,7 +9,7 @@ from pytest_django import DjangoAssertNumQueries
 
 from asu.verification.models import PasswordResetVerification
 from tests.conftest import OAuthClient
-from tests.factories import UserFactory
+from tests.factories import PasswordResetVerificationFactory, UserFactory
 
 
 @pytest.mark.django_db
@@ -18,19 +18,21 @@ def test_user_password_reset_verify(
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         email="helen@example.com",
         user=user,
+        code="123456",
     )
     with django_assert_num_queries(
         1  # fetch token
+        + 1  # fetch verification
         + 1  # update verification
     ):
         response = first_party_app_client.post(
             reverse("api:v1:verification:password-reset-verify"),
             data={
                 "id": verification.pk,
-                "code": verification.code,
+                "code": "123456",
             },
         )
     assert response.status_code == 204
@@ -45,15 +47,16 @@ def test_user_password_reset_verify_expires_code_after_use(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         email="helen@example.com",
         user=user,
+        code="123456",
     )
     url, payload = (
         reverse("api:v1:verification:password-reset-verify"),
         {
             "id": verification.pk,
-            "code": verification.code,
+            "code": "123456",
         },
     )
     r1 = first_party_app_client.post(url, data=payload)
@@ -67,12 +70,11 @@ def test_user_password_reset_verify_bad_code(
     first_party_app_client: OAuthClient,
 ) -> None:
     user = UserFactory.create(email="helen@example.com")
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         email="helen@example.com",
         user=user,
+        code="123456",
     )
-    verification.code = "123456"
-    verification.save(update_fields=["code", "updated_at"])
     response = first_party_app_client.post(
         reverse("api:v1:verification:password-reset-verify"),
         data={
@@ -91,17 +93,18 @@ def test_user_password_reset_verify_expired_code(
         seconds=settings.PASSWORD_RESET_VERIFY_TIMEOUT + 10
     )
     user = UserFactory.create(email="helen@example.com")
-    verification = PasswordResetVerification.objects.create(
+    verification = PasswordResetVerificationFactory.create(
         email="helen@example.com",
         user=user,
         created_at=past,
+        code="123456",
     )
 
     response = first_party_app_client.post(
         reverse("api:v1:verification:password-reset-verify"),
         data={
             "id": verification.pk,
-            "code": verification.code,
+            "code": "123456",
         },
     )
     assert response.status_code == 404

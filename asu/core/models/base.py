@@ -20,7 +20,7 @@ class AutoUpdatedField(models.DateTimeField):
 
 class BaseManager[T: models.Model](models.Manager[T]):
     def get_queryset(self) -> models.QuerySet[T]:
-        return super().get_queryset().fetch_mode(models.RAISE)
+        return super().get_queryset().fetch_mode(models.FETCH_RAISE)
 
 
 class Base(models.Model):

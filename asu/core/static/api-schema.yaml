@@ -1316,9 +1316,12 @@ components:
           type: string
           maxLength: 140
         website:
-          type: string
-          format: uri
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         profile_picture:
           type: string
           format: binary
@@ -1489,9 +1492,12 @@ components:
           type: string
           maxLength: 140
         website:
-          type: string
-          format: uri
-          maxLength: 200
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
         profile_picture:
           type: string
           format: uri

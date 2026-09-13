@@ -88,8 +88,8 @@ def test_user_password_reset_send_user_with_unusable_password(
     assert len(mail.outbox) == 0
     assert (
         "Password reset request is cancelled because user"
-        " did not have usable password, user_id=%s" % user.pk in caplog.messages
-    )
+        " did not have usable password, user_id=%s email=%s" % (user.pk, user.email)
+    ) in caplog.messages
 
 
 @pytest.mark.django_db

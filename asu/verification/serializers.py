@@ -1,7 +1,7 @@
 import uuid
 from typing import Any, ClassVar
 
-from django.db import OperationalError
+from django.db import OperationalError, transaction
 from django.db.models.functions import Now
 from django.utils.translation import gettext_lazy as _
 
@@ -40,6 +40,7 @@ class VerificationVerifySerializer(serializers.Serializer[dict[str, Any]]):
 
     model: ClassVar[type[ExtendedVerification]]
 
+    @transaction.atomic(durable=True)
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         pk, code = validated_data["id"], validated_data["code"]
         try:

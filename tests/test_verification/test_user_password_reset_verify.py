@@ -13,7 +13,7 @@ from tests.conftest import OAuthClient
 from tests.factories import PasswordResetVerificationFactory, UserFactory
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_password_reset_verify(
     first_party_app_client: OAuthClient,
     django_assert_num_queries: DjangoAssertNumQueries,
@@ -25,7 +25,8 @@ def test_user_password_reset_verify(
         code="123456",
     )
     with django_assert_num_queries(
-        1  # fetch token
+        2  # begin and commit transaction
+        + 1  # fetch token
         + 1  # fetch verification
         + 1  # update verification
     ):
@@ -43,7 +44,7 @@ def test_user_password_reset_verify(
     assert verification.completed_at is None
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_password_reset_verify_expires_code_after_use(
     first_party_app_client: OAuthClient,
 ) -> None:
@@ -66,7 +67,7 @@ def test_user_password_reset_verify_expires_code_after_use(
     assert r2.status_code == 404
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_password_reset_verify_bad_code(
     first_party_app_client: OAuthClient,
 ) -> None:
@@ -86,7 +87,7 @@ def test_user_password_reset_verify_bad_code(
     assert response.status_code == 404
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_user_password_reset_verify_expired_code(
     first_party_app_client: OAuthClient,
 ) -> None:

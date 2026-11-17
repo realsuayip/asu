@@ -27,14 +27,17 @@ class Migration(migrations.Migration):
                     models.CharField(
                         db_index=True,
                         default=oauth2_provider.generators.generate_client_id,
-                        max_length=100,
+                        max_length=255,
                         unique=True,
+                        verbose_name="client ID",
                     ),
                 ),
                 (
                     "redirect_uris",
                     models.TextField(
-                        blank=True, help_text="Allowed URIs list, space separated"
+                        blank=True,
+                        help_text="Allowed URIs list, space separated",
+                        verbose_name="redirect URIs",
                     ),
                 ),
                 (
@@ -43,6 +46,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         help_text="Allowed Post Logout URIs list, space separated",
+                        verbose_name="post logout redirect URIs",
                     ),
                 ),
                 (
@@ -53,6 +57,7 @@ class Migration(migrations.Migration):
                             ("public", "Public"),
                         ],
                         max_length=32,
+                        verbose_name="client type",
                     ),
                 ),
                 (
@@ -70,6 +75,7 @@ class Migration(migrations.Migration):
                             ("openid-hybrid", "OpenID connect hybrid"),
                         ],
                         max_length=44,
+                        verbose_name="authorization grant type",
                     ),
                 ),
                 (
@@ -78,15 +84,35 @@ class Migration(migrations.Migration):
                         blank=True,
                         db_index=True,
                         default=oauth2_provider.generators.generate_client_secret,
-                        help_text="Hashed on Save. Copy it now if this is a new secret.",
+                        help_text="Client secret for authentication",
                         max_length=255,
+                        verbose_name="client secret",
                     ),
                 ),
-                ("hash_client_secret", models.BooleanField(default=True)),
-                ("name", models.CharField(blank=True, max_length=255)),
-                ("skip_authorization", models.BooleanField(default=False)),
-                ("created", models.DateTimeField(auto_now_add=True)),
-                ("updated", models.DateTimeField(auto_now=True)),
+                (
+                    "hash_client_secret",
+                    models.BooleanField(
+                        default=True, verbose_name="hash client secret"
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(blank=True, max_length=255, verbose_name="name"),
+                ),
+                (
+                    "skip_authorization",
+                    models.BooleanField(
+                        default=False, verbose_name="skip authorization"
+                    ),
+                ),
+                (
+                    "created",
+                    models.DateTimeField(auto_now_add=True, verbose_name="created"),
+                ),
+                (
+                    "updated",
+                    models.DateTimeField(auto_now=True, verbose_name="updated"),
+                ),
                 (
                     "algorithm",
                     models.CharField(
@@ -98,6 +124,7 @@ class Migration(migrations.Migration):
                         ],
                         default="",
                         max_length=5,
+                        verbose_name="algorithm",
                     ),
                 ),
                 (
@@ -106,6 +133,31 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         help_text="Allowed origins list to enable CORS, space separated",
+                        verbose_name="allowed origins",
+                    ),
+                ),
+                (
+                    "cimd_expires_at",
+                    models.DateTimeField(
+                        blank=True,
+                        default=None,
+                        help_text="When the cached Client ID Metadata Document should be re-fetched",
+                        null=True,
+                        verbose_name="CIMD expires at",
+                    ),
+                ),
+                (
+                    "registration_source",
+                    models.CharField(
+                        choices=[
+                            ("manual", "Manual"),
+                            ("dcr", "Dynamic Client Registration"),
+                            ("cimd", "Client ID Metadata Document"),
+                        ],
+                        default="manual",
+                        help_text="How this application was registered (manual, DCR per RFC 7591, or CIMD)",
+                        max_length=32,
+                        verbose_name="registration source",
                     ),
                 ),
                 (
@@ -124,6 +176,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="%(app_label)s_%(class)s",
                         to=settings.AUTH_USER_MODEL,
+                        verbose_name="user",
                     ),
                 ),
             ],

@@ -35,6 +35,7 @@ class PasswordResetSerializer(serializers.Serializer[dict[str, Any]]):
             verification = (
                 PasswordResetVerification.objects.eligible()
                 .select_related("user")
+                .select_for_update(of=("user",))
                 .only(
                     "id",
                     "email",

@@ -1,7 +1,7 @@
 [project]
 name = "asu"
 version = "0.1.0"
-requires-python = "==3.14.*"
+requires-python = "==3.15.*"
 dependencies = [
     "django[argon2]~=6.1",
     "djangorestframework~=3.18",

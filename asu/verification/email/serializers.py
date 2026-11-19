@@ -1,6 +1,7 @@
 from typing import Any
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.exceptions import NotFound
 
@@ -44,5 +45,8 @@ class ChangeEmailSerializer(VerificationVerifySerializer):
             raise NotFound(messages.BAD_VERIFICATION_CODE)
 
         user.email = verification.email
-        user.save(update_fields=["email", "updated_at"])
+        try:
+            user.save(update_fields=["email", "updated_at"])
+        except IntegrityError:
+            raise NotFound(_("This e-mail is not usable."))
         return validated_data

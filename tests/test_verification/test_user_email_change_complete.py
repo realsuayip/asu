@@ -52,6 +52,43 @@ def test_user_email_change_complete(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "taken_email",
+    (
+        "helen_new@example.com",
+        "HELEN_NEW@example.com",
+    ),
+)
+def test_user_email_change_complete_email_taken(
+    client: OAuthClient,
+    taken_email: str,
+) -> None:
+    user = UserFactory.create(email="helen@example.com")
+    client.set_user(user, scope="")
+    verification = EmailVerificationFactory.create(
+        email="helen_new@example.com", user=user, code="123456"
+    )
+    other_verification = EmailVerificationFactory.create(user=user)
+    owner = UserFactory.create(email=taken_email)
+
+    response = client.post(
+        reverse("api:v1:verification:email-change-complete"),
+        data={"id": verification.pk, "code": "123456"},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["message"] == "This e-mail is not usable."
+    user.refresh_from_db()
+    owner.refresh_from_db()
+    verification.refresh_from_db()
+    other_verification.refresh_from_db()
+    assert user.email == "helen@example.com"
+    assert owner.email == taken_email
+    assert verification.verified_at is None
+    assert other_verification.nulled_by_id is None
+
+
+@pytest.mark.django_db
 def test_user_email_change_complete_expires_code_after_use(client: OAuthClient) -> None:
     user = UserFactory.create(email="helen@example.com")
     client.set_user(user, scope="")
